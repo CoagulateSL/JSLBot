@@ -46,8 +46,10 @@ public class ObjectData {
 
     public void position(float newx,float newy,float newz) {
         x=newx; y=newy; z=newz;
-        if (fullid.equals(bot.getUUID())) {
-            bot.setPos(x,y,z);
+        if (fullid!=null && bot!=null && bot.getUUID()!=null) {
+            if (fullid.equals(bot.getUUID())) {
+                bot.setPos(x,y,z);
+            }
         }
     }
 }
