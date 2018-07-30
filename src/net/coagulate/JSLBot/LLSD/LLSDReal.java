@@ -1,0 +1,32 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package net.coagulate.JSLBot.LLSD;
+
+import org.w3c.dom.Node;
+
+/**
+ *
+ * @author Iain
+ */
+public class LLSDReal extends Atomic {
+
+    float value=0;
+    public LLSDReal(float a) {
+        value=a;
+    }
+
+    public LLSDReal(Node item) {
+        value=Float.parseFloat(item.getTextContent());
+    }
+
+    @Override
+    public String toXML(String lineprefix) {
+        return lineprefix+"<integer>"+value+"</integer>\n";
+    }
+    public String toString() { return ""+value; }
+
+    public float get() { return value; }
+}

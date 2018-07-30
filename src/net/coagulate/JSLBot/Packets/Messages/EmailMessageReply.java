@@ -1,0 +1,11 @@
+package net.coagulate.JSLBot.Packets.Messages;
+import java.util.*;
+import net.coagulate.JSLBot.Packets.*;
+import net.coagulate.JSLBot.Packets.Types.*;
+public class EmailMessageReply extends Block implements Message {
+	public final int getFrequency() { return Frequency.LOW; }
+	public final int getId() { return 336; }
+	public final String getName() { return "EmailMessageReply"; }
+	@Sequence(0)
+	public EmailMessageReply_bDataBlock bdatablock=new EmailMessageReply_bDataBlock();
+}

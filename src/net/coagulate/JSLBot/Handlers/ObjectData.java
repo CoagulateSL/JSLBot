@@ -1,0 +1,53 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package net.coagulate.JSLBot.Handlers;
+
+import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+import net.coagulate.JSLBot.Packets.Types.LLVector3;
+import net.coagulate.JSLBot.Packets.Types.U32;
+import net.coagulate.JSLBot.Packets.Types.U8;
+
+public class ObjectData {
+    public U32 id=null;
+    public LLUUID fullid=null;
+    public U8 clickaction=null;
+    public LLVector3 scale=null;
+    public U32 parentid=null;
+    public String name=null;
+    public boolean requested=false;
+    public String description=null;
+    public LLUUID owner=null;
+    public LLUUID group=null;
+    public LLUUID lastowner=null;
+    public boolean agent=false;
+    public JSLBot bot;
+    private float x=-1;
+    private float y=-1;
+    private float z=-1;
+    public ObjectData(JSLBot bot) { this.bot=bot; }
+    public String toString() {
+        String r="";
+        if (id!=null) { r+="#"+id.value; } else { r+="id??"; }
+        r+="@<"+x+","+y+","+z+"> ";
+        if (clickaction!=null) { r+=" onClick:"+clickaction; }
+        if (scale!=null) { r+=" Size:"+scale.toString(); }
+        if (parentid!=null) { r+=" Parent:"+parentid.value; }
+        if (name!=null) { r+=" '"+name+"'"; }
+        if (description!=null) { r+=" ("+description+")"; }
+        if (owner!=null) { r+= " Owner:"+owner.toUUIDString()+"="+bot.getUserName(owner); }
+        if (group!=null) { r+= " Group:"+group.toUUIDString()+"="+bot.getUserName(group); }
+        if (lastowner!=null) { r+= " LastOwner:"+lastowner.toUUIDString()+"="+bot.getUserName(lastowner); }
+        return r;
+    }
+
+    public void position(float newx,float newy,float newz) {
+        x=newx; y=newy; z=newz;
+        if (fullid.equals(bot.getUUID())) {
+            bot.setPos(x,y,z);
+        }
+    }
+}
