@@ -33,7 +33,7 @@ public class EventQueue extends Thread {
     String eventqueue;
     CAPS caps;
     long regionhandle;
-    public EventQueue(CAPS caps,String queue,long regionhandle) { this.caps=caps; eventqueue=queue;  this.regionhandle=regionhandle; }
+    public EventQueue(CAPS caps,String queue,long regionhandle) { this.caps=caps; eventqueue=queue;  this.regionhandle=regionhandle; setDaemon(true); }
     public CAPS caps() { return caps; }
     public Circuit circuit() { return caps().getCircuit(); }
     public JSLBot bot() { return circuit().bot(); }

@@ -77,7 +77,7 @@ public class JSLBot extends Thread {
     * etc etc, yadda yadda, this seems to be a fairly normal design
     */
     
-    private boolean quit=false;
+    public boolean quit=false;
     private String quitreason="";
     private static boolean initialised=false; // yes static, as in we've reconfigured the SSL engine
 
@@ -180,6 +180,7 @@ public class JSLBot extends Thread {
     public void run() {
         log(this,NOTE,"JSLBot launching connection...");        
         setName("JSLBot Brain for "+firstname+" "+lastname);
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
         try {
             mainLoop();
         }
@@ -189,6 +190,11 @@ public class JSLBot extends Thread {
         }
     }
     
+    public class ShutdownHook extends Thread {
+        JSLBot bot;
+        ShutdownHook(JSLBot bot) {this.bot=bot;}
+        public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
+    }
     
     private void performLogin(String firstname,String lastname,String password,String location) throws Exception {
         Exception last=null;
@@ -516,7 +522,8 @@ public class JSLBot extends Thread {
     void deregisterCircuit(Long regionhandle, Circuit circ) {
         synchronized(circuits) {
             circuits.remove(regionhandle);
-            if (circ==primary) { crit(this,"Closure of primary circuit detected, this is fatal?"); terminate(1); }
+            // dont warn if shutting down
+            if (!quit && circ==primary) { crit(this,"Closure of primary circuit detected, this is fatal?"); shutdown("Primary circuit lost, we have been disconnected?"); }
         }
     }
 
@@ -543,13 +550,19 @@ public class JSLBot extends Thread {
         return circuits.values();
     }
 
-    public void terminate(int ret) {
+    public void shutdown(String reason) {
+        if (quit) { return; } // do not re-enter
+        quit=true; quitreason=reason;
+        warn(this,"Shutdown requested: "+reason);
+        Set<Circuit> closeme=new HashSet<>();
         for (Circuit c:getCircuits()) {
+            closeme.add(c); // because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
+        }
+        for (Circuit c:closeme) {
             try { c.close(); } catch (Exception e) {}
         }
         // 0 - requested exit
         // 1 - Primary circuit closed (teleport failed, usually)
-        System.exit(ret);
     }
     private float x=0; private float y=0; private float z=0;
     public LLVector3 getPos() { return new LLVector3(x,y,z); }

@@ -134,6 +134,7 @@ public class CAPS extends Thread {
         if (capabilities.containsKey("GetDisplayNames")) { displaynames=((LLSDString)(capabilities.get("GetDisplayNames"))).toString(); }
         if (capabilities.containsKey("EventQueueGet")) {
             EventQueue eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString(),regionhandle);
+            eq.setDaemon(true);
             eq.start();
             info("CAPS seed interrogated successfully; EventQueueGet driver launched");
         } else {

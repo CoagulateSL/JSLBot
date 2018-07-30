@@ -75,6 +75,7 @@ public class Circuit extends Thread implements Closeable {
     Date lastreduced=new Date();
     // create a circuit given the parameters.  sessionid comes from login, and circuitcode comes from login or TeleportFinished style events that open new circuits
     Circuit(JSLBot parent, String address, int port, Long passedregionhandle,String capsurl) throws IOException  {
+        setDaemon(true);
         simipandport=address+":"+port;
         regional=new Regional(this);
         // stash useful info
@@ -167,7 +168,7 @@ public class Circuit extends Thread implements Closeable {
             }
         }
         catch (SocketException ex) {
-            warn("Circuit to "+this.regionname+" has been closed, "+ex.toString());
+            if (!bot().quit) { warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); }
         }
         catch (Exception e) {
             crit("Circuit driver run() loop crashed : "+e.toString(),e);

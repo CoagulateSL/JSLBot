@@ -29,6 +29,7 @@ import static net.coagulate.JSLBot.Log.NOTE;
 import static net.coagulate.JSLBot.Log.WARN;
 import static net.coagulate.JSLBot.Log.debug;
 import static net.coagulate.JSLBot.Log.log;
+import static net.coagulate.JSLBot.Log.note;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLureRequest;
@@ -59,6 +60,7 @@ public class CnC extends Handler {
         bot.addCommand("unloadhandler", this);
         bot.addImmediateHandler("XML_EnableSimulator", this);
         bot.addHandler("XML_EstablishAgentCommunication",this);
+        bot.addCommand("quit",this);
     }
 
     @Override
@@ -322,7 +324,8 @@ public class CnC extends Handler {
                 }
             }
         }
-        bot.im(source,"> "+response);
+        if (bot.quit) { note(bot,"Not sending IM response due to shutdown: "+response); }
+        else { bot.im(source,"> "+response); }
     }
 
     private String internalCommands(String command,String parts[],LLUUID source) {
@@ -373,6 +376,10 @@ public class CnC extends Handler {
     
     @Override
     public String execute(String command, Map<String, String> parameters) throws Exception {
+        if (command.equals("quit")) {
+            bot.shutdown("Instant Message instructed us to quit");
+            return "Shutting down as requested (this message will not be delivered)";
+        }
         if (command.equals("loadhandler")) {
             String handlername=parameters.get("class");
             Handler h=bot.register(handlername);
@@ -395,6 +402,7 @@ public class CnC extends Handler {
         return "Open Access";
     }
     public String help(String command) {
+        if (command.equals("quit")) { return "calls the shutdown() handler for the bot"; }
         if (command.equals("loadhandler")) { return "loadhandler class <classname>\nLoads the named handler into the bot."; }
         if (command.equals("unloadhandler")) { return "unloadhandler class <classname>\nUnloads the named handler from the bot."; }
         return "Unknown command "+command;
