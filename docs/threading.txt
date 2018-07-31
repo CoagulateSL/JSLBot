@@ -1,0 +1,57 @@
+Threading in JSLbot
+
+Threads are used in a few locations in JSLBot, notably:
+1) The main bot "AI" thread
+2) One thread per UDP circuit to listen for traffic
+3) One thread per CAPS EventQueue to poll the remote resource
+
+It is possible for us to do this all in one thread, however this separation of behaviour allows certain pleasantness in the programming.
+
+
+
+
+IMMEDIATE vs DELAYED
+
+( Delayed is not explicitly called 'delayed' in the code, merely the ommission of the 'immediate' term indicates it is not immediate )
+
+Events (messages and commands), can be executed in two forms:
+* Immediate events are handled there and then by the thread that submits them.
+* Delayed events are queued up and handled one by one in serial by the main AI thread.
+
+This means that immediate events must complete quickly so the thread can return to its purpose (handling UDP traffic or whatever) and that longer events should go via the delayed AI thread.
+Consequently the main AI thread has the freedom to "block" as long as it likes, and thus can be used for "ongoing" operations.
+
+To simplify this, lets assume the bot has a command, "returnprims" which takes a region (and presumably x,y (and useless z for parcel ops)  which we'll gloss over here) and goes there, returns all prims, and leaves for home.
+
+This "command" would be a delayed mode command for the following reasons
+1) The time taken would be too long for any immediate thread
+2) The teleport operation actually requires a "region lookup" to get the target region handle, and this requires a query-response to the server, thus the UDP receiver thread must be free.
+3) As an actual bonus, it would be "disasterous" for this operation to run in parallel with any other operation - if we were trying to return prims on one parcel, but just reset a script on a different parcel, and these happen at the same time, the teleports might conflict with each other and the bot be at the wrong place when it returns.   Since there is only ONE AI thread it will run one event until completion before starting the next.
+
+In essence the basic events are as follows
+
+<something> queues a prim return and some other command on the "delayed queue"
+AI Thread) either becomes free, or is awoken by the adding to the queue, and pulls a command.
+AI Thread) Starts to process the command, enters teleport code and executes "region.lookup" on the target region
+AI Thread) Enters region code and sends the UDP query.  It then 'sleeps' on a "region handles updated" signal (for up to 10 seconds before failing the TP)
+UDP thread) receives the region response packet.... if we queued this as delayed it wouldn't happen until after the teleport failed, so instead
+UDP thread) enters the "immediate" handler for the region lookup reply, which extracts the name and handle, stores them in the map, and wakes the AI thread before returning to its UDP based duties
+AI Thread) Wakes up, reads the map for the region handle and initiates the teleport, going to sleep on the "teleport complete" internal signal
+UDP Thread) Wakes up, receives various teleport start / progress packets, which IMMEDIATEly log messages and return to UDP receive mode
+EventQueue) The teleportFinish comes in over the event queue and is handled IMMEDIATEly, this data creates new circuits as instructed and completes agent movement
+(this is probably a bit slow for an immediate handler, but in the event queue this is less dangerous than the fast-response UDP stream)
+EventQueue) Sends teleport-complete internal signal and returns to its event queue (which may close in a while)
+AI Thread) Wakes up on the teleport-complete signal and looks at the response code to check success or failure
+AI Thread) should then take note of where it is, just in case, and initiates prim return
+AI Thread) Initiates teleport home
+(same series of events as above)
+AI Thread) Arriving home, the command is completed and it returns to its "poll delayed queue" operation
+
+The points being:
+Immediate threads are important for importing information during the execution of a command in the delayed thread.
+The delayed thread only does one thing at once before moving on to the next command.
+
+Things like sending an instant message can be done immediately, at any point during a bots connection; it has no side effects.  Things like teleporting, or returning objects may assume nothing else happens in between that 'changes state'.
+
+If this isn't clear, avoid immediate implementations.  When they're used it's either for a very good reason, or simply because it's only unmarshalling data.
+
