@@ -173,7 +173,7 @@ public class JSLBot extends Thread {
         uuid=new LLUUID((String)result.get("agent_id"));
         // probably want to note the "udp_blacklist" which is a comma separated list of packet types to not use.  but then if we just aren't using them either...?
         String message=(String)result.get("message");
-        info("Login MOTD: "+message);
+        note("Login MOTD: "+message);
         // used for primary connection
         circuitcode=(int)result.get("circuit_code");
         sessionid=new LLUUID((String)result.get("session_id"));
