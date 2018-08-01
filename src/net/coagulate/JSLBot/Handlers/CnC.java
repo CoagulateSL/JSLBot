@@ -11,6 +11,7 @@ import net.coagulate.JSLBot.Circuit;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
+import net.coagulate.JSLBot.Global;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
@@ -385,7 +386,8 @@ public class CnC extends Handler {
                 String numericip=ip.toIP();
                 byte[] handlebytes=handle.toByte();
                 if (Debug.REGIONHANDLES) { debug(bot,"Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
-                bot.createCircuit(numericip,port.get(),handle.toLong(),null);
+                try { bot.createCircuit(numericip,port.get(),handle.toLong(),null); }
+                catch (Exception e) { Log.note(bot,"Failed to set up circuit to "+Global.getRegionName(handle.toLong())+" (#"+handle+")"); }
             }
         }
     }

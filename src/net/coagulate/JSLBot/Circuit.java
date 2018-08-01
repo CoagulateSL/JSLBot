@@ -167,10 +167,10 @@ public class Circuit extends Thread implements Closeable {
             }
         }
         catch (SocketException ex) {
-            if (!bot().quitting()) { warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); }
+            if (!bot().quitting()) { warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); closing=true; close(); }
         }
         catch (Exception e) {
-            crit("Circuit driver run() loop crashed : "+e.toString(),e);
+            crit("Circuit driver run() loop crashed : "+e.toString(),e); closing=true; close();
         }
         if (Debug.CIRCUIT) { debug("Deregistering circuit to "+regionname); }
         owner.deregisterCircuit(regionhandle,this);
@@ -210,7 +210,7 @@ public class Circuit extends Thread implements Closeable {
     int maintenancecounter=0;
     void maintenance() throws IOException {
         long interval=new Date().getTime()-lackpacket.getTime();
-        if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) { crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing."); close(); return; }
+        if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) { crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing."); closing=true; close(); return; }
         // polled every 10s
         maintenancecounter++;
         lastmaintenance=new Date();
@@ -343,8 +343,15 @@ public class Circuit extends Thread implements Closeable {
 
     protected void finalize() { try { this.close(); super.finalize(); } catch (Throwable e) {}}
 
+    
+    private boolean isclosing=false;
+    private Object lockisclosing=new Object();
     @Override
     public void close() {
+        synchronized(lockisclosing) {
+            if (isclosing) { return; }
+            isclosing=true;
+        }
         try {
             LogoutRequest l=new LogoutRequest();
             l.bagentdata.vagentid=owner.getUUID();

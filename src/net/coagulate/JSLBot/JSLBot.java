@@ -454,6 +454,8 @@ public class JSLBot extends Thread {
 
     void deregisterCircuit(Long regionhandle, Circuit circ) {
         synchronized(circuits) {
+            Circuit c=circuits.get(regionhandle);
+            if (c!=null) { c.close(); }
             circuits.remove(regionhandle);
             // dont warn if shutting down
             if (!quit && circ==primary) { crit("Closure of primary circuit detected, this is fatal?"); shutdown("Primary circuit lost, we have been disconnected?"); }
