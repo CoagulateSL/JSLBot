@@ -14,7 +14,9 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import org.apache.xmlrpc.XmlRpcException;
@@ -180,5 +182,38 @@ public abstract class BotUtils {
         req.add("ViewerStartAuction");
         req.add("ViewerStats");        
         return req;
+    }
+    
+    
+    public static byte[] zeroEncode(byte[] input) {
+        List<Byte> output=new ArrayList<>();
+        // first 5 bytes (header) are not encoded
+        for (int i=0;i<6;i++) { output.add(input[i]); }
+        int zerocount=0;
+        // rest is
+        for (int i=6;i<input.length;i++) {
+            if (input[i]==0) {
+                zerocount++;
+            } else {
+                if (zerocount>0) {
+                    output.add((byte)0);
+                    output.add((byte)zerocount);
+                    zerocount=0;
+                }
+                output.add(input[i]);
+            }
+        }
+        if (zerocount>0) {
+            output.add((byte)0);
+            output.add((byte)zerocount);
+            zerocount=0;
+        }
+        byte[] outputbytes = new byte[output.size()];
+        int offset=0;
+        // and put it back into the byte array :P
+        for (Byte b:output) {
+            outputbytes[offset]=b; offset++;
+        }    
+        return outputbytes;
     }
 }

@@ -48,7 +48,7 @@ public class Circuit extends Thread implements Closeable {
     // our listening socket / endpoint
     private DatagramSocket socket;
     // how long for an unacked packet before retransmit kicks in
-    private static final int acktimeout=3;
+    private static final long acktimeout=3000;
     // biggest remote packet we acked or something.  comes up in UDP ping messages, but i dont think we even need it
     private int highestack=0;
     // list of outstanding outbound acks
@@ -63,7 +63,7 @@ public class Circuit extends Thread implements Closeable {
     private LLUUID regionuuid=null;
     // last time we rxed anything
     private Date lackpacket=new Date();
-    Long regionhandle=null; // there are different forms of this.  the one i get back from teleportfinish is weird.  we go with agentmovemntcomplete or the mapgridlookup, this seems consistent
+    private Long regionhandle=null;
     private String capsurl=null;
     private CAPS caps=null;
     public CAPS getCAPS() { return caps; }
@@ -71,7 +71,11 @@ public class Circuit extends Thread implements Closeable {
     private String simipandport=null;
     public String getSimIPAndPort() { return simipandport; }
     private int packetrate=0;
-    Date lastreduced=new Date();
+    private Date lastreduced=new Date();
+    
+    private boolean disconnecting=false;
+    private boolean disconnectlogged=false;
+    private boolean disconnected=false;
     // create a circuit given the parameters.  sessionid comes from login, and circuitcode comes from login or TeleportFinished style events that open new circuits
     Circuit(JSLBot parent, String address, int port, Long passedregionhandle,String capsurl) throws IOException  {
         setDaemon(true);
@@ -80,14 +84,11 @@ public class Circuit extends Thread implements Closeable {
         // stash useful info
         this.capsurl=capsurl;
         owner=parent;
-        if (passedregionhandle!=null) { regionhandle=passedregionhandle; }
-        // firstly check if we're allowed to set up this circuit or if its a duplicate
+        regionhandle=passedregionhandle;
+        if (regionhandle==null) { throw new IllegalArgumentException("Null region handles are not allowed"); }
         this.address=new InetSocketAddress(address,port);
-        // create socket on whatever port
         socket=new DatagramSocket();
-        // not really sure what this means on a UDP socket, probably nothing :P
         socket.connect(this.address);
-        // create UseCircuitCode packet necessary to authenticate / identify our connection to the simulator
         if (Debug.CIRCUIT) { debug("Sending initial circuit code over socket to "+this.address); }
         send(parent.useCircuitCode());
         // launch our background thread, it's purpose is to drive the Circuit, mostly the receive but also acks/retransmits.
@@ -96,42 +97,27 @@ public class Circuit extends Thread implements Closeable {
         this.start(); // launch the rx driver
         try {
             // wait for the 'outstanding acks' to be updated (meaning our reliable UseCircuitCode is acked)
-            synchronized(inflight) {
-                inflight.wait(5000);
-            }
+            synchronized(inflight) { inflight.wait(5000); }
         } catch (InterruptedException ex) { throw new IOException("Failed to get UseCircuitCode Ack"); } // no ack in 10 seconds
         // check there are no acks in the queue, should there be, i don't really know what happened, should be one packet out, one ack in, this early on.
         if (Debug.CIRCUIT) { debug("Outstanding ACKS: "+inflight.size()); }
-        if (inflight.size()!=0) { 
-            throw new IllegalArgumentException("Login completed, UseCircuitCode sent, and not acknowledged... Unexpected twist in protocol. Aborting.  (or, the ack processor was unable to lock the ack queue to update, logic error with locking)");
-        }
+        if (inflight.size()!=0) { throw new IllegalArgumentException("Login completed, UseCircuitCode sent, and not acknowledged..."); }
         info("Successfully connected circuit");
         if (capsurl!=null) { caps=new CAPS(this,capsurl,regionhandle); }
     }
     
-    long maxinterval=0;
     // run when the circuit is established, this performs the blocking IO listening for packets, and does some other circuit maintenance tasks
     public void run() {
-        // TO DO
-        // clean up the code generally
-        // ACKS - we do not check we get acks for our Reliables.  Implement retransmissions and timeouts with WARNs.
-        // explain ourselves
         this.setName("Circuit for "+owner.getUsername()+" to "+this.address);
         if (Debug.CIRCUIT) { info("Starting background driver:"+this.getName()); }
         try {
             // create our RX buffer
             DatagramPacket receive=new DatagramPacket(new byte[MAX_BUFFER],MAX_BUFFER);            
             // begin eternal damnation as a circuit driver.
-            while (!closing) {
+            while (!disconnected) {
                 try {
-                    // this causes blocking receives to abort after sometime with no packets.
-                    // It has no side effects other than guaranteeing exiting a blocked state (well, and throwing an exception!)
                     socket.setSoTimeout(250);
-                    if (Debug.ACK) { debug("Entering blocking receive"); }
                     socket.receive(receive);
-                    if (Debug.ACK) { debug("Data RX exit blocking receive"); }
-                    //long interval=new Date().getTime()-lackpacket.getTime();
-                    //if (interval>maxinterval) { maxinterval=interval; System.out.println("Largest inter-rx interval is now "+maxinterval); }
                     lackpacket = new Date();
                     ByteBuffer rx=ByteBuffer.allocate(receive.getLength());
                     rx.put(receive.getData(),0,receive.getLength());
@@ -139,10 +125,7 @@ public class Circuit extends Thread implements Closeable {
                     Packet p=null;
                     try {
                         p=Packet.decode(rx);
-                        for (Integer rxack:p.appendedacks) {
-                            //System.out.println("RXACK "+rxack);
-                            receivedAck(rxack);
-                        }
+                        for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
                     } catch (Exception e) {
                         error("UDP packet decode gave exception "+e.toString(),e);
                         p=null;
@@ -167,24 +150,26 @@ public class Circuit extends Thread implements Closeable {
             }
         }
         catch (SocketException ex) {
-            if (!bot().quitting()) { warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); closing=true; close(); }
+            if (!bot().quitting()) // who cares if we're closing the bot
+            { 
+                if (!disconnectlogged) { disconnectlogged=true; warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); }
+                close();
+            }
         }
         catch (Exception e) {
-            crit("Circuit driver run() loop crashed : "+e.toString(),e); closing=true; close();
+            if (!disconnectlogged) { disconnectlogged=true; crit("Circuit driver run() loop crashed : "+e.toString(),e); }
+            close();
         }
         if (Debug.CIRCUIT) { debug("Deregistering circuit to "+regionname); }
         owner.deregisterCircuit(regionhandle,this);
     }
+    
     public long lastAck() {
-        // when we last sent acks - if this is too long ago we must forge and send a PacketAck rather than waiting for append opportunities
-        Date now=new Date();
-        long result=now.getTime()-lastacks.getTime();
+        long result=new Date().getTime()-lastacks.getTime();
         return result;
     }
     public long lastMaintenance() {
-        // when we last sent acks - if this is too long ago we must forge and send a PacketAck rather than waiting for append opportunities
-        Date now=new Date();
-        long result=now.getTime()-lastmaintenance.getTime();
+        long result=new Date().getTime()-lastmaintenance.getTime();
         return result;
     }
     public void requiresAck(Packet p) {
@@ -210,11 +195,11 @@ public class Circuit extends Thread implements Closeable {
     int maintenancecounter=0;
     void maintenance() throws IOException {
         long interval=new Date().getTime()-lackpacket.getTime();
-        if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) { crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing."); closing=true; close(); return; }
-        // polled every 10s
+        if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) { disconnectlogged=true; crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing."); close(); return; }
+        // polled every 2.5s
         maintenancecounter++;
         lastmaintenance=new Date();
-        if ((maintenancecounter % 10) == 0) {
+        if ((maintenancecounter % 12) == 0) {
             // trim remembered packets.
             synchronized(acked) {
                 Set<Integer> removeme=new HashSet<>();
@@ -231,8 +216,8 @@ public class Circuit extends Thread implements Closeable {
         synchronized (inflight) {
             for (Packet p:inflight.keySet()) {
                 Date sent=inflight.get(p);
-                if (packetrate<5 && ((new Date().getTime())-(sent.getTime()))>5000) {
-                    System.out.println("In retransmit with packetrate "+packetrate);
+                if (packetrate<5 && ((new Date().getTime())-(sent.getTime()))>acktimeout) {
+                    //System.out.println("In retransmit with packetrate "+packetrate);
                     debug("Retransmitting packet "+p.getSequence());
                     p.setResent(true);
                     send(p);
@@ -244,14 +229,12 @@ public class Circuit extends Thread implements Closeable {
     public void send(Message m,boolean reliable) throws IOException { Packet p=new Packet(m); p.setReliable(reliable); send(p); }
     public void send(Message m) throws IOException { send(m,false); }
     public void send(Packet p) throws IOException {
-        // THIS CODE IS BAD
-        // it works, but its ugly.
-        // the whole ordering of zerocoding, ack appending and so on needs to be cleaned up and done better
-        List<Integer> sending=new ArrayList<Integer>();
-        
-        // synchronise up around the ack queue, strip it , aka "claim it"
+        List<Integer> sending=new ArrayList<Integer>(); // list of acks we'll append.
+        // synchronise up around the ack queue, strip it , aka "claim it"... 
         synchronized(ackqueue) {
-            for (Integer i:ackqueue) { sending.add(i); if (i>highestack) { highestack=i; }}
+            for (Integer i:ackqueue) {
+                sending.add(i); if (i>highestack) { highestack=i; }
+            }
             ackqueue.clear();
         }
         
@@ -261,47 +244,15 @@ public class Circuit extends Thread implements Closeable {
         // claim message+ack size
         ByteBuffer buffer=ByteBuffer.allocate(p.size()+acksize);
         if (buffer.capacity()>1500) { note("Message size is "+buffer.capacity()+" which is quite large"); }
-        // write message
+        // write message to the buffer
         p.write(this,buffer);
-        // debug
-        byte[] transmit;
-        if (p.getZeroCode()) {
-            // if we're zerocoding, we just unmarshall into an array and step over it coping it into a byte list
-            byte[] input=buffer.array();
-            List<Byte> output=new ArrayList<>();
-            // first 5 bytes (header) are not encoded
-            for (int i=0;i<6;i++) { output.add(input[i]); }
-            int zerocount=0;
-            // rest is
-            for (int i=6;i<input.length;i++) {
-                if (input[i]==0) {
-                    zerocount++;
-                } else {
-                    if (zerocount>0) {
-                        output.add((byte)0);
-                        output.add((byte)zerocount);
-                        zerocount=0;
-                    }
-                    output.add(input[i]);
-                }
-            }
-            if (zerocount>0) {
-                output.add((byte)0);
-                output.add((byte)zerocount);
-                zerocount=0;
-            }
-            transmit=new byte[output.size()];
-            int offset=0;
-            // and put it back into the byte array :P
-            for (Byte b:output) {
-                transmit[offset]=b; offset++;
-            }
-        } else { transmit=buffer.array(); }
+        byte[] transmit=buffer.array();
+        if (p.getZeroCode()) { transmit=BotUtils.zeroEncode(transmit); }
         // final acks aren't zero coded
         String acked="";
         if (buffer.capacity()>1500) { note("Message size is "+sending.size()+" post ZeroCoding which is quite large"); }
+        // IF sending acks, append them now (AFTER zerocoding)
         if (sending.size()>0) {
-            // but since we packed for transmission, we unpack, expand, blah blah, not really very elegant, zerocoding should probably be a factor around the messageWrite call :/
             ByteBuffer append=ByteBuffer.allocate(transmit.length+(4*sending.size())+1);
             append.put(transmit);
             // append acks
@@ -324,7 +275,7 @@ public class Circuit extends Thread implements Closeable {
             }
             System.out.println();
         }
-        if (false || Debug.PACKET) {
+        if (Debug.PACKET) {
             // nice debugger, pretend we received our own packet, do we dismantle it properly?
             ByteBuffer decodeme=ByteBuffer.allocate(transmit.length);
             decodeme.put(transmit);
@@ -344,13 +295,12 @@ public class Circuit extends Thread implements Closeable {
     protected void finalize() { try { this.close(); super.finalize(); } catch (Throwable e) {}}
 
     
-    private boolean isclosing=false;
-    private Object lockisclosing=new Object();
+    private Object lockdisconnecting=new Object();
     @Override
     public void close() {
-        synchronized(lockisclosing) {
-            if (isclosing) { return; }
-            isclosing=true;
+        synchronized(lockdisconnecting) {
+            if (disconnecting) { return; }
+            disconnecting=true;
         }
         try {
             LogoutRequest l=new LogoutRequest();
@@ -364,8 +314,8 @@ public class Circuit extends Thread implements Closeable {
         } catch (Exception e) { }//debug(owner,"Circuit Close message exceptioned - ",e); }
         try { socket.close(); }
         catch (Exception e) { }//debug(owner,"Socket closure exceptioned - ",e); }
-        if (!closing) { debug("We have requested closure of circuit to "+this.regionname); }
-        closing=true;
+        if (!disconnectlogged) { disconnectlogged=true; debug("We have requested closure of circuit to "+this.regionname); }
+        disconnected=true;
     }
     
     private void sendAck() throws IOException
@@ -389,7 +339,9 @@ public class Circuit extends Thread implements Closeable {
         send(ack);
         lastacks=new Date();
     }
+
     private boolean firsthandshake=true;
+
     private void processPacket(Packet p) throws IOException {
         if (Debug.PACKET) { debug("Received packet: "+p.dump()); }
         boolean alreadyseen=acked.containsKey(p.getSequence());
@@ -469,10 +421,8 @@ public class Circuit extends Thread implements Closeable {
             send(replypacket);
         }
         if (m instanceof DisableSimulator) {
-            if (!closing) { info("Circuit closure was requested from Simulator "+regionname+" via DisableSimulator"); }
-            closing=true;
+            if (!disconnectlogged) { disconnectlogged=true; info("Circuit closure was requested from Simulator "+regionname+" via DisableSimulator"); }
             close();
-            owner.dropCircuit(this);
             internal=true;
         }
         if (!internal) { 
@@ -484,8 +434,6 @@ public class Circuit extends Thread implements Closeable {
         }
         
     }
-    private boolean closing=false;
-
     long getHandle() {
         return regionhandle;
     }

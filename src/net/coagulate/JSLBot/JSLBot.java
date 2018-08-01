@@ -374,19 +374,6 @@ public class JSLBot extends Thread {
         note("Bot exited:"+quitreason);
     }
 
-    private Map<Long,Circuit> circuits=new HashMap<>();
-
-    void dropCircuit(Circuit circuit) {
-        if (circuit==primary) { quit=true; quitreason="Simulator notified us the primary circuit was closed";}
-        while (circuits.containsValue(circuit)) {
-            synchronized(circuits) {
-                for (Long scan:circuits.keySet()) {
-                    if (circuits.get(scan)==circuit) { circuits.remove(scan); break; }
-                }
-            }
-        }
-    }
-
     public CAPS getCAPS() { return primary.getCAPS(); }
     public String getFirstName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
@@ -435,6 +422,8 @@ public class JSLBot extends Thread {
         p.setReliable(true);
         return p;
     }
+
+    private Map<Long,Circuit> circuits=new HashMap<>();
 
     public Circuit createCircuit(String numericip, int port, Long handle, String capsurl) throws IOException {
         synchronized(circuits) {

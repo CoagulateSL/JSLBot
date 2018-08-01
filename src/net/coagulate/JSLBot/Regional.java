@@ -6,11 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import net.coagulate.JSLBot.Handlers.ObjectData;
-import net.coagulate.JSLBot.Handlers.Objects;
-import static net.coagulate.JSLBot.Log.debug;
-import static net.coagulate.JSLBot.Log.warn;
 import net.coagulate.JSLBot.Packets.Messages.ParcelPropertiesRequestByID;
-import net.coagulate.JSLBot.Packets.Packet;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.S32;
@@ -67,7 +63,7 @@ public class Regional {
         return objects.keySet();
     }
 
-    public Long handle() { return circuit.regionhandle; }
+    public Long handle() { return circuit.getHandle(); }
     
     private byte[][] parcelgrid=new byte[64][64];
     private Map<Byte,ParcelData> parceldata=new HashMap<>();
