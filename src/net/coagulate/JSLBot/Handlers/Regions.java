@@ -1,18 +1,14 @@
 package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import net.coagulate.JSLBot.Handler;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.Packet;
-import net.coagulate.JSLBot.Packets.Types.Variable1;
 import java.util.Date;
+import java.util.Map;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Event;
 import net.coagulate.JSLBot.Global;
-import net.coagulate.JSLBot.LLSD.Atomic;
+import net.coagulate.JSLBot.Handler;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDBoolean;
@@ -21,22 +17,17 @@ import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
 import static net.coagulate.JSLBot.Log.debug;
-import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.MapBlockReply;
 import net.coagulate.JSLBot.Packets.Messages.MapBlockReply_bData;
 import net.coagulate.JSLBot.Packets.Messages.MapNameRequest;
-import net.coagulate.JSLBot.Packets.Messages.ParcelInfoRequest;
 import net.coagulate.JSLBot.Packets.Messages.ParcelOverlay;
-import net.coagulate.JSLBot.Packets.Messages.ParcelProperties;
-import net.coagulate.JSLBot.Packets.Messages.ParcelPropertiesRequestByID;
-import net.coagulate.JSLBot.Packets.Messages.RegionHandshake;
 import net.coagulate.JSLBot.Packets.Messages.SimulatorViewerTimeMessage;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.S32;
-import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U64;
+import net.coagulate.JSLBot.Packets.Types.Variable1;
 import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.Regional.ParcelData;
+import net.coagulate.JSLBot.UDPEvent;
+import net.coagulate.JSLBot.XMLEvent;
 
 /** Region based information parser
  *
@@ -61,26 +52,17 @@ public class Regions extends Handler {
         bot=ai;
         bot.addCommand("region.lookup", this);
         bot.addCommand("region.flookup", this);
-        bot.addImmediateHandler("MapBlockReply", this);
+        bot.addImmediateUDP("MapBlockReply", this);
         bot.addCommand("regions.list",this);
         bot.addCommand("parcels.list",this);
-        bot.addHandler("ParcelOverlay",this);
-        bot.addHandler("XML_ParcelProperties",this);
-        bot.addHandler("SimulatorViewerTimeMessage",this);
-    }
-
-    @Override
-    public void processImmediate(Event event) throws Exception {
-        Message m=event.message();
-        if (m!=null) { processImmediate(m,event.getRegion()); }                
-    }
-    public void processImmediate(Message p,Regional regionid) throws Exception {
-        if (p instanceof MapBlockReply) { mapBlockReply((MapBlockReply)p,regionid); }    
+        bot.addUDP("ParcelOverlay",this);
+        bot.addXML("ParcelProperties",this);
+        bot.addUDP("SimulatorViewerTimeMessage",this);
     }
 
     private Object signal=new Object();
     private void mapBlockReply(MapBlockReply p,Regional regionid) {
-        System.out.println(p.dump());
+        //System.out.println(p.dump());
         for (MapBlockReply_bData data:p.bdata) {
             // for some reason we get multiple replies, one has no access and 0 X/Y for a not found, not sure what this is about :)
             if (data.vaccess.value!=-1 && data.vx.value!=0 && data.vy.value!=0) {
@@ -102,57 +84,6 @@ public class Regions extends Handler {
     //    Global.setRegionName(regionid.handle(),rh.bregioninfo.vsimname.toString());
     //}
 
-    @Override
-    public void process(Event p) throws Exception {
-        Message m=p.message();
-        if (m!=null) { process(m,p.getRegion()); }
-        if (p.getName().equalsIgnoreCase("XML_ParcelProperties")) { parcelProperties((Atomic)p.body(),p.getRegion()); }        
-    }
-    public void process(Message p,Regional regionid) throws IOException {
-        if (p instanceof ParcelOverlay) { parcelOverlay((ParcelOverlay)p,regionid); }
-        if (p instanceof SimulatorViewerTimeMessage) { simTime((SimulatorViewerTimeMessage)p,regionid); }
-    }
-
-    @Override
-    public String execute(String command, Map<String, String> parameters) throws Exception {
-        String response="\n";
-        if (command.equals("regions.list")) {
-            for (Regional regional:bot.getRegionals()) {
-                response+=Long.toUnsignedString(regional.handle());
-                // DONT ASK :P
-                //response+=" [[";
-                //Long inverted=handle>>32;
-                //inverted+=(handle&0xffffffff)<<32;
-                //response+=Long.toUnsignedString(inverted)+"]]";
-                response+=": "+regional.dump()+"\n";
-            }
-            return response;
-        }
-        if (command.equals("region.lookup") || command.equals("region.flookup")) {
-            String name=parameters.get("name");
-            if (name==null || name.equals("")) { return "No NAME parameter passed."; }
-            Long cached=Global.getRegionHandle(name);
-            if (cached!=null && (!command.equals("region.flookup"))) { return Long.toUnsignedString(cached); }
-            MapNameRequest request=new MapNameRequest();
-            request.bagentdata.vagentid=bot.getUUID();
-            request.bagentdata.vsessionid=bot.getSession();
-            request.bnamedata.vname=new Variable1(name);
-            bot.send(request);
-            Date now=new Date();
-            while (Global.getRegionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
-                synchronized(signal) { signal.wait(1000); }
-            }
-            cached=Global.getRegionHandle(name);
-            if (cached!=null) {
-                return Long.toUnsignedString(cached);
-            }
-            return "Lookup failed";
-        }
-        if (command.equals("parcels.list")) {
-            return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
-        }
-        return "Unknown command "+command;
-    }
 
     @Override
     public void loggedIn() throws Exception {
@@ -178,8 +109,7 @@ public class Regions extends Handler {
         }
     }
 
-    private void parcelProperties(Atomic atomic, Regional region) throws IOException {
-        LLSDMap body=(LLSDMap)atomic;
+    private void parcelProperties(LLSDMap body, Regional region) throws IOException {
         LLSDArray array=(LLSDArray)body.get("ParcelData");
         LLSDMap data=(LLSDMap)array.get().get(0);        
         //System.out.println(data.toXML());
@@ -214,6 +144,69 @@ public class Regions extends Handler {
         region.setDayUSec(time.btimeinfo.vusecsincestart.value);
         region.setSunDirection(time.btimeinfo.vsundirection);
         region.setSunPhase(time.btimeinfo.vsunphase.value);
+    }
+
+    @Override
+    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        if (eventname.equals("MapBlockReply")) { mapBlockReply((MapBlockReply)event.body(),region); }    
+    }
+
+    @Override
+    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        if (eventname.equals("ParcelOverlay")) { parcelOverlay((ParcelOverlay)event.body(),region); }
+        if (eventname.equals("SimulatorViewerTimeMessage")) { simTime((SimulatorViewerTimeMessage)event.body(),region); }
+    }
+
+    @Override
+    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        if (eventname.equals("ParcelProperties")) { parcelProperties(event.map(),region); }        
+    }
+
+    @Override
+    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+        if (eventname.equalsIgnoreCase("region.lookup") || eventname.equalsIgnoreCase("region.flookup")) {
+            String name=parameters.get("name");
+            if (name==null || name.equals("")) { return "No NAME parameter passed."; }
+            Long cached=Global.getRegionHandle(name);
+            if (cached!=null && (!eventname.equals("region.flookup"))) { return Long.toUnsignedString(cached); }
+            MapNameRequest request=new MapNameRequest();
+            request.bagentdata.vagentid=bot.getUUID();
+            request.bagentdata.vsessionid=bot.getSession();
+            request.bnamedata.vname=new Variable1(name);
+            bot.send(request);
+            Date now=new Date();
+            while (Global.getRegionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
+                synchronized(signal) { signal.wait(1000); }
+            }
+            cached=Global.getRegionHandle(name);
+            if (cached!=null) {
+                return Long.toUnsignedString(cached);
+            }
+            return "Lookup failed";
+        }
+        String response="\n";
+        if (eventname.equalsIgnoreCase("regions.list")) {
+            for (Regional regional:bot.getRegionals()) {
+                response+=Long.toUnsignedString(regional.handle());
+                // DONT ASK :P
+                //response+=" [[";
+                //Long inverted=handle>>32;
+                //inverted+=(handle&0xffffffff)<<32;
+                //response+=Long.toUnsignedString(inverted)+"]]";
+                response+=": "+regional.dump()+"\n";
+            }
+            return response;
+        }
+
+        if (eventname.equalsIgnoreCase("parcels.list")) {
+            return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
+        }
+        return null;
     }
 
 }

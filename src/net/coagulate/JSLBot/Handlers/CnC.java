@@ -5,16 +5,12 @@
  */
 package net.coagulate.JSLBot.Handlers;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import net.coagulate.JSLBot.Circuit;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Event;
-import net.coagulate.JSLBot.Global;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
@@ -23,19 +19,22 @@ import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.Log;
-import static net.coagulate.JSLBot.Log.DEBUG;
 import static net.coagulate.JSLBot.Log.INFO;
 import static net.coagulate.JSLBot.Log.NOTE;
 import static net.coagulate.JSLBot.Log.WARN;
 import static net.coagulate.JSLBot.Log.debug;
 import static net.coagulate.JSLBot.Log.log;
 import static net.coagulate.JSLBot.Log.note;
-import net.coagulate.JSLBot.Packets.Message;
+import static net.coagulate.JSLBot.Log.warn;
+import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
+import net.coagulate.JSLBot.Packets.Messages.AlertMessage_bAlertInfo;
+import net.coagulate.JSLBot.Packets.Messages.ChatFromSimulator;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
-import net.coagulate.JSLBot.Packets.Messages.TeleportLureRequest;
-import net.coagulate.JSLBot.Packets.Packet;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.Variable2;
+import net.coagulate.JSLBot.Packets.Types.LLVector3;
+import net.coagulate.JSLBot.Regional;
+import net.coagulate.JSLBot.UDPEvent;
+import net.coagulate.JSLBot.XMLEvent;
 
 /**
  *
@@ -55,49 +54,73 @@ public class CnC extends Handler {
     @Override
     public void initialise(JSLBot ai) throws Exception {
         bot=ai;
-        bot.addHandler("ImprovedInstantMessage", this);
+        bot.addUDP("ImprovedInstantMessage", this);
         bot.addCommand("loadhandler", this);
         bot.addCommand("unloadhandler", this);
-        bot.addImmediateHandler("XML_EnableSimulator", this);
-        bot.addHandler("XML_EstablishAgentCommunication",this);
+        bot.addImmediateXML("EnableSimulator", this);
+        bot.addXML("EstablishAgentCommunication",this);
+        bot.addUDP("ChatFromSimulator", this);
+        bot.addUDP("AlertMessage",this);
         bot.addCommand("quit",this);
     }
 
     @Override
-    public void processImmediate(Event event) throws Exception {
-        if (event.getName().equals("XML_EnableSimulator")) {
-            LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap)event.body()).get("SimulatorInfo");
-            for (Object m:simulatorinfos) {
-                LLSDMap map=(LLSDMap)m;
-                LLSDBinary ip=(LLSDBinary) map.get("IP");
-                LLSDInteger port=(LLSDInteger) map.get("Port");
-                LLSDBinary handle=(LLSDBinary) map.get("Handle");
-                String numericip=ip.toIP();
-                byte[] handlebytes=handle.toByte();
-                if (Debug.REGIONHANDLES) { debug(bot,"Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
-                bot.createCircuit(numericip,port.get(),handle.toLong(),null);
+    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        if (eventname.equals("AlertMessage")) {
+            AlertMessage msg=(AlertMessage) event.body();
+            warn(bot,"Simulator sends Alert, data message: "+msg.balertdata.vmessage.toString());
+            for (AlertMessage_bAlertInfo info:msg.balertinfo) {
+                warn(bot,"Warning included info:"+info.vmessage.toString()+" / "+info.vextraparams.toString());
             }
         }
-    }
-
-    @Override
-    public void process(Event event) throws Exception {
-        Message m=event.message();
-        if (m!=null) { process(m); }
-        if (event.getName().equals("XML_EstablishAgentCommunication")) {
-            LLSDMap body=(LLSDMap) event.body();
-            String simipandport=((LLSDString)(body.get("sim-ip-and-port"))).toString();
-            for (Circuit c:bot.getCircuits()) {
-                if (c.getSimIPAndPort().equalsIgnoreCase(simipandport)) {
-                    if (Debug.EVENTQUEUE) { debug(bot,"Matched ip and port to circuit for region "+c.getRegionName()); }
-                    c.connectCAPS(((LLSDString)(body.get("seed-capability"))).toString());
+        if (eventname.equals("ChatFromSimulator")) {
+            ChatFromSimulator msg = (ChatFromSimulator) event.body();
+            String from=msg.bchatdata.vfromname.toString();
+            LLUUID source=msg.bchatdata.vsourceid;
+            LLUUID owner=msg.bchatdata.vownerid;
+            int sourcetypenum=msg.bchatdata.vsourcetype.integer();
+            int chattypenum=msg.bchatdata.vchattype.integer();
+            int audiblenum=msg.bchatdata.vaudible.integer();
+            LLVector3 pos=msg.bchatdata.vposition;
+            String message=msg.bchatdata.vmessage.toString();
+            String sourcetype="";
+            switch (sourcetypenum) {
+                case 0: sourcetype="SYSTEM"; break;
+                case 1: sourcetype="Agent"; break;
+                case 2: sourcetype="Object"; break;
+                default: sourcetype="Unknown#"+sourcetypenum; break;
+            }
+            String audible="";
+            switch (audiblenum) {
+                case -1: audible="Inaudible"; break;
+                case 0: audible="Quiet"; break;
+                case 1: audible="Normal"; break;
+                default: audible="Unknown#"+audiblenum; break;
+            }
+            String chattype="";
+            switch (chattypenum) {
+                case 0: chattype="Whisper"; break;
+                case 1: chattype="Normal"; break;
+                case 2: chattype="Shout"; break;
+                case 3: chattype="Say??"; break;
+                case 4: chattype="StartTyping"; break;
+                case 5: chattype="StopTyping"; break;
+                case 6: chattype="Debug"; break;
+                case 8: chattype="OwnerSay"; break;
+                default: chattype="Unknown#"+chattypenum; break;
+            }
+            if (chattypenum!=4 && chattypenum!=5) {
+                String ownedby="";
+                if (!source.equals(owner)) { 
+                    ownedby=" (owner:"+bot.getUserName(owner)+")";
                 }
+                String volume="";
+                if (audiblenum!=1) {  volume="vol:"+audible+" ";}
+                Log.debug(bot,"Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
             }
         }
-    }
-    public void process(Message p) throws Exception {
-        if (p instanceof ImprovedInstantMessage) {
-            ImprovedInstantMessage m=(ImprovedInstantMessage) p;
+        if (eventname.equals("ImprovedInstantMessage")) {
+            ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
             int messagetype=m.bmessageblock.vdialog.value;
             String messagetext="["+m.bmessageblock.vfromagentname.toString()+"] "+m.bmessageblock.vmessage.toString();
             // this is a HEAVILY overloaded conduit of information
@@ -316,95 +339,82 @@ public class CnC extends Handler {
 
 
         if (response==null) {
-            if (hasPermission(source,"command-"+command)) {
-                try {response=bot.execute(command,params); }
-                catch (Exception e) {
-                    Log.log(bot,Log.WARN,"CnC Subcommand exceptioned:"+e.toString(),e);
-                    response="Exception:"+e.toString();
-                }
+            try {
+                response=new CommandEvent(bot, null, command, params,source).execute();
+            }
+            catch (Exception e) {
+                Log.log(bot,Log.WARN,"CnC Subcommand exceptioned:"+e.toString(),e);
+                response="Exception:"+e.toString();
             }
         }
-        if (bot.quit) { note(bot,"Not sending IM response due to shutdown: "+response); }
-        else { bot.im(source,"> "+response); }
+        if (bot.quitting()) { note(bot,"Not sending IM response due to shutdown: "+response); }
+        else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
     }
 
     private String internalCommands(String command,String parts[],LLUUID source) {
-        if (command.equalsIgnoreCase("hello") || command.equalsIgnoreCase("hi")) {
-            return "Greetings.  This is a bot running JSLBot pre-alpha.  Your access level is "+describePermissions(source)+".\n\nPlease see 'help' for more details.";
-        }
-        if (command.equalsIgnoreCase("help")) {
-            if (parts.length==1) {
-                String handlerreport="";
-                Map<Handler,Set<String>> map=new HashMap<>();
-                for (String cmd:bot.getCommands().keySet()) {
-                    Handler h=bot.getCommands().get(cmd);
-                    Set<String> commandset=new HashSet<>();
-                    if (map.containsKey(h)) { commandset=map.get(h); }
-                    commandset.add(cmd);
-                    map.put(h,commandset);
-                }
-                for (Handler h:bot.getBrain()) {
-                    Set<String> commands=map.get(h);
-                    String classname=h.getClass().getName();
-                    classname=classname.replaceFirst("net.coagulate.JSLBot.Handlers.","");
-                    handlerreport+="\n== "+classname+" - "+h.toString()+"";
-                    if (commands!=null && !(commands.isEmpty())) {
-                        boolean first=true;
-                        for (String cmd:commands) {
-                            if (first) { handlerreport+="\nCommands: "; }
-                            if (!first) { handlerreport+=", "; }
-                            handlerreport+=cmd; first=false;
-                        }
-                    }
-                }
-                return handlerreport;
-            }
-            else
-            {
-                Handler h=bot.getCommands().get(parts[1]);
-                if (h==null) {
-                    return "Command lookup for '"+parts[1]+"' failed";
-                } else {
-                    return h.help(parts[1]);
-                }
-            }
-        }
         return null;
     }
     
 
     
-    @Override
-    public String execute(String command, Map<String, String> parameters) throws Exception {
-        if (command.equals("quit")) {
-            bot.shutdown("Instant Message instructed us to quit");
-            return "Shutting down as requested (this message will not be delivered)";
-        }
-        if (command.equals("loadhandler")) {
-            String handlername=parameters.get("class");
-            Handler h=bot.register(handlername);
-            return "Module "+h.getClass().getName()+" loaded";
-        }
-        return null;
-    }
-
     @Override
     public void loggedIn() throws Exception {
     }
     
-    private boolean hasPermission(LLUUID who,String permission) { 
-        if (bot.master.equals(who)) { return true; }
-        return false;
-    }
-    
-    private String describePermissions(LLUUID who) {
-        if (bot.master.equals(who)) { return "Bot Owner / Unconditional Access"; }
-        return "Open Access";
-    }
     public String help(String command) {
         if (command.equals("quit")) { return "calls the shutdown() handler for the bot"; }
         if (command.equals("loadhandler")) { return "loadhandler class <classname>\nLoads the named handler into the bot."; }
         if (command.equals("unloadhandler")) { return "unloadhandler class <classname>\nUnloads the named handler from the bot."; }
         return "Unknown command "+command;
+    }
+
+    @Override
+    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        if (eventname.equals("EnableSimulator")) {
+            LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap)event.body()).get("SimulatorInfo");
+            for (Object m:simulatorinfos) {
+                LLSDMap map=(LLSDMap)m;
+                LLSDBinary ip=(LLSDBinary) map.get("IP");
+                LLSDInteger port=(LLSDInteger) map.get("Port");
+                LLSDBinary handle=(LLSDBinary) map.get("Handle");
+                String numericip=ip.toIP();
+                byte[] handlebytes=handle.toByte();
+                if (Debug.REGIONHANDLES) { debug(bot,"Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
+                bot.createCircuit(numericip,port.get(),handle.toLong(),null);
+            }
+        }
+    }
+
+    @Override
+    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        if (eventname.equals("EstablishAgentCommunication")) {
+            LLSDMap body=event.map();
+            String simipandport=((LLSDString)(body.get("sim-ip-and-port"))).toString();
+            for (Circuit c:bot.getCircuits()) {
+                if (c.getSimIPAndPort().equalsIgnoreCase(simipandport)) {
+                    if (Debug.EVENTQUEUE) { debug(bot,"Matched ip and port to circuit for region "+c.getRegionName()); }
+                    c.connectCAPS(((LLSDString)(body.get("seed-capability"))).toString());
+                }
+            }
+        }
+    }
+
+    @Override
+    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+        if (eventname.equalsIgnoreCase("quit")) {
+            bot.shutdown("Instant Message instructed us to quit");
+            return "Shutting down as requested (this message will not be delivered)";
+        }
+        if (eventname.equalsIgnoreCase("loadhandler")) {
+            String handlername=event.parameters().get("class");
+            Handler h=bot.register(handlername);
+            return "Module "+h.getClass().getName()+" loaded";
+        }
+        return null;
     }
 }

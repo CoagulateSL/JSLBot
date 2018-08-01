@@ -2,20 +2,13 @@ package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Event;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
-import static net.coagulate.JSLBot.Log.CRIT;
-import static net.coagulate.JSLBot.Log.log;
 import static net.coagulate.JSLBot.Log.warn;
-import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate;
-import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bAgentData;
-import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bLocation;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.KillObject;
@@ -23,16 +16,13 @@ import net.coagulate.JSLBot.Packets.Messages.KillObject_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.ObjectPropertiesFamily;
 import net.coagulate.JSLBot.Packets.Messages.ObjectUpdate;
 import net.coagulate.JSLBot.Packets.Messages.ObjectUpdate_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.RequestMultipleObjects;
-import net.coagulate.JSLBot.Packets.Messages.RequestMultipleObjects_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.RequestObjectPropertiesFamily;
-import net.coagulate.JSLBot.Packets.Messages.RequestObjectPropertiesFamily_bObjectData;
 import net.coagulate.JSLBot.Packets.Types.F32;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U8;
 import net.coagulate.JSLBot.Regional;
+import net.coagulate.JSLBot.UDPEvent;
+import net.coagulate.JSLBot.XMLEvent;
 
 /** Processes messages about objects within the world
  *
@@ -49,60 +39,12 @@ public class Objects extends Handler {
     @Override
     public void initialise(JSLBot ai) throws Exception {
         bot=ai;
-        bot.addImmediateHandler("ObjectUpdate", this);
-        bot.addImmediateHandler("ImprovedTerseObjectUpdate", this);
-        bot.addImmediateHandler("KillObject",this);
-        bot.addImmediateHandler("ObjectPropertiesFamily",this);
+        bot.addImmediateUDP("ObjectUpdate", this);
+        bot.addImmediateUDP("ImprovedTerseObjectUpdate", this);
+        bot.addImmediateUDP("KillObject",this);
+        bot.addImmediateUDP("ObjectPropertiesFamily",this);
         bot.addCommand("objects",this);
         bot.addCommand("findobject",this);
-    }
-
-    @Override
-    public void processImmediate(Event p) throws Exception {
-        if (p.getName().equals("ObjectUpdate")) {
-            processObjectData((ObjectUpdate) p.message(),p.getRegion());
-        }
-        if (p.getName().equals("KillObject")) {
-            killObjects((KillObject)p.message(),p.getRegion()); 
-        }
-        if (p.getName().equals("ObjectPropertiesFamily")) {
-            objectProperties((ObjectPropertiesFamily)p.message(),p.getRegion());
-        }
-        if (p.getName().equals("ImprovedTerseObjectUpdate")) { 
-            improvedTerseObjectUpdate((ImprovedTerseObjectUpdate)p.message(),p.getRegion());
-        }
-    }
-
-    @Override
-    public void process(Event p) throws Exception {
-    }
-
-    @Override
-    public String execute(String command, Map<String, String> parameters) throws Exception {
-        Regional r=bot.getRegional();
-        if (command.equalsIgnoreCase("objects")) {
-            for (Integer id:r.getObjects()) {
-                System.out.println(r.getObject(id).toString());
-            }
-            return "Dumped to console because so many.";
-        }
-        if (command.equalsIgnoreCase("findobject")) {
-            ObjectData best=null;
-            String searching=parameters.get("name");
-            if (searching==null) { return "Must supply 'name <text>' parameter"; }
-            searching=searching.toLowerCase();
-            for (Integer id:r.getObjects()) {
-                ObjectData check = r.getObject(id);
-                if (check.parentid.value==0) {
-                    if (check.name!=null) {
-                        if (check.name.toLowerCase().indexOf(searching)>=0) { best=check; }
-                    }
-                }
-            }
-            if (best==null) { return "No such object found"; }
-            return searching+"->"+best.toString();            
-        }
-        return "Unknown command";
     }
 
     @Override
@@ -181,6 +123,64 @@ public class Objects extends Handler {
             object.agent=avatar;
             object.position(x.value,y.value,z.value);
         }
+    }
+
+    @Override
+    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        if (eventname.equals("ObjectUpdate")) {
+            processObjectData((ObjectUpdate) event.body(),region);
+        }
+        if (eventname.equals("KillObject")) {
+            killObjects((KillObject)event.body(),region); 
+        }
+        if (eventname.equals("ObjectPropertiesFamily")) {
+            objectProperties((ObjectPropertiesFamily)event.body(),region);
+        }
+        if (eventname.equals("ImprovedTerseObjectUpdate")) { 
+            improvedTerseObjectUpdate((ImprovedTerseObjectUpdate)event.body(),region);
+        }
+    }
+
+    @Override
+    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+        if (eventname.equalsIgnoreCase("objects")) {
+            for (Integer id:region.getObjects()) {
+                System.out.println(region.getObject(id).toString());
+            }
+            return "Dumped to console because so many.";
+        }
+        if (eventname.equalsIgnoreCase("findobject")) {
+            ObjectData best=null;
+            String searching=event.parameters().get("name");
+            if (searching==null) { return "Must supply 'name <text>' parameter"; }
+            searching=searching.toLowerCase();
+            for (Integer id:region.getObjects()) {
+                ObjectData check = region.getObject(id);
+                if (check.parentid.value==0) {
+                    if (check.name!=null) {
+                        if (check.name.toLowerCase().indexOf(searching)>=0) { best=check; }
+                    }
+                }
+            }
+            if (best==null) { return "No such object found"; }
+            return searching+"->"+best.toString();            
+        }
+        return "Unknown command";
     }
 
 }

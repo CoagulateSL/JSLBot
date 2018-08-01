@@ -3,10 +3,9 @@ package net.coagulate.JSLBot.Handlers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Event;
-import net.coagulate.JSLBot.Global;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
 import static net.coagulate.JSLBot.Log.*;
@@ -21,6 +20,8 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Regional;
+import net.coagulate.JSLBot.UDPEvent;
+import net.coagulate.JSLBot.XMLEvent;
 
 /** Deal with messages about the Agent (and other agents).
  *
@@ -35,63 +36,21 @@ public class Agent extends Handler {
     }
 
     @Override
-    public void initialise(JSLBot ai) throws Exception {
-        bot=ai;
-        ai.addImmediateHandler("AgentDataUpdate", this);
-        ai.addImmediateHandler("AgentMovementComplete",this);
-        ai.addImmediateHandler("TeleportLocal",this);
-        bot.addHandler("CoarseLocationUpdate",this);  // rough agent locations
-        ai.addCommand("status", this);
+    public void initialise(JSLBot bot) throws Exception {
+        this.bot=bot;
+        bot.addImmediateUDP("AgentDataUpdate", this);
+        bot.addImmediateUDP("AgentMovementComplete",this);
+        bot.addImmediateUDP("TeleportLocal",this);
+        bot.addUDP("CoarseLocationUpdate",this);  // rough agent locations
+        bot.addCommand("status", this);
     }
 
     private String grouptitle="";
     private String groupname="";
     private String firstname="";
     private String lastname="";
-    @Override
-    public void processImmediate(Event event) throws Exception {
-        Message m=event.message();
-        if (m!=null) { processImmediate(m,event.getRegion()); }
-    }
     private void processImmediate(Message m,Regional regionid) throws Exception {
-        if (m instanceof AgentDataUpdate) {
-            AgentDataUpdate adu=(AgentDataUpdate) m;
-            firstname=adu.bagentdata.vfirstname.toString();
-            lastname=adu.bagentdata.vlastname.toString();
-            groupname=adu.bagentdata.vgroupname.toString();
-            grouptitle=adu.bagentdata.vgrouptitle.toString();
-        }
-        if (m instanceof AgentMovementComplete) {
-            AgentMovementComplete amc=(AgentMovementComplete) m;
-            bot.setPos(amc.bdata.vposition);
-            bot.setLookAt(amc.bdata.vlookat);
-            U64 regionhandle = amc.bdata.vregionhandle;
-            if (Debug.REGIONHANDLES) { debug(bot,"AgentMovementComplete discovers region handle "+Long.toUnsignedString(regionhandle.value)); }
-        }        
-   
-        if (m instanceof TeleportLocal) {
-            TeleportLocal tp=(TeleportLocal)m;
-            bot.setPos(tp.binfo.vposition);
-            bot.setLookAt(tp.binfo.vlookat);
-        }
-    }
 
-    @Override
-    public void process(Event event) throws Exception {
-        Message m=event.message();
-        if (m!=null) { process(m,event.getRegion()); }        
-    }
-    private void process(Message m,Regional regionid) {
-        if (m instanceof CoarseLocationUpdate) {
-            coarseLocationUpdate(regionid,(CoarseLocationUpdate) m);
-        } 
-    }
-    @Override
-    public String execute(String command, Map<String, String> parameters) throws Exception {
-        if (command.equalsIgnoreCase("status")) {
-            return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.circuit().getRegionName();
-        }
-        return null;
     }
 
     @Override
@@ -119,6 +78,56 @@ public class Agent extends Handler {
             locmap.put(agent,location);
         }
         regionid.setCoarseAgentLocations(locmap);
+    }
+
+    @Override
+    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        Message m=event.body();
+        if (eventname.equals("AgentDataUpdate")) {
+            AgentDataUpdate adu=(AgentDataUpdate) m;
+            firstname=adu.bagentdata.vfirstname.toString();
+            lastname=adu.bagentdata.vlastname.toString();
+            groupname=adu.bagentdata.vgroupname.toString();
+            grouptitle=adu.bagentdata.vgrouptitle.toString();
+        }
+        if (eventname.equals("AgentMovementComplete")) {
+            AgentMovementComplete amc=(AgentMovementComplete) m;
+            bot.setPos(amc.bdata.vposition);
+            bot.setLookAt(amc.bdata.vlookat);
+            U64 regionhandle = amc.bdata.vregionhandle;
+            if (Debug.REGIONHANDLES) { debug(bot,"AgentMovementComplete discovers region handle "+Long.toUnsignedString(regionhandle.value)); }
+        }        
+   
+        if (eventname.equals("TeleportLocal")) {
+            TeleportLocal tp=(TeleportLocal)m;
+            bot.setPos(tp.binfo.vposition);
+            bot.setLookAt(tp.binfo.vlookat);
+        }
+    }
+
+    @Override
+    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        if (eventname.equals("CoarseLocationUpdate")) {
+            coarseLocationUpdate(region,(CoarseLocationUpdate) event.body());
+        } 
+    }
+
+    @Override
+    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+        if (eventname.equalsIgnoreCase("status")) {
+            return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
+        }
+        return null;
     }
     
 }

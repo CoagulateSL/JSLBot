@@ -24,6 +24,12 @@ import javax.net.ssl.X509TrustManager;
 public class LLCATruster implements X509TrustManager,HostnameVerifier {
 
     private static X509Certificate[] cas;
+    private static Boolean initialised=false;
+    public synchronized static void initialise() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        if (initialised) { return; }
+        new LLCATruster();
+        initialised=true;
+    }
 
     public LLCATruster() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         // SSL connections to the SL service use a CA signed and held by Linden Labs.

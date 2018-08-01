@@ -1,14 +1,9 @@
 package net.coagulate.JSLBot;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import net.coagulate.JSLBot.Handlers.*;
 
 /** Stand alone single bot launcher.
  *
@@ -32,7 +27,7 @@ public class Test {
         Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
 
-        new JSLBot(config).run();
+        new JSLBot(config).run(); // lose control to bot.  call start() to background the bot and continue execution here.
     }
     
     static void initConfig(String CONFIGFILE) throws Exception {

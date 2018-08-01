@@ -7,11 +7,8 @@ package net.coagulate.JSLBot;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -22,8 +19,6 @@ import net.coagulate.JSLBot.LLSD.LLSDBoolean;
 import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.Packets.Packet;
-import org.w3c.dom.Node;
 
 /**
  *
@@ -106,9 +101,8 @@ public class EventQueue extends Thread {
             String messagetype=((LLSDString)eventmap.get("message")).toString();
             Atomic body=eventmap.get("body");
             if (Debug.DUMPXML) { System.out.println("Message type is "+messagetype+"\n"+body.toXML()); }
-            Event event=new Event("XML_"+messagetype,body);
-            event.regional=circuit().getRegional();
-            bot().process(event);
+            XMLEvent event=new XMLEvent(bot(), circuit().getRegional(), body, messagetype);
+            bot().submit(event);
         }
     }
     String getRegionName() { return caps().getCircuit().getRegionName(); }

@@ -18,5 +18,5 @@ public class Debug {
     public static final boolean DUMPRETRANS=false; // dump the content of retransmitted UDP packets
     public static final boolean EVENTQUEUE=false; // debug the stages of the event queue thread
     public static final boolean REGIONHANDLES=false; // debug region handle usage.
-    
+    public static final boolean TRACKCOMMANDS=false; // dump status changes on command events
 }

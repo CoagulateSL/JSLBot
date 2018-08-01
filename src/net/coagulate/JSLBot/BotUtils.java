@@ -7,11 +7,18 @@ package net.coagulate.JSLBot;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 /** Some general purpose useful stuff
  *
@@ -73,5 +80,39 @@ public abstract class BotUtils {
         byte[] digest = md5.digest(password.getBytes("UTF-8"));
         return "$1$" + hex(digest);
     }
+ 
     
+    public static Map loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, UnknownHostException, SocketException, NoSuchAlgorithmException, UnsupportedEncodingException, XmlRpcException {
+        XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
+        config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
+        XmlRpcClient client=new XmlRpcClient();
+        client.setConfig(config);
+        HashMap params=new HashMap();
+        params.put("first",firstname);
+        params.put("last",lastname);
+        params.put("start",location);
+        params.put("channel","JSLBot <Iain Maltz@Second Life>");
+        params.put("platform","Lin");
+        String mac=BotUtils.getMac();
+        if (mac==null) { throw new IllegalArgumentException("Failed to get MAC address"); } else { params.put("mac",mac); }
+        // MD-5 =)
+        params.put("passwd",BotUtils.md5hash(password));
+        HashMap result=(HashMap)(client.execute("login_to_simulator",new Object[]{params}));
+        if (Debug.AUTH) {
+            // dump the result
+            for(Object s:result.keySet()) {
+                String printline=(((String)s)+" -> ");
+                Object output=result.get(s);
+                if (output instanceof String) { printline+=("[String] "+(String)output); }
+                else {
+                    if (output instanceof Integer) { printline+=("[Integer] "+(Integer)output); }
+                    else {
+                        printline+=(output);
+                    }
+                }
+                Log.debug(bot,printline);
+            }
+        }
+        return result;
+    }
 }

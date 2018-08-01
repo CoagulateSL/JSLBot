@@ -3,11 +3,10 @@ package net.coagulate.JSLBot.Handlers;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Event;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDBoolean;
@@ -17,6 +16,8 @@ import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Regional;
+import net.coagulate.JSLBot.UDPEvent;
+import net.coagulate.JSLBot.XMLEvent;
 
 /** Handle group related activities and messages.
  *
@@ -36,34 +37,8 @@ public class Groups extends Handler {
     @Override
     public void initialise(JSLBot ai) throws Exception { 
         bot=ai;
-        bot.addHandler("XML_AgentGroupDataUpdate", this);
+        bot.addXML("AgentGroupDataUpdate", this);
         bot.addCommand("groups.list",this);
-    }
-
-    @Override
-    public void processImmediate(Event p) throws Exception {
-    }
-
-    @Override
-    public void process(Event p) throws Exception {
-        if (p.getName().equals("XML_AgentGroupDataUpdate")) { agentGroupDataUpdate((LLSDMap) p.body(),p.getRegion()); }
-    }
-
-    @Override
-    public String execute(String command, Map<String, String> parameters) throws Exception {
-        if (command.equals("groups.list")) {
-            String resp="Groups:";
-            synchronized(groups) {
-                for(GroupData g:groups.values()) {
-                    resp+="\n";
-                    resp+=g.groupname+" ("+g.uuid.toUUIDString()+") ";
-                    if (g.contribution!=0) { resp+="Contribution:"+g.contribution+" "; }
-                    if (g.listinprofile) { resp+="Listed"; } else { resp+="Unlisted"; }
-                }
-            }
-            return resp;
-        }
-        return "Unknown command";
     }
 
     @Override
@@ -100,6 +75,43 @@ public class Groups extends Handler {
     }
     
     private Map<Long,GroupData> groups=new HashMap<>();
+
+    @Override
+    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+        if (eventname.equals("AgentGroupDataUpdate")) { agentGroupDataUpdate(event.map(),region); }
+    }
+
+    @Override
+    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+        if (eventname.equalsIgnoreCase("groups.list")) {
+            String resp="Groups:";
+            synchronized(groups) {
+                for(GroupData g:groups.values()) {
+                    resp+="\n";
+                    resp+=g.groupname+" ("+g.uuid.toUUIDString()+") ";
+                    if (g.contribution!=0) { resp+="Contribution:"+g.contribution+" "; }
+                    if (g.listinprofile) { resp+="Listed"; } else { resp+="Unlisted"; }
+                }
+            }
+            return resp;
+        }
+        return "Unknown command";
+    }
     
     public class GroupData {
         String groupname=null;

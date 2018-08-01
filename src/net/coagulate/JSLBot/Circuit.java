@@ -26,7 +26,6 @@ import net.coagulate.JSLBot.Packets.Messages.PacketAck_bPackets;
 import net.coagulate.JSLBot.Packets.Messages.RegionHandshake;
 import net.coagulate.JSLBot.Packets.Messages.RegionHandshakeReply;
 import net.coagulate.JSLBot.Packets.Messages.StartPingCheck;
-import net.coagulate.JSLBot.Packets.Messages.UseCircuitCode;
 import net.coagulate.JSLBot.Packets.Packet;
 import net.coagulate.JSLBot.Packets.Types.*;
 
@@ -168,7 +167,7 @@ public class Circuit extends Thread implements Closeable {
             }
         }
         catch (SocketException ex) {
-            if (!bot().quit) { warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); }
+            if (!bot().quitting()) { warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); }
         }
         catch (Exception e) {
             crit("Circuit driver run() loop crashed : "+e.toString(),e);
@@ -211,7 +210,7 @@ public class Circuit extends Thread implements Closeable {
     int maintenancecounter=0;
     void maintenance() throws IOException {
         long interval=new Date().getTime()-lackpacket.getTime();
-        if (interval>(JSLBot.CIRCUIT_TIMEOUT*1000)) { crit("Circuit has received no packets in "+JSLBot.CIRCUIT_TIMEOUT+" seconds, closing."); close(); return; }
+        if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) { crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing."); close(); return; }
         // polled every 10s
         maintenancecounter++;
         lastmaintenance=new Date();
@@ -383,6 +382,7 @@ public class Circuit extends Thread implements Closeable {
         send(ack);
         lastacks=new Date();
     }
+    private boolean firsthandshake=true;
     private void processPacket(Packet p) throws IOException {
         if (Debug.PACKET) { debug("Received packet: "+p.dump()); }
         boolean alreadyseen=acked.containsKey(p.getSequence());
@@ -449,7 +449,10 @@ public class Circuit extends Thread implements Closeable {
             // the initial circuit maybe not so much
             regionuuid=r.bregioninfo2.vregionid;
             if (Debug.REGIONHANDLES) { debug("RegionHandshake with UUID "+regionuuid.toUUIDString()); }
-            info("Handshake "+regionname+" cpu "+r.bregioninfo3.vcpuclassid.value+"/"+r.bregioninfo3.vcpuratio.value+" active as "+r.bregioninfo3.vproductname.toString()+"#"+r.bregioninfo3.vproductsku.toString()+" @ colocation "+r.bregioninfo3.vcoloname.toString());
+            if (firsthandshake) {
+                info("Handshake "+regionname+" cpu "+r.bregioninfo3.vcpuclassid.value+"/"+r.bregioninfo3.vcpuratio.value+" active as "+r.bregioninfo3.vproductname.toString()+"#"+r.bregioninfo3.vproductsku.toString()+" @ colocation "+r.bregioninfo3.vcoloname.toString());
+                firsthandshake=false;
+            }
             RegionHandshakeReply reply=new RegionHandshakeReply();
             reply.bagentdata.vagentid=owner.getUUID();
             reply.bagentdata.vsessionid=owner.getSession();
@@ -470,7 +473,7 @@ public class Circuit extends Thread implements Closeable {
             if (Debug.REGIONHANDLES && regionhandle==null) { System.out.println("Creating event with null RH :( "); }
             Regional r=null;
             if (regionhandle!=null) { r=getRegional(); }
-            owner.process(new Event(p,r));
+            new UDPEvent(owner, r, m, m.getName()).submit();
         }
         
     }
