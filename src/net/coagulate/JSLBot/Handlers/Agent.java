@@ -15,6 +15,8 @@ import net.coagulate.JSLBot.Packets.Messages.AgentMovementComplete;
 import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate;
 import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bAgentData;
 import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bLocation;
+import net.coagulate.JSLBot.Packets.Messages.MoneyBalanceReply;
+import net.coagulate.JSLBot.Packets.Messages.MoneyBalanceRequest;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
@@ -41,6 +43,7 @@ public class Agent extends Handler {
         bot.addImmediateUDP("AgentDataUpdate", this);
         bot.addImmediateUDP("AgentMovementComplete",this);
         bot.addImmediateUDP("TeleportLocal",this);
+        bot.addImmediateUDP("MoneyBalanceReply",this);
         bot.addUDP("CoarseLocationUpdate",this);  // rough agent locations
         bot.addCommand("status", this);
     }
@@ -55,6 +58,12 @@ public class Agent extends Handler {
 
     @Override
     public void loggedIn() throws Exception {
+        // get financials
+        MoneyBalanceRequest req=new MoneyBalanceRequest();
+        req.bagentdata.vagentid=bot.getUUID();
+        req.bagentdata.vsessionid=bot.getSession();
+        req.bmoneydata.vtransactionid=new LLUUID();
+        bot.send(req,true);
     }
 
     @Override
@@ -80,6 +89,7 @@ public class Agent extends Handler {
         regionid.setCoarseAgentLocations(locmap);
     }
 
+    private int balance=0;
     @Override
     public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
         Message m=event.body();
@@ -102,6 +112,14 @@ public class Agent extends Handler {
             TeleportLocal tp=(TeleportLocal)m;
             bot.setPos(tp.binfo.vposition);
             bot.setLookAt(tp.binfo.vlookat);
+        }
+        if (eventname.equals("MoneyBalanceReply")) {
+            MoneyBalanceReply money = (MoneyBalanceReply)m;
+            balance=money.bmoneydata.vmoneybalance.value;
+            int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
+            int sqmspent=money.bmoneydata.vsquaremeterscommitted.value;
+            String description=money.bmoneydata.vdescription.toString();
+            note(bot,"Balance: "+balance+"L$, Land: "+sqmspent+"m2/"+sqmcredit+"m2 "+description);
         }
     }
 
