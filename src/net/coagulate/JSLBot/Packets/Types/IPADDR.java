@@ -9,6 +9,6 @@ package net.coagulate.JSLBot.Packets.Types;
  *
  * @author Iain
  */
-public class IPADDR extends Unimplemented{
+public class IPADDR extends U32 {
     
 }
