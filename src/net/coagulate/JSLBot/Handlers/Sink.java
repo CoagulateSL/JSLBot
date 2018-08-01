@@ -42,6 +42,7 @@ public class Sink extends Handler {
         ai.addUDP("AttachedSoundGainChange",this); // sound zzz
         ai.addUDP("RegionHandshake",this); // handled internally by circuit, though does little.  can be hooked for "on connect()" functionality
         ai.addUDP("SoundTrigger",this); // sound from "outside current region" (sounds really interesting to a bot)
+        ai.addUDP("PreloadSound",this); // no sound
         ai.addUDP("LayerData",this); // has something to do with terrain/sky/cloud layers and some "internal proprietary format" - sounds near useless and a lot of effort :)
         ai.addUDP("CameraConstraint",this); // camera collision? unsure, its a 4 dimensional vector though
         ai.addUDP("AvatarAnimation",this); // as a non visual agent, this isn't interesting :P
