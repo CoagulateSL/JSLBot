@@ -496,6 +496,7 @@ public class JSLBot extends Thread {
         for (Circuit c:closeme) {
             try { c.close(); } catch (Exception e) {}
         }
+        synchronized(queue) { queue.notifyAll(); } // wake up the thread to quit
         // 0 - requested exit
         // 1 - Primary circuit closed (teleport failed, usually)
     }
