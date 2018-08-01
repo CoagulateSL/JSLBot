@@ -64,5 +64,9 @@ public class Test {
         oos.close();
         fos.close();
     }
+
+        /*CnC.parseRegionRestart("<? LLSD/XML ?>\n" +
+"<llsd><map><key>MINUTES</key><integer>4</integer><key>NAME</key><string>Cerasi</string></map></llsd>");*/
+
     
 }
