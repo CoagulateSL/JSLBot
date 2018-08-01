@@ -5,6 +5,8 @@
  */
 package net.coagulate.JSLBot.Handlers;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import net.coagulate.JSLBot.Circuit;
@@ -14,15 +16,18 @@ import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Global;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.Log;
+import static net.coagulate.JSLBot.Log.ERROR;
 import static net.coagulate.JSLBot.Log.INFO;
 import static net.coagulate.JSLBot.Log.NOTE;
 import static net.coagulate.JSLBot.Log.WARN;
+import static net.coagulate.JSLBot.Log.datetime;
 import static net.coagulate.JSLBot.Log.debug;
 import static net.coagulate.JSLBot.Log.log;
 import static net.coagulate.JSLBot.Log.note;
@@ -65,13 +70,49 @@ public class CnC extends Handler {
         bot.addCommand("quit",this);
     }
 
+    public static Date parseRegionRestart(String m) throws IOException {
+        if (m.split("\n").length<2) { throw new IllegalArgumentException("Expected at least 2 lines of input"); }
+        String line=m.split("\n")[1];
+        LLSDMap msg=(LLSDMap) new LLSD(line).getFirst();
+        String region=msg.get("NAME").toString();
+        long shutdown=new Date().getTime();
+        if (msg.containsKey("MINUTES")) { shutdown=shutdown+((Integer.parseInt(msg.get("MINUTES").toString()))*1000*60); }
+        if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))*1000); }
+        Date when=new Date(shutdown);
+        System.out.println(when.toString());
+        return when;
+    }
+    private Date evacby=null;
     @Override
     public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("AlertMessage")) {
             AlertMessage msg=(AlertMessage) event.body();
             warn(bot,"Simulator sends Alert, data message: "+msg.balertdata.vmessage.toString());
             for (AlertMessage_bAlertInfo info:msg.balertinfo) {
-                warn(bot,"Warning included info:"+info.vmessage.toString()+" / "+info.vextraparams.toString());
+                String infotype=info.vmessage.toString();
+                boolean handled=false;
+                if (infotype.equals("RegionRestartMinutes") || infotype.equals("RegionRestartSeconds")) {
+                    handled=true;
+                    Date when=parseRegionRestart(info.vextraparams.toString());
+                    int seconds=(int) ((when.getTime()-(new Date().getTime()))/1000);
+                    int level = NOTE;
+                    if (seconds<=180) { level=WARN; }
+                    if (seconds<=60) {
+                        level=ERROR;
+                        if (evacby==null ||evacby.before(new Date())) { // if not evacuating or it was in the past
+                            evacby=new Date(when.getTime()+30000); // set to 30 seconds post evacuation so we dont do this more than once
+                            Map<String,String> params=new HashMap<>();
+                            params.put("when",""+((int)(when.getTime()/1000)));
+                            CommandEvent evacuate=new CommandEvent(bot, region, "evacuate", params, null);
+                            evacuate.submit();
+                        }
+                    }
+                    String mins=Integer.toString(seconds/60);
+                    String secs=Integer.toString(seconds % 60);
+                    if (secs.length()==1) { secs="0"+secs; }
+                    log(bot,level,"Simulator will shut down in "+mins+"m"+secs+"s at "+datetime.format(when));
+                }
+                if (!handled) { warn(bot,"Unhandled warning included info:"+info.vmessage.toString()+" / "+info.vextraparams.toString()); }
             }
         }
         if (eventname.equals("ChatFromSimulator")) {
@@ -387,7 +428,7 @@ public class CnC extends Handler {
                 byte[] handlebytes=handle.toByte();
                 if (Debug.REGIONHANDLES) { debug(bot,"Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
                 try { bot.createCircuit(numericip,port.get(),handle.toLong(),null); }
-                catch (Exception e) { Log.note(bot,"Failed to set up circuit to "+Global.getRegionName(handle.toLong())+" (#"+handle+")"); }
+                catch (Exception e) { Log.note(bot,"Failed to set up circuit to "+Global.getRegionName(handle.toLong())+" (#"+Long.toUnsignedString(handle.toLong())+")"); }
             }
         }
     }

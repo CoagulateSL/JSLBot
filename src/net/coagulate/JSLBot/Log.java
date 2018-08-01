@@ -20,7 +20,7 @@ public class Log {
     public static final int CRITICAL=CRIT;
     public static final int ABORT=CRIT;
     public static final int CRASH=CRIT; // why not
-    private static final DateFormat datetime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final DateFormat datetime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     
     public static String decode(int l) {
         switch (l) {
