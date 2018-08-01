@@ -16,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import net.coagulate.JSLBot.LLSD.LLSDArray;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -114,5 +115,70 @@ public abstract class BotUtils {
             }
         }
         return result;
+    }
+
+    public static LLSDArray getCAPSArray() {
+        LLSDArray req = new LLSDArray();
+        req.add("AttachmentResources");
+        req.add("AvatarPickerSearch");
+        req.add("ChatSessionRequest");
+        req.add("CopyInventoryFromNotecard");
+        req.add("DispatchRegionInfo");
+        req.add("EstateChangeInfo");
+        req.add("EventQueueGet");
+        req.add("ObjectMedia");
+        req.add("ObjectMediaNavigate");
+        req.add("FetchLib2");
+        req.add("FetchLibDescendents2");
+        req.add("FetchInventory2");
+        req.add("FetchInventoryDescendents2");
+        req.add("GetDisplayNames");
+        req.add("GetTexture");
+        req.add("GetMesh");
+        req.add("GetObjectCost");
+        req.add("GetObjectPhysicsData");
+        req.add("GroupProposalBallot");
+        req.add("HomeLocation");
+        req.add("LandResources");
+        req.add("MapLayer");
+        req.add("MapLayerGod");
+        req.add("NewFileAgentInventory");
+        req.add("NewFileAgentInventoryVariablePrice");
+        req.add("Objectadd");
+        req.add("ParcelPropertiesUpdate");
+        req.add("ParcelMediaURLFilterList");
+        req.add("ParcelNavigateMedia");
+        req.add("ParcelVoiceInfoRequest");
+        req.add("ProductInfoRequest");
+        req.add("ProvisionVoiceAccountRequest");
+        req.add("RemoteParcelRequest");
+        req.add("RequestTextureDownload");
+        req.add("SearchStatRequest");
+        req.add("SearchStatTracking");
+        req.add("SendPostcard");
+        req.add("SendUserReport");
+        req.add("SendUserReportWithScreenshot");
+        req.add("ServerReleaseNotes");
+        req.add("SimConsole");
+        req.add("SimulatorFeatures");
+        req.add("SetDisplayName");
+        req.add("SimConsoleAsync");
+        req.add("StartGroupProposal");
+        req.add("TextureStats");
+        req.add("UntrustedSimulatorMessage");
+        req.add("UpdateAgentInformation");
+        req.add("UpdateAgentLanguage");
+        req.add("UpdateGestureAgentInventory");
+        req.add("UpdateNotecardAgentInventory");
+        req.add("UpdateScriptAgent");
+        req.add("UpdateGestureTaskInventory");
+        req.add("UpdateNotecardTaskInventory");
+        req.add("UpdateScriptTask");
+        req.add("UploadBakedTexture");
+        req.add("UploadObjectAsset");
+        req.add("ViewerMetrics");
+        req.add("ViewerStartAuction");
+        req.add("ViewerStats");        
+        return req;
     }
 }
