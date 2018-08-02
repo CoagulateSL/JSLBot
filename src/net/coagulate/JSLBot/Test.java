@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class Test {
 
-    /**
+    /** Launch a singular bot and lose our thread to its AI thread.
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
@@ -30,6 +30,7 @@ public class Test {
         new JSLBot(config).run(); // lose control to bot.  call start() to background the bot and continue execution here.
     }
     
+    /** Builds a base configuration file */
     static void initConfig(String CONFIGFILE) throws Exception {
         System.out.println("CREATING NEW CONFIGURATION FILE IN 3 SECONDS.  ABORT NOW.");
         Thread.sleep(3000);
@@ -65,6 +66,7 @@ public class Test {
         fos.close();
     }
 
+    // something i keep around for reference, its a region restart message.
         /*CnC.parseRegionRestart("<? LLSD/XML ?>\n" +
 "<llsd><map><key>MINUTES</key><integer>4</integer><key>NAME</key><string>Cerasi</string></map></llsd>");*/
 

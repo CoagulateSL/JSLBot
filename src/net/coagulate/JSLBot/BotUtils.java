@@ -28,6 +28,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
  * @author Iain Price <git@predestined.net>
  */
 public abstract class BotUtils {
+    /** Turns a byte array into a hex string */
     public static String hex(byte[] in) {
         final StringBuilder builder = new StringBuilder();
         for(byte b : in) {
@@ -36,7 +37,7 @@ public abstract class BotUtils {
         return builder.toString();
     }     
     
-    // used by the SL login protocol
+    /** Get the machine's mac address as a hex string, required by the SL login */
     public static String getMac() throws UnknownHostException, SocketException {
         
         InetAddress addr = InetAddress.getLocalHost();
@@ -47,34 +48,10 @@ public abstract class BotUtils {
         byte[] mac = ni.getHardwareAddress();
         if (mac == null)
             return null;
-
-        StringBuilder sb = new StringBuilder(18);
-        for (byte b : mac) {
-            if (sb.length() > 0)
-                sb.append(':');
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
+        return hex(mac);
     }
 
-    /*// stuff you probably want to reimplement by extending this class
-    public void alert(String alert) {}
-    public void chat(String from,LLUUID source,LLUUID owner,LLVector3 position,String message) {}
-    public void groupMessage(String from,LLUUID source,String message) {}
-    public void instantMessage(String from,LLUUID source,String message) throws IOException {}
-    public void healthChange() {}
-    public void positionUpdate() {}
-    public void sendInstantMessage(LLUUID target,String message) throws IOException {
-    ImprovedInstantMessage i=new ImprovedInstantMessage();
-    i.setReliable(true);
-    i.bagentdata.vagentid=new LLUUID(uuid);
-    i.bagentdata.vsessionid=sessionid;
-    i.bmessageblock.vmessage=new Variable2(message);
-    i.bmessageblock.vfromagentname=new Variable1(getFullName());
-    i.bmessageblock.vtoagentid=target;
-    primary.send(i);
-    }
-     */
+    /** Hash a password using MD5 and prefix with $1$, used by SL login request */
     public static String md5hash(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (password.startsWith("$1$")) {
             return password;
@@ -84,7 +61,7 @@ public abstract class BotUtils {
         return "$1$" + hex(digest);
     }
  
-    
+    /** Create and execute the XMLRPC logon command */
     public static Map loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, UnknownHostException, SocketException, NoSuchAlgorithmException, UnsupportedEncodingException, XmlRpcException {
         XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
@@ -119,7 +96,9 @@ public abstract class BotUtils {
         return result;
     }
 
+    /** A list of caps we request from a sim. */
     public static LLSDArray getCAPSArray() {
+        //Mostly here because its a giant horrible block of text
         LLSDArray req = new LLSDArray();
         req.add("AttachmentResources");
         req.add("AvatarPickerSearch");
@@ -184,7 +163,12 @@ public abstract class BotUtils {
         return req;
     }
     
-    
+    /** ZeroEncode the input byte array.
+     * Add acks /after/ zerocoding, they are not included.
+     * See the SL protocol documentation.
+     * @param input raw byte array
+     * @return ZeroCoded byte array
+     */
     public static byte[] zeroEncode(byte[] input) {
         List<Byte> output=new ArrayList<>();
         // first 5 bytes (header) are not encoded

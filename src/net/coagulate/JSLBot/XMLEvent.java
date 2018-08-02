@@ -3,21 +3,17 @@ package net.coagulate.JSLBot;
 import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 
-/**
+/** Encapsulates an EventQueue XML document as an event.
  *
- * @author iain
+ * @author Iain Price <git@predestined.net>
  */
 public class XMLEvent extends Event {
     private Atomic content;
     public Atomic body() { return content; }
-    private String name;
-    @Override
-    public String getName() {return name;}
 
     public XMLEvent(JSLBot bot,Regional r,Atomic content,String name) {
-        super(bot, r);
+        super(bot, r,name);
         this.content=content;
-        this.name=name;
     }
 
     @Override

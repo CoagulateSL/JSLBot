@@ -25,13 +25,18 @@ import net.coagulate.JSLBot.LLSD.LLSDString;
  * @author Iain
  */
 public class EventQueue extends Thread {
-    String eventqueue;
-    CAPS caps;
-    long regionhandle;
+    private String eventqueue;
+    private CAPS caps;
+    private long regionhandle;
     public EventQueue(CAPS caps,String queue,long regionhandle) { this.caps=caps; eventqueue=queue;  this.regionhandle=regionhandle; setDaemon(true); }
+    /** Get the owning CAPS */
     public CAPS caps() { return caps; }
-    public Circuit circuit() { return caps().getCircuit(); }
+    /** Get the owning circuit */
+    public Circuit circuit() { return caps().circuit(); }
+    /** Get the owning bot */
     public JSLBot bot() { return circuit().bot(); }
+    
+    /** Call via start() to launch a background thread for polling the event queue */
     public void run() {
         setName("Event queue driver for "+bot().getUsername()+" to "+circuit().getRegionName());
         try {
@@ -45,9 +50,6 @@ public class EventQueue extends Thread {
     private void runMain() throws Exception {
         int id=0;
         URL url=new URL(eventqueue);
-
-        //debug("CAPS POST:"+req.toXML());
-//        byte[] postdata=(getcaps.toXML()).getBytes(StandardCharsets.UTF_8);
         while (1==1) {
             
             LLSDMap post=new LLSDMap();
@@ -92,7 +94,7 @@ public class EventQueue extends Thread {
         }
     }
     
-    void process(LLSDArray events) throws Exception {
+    private void process(LLSDArray events) throws Exception {
         for (Atomic a:events.get()) {
             //System.out.println("**************** ATOM:\n"+a.toXML());
             // this is so clunky
@@ -101,11 +103,11 @@ public class EventQueue extends Thread {
             String messagetype=((LLSDString)eventmap.get("message")).toString();
             Atomic body=eventmap.get("body");
             if (Debug.DUMPXML) { System.out.println("Message type is "+messagetype+"\n"+body.toXML()); }
-            XMLEvent event=new XMLEvent(bot(), circuit().getRegional(), body, messagetype);
+            XMLEvent event=new XMLEvent(bot(), circuit().regional(), body, messagetype);
             bot().submit(event);
         }
     }
-    String getRegionName() { return caps().getCircuit().getRegionName(); }
+    public String getRegionName() { return caps().circuit().getRegionName(); }
     void debug(String message) { debug(message,null); }
     void debug(String message, Throwable t) { Log.log(bot(),Log.DEBUG,"("+getRegionName()+") "+message,t); }
     void info(String message) { info(message,null); }

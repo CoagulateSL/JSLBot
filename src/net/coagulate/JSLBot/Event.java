@@ -16,14 +16,16 @@ import static net.coagulate.JSLBot.Event.STATUS.*;
  */
 public abstract class Event {
 
+    /** Stages an event goes through */
     public enum STATUS { UNSUBMITTED, IMMEDIATE, QUEUED, RUNNING, COMPLETE }
     private STATUS status=UNSUBMITTED;
     public STATUS status() { return status; }
-    void setStatus (STATUS status) {
+    void status (STATUS status) {
         this.status=status;
         if (Debug.TRACKCOMMANDS && type==COMMAND) { Log.debug(bot(),"Command "+getName()+" entering status "+status); }
     }
     
+    /** Supported event types */
     public enum EVENTTYPE { UDP, XML, COMMAND };
     private EVENTTYPE type; public EVENTTYPE type() { return type; }
     public String typePrefix() { 
@@ -34,12 +36,15 @@ public abstract class Event {
     }
     
     private Regional r;
+    /** Region this event originated from, if applicable */
     public Regional region() { return r; }
 
     private JSLBot bot;
+    
     public JSLBot bot() { return bot; }
     
-    Event(JSLBot bot,Regional r) { this.bot=bot; this.r=r; setType(); }
+    Event(JSLBot bot,Regional r,String name) { this.bot=bot; this.r=r; setType(); }
+    
     private void setType() {
         if (this instanceof UDPEvent) { type=UDP; return ;}
         if (this instanceof XMLEvent) { type=XML; return; }
@@ -47,13 +52,18 @@ public abstract class Event {
         throw new IllegalArgumentException("This class "+this.getClass().getName()+" is not assignable from the expected types");
     }
     
-    public abstract String getName();
+    private String name;
+    public final String getName() { return name; }
     public abstract String dump();
     
     public String getPrefixedName() {
         return typePrefix()+"/"+getName();
     }
     
+    /** Submit event for full queue processing.
+     * While commands choose IMMEDIATE/DELAYED mode, every other event passes through both and the handlers decide where to be installed.
+     * @throws IOException 
+     */
     public void submit() throws IOException {
         bot().submit(this);
     }

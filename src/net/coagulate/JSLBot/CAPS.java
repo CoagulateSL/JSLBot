@@ -25,22 +25,21 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  *
  * @author Iain
  */
-public class CAPS extends Thread {
-    String caps;
-    LLSDMap capabilities;
+public class CAPS {
+    private String caps;
+    private LLSDMap capabilities;
     private String displaynames;
-    Circuit circuit;
-    public void run() {
-        try {
-            //runMain();
-        }
-        catch (Exception e)
-        {
-            error("CAPS thread crashed: "+e,e);
-        }
-    }
-    public JSLBot bot() { return getCircuit().bot(); }
-    public CAPS(Circuit circuit,String capsseed,long regionhandle) throws IOException {
+    private Circuit circuit;
+    private EventQueue eq=null; EventQueue eventqueue() { return eq; }
+    public JSLBot bot() { return circuit().bot(); }
+    
+    /** Create and interrogate CAPS.
+     * Launch EventQueueGet if applicable
+     * @param circuit Owning circuit
+     * @param capsseed CAPS url
+     * @throws IOException 
+     */
+    public CAPS(Circuit circuit,String capsseed) throws IOException {
         this.caps=capsseed;
         this.circuit=circuit;
         LLSDArray req=BotUtils.getCAPSArray();
@@ -50,7 +49,7 @@ public class CAPS extends Thread {
 
         if (capabilities.containsKey("GetDisplayNames")) { displaynames=((LLSDString)(capabilities.get("GetDisplayNames"))).toString(); }
         if (capabilities.containsKey("EventQueueGet")) {
-            EventQueue eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString(),regionhandle);
+            eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString(),circuit.handle());
             eq.setDaemon(true);
             eq.start();
             info("CAPS seed interrogated successfully; EventQueueGet driver launched");
@@ -60,7 +59,12 @@ public class CAPS extends Thread {
         }
     }
     
-
+    /** Run a CAPS getDisplayNames event for a given UUID.
+     * Does /not/ use the cache, internal use only!
+     * @param agentid
+     * @throws MalformedURLException
+     * @throws IOException 
+     */
     void getNames(LLUUID agentid) throws MalformedURLException, IOException {
         LLSDMap map = invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
         LLSDArray agents=(LLSDArray) map.get("agents");
@@ -72,17 +76,25 @@ public class CAPS extends Thread {
             LLSDString firstname=(LLSDString) agent.get("legacy_first_name");
             LLSDString lastname=(LLSDString) agent.get("legacy_last_name");
             LLSDString username=(LLSDString) agent.get("username");
-            Global.setDisplayName(describedagent.toLLUUID(), displayname.toString());
-            Global.setFirstName(describedagent.toLLUUID(), firstname.toString());
-            Global.setLastName(describedagent.toLLUUID(), lastname.toString());
-            Global.setUserName(describedagent.toLLUUID(), username.toString());
+            Global.displayName(describedagent.toLLUUID(), displayname.toString());
+            Global.firstName(describedagent.toLLUUID(), firstname.toString());
+            Global.lastName(describedagent.toLLUUID(), lastname.toString());
+            Global.userName(describedagent.toLLUUID(), username.toString());
         }
     }
 
-    
-    private LLSDMap invokeCAPS(String cap,String appendtocap,LLSD content) throws IOException
+    /** Call a specific cap, with a suffix and an optional document */
+    LLSDMap invokeCAPS(String cap,String appendtocap,LLSD content) throws IOException
     {return invokeXML(capabilities.get(cap).toString()+appendtocap,content);}
-    private LLSDMap invokeXML(String url,LLSD content) throws MalformedURLException, IOException {
+    /** Call a URL for an XML exchange
+     * 
+     * @param url Target URL
+     * @param content LLSD document to POST, or null if GET mode only
+     * @return LLSDMap response
+     * @throws MalformedURLException
+     * @throws IOException 
+     */
+    LLSDMap invokeXML(String url,LLSD content) throws MalformedURLException, IOException {
         if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
         HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
         byte[] postdata=new byte[0];
@@ -111,22 +123,23 @@ public class CAPS extends Thread {
         
     }    
     
-    Circuit getCircuit() {
+    Circuit circuit() {
         return circuit;
     }
-    String getRegionName() { return circuit.getRegionName(); }
+    public String regionName() { return circuit.getRegionName(); }
     void debug(String message) { debug(message,null); }
-    void debug(String message, Throwable t) { Log.log(bot(),Log.DEBUG,"("+getRegionName()+") "+message,t); }
+    void debug(String message, Throwable t) { Log.log(bot(),Log.DEBUG,"("+regionName()+") "+message,t); }
     void info(String message) { info(message,null); }
-    void info(String message, Throwable t) { Log.log(bot(),Log.INFO,"("+getRegionName()+") "+message,t); }
+    void info(String message, Throwable t) { Log.log(bot(),Log.INFO,"("+regionName()+") "+message,t); }
     void note(String message) { note(message,null); }
-    void note(String message, Throwable t) { Log.log(bot(),Log.NOTE,"("+getRegionName()+") "+message,t); }
+    void note(String message, Throwable t) { Log.log(bot(),Log.NOTE,"("+regionName()+") "+message,t); }
     void warn(String message) { warn(message,null); }
-    void warn(String message, Throwable t) { Log.log(bot(),Log.WARNING,"("+getRegionName()+") "+message,t); }
+    void warn(String message, Throwable t) { Log.log(bot(),Log.WARNING,"("+regionName()+") "+message,t); }
     void error(String message) { error(message,null); }
-    void error(String message, Throwable t) { Log.log(bot(),Log.ERROR,"("+getRegionName()+") "+message,t); }
+    void error(String message, Throwable t) { Log.log(bot(),Log.ERROR,"("+regionName()+") "+message,t); }
     void crit(String message) { crit(message,null); }
-    void crit(String message, Throwable t) { Log.log(bot(),Log.CRITICAL,"("+getRegionName()+") "+message,t); }    
+    void crit(String message, Throwable t) { Log.log(bot(),Log.CRITICAL,"("+regionName()+") "+message,t); }    
+
 
 
 

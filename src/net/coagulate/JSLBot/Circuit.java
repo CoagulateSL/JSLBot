@@ -63,20 +63,39 @@ public class Circuit extends Thread implements Closeable {
     private LLUUID regionuuid=null;
     // last time we rxed anything
     private Date lackpacket=new Date();
+    // the primary all important region handle
     private Long regionhandle=null;
+    // primary CAPS url
     private String capsurl=null;
+    // primary CAPS object
     private CAPS caps=null;
+    // Get the CAPS object attached to this circuit's region
     public CAPS getCAPS() { return caps; }
-    Regional regional=null;
+    // Region object for this circuit's region
+    private Regional regional=null;
+    // target address
     private String simipandport=null;
     public String getSimIPAndPort() { return simipandport; }
+    // how many packets sent
     private int packetrate=0;
+    // reduced occasionally, as stored here
     private Date lastreduced=new Date();
     
+    // Have started a disconnect, so dont error so much
     private boolean disconnecting=false;
+    // Have given a reason for the disconnect, so dont give any more
     private boolean disconnectlogged=false;
+    // We're dead.
     private boolean disconnected=false;
-    // create a circuit given the parameters.  sessionid comes from login, and circuitcode comes from login or TeleportFinished style events that open new circuits
+    /** create a circuit given the parameters.
+     * 
+     * @param parent Owning JSLBot
+     * @param address Target IP address
+     * @param port Target port
+     * @param passedregionhandle Target region handle
+     * @param capsurl Target CAPS url
+     * @throws IOException 
+     */
     Circuit(JSLBot parent, String address, int port, Long passedregionhandle,String capsurl) throws IOException  {
         setDaemon(true);
         simipandport=address+":"+port;
@@ -103,10 +122,10 @@ public class Circuit extends Thread implements Closeable {
         if (Debug.CIRCUIT) { debug("Outstanding ACKS: "+inflight.size()); }
         if (inflight.size()!=0) { throw new IllegalArgumentException("Login completed, UseCircuitCode sent, and not acknowledged..."); }
         info("Successfully connected circuit");
-        if (capsurl!=null) { caps=new CAPS(this,capsurl,regionhandle); }
+        if (capsurl!=null) { caps=new CAPS(this,capsurl); }
     }
     
-    // run when the circuit is established, this performs the blocking IO listening for packets, and does some other circuit maintenance tasks
+    /** Runs the UDP receiver thread */
     public void run() {
         this.setName("Circuit for "+owner.getUsername()+" to "+this.address);
         if (Debug.CIRCUIT) { info("Starting background driver:"+this.getName()); }
@@ -163,21 +182,27 @@ public class Circuit extends Thread implements Closeable {
         if (Debug.CIRCUIT) { debug("Deregistering circuit to "+regionname); }
         owner.deregisterCircuit(regionhandle,this);
     }
-    
-    public long lastAck() {
+    /** When the last ack packet was sent, as an interval from now.
+     * // TODO this isn't the whole story (since we append to outgoings too)
+     * @return 
+     */
+    private long lastAck() {
         long result=new Date().getTime()-lastacks.getTime();
         return result;
     }
-    public long lastMaintenance() {
+    /** When maintenance last ran, as an interval from now */
+    private long lastMaintenance() {
         long result=new Date().getTime()-lastmaintenance.getTime();
         return result;
     }
+    /** Add a packet to the list to send ACKs for */
     public void requiresAck(Packet p) {
         synchronized(inflight) {
             inflight.put(p,new Date());
         }
     }
-    public void receivedAck(int seqno)
+    /** Handle a received ACK */
+    private void receivedAck(int seqno)
     {
         Packet match=null;
         synchronized(inflight) { 
@@ -193,14 +218,15 @@ public class Circuit extends Thread implements Closeable {
         }
     }
     int maintenancecounter=0;
-    void maintenance() throws IOException {
+    /** Run maintenance tasks */
+    private void maintenance() throws IOException {
         long interval=new Date().getTime()-lackpacket.getTime();
         if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) { disconnectlogged=true; crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing."); close(); return; }
         // polled every 2.5s
         maintenancecounter++;
         lastmaintenance=new Date();
         if ((maintenancecounter % 12) == 0) {
-            // trim remembered packets.
+            // trim the list of remember transmissions, if they didn't send after 60 seconds they're dead.
             synchronized(acked) {
                 Set<Integer> removeme=new HashSet<>();
                 for (int sequence:acked.keySet()) {
@@ -215,6 +241,7 @@ public class Circuit extends Thread implements Closeable {
         }
         synchronized (inflight) {
             for (Packet p:inflight.keySet()) {
+                // retransmit any packets that haven't been acked in a while
                 Date sent=inflight.get(p);
                 if (packetrate<5 && ((new Date().getTime())-(sent.getTime()))>acktimeout) {
                     //System.out.println("In retransmit with packetrate "+packetrate);
@@ -226,8 +253,11 @@ public class Circuit extends Thread implements Closeable {
             }
         }
     }
+    /** Send a message, optionally reliably */
     public void send(Message m,boolean reliable) throws IOException { Packet p=new Packet(m); p.setReliable(reliable); send(p); }
+    /* Send a message, unreliably */
     public void send(Message m) throws IOException { send(m,false); }
+    /* Send a packet */
     public void send(Packet p) throws IOException {
         List<Integer> sending=new ArrayList<Integer>(); // list of acks we'll append.
         // synchronise up around the ack queue, strip it , aka "claim it"... 
@@ -288,14 +318,17 @@ public class Circuit extends Thread implements Closeable {
         packetrate++;
     }
 
+    /** Produce a reliable sequence counter for packets */
     public synchronized int getSequence() {
         return sequence++;
     }
 
+    /** Attempt to close the network socket if this class gets garbage collected somehow */
     protected void finalize() { try { this.close(); super.finalize(); } catch (Throwable e) {}}
 
     
     private Object lockdisconnecting=new Object();
+    /** Close this circuit */
     @Override
     public void close() {
         synchronized(lockdisconnecting) {
@@ -318,6 +351,7 @@ public class Circuit extends Thread implements Closeable {
         disconnected=true;
     }
     
+    /** Send a standalone ACK packet */
     private void sendAck() throws IOException
     {
         //packet ack generator
@@ -342,6 +376,7 @@ public class Circuit extends Thread implements Closeable {
 
     private boolean firsthandshake=true;
 
+    /** Process a received packet */
     private void processPacket(Packet p) throws IOException {
         if (Debug.PACKET) { debug("Received packet: "+p.dump()); }
         boolean alreadyseen=acked.containsKey(p.getSequence());
@@ -365,7 +400,7 @@ public class Circuit extends Thread implements Closeable {
                 if (Debug.NOTERETRANS) {
                     debug("Received resent DUPLICATED packet:"+p.getSequence()); 
                 }
-                return; // alrea dy run it
+                return; // already run it
             }
             if (Debug.DUMPRETRANS) {
                 debug("Received resent LOST packet:"+p.dump()); 
@@ -403,7 +438,7 @@ public class Circuit extends Thread implements Closeable {
             RegionHandshake r=(RegionHandshake)m;
             regionname=r.bregioninfo.vsimname.toString();
             this.setName("Circuit for "+owner.getUsername()+" to "+this.regionname);
-            if (regionhandle!=null) { Global.setRegionName(regionhandle, regionname); }
+            if (regionhandle!=null) { Global.regionName(regionhandle, regionname); }
             boolean register=false; // most connections register at creation since we know where we're connecting to
             // the initial circuit maybe not so much
             regionuuid=r.bregioninfo2.vregionid;
@@ -429,12 +464,12 @@ public class Circuit extends Thread implements Closeable {
             // if it wasn't a circuit related packet, hand it off to the bot
             if (Debug.REGIONHANDLES && regionhandle==null) { System.out.println("Creating event with null RH :( "); }
             Regional r=null;
-            if (regionhandle!=null) { r=getRegional(); }
+            if (regionhandle!=null) { r=regional(); }
             new UDPEvent(owner, r, m, m.getName()).submit();
         }
         
     }
-    long getHandle() {
+    public long handle() {
         return regionhandle;
     }
 
@@ -442,10 +477,15 @@ public class Circuit extends Thread implements Closeable {
         return owner;
     }
     
-    public Regional getRegional() { return regional; }
+    public Regional regional() { return regional; }
 
+    /** Fire up CAPS for this simulator.
+     * Avoid replacing existing caps with a duplicate, log if we're replacing a non duplicate...
+     * @param newcapsurl
+     * @throws IOException 
+     */
     public void connectCAPS(String newcapsurl) throws IOException {
-        if (caps!=null && caps.isAlive()) {
+        if (caps!=null && caps.eventqueue().isAlive()) {
             if (capsurl.equals(newcapsurl)) {
                 if (Debug.EVENTQUEUE) { debug("Passed duplicate of existing CAPS url, not reconnecting anything"); return; }
             }
@@ -453,7 +493,7 @@ public class Circuit extends Thread implements Closeable {
         }
         capsurl=newcapsurl;
         if (Debug.EVENTQUEUE) { debug("Establishing connection to CAPS for region "+getRegionName()); }
-        caps=new CAPS(this,newcapsurl,regionhandle);
+        caps=new CAPS(this,newcapsurl);
     }
 
     void debug(String message) { debug(message,null); }

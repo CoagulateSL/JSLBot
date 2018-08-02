@@ -1,4 +1,3 @@
-
 package net.coagulate.JSLBot;
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -97,7 +96,12 @@ public class JSLBot extends Thread {
     // ********** BOT STARTUP **********
     private boolean connected=false; public boolean connected() { return connected; }
     private Object connectsignal=new Object();
-    public void waitConnection(long milliseconds) {
+    /** Wait up to a limited ammount of time for the bot to complete a connection.
+     * 
+     * @param milliseconds Maximum time to wait for
+     * @throws IllegalStateException If we fail to connect due to timeout or being in a quit state. 
+     */
+    public void waitConnection(long milliseconds) throws IllegalStateException {
         if (quit) { throw new IllegalStateException("Quitting, can not wait on connection"); }
         if (connected) { return; }
         try {
@@ -120,8 +124,10 @@ public class JSLBot extends Thread {
         if (brain.isEmpty()) { warn("Bot has no brain and will be a virtual zombie."); }
     }
     
-    // you can run this with Thread.start() if you want to run lots of bots
-    // if you just want to run this one bot, you can yield your main thread into here by calling JSLBot.run();
+    /** Launch bot AI.
+     * you can run this with Thread.start() if you want to run lots of bots
+     * if you just want to run this one bot, you can yield your main thread into here by calling JSLBot.run();
+     */
     public void run() {
         note("JSLBot launching connection...");        
         setName("JSLBot Brain for "+firstname+" "+lastname);
@@ -137,7 +143,7 @@ public class JSLBot extends Thread {
         public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
     }
     
-    // wrapper for the try-retry approach
+    /** Wrapper for logging in, implements retries and backoff. */
     private void performLogin(String firstname,String lastname,String password,String location) throws Exception {
         Exception last=null;
         for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
@@ -162,22 +168,24 @@ public class JSLBot extends Thread {
     
     // ********** LOGIN CODE / BOT PRIMITIVES **********
     
+    /** Perform a login attempt */
     private void login(String firstname,String lastname,String password,String loginlocation) throws MalformedURLException, IOException, NoSuchAlgorithmException, XmlRpcException  {
+        // authentication is performed over XMLRPC over HTTPS
         Map result=BotUtils.loginXMLRPC(this,firstname, lastname, password, loginlocation);
         if (!(((String)result.get("login")).equalsIgnoreCase("true"))) {
             throw new IOException("Server gave error: "+((String)result.get("message")));
         }
+        String message=(String)result.get("message");
+        note("Login MOTD: "+message);
+
+        // the response contains things we'll need
         String fn=(String)result.get("first_name");
         this.firstname=fn.substring(1,fn.length()-1);
         this.lastname=(String)result.get("last_name");
         uuid=new LLUUID((String)result.get("agent_id"));
         // probably want to note the "udp_blacklist" which is a comma separated list of packet types to not use.  but then if we just aren't using them either...?
-        String message=(String)result.get("message");
-        note("Login MOTD: "+message);
-        // used for primary connection
         circuitcode=(int)result.get("circuit_code");
         sessionid=new LLUUID((String)result.get("session_id"));
-        // where we're connecting to
         String ip=(String)result.get("sim_ip");
         int port=(Integer)result.get("sim_port");
         int x=(Integer)result.get("region_x");
@@ -188,6 +196,7 @@ public class JSLBot extends Thread {
         handle.value=handle.value<<(32);
         handle.value=handle.value | (y);     
         if (Debug.AUTH || Debug.REGIONHANDLES) { debug("Computed initial handle of "+Long.toUnsignedString(handle.value)); }
+        // caps
         String seedcaps=(String)result.get("seed_capability");
         info("Login is complete, opening initial circuit.");
         Circuit initial=new Circuit(this, ip, port, handle.value,seedcaps);
@@ -200,6 +209,7 @@ public class JSLBot extends Thread {
         synchronized(connectsignal) { connectsignal.notifyAll(); } // wake up, sleepers
     }
 
+    /** Send this generally useful message down the primary UDP circuit */
     public void completeAgentMovement() throws IOException {
         CompleteAgentMovement p=new CompleteAgentMovement();
         p.bagentdata.vagentid=getUUID();
@@ -207,6 +217,7 @@ public class JSLBot extends Thread {
         p.bagentdata.vcircuitcode=new U32(getCC());
         send(p);
     }
+    /** Send this generally useful message down the primary UDP circuit */
     public void agentUpdate() throws IOException {
         AgentUpdate p=new AgentUpdate();
         p.bagentdata.vagentid=getUUID();
@@ -216,6 +227,19 @@ public class JSLBot extends Thread {
         send(agentupdate);
     }
 
+    /** Send this generally useful message down the primary UDP circuit */
+    Packet useCircuitCode() {
+        UseCircuitCode cc=new UseCircuitCode();
+        cc.bcircuitcode.vcode=new U32(getCC());
+        cc.bcircuitcode.vsessionid=getSession();
+        cc.bcircuitcode.vid=getUUID();
+        Packet p=new Packet(cc);
+        p.setReliable(true);
+        return p;
+    }
+
+
+    /** Send an instant message immediately using the primary circuit */
     public void im(LLUUID uuid,String message) throws IOException {
         ImprovedInstantMessage reply=new ImprovedInstantMessage();
         reply.bagentdata.vagentid=getUUID();
@@ -230,6 +254,7 @@ public class JSLBot extends Thread {
     
     
     // ********** TRANSMISSION PRIMITIVES **********
+    /** Primary circuit, as in where the agent presence *is* */
     Circuit primary=null;  Circuit circuit() { return primary; }
     public String getRegionName() { return circuit().getRegionName(); }
     
@@ -240,7 +265,6 @@ public class JSLBot extends Thread {
         send(p);
     }
     public void send(Message m) throws IOException {send(m,false); }
-    
     public void setPrimaryCircuit(Circuit c) { primary=c; }
     
     
@@ -286,7 +310,7 @@ public class JSLBot extends Thread {
     String submit(Event event) throws IOException { // the IMMEDIATE MODE code, called in the callers thread
         String messageid=event.getPrefixedName();
         String response=null;
-        event.setStatus(Event.STATUS.IMMEDIATE);
+        event.status(Event.STATUS.IMMEDIATE);
         if (immediatehandlers.containsKey(messageid)) {
             List<Handler> handlers=immediatehandlers.get(messageid);
             for (Handler h:handlers) {
@@ -302,14 +326,14 @@ public class JSLBot extends Thread {
                 catch (Exception e) { error("IMMEDIATE MODE handler "+h+" for event "+messageid+" crashed with exception "+e.toString(),e); }
             }
         }
-        event.setStatus(Event.STATUS.QUEUED);
+        event.status(Event.STATUS.QUEUED);
         synchronized(queue) { queue.add(event); queue.notifyAll(); } // and queue for the delayed thread
         return response;
     }
     void distribute(Event event) throws IOException { // dequeued events in the delayed (bot AI) thread.
         String messageid=event.getPrefixedName();
         String response=null;
-        event.setStatus(Event.STATUS.RUNNING);
+        event.status(Event.STATUS.RUNNING);
         // log unhandled messages, as a reminder of things to do if nothing else
         if (!(delayedhandlers.containsKey(messageid) || immediatehandlers.containsKey(messageid))) {
             if (Debug.UNHANDLEDALL) { debug("Unhandled packet was "+event.dump()); }
@@ -317,7 +341,7 @@ public class JSLBot extends Thread {
             note("Unhandled packet type "+messageid);
             if (Debug.UNHANDLEDONCE) { debug("Unhandled packet was "+event.dump()); }
             unhandled.add(messageid);
-            event.setStatus(Event.STATUS.COMPLETE);            
+            event.status(Event.STATUS.COMPLETE);            
             return;
         }
         // fast bail?
@@ -332,14 +356,14 @@ public class JSLBot extends Thread {
                         response=h.execute(this,event.region(), (CommandEvent) event,event.getName(),((CommandEvent)event).parameters());
                         if (response!=null && !response.equals("") && ((CommandEvent)event).respondTo()!=null) {
                             im(((CommandEvent)event).respondTo(),"> "+response);
-                            ((CommandEvent)event).setResponse(response);
+                            ((CommandEvent)event).respondTo(response);
                         }
                     }
                 }
                 catch (Exception e) { error("Handler (not-immediate) "+h+" for event "+messageid+" crashed with exception "+e.toString(),e); }
             }
         }
-        event.setStatus(Event.STATUS.COMPLETE);
+        event.status(Event.STATUS.COMPLETE);
     }
     
     void initialiseHandlers() throws Exception {
@@ -375,29 +399,33 @@ public class JSLBot extends Thread {
     }
 
     public CAPS getCAPS() { return primary.getCAPS(); }
+    /** Resolve a UUID into a firstname, either via cache or via lookup */
     public String getFirstName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.getFirstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
-        if (Global.getFirstName(uuid)==null) { Global.setFirstName(uuid,"???"); }
-        return Global.getFirstName(uuid);
+        if (Global.firstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.firstName(uuid)==null) { Global.firstName(uuid,"???"); }
+        return Global.firstName(uuid);
     }
+    /** Resolve a UUID into lastname, either via cache or via lookup */
     public String getLastName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.getLastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
-        if (Global.getLastName(uuid)==null) { Global.setLastName(uuid,"???"); }
-        return Global.getLastName(uuid);
+        if (Global.lastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.lastName(uuid)==null) { Global.lastName(uuid,"???"); }
+        return Global.lastName(uuid);
     }
+    /** Resolve a UUID into a username, either via cache or via lookup */
     public String getUserName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.getUserName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
-        if (Global.getUserName(uuid)==null) { Global.setUserName(uuid,"???"); }
-        return Global.getUserName(uuid);
+        if (Global.userName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.userName(uuid)==null) { Global.userName(uuid,"???"); }
+        return Global.userName(uuid);
     }
+    /** Resolve a UUID into a displayname, either via cache or via lookup */
     public String getDisplayName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.getDisplayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
-        if (Global.getDisplayName(uuid)==null) { Global.setDisplayName(uuid,"???"); }
-        return Global.getDisplayName(uuid);
+        if (Global.displayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.displayName(uuid)==null) { Global.displayName(uuid,"???"); }
+        return Global.displayName(uuid);
     }
 
     public Handler register(String handlername) throws Exception {
@@ -412,20 +440,19 @@ public class JSLBot extends Thread {
         config.getMaster().put("handlers",newvalue);
         return h;
     }
-
-    Packet useCircuitCode() {
-        UseCircuitCode cc=new UseCircuitCode();
-        cc.bcircuitcode.vcode=new U32(getCC());
-        cc.bcircuitcode.vsessionid=getSession();
-        cc.bcircuitcode.vid=getUUID();
-        Packet p=new Packet(cc);
-        p.setReliable(true);
-        return p;
-    }
-
     private Map<Long,Circuit> circuits=new HashMap<>();
 
-    public Circuit createCircuit(String numericip, int port, Long handle, String capsurl) throws IOException {
+    /** Obtain a circuit to the target.
+     * If a live circuit already exists for this handle, that is returned, otherwise a new circuit is created and started.
+     * Note the target sim must be expecting us.
+     * @param numericip Sim IP address
+     * @param port Sim IP port
+     * @param handle Region handle
+     * @param capsurl CAPS url for target region, potentially null for child agents which get this later.
+     * @return Activated circuit for requested region handle
+     * @throws IOException 
+     */
+    public Circuit createCircuit(String numericip, int port, long handle, String capsurl) throws IOException {
         synchronized(circuits) {
             if (circuits.containsKey(handle)) {
                 if (circuits.get(handle).isAlive()) {
@@ -441,39 +468,50 @@ public class JSLBot extends Thread {
         }
     }
 
+    /** Inform bot that a circuit closed.
+     * If this is our primary (non child agent) circuit we're in trouble and will quit.
+     * @param regionhandle Region handle that's closing connection.
+     * @param circ Associated circuit, used as a 'check' only
+     */
     void deregisterCircuit(Long regionhandle, Circuit circ) {
         synchronized(circuits) {
             Circuit c=circuits.get(regionhandle);
             if (c!=null) { c.close(); }
+            if (circ!=c && c!=null) { error("Closing a region handle but the circuit is not the one we have registered"); }
             circuits.remove(regionhandle);
             // dont warn if shutting down
-            if (!quit && circ==primary) { crit("Closure of primary circuit detected, this is fatal?"); shutdown("Primary circuit lost, we have been disconnected?"); }
+            if (!quit && c==primary) { crit("Closure of primary circuit detected, this is fatal?"); shutdown("Primary circuit lost, we have been disconnected?"); }
         }
     }
 
+    /** Get the regional info for the primary region */
     public Regional getRegional() {
-        return primary.getRegional();
+        return primary.regional();
     }
 
+    /** Get regional data for all connected circuit */
     public Set<Regional> getRegionals() {
         Set<Regional> regionalset=new HashSet<>();
         synchronized(circuits) {
             for (Long handle:circuits.keySet()) {
                 //System.out.println("Circuit "+handle);
-                regionalset.add(circuits.get(handle).getRegional());
+                regionalset.add(circuits.get(handle).regional());
             }
         }
         return regionalset;
     }
 
+    /** Get the circuit for a given region handle */
     Circuit getCircuit(Long regionhandle) {
         return circuits.get(regionhandle); 
     }
 
+    /** Get all circuits */
     public Collection<Circuit> getCircuits() {
         return circuits.values();
     }
 
+    /** Initiate disconnection from SL */
     public void shutdown(String reason) {
         if (quit) { return; } // do not re-enter
         quit=true; quitreason=reason;
@@ -486,8 +524,6 @@ public class JSLBot extends Thread {
             try { c.close(); } catch (Exception e) {}
         }
         synchronized(queue) { queue.notifyAll(); } // wake up the thread to quit
-        // 0 - requested exit
-        // 1 - Primary circuit closed (teleport failed, usually)
     }
     private float x=0; private float y=0; private float z=0;
     public LLVector3 getPos() { return new LLVector3(x,y,z); }

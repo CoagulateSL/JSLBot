@@ -70,9 +70,9 @@ public class Regions extends Handler {
                 handle.value=data.vx.value;
                 handle.value=handle.value<<(32+8);
                 handle.value=handle.value | (data.vy.value<<8);
-                if (handle.value!=0) { Global.setRegionName(handle.value,data.vname.toString()); }
+                if (handle.value!=0) { Global.regionName(handle.value,data.vname.toString()); }
                 if (Debug.REGIONHANDLES) { debug(bot,"Map Block Reply computed handle "+Long.toUnsignedString(handle.value)); }
-                Global.setRegionName(handle.value,data.vname.toString());
+                Global.regionName(handle.value,data.vname.toString());
             }
         }
         synchronized(signal) {
@@ -172,7 +172,7 @@ public class Regions extends Handler {
         if (eventname.equalsIgnoreCase("region.lookup") || eventname.equalsIgnoreCase("region.flookup")) {
             String name=parameters.get("name");
             if (name==null || name.equals("")) { return "No NAME parameter passed."; }
-            Long cached=Global.getRegionHandle(name);
+            Long cached=Global.regionHandle(name);
             if (cached!=null && (!eventname.equals("region.flookup"))) { return Long.toUnsignedString(cached); }
             MapNameRequest request=new MapNameRequest();
             request.bagentdata.vagentid=bot.getUUID();
@@ -180,10 +180,10 @@ public class Regions extends Handler {
             request.bnamedata.vname=new Variable1(name);
             bot.send(request);
             Date now=new Date();
-            while (Global.getRegionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
+            while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
                 synchronized(signal) { signal.wait(1000); }
             }
-            cached=Global.getRegionHandle(name);
+            cached=Global.regionHandle(name);
             if (cached!=null) {
                 return Long.toUnsignedString(cached);
             }

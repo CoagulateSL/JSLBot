@@ -12,7 +12,7 @@ import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.S32;
 
 /**  Class that holds regional level data.
- *
+ * A not very interesting mostly container class.
  * @author Iain Price <git@predestined.net>
  */
 public class Regional {
@@ -54,7 +54,7 @@ public class Regional {
     public String dump() {
         String d="";
         if (circuit==bot().primary) { d="[PRIMARY] "; }
-        d+="("+Global.getRegionName(circuit.getHandle())+") ";
+        d+="("+Global.regionName(circuit.handle())+") ";
         d+=coarseagentlocationmap.size()+" agents, "+objects.size()+" objects";
         return d;
     }
@@ -63,7 +63,7 @@ public class Regional {
         return objects.keySet();
     }
 
-    public Long handle() { return circuit.getHandle(); }
+    public Long handle() { return circuit.handle(); }
     
     private byte[][] parcelgrid=new byte[64][64];
     private Map<Byte,ParcelData> parceldata=new HashMap<>();
@@ -99,7 +99,7 @@ public class Regional {
     }
 
     public String getName() {
-        return Global.getRegionName(handle());
+        return Global.regionName(handle());
     }
 
     private long dayusec=0;

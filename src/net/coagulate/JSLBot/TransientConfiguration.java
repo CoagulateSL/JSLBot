@@ -21,9 +21,12 @@ public class TransientConfiguration extends Configuration {
         kv.put(param,value);
     }
 
-    @Override
     public String dump() {
-        return "Not supported because lazy.";
-    }
-    
+        String response="";
+        for (String k:kv.keySet()) {
+            if (!response.equals("")) { response+="\n"; }
+            response+=k+"="+kv.get(k); 
+        }
+        return response;
+    }   
 }

@@ -428,7 +428,7 @@ public class CnC extends Handler {
                 byte[] handlebytes=handle.toByte();
                 if (Debug.REGIONHANDLES) { debug(bot,"Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
                 try { bot.createCircuit(numericip,port.get(),handle.toLong(),null); }
-                catch (Exception e) { Log.note(bot,"Failed to set up circuit to "+Global.getRegionName(handle.toLong())+" (#"+Long.toUnsignedString(handle.toLong())+")"); }
+                catch (Exception e) { Log.note(bot,"Failed to set up circuit to "+Global.regionName(handle.toLong())+" (#"+Long.toUnsignedString(handle.toLong())+")"); }
             }
         }
     }

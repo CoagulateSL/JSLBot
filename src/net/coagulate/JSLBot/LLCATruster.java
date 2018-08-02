@@ -17,9 +17,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-/** The badly implemented SSL verifier for the LLCA.
+/** The badly implemented SSL verifier for the Linden Labs CA.
  *
- * @author iain
+ * @author Iain Price <git@predestined.net>
  */
 public class LLCATruster implements X509TrustManager,HostnameVerifier {
 
@@ -50,12 +50,12 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
     // FIXME
     @Override
     public boolean verify(String string, SSLSession ssls) {
-        // FIXING THIS MIGHT BE A GOOD IDEA.  dont really know when its called 
         return true;
     }
+
     @Override
     public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
-    }
+    }  
 
     @Override
     public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
@@ -66,7 +66,7 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
     public X509Certificate[] getAcceptedIssuers() {
         return cas;
     }
-        
+      
 
 
 
