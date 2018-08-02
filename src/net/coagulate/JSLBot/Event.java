@@ -43,7 +43,7 @@ public abstract class Event {
     
     public JSLBot bot() { return bot; }
     
-    Event(JSLBot bot,Regional r,String name) { this.bot=bot; this.r=r; setType(); }
+    Event(JSLBot bot,Regional r,String name) { this.bot=bot; this.r=r; this.name=name; setType(); }
     
     private void setType() {
         if (this instanceof UDPEvent) { type=UDP; return ;}
