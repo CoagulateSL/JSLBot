@@ -70,8 +70,8 @@ public class JSLBot extends Thread {
         if (!classname.contains(".")) { classname="net.coagulate.JSLBot.Handlers."+name; }
         Class c=Class.forName(classname);
         Configuration configuration=config.subspace(name);
-        Constructor cons=c.getConstructor(Configuration.class);
-        return (Handler) (cons.newInstance(configuration));
+        Constructor cons=c.getConstructor(JSLBot.class,Configuration.class);
+        return (Handler) (cons.newInstance(this,configuration));
     }
     public Handler getHandler(String name)
     {
@@ -318,11 +318,11 @@ public class JSLBot extends Thread {
             for (Handler h:handlers) {
                 try {
                     // it's not that tempting to generalise with reflection, it'll just look ugly.
-                    if (event.type()==UDP) { h.processImmediateUDP(this,event.region(), (UDPEvent) event,event.getName()); }
-                    if (event.type()==XML) { h.processImmediateXML(this,event.region(), (XMLEvent) event,event.getName()); }
+                    if (event.type()==UDP) { h.processImmediateUDP(event.region(), (UDPEvent) event,event.getName()); }
+                    if (event.type()==XML) { h.processImmediateXML(event.region(), (XMLEvent) event,event.getName()); }
                     if (event.type()==COMMAND && ((CommandEvent)event).immediate()) {
                         if (Debug.TRACKCOMMANDS) { debug("Command "+((CommandEvent)event).getName()+" invoking immediate handler "+h.getClass().getSimpleName()); }
-                        response=h.execute(this,event.region(), (CommandEvent) event,event.getName(),((CommandEvent)event).parameters());
+                        response=h.execute(event.region(), (CommandEvent) event,event.getName(),((CommandEvent)event).parameters());
                     }
                 }
                 catch (Exception e) { error("IMMEDIATE MODE handler "+h+" for event "+messageid+" crashed with exception "+e.toString(),e); }
@@ -351,11 +351,11 @@ public class JSLBot extends Thread {
             List<Handler> handlers=delayedhandlers.get(messageid);
             for (Handler h:handlers) {
                 try {
-                    if (event.type()==UDP) { h.processUDP(this,event.region(), (UDPEvent) event,event.getName()); }
-                    if (event.type()==XML) { h.processXML(this,event.region(), (XMLEvent) event,event.getName()); }
+                    if (event.type()==UDP) { h.processUDP(event.region(), (UDPEvent) event,event.getName()); }
+                    if (event.type()==XML) { h.processXML(event.region(), (XMLEvent) event,event.getName()); }
                     if (event.type()==COMMAND && !((CommandEvent)event).immediate()) {
                         if (Debug.TRACKCOMMANDS) { debug("Command "+((CommandEvent)event).getName()+" invoking delayed handler "+h.getClass().getSimpleName()); }
-                        response=h.execute(this,event.region(), (CommandEvent) event,event.getName(),((CommandEvent)event).parameters());
+                        response=h.execute(event.region(), (CommandEvent) event,event.getName(),((CommandEvent)event).parameters());
                         if (response!=null && !response.equals("") && ((CommandEvent)event).respondTo()!=null) {
                             im(((CommandEvent)event).respondTo(),"> "+response);
                             ((CommandEvent)event).respondTo(response);
@@ -371,7 +371,7 @@ public class JSLBot extends Thread {
     void initialiseHandlers() throws Exception {
         // i feel like there is a joke in here somewhere
         for (Handler h:brain) {
-            h.initialise(this);
+            h.initialise();
         }
     }
     void notifyHandlers() throws Exception { for (Handler h:brain) { h.loggedIn(); }}
@@ -433,7 +433,7 @@ public class JSLBot extends Thread {
     public Handler register(String handlername) throws Exception {
         if (handlername==null) { throw new NullPointerException("No CLASS parameter specified"); }
         Handler h=createHandler(handlername);
-        h.initialise(this);
+        h.initialise();
         getBrain().add(h);
         h.loggedIn();
         String newvalue=config.getMaster().get("handlers","");

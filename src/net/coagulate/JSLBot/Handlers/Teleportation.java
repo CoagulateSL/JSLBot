@@ -39,23 +39,20 @@ import net.coagulate.JSLBot.XMLEvent;
  */
 public class Teleportation extends Handler {
 
-    Configuration config;
-    public Teleportation(Configuration c){super(c); config=c;}
+    public Teleportation(JSLBot bot,Configuration c){super(bot,c); config=c;}
     @Override
     public String toString() {
         return "Teleportation manager";
     }
     Object signal=new Object();
-    JSLBot bot;
     @Override
-    public void initialise(JSLBot ai) throws Exception {
-        bot=ai;
-        ai.addCommand("teleport", this);
-        ai.addImmediateUDP("TeleportProgress", this);
-        ai.addImmediateUDP("TeleportStart",this);
-        ai.addImmediateXML("TeleportFinish",this);
-        ai.addImmediateUDP("TeleportLocal",this);
-        ai.addUDP("ImprovedInstantMessage",this);
+    public void initialise() throws Exception {
+        bot.addCommand("teleport", this);
+        bot.addImmediateUDP("TeleportProgress", this);
+        bot.addImmediateUDP("TeleportStart",this);
+        bot.addImmediateXML("TeleportFinish",this);
+        bot.addImmediateUDP("TeleportLocal",this);
+        bot.addUDP("ImprovedInstantMessage",this);
     }
 
     boolean teleporting=false;
@@ -71,7 +68,7 @@ public class Teleportation extends Handler {
     }
 
     @Override
-    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         Message p=event.body();
         if (eventname.equals("TeleportProgress")) {
             TeleportProgress tp=(TeleportProgress) p;
@@ -90,7 +87,7 @@ public class Teleportation extends Handler {
     }
 
     @Override
-    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         if (eventname.equals("TeleportFinish")) {            
             // get the data for the new region
             LLSDMap body=event.map();
@@ -117,7 +114,7 @@ public class Teleportation extends Handler {
     }
 
     @Override
-    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("ImprovedInstantMessage")) {
             ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
             int messagetype=m.bmessageblock.vdialog.value;
@@ -147,12 +144,12 @@ public class Teleportation extends Handler {
     }
 
     @Override
-    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         if (eventname.equals("teleport")) {
             if (!(parameters.containsKey("x"))) { return "Missing X parameter"; }
             if (!(parameters.containsKey("y"))) { return "Missing Y parameter"; }

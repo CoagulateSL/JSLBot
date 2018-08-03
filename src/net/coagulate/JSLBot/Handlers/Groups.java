@@ -25,18 +25,16 @@ import net.coagulate.JSLBot.XMLEvent;
  */
 public class Groups extends Handler {
 
-    public Groups(Configuration config) {
-        super(config);
+    public Groups(JSLBot bot,Configuration config) {
+        super(bot,config);
     }
 
     @Override
     public String toString() { return "Manages groups"; }
 
     
-    JSLBot bot=null;
     @Override
-    public void initialise(JSLBot ai) throws Exception { 
-        bot=ai;
+    public void initialise() throws Exception { 
         bot.addXML("AgentGroupDataUpdate", this);
         bot.addCommand("groups.list",this);
     }
@@ -77,27 +75,27 @@ public class Groups extends Handler {
     private Map<Long,GroupData> groups=new HashMap<>();
 
     @Override
-    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         if (eventname.equals("AgentGroupDataUpdate")) { agentGroupDataUpdate(event.map(),region); }
     }
 
     @Override
-    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         if (eventname.equalsIgnoreCase("groups.list")) {
             String resp="Groups:";
             synchronized(groups) {

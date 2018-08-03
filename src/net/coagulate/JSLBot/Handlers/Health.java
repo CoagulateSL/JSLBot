@@ -20,16 +20,15 @@ public class Health extends Handler {
     JSLBot master;
     boolean verbose=false;
     float health=0;
-    public Health(Configuration c) { super(c); this.verbose=Boolean.parseBoolean(c.get("verbose","false")); }
+    public Health(JSLBot bot,Configuration c) { super(bot,c); this.verbose=Boolean.parseBoolean(c.get("verbose","false")); }
     @Override
     public String toString() {
         return "Health message handler";
     }
 
     @Override
-    public void initialise(JSLBot ai) throws Exception {
-        master=ai;
-        ai.addImmediateUDP("HealthMessage", this);
+    public void initialise() throws Exception {
+        bot.addImmediateUDP("HealthMessage", this);
     }
 
     @Override
@@ -37,7 +36,7 @@ public class Health extends Handler {
     }
 
     @Override
-    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("HealthMessage")) {
             HealthMessage h=(HealthMessage) event.body();
             health=h.bhealthdata.vhealth.value;
@@ -46,22 +45,22 @@ public class Health extends Handler {
     }
 
     @Override
-    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

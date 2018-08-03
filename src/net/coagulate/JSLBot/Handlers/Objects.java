@@ -29,15 +29,13 @@ import net.coagulate.JSLBot.XMLEvent;
  * @author Iain Price <git@predestined.net>
  */
 public class Objects extends Handler {
-    public Objects(Configuration c) { super(c); }
+    public Objects(JSLBot bot,Configuration c) { super(bot,c); }
     @Override
     public String toString() {
         return "Object tracking manager";
     }
-    JSLBot bot;
     @Override
-    public void initialise(JSLBot ai) throws Exception {
-        bot=ai;
+    public void initialise() throws Exception {
         bot.addImmediateUDP("ObjectUpdate", this);
         bot.addImmediateUDP("ImprovedTerseObjectUpdate", this);
         bot.addImmediateUDP("KillObject",this);
@@ -125,7 +123,7 @@ public class Objects extends Handler {
     }
 
     @Override
-    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("ObjectUpdate")) {
             processObjectData((ObjectUpdate) event.body(),region);
         }
@@ -141,22 +139,22 @@ public class Objects extends Handler {
     }
 
     @Override
-    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         if (eventname.equalsIgnoreCase("objects")) {
             for (Integer id:region.getObjects()) {
                 System.out.println(region.getObject(id).toString());

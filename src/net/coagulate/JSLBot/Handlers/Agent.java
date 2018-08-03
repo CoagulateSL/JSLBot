@@ -37,16 +37,14 @@ import net.coagulate.JSLBot.XMLEvent;
  * @author Iain Price <git@predestined.net>
  */
 public class Agent extends Handler {
-    JSLBot bot;
-    public Agent(Configuration c) {super(c);}
+    public Agent(JSLBot bot,Configuration c) {super(bot,c);}
     @Override
     public String toString() {
         return "Basic agent operations and information";
     }
 
     @Override
-    public void initialise(JSLBot bot) throws Exception {
-        this.bot=bot;
+    public void initialise() throws Exception {
         bot.addImmediateUDP("AgentDataUpdate", this);
         bot.addImmediateUDP("AgentMovementComplete",this);
         bot.addImmediateUDP("TeleportLocal",this);
@@ -102,7 +100,7 @@ public class Agent extends Handler {
     private final Set<LLUUID> offline=new HashSet<>();
     private int balance=0;
     @Override
-    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         Message m=event.body();
         if (eventname.equals("OnlineNotification")) {
             List<OnlineNotification_bAgentBlock> agents=((OnlineNotification)event.body()).bagentblock;
@@ -161,24 +159,24 @@ public class Agent extends Handler {
     }
 
     @Override
-    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("CoarseLocationUpdate")) {
             coarseLocationUpdate(region,(CoarseLocationUpdate) event.body());
         } 
     }
 
     @Override
-    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         if (eventname.equalsIgnoreCase("status")) {
             return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
         }

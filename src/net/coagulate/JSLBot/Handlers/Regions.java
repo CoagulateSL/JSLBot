@@ -35,21 +35,16 @@ import net.coagulate.JSLBot.XMLEvent;
  */
 public class Regions extends Handler {
 
-    Configuration conf;
-    public Regions(Configuration conf) {
-        super(conf);
-        this.conf=conf;
+    public Regions(JSLBot bot,Configuration conf) {
+        super(bot,conf);
     }
     @Override
     public String toString() {
         return "Region tracking and manager, required for bot initiated Teleportation";
     }
 
-    JSLBot bot;
-    
     @Override
-    public void initialise(JSLBot ai) throws Exception {
-        bot=ai;
+    public void initialise() throws Exception {
         bot.addCommand("region.lookup", this);
         bot.addCommand("region.flookup", this);
         bot.addImmediateUDP("MapBlockReply", this);
@@ -147,28 +142,28 @@ public class Regions extends Handler {
     }
 
     @Override
-    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("MapBlockReply")) { mapBlockReply((MapBlockReply)event.body(),region); }    
     }
 
     @Override
-    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("ParcelOverlay")) { parcelOverlay((ParcelOverlay)event.body(),region); }
         if (eventname.equals("SimulatorViewerTimeMessage")) { simTime((SimulatorViewerTimeMessage)event.body(),region); }
     }
 
     @Override
-    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         if (eventname.equals("ParcelProperties")) { parcelProperties(event.map(),region); }        
     }
 
     @Override
-    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         if (eventname.equalsIgnoreCase("region.lookup") || eventname.equalsIgnoreCase("region.flookup")) {
             String name=parameters.get("name");
             if (name==null || name.equals("")) { return "No NAME parameter passed."; }

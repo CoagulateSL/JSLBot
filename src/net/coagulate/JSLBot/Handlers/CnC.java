@@ -50,21 +50,19 @@ import net.coagulate.JSLBot.XMLEvent;
  */
 public class CnC extends Handler {
 
-    JSLBot bot;
-    Configuration config;
     private Authorisation auth=null;
-    public CnC(Configuration c) {
-        super(c); config=c;
+    public CnC(JSLBot bot,Configuration c) {
+        super(bot,c);
         String authoriser=c.get("authoriser", "OwnerOnly");
         if (authoriser.indexOf(".")==-1) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
         try {
-            auth=(Authorisation) Class.forName(authoriser).getConstructor(Configuration.class).newInstance(c.subspace("authorisation"));
+            auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
         } catch (Exception e) {
             Log.error(bot,"Unable to load authoriser "+authoriser, e);
         }
         if (auth==null) {
             Log.error(bot,"No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
-            auth=new DenyAll(c.subspace("authorisation"));
+            auth=new DenyAll(bot,c.subspace("authorisation"));
         }
     }
     @Override
@@ -73,8 +71,7 @@ public class CnC extends Handler {
     }
 
     @Override
-    public void initialise(JSLBot ai) throws Exception {
-        bot=ai;
+    public void initialise() throws Exception {
         bot.addUDP("ImprovedInstantMessage", this);
         bot.addCommand("loadhandler", this);
         bot.addCommand("unloadhandler", this);
@@ -99,7 +96,7 @@ public class CnC extends Handler {
     }
     private Date evacby=null;
     @Override
-    public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("AlertMessage")) {
             AlertMessage msg=(AlertMessage) event.body();
             warn(bot,"Simulator sends Alert, data message: "+msg.balertdata.vmessage.toString());
@@ -284,12 +281,12 @@ public class CnC extends Handler {
     }
 
     @Override
-    public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void processImmediateXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         if (eventname.equals("EnableSimulator")) {
             LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap)event.body()).get("SimulatorInfo");
             for (Object m:simulatorinfos) {
@@ -307,7 +304,7 @@ public class CnC extends Handler {
     }
 
     @Override
-    public void processXML(JSLBot bot, Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         if (eventname.equals("EstablishAgentCommunication")) {
             LLSDMap body=event.map();
             String simipandport=((LLSDString)(body.get("sim-ip-and-port"))).toString();
@@ -321,7 +318,7 @@ public class CnC extends Handler {
     }
 
     @Override
-    public String execute(JSLBot bot, Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
+    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         if (eventname.equalsIgnoreCase("quit")) {
             bot.shutdown("Instant Message instructed us to quit");
             return "Shutting down as requested (this message will not be delivered)";
