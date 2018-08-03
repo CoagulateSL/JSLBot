@@ -6,7 +6,6 @@
 package net.coagulate.JSLBot;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -15,6 +14,7 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,15 +39,19 @@ public abstract class BotUtils {
     
     /** Get the machine's mac address as a hex string, required by the SL login */
     public static String getMac() throws UnknownHostException, SocketException {
-        
-        InetAddress addr = InetAddress.getLocalHost();
-        NetworkInterface ni = NetworkInterface.getByInetAddress(addr);
-        if (ni == null)
-            throw new IllegalArgumentException("No network interfaces found for "+addr.toString());
-
-        byte[] mac = ni.getHardwareAddress();
-        if (mac == null)
-            throw new IllegalArgumentException("No MAC on network interface found for "+addr.toString());
+        Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
+        byte[] mac=null;
+        NetworkInterface stored=null;
+        while (e.hasMoreElements() && mac==null) {
+            NetworkInterface ni = e.nextElement();
+            mac=ni.getHardwareAddress();
+            if (mac!=null) { stored=ni; }
+        }
+        if (mac == null){
+            if (stored==null) { throw new IllegalArgumentException("No network interfaces found"); }
+            throw new IllegalArgumentException("No MAC on network interface found for "+stored.toString());
+        }
+        //System.out.println("Using mac "+hex(mac)+" from "+stored.toString());
         return hex(mac);
     }
 
