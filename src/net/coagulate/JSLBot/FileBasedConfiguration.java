@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /** Implementation of the Configuration system that uses a simple object-store file.
  *
@@ -59,5 +60,10 @@ public class FileBasedConfiguration extends Configuration {
             response+=k+"="+kvstore.get(k); 
         }
         return response;
+    }
+
+    @Override
+    public Set<String> get() {
+        return kvstore.keySet();
     }
 }

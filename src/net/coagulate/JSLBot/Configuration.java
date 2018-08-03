@@ -1,5 +1,7 @@
 package net.coagulate.JSLBot;
 
+import java.util.Set;
+
 /** General abstract API for the configuration system, K=V style.
  *
  * @author Iain Price <git@predestined.net>
@@ -25,7 +27,7 @@ public abstract class Configuration {
     public abstract String get(String param);
     /** Configuration services must have a 'put' command */
     public abstract void put(String param,String value);    
-    
+    public abstract Set<String> get();
     public abstract String dump();
     /** For seeking the root of the configuration tree, subspaces will point this upwards */
     public Configuration getMaster() { return this; }

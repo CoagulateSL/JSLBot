@@ -9,6 +9,7 @@ import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.Log;
 import static net.coagulate.JSLBot.Log.*;
 import net.coagulate.JSLBot.Packets.Message;
@@ -168,6 +169,7 @@ public class Agent extends Handler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @CmdHelp(description = "Returns some basic information about the logged in agent")
     public String statusCommand(Regional region) {
         return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
     }

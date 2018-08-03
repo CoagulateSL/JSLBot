@@ -3,10 +3,10 @@ package net.coagulate.JSLBot.Handlers;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDBoolean;
@@ -39,7 +39,8 @@ public class Groups extends Handler {
         bot.addCommand("list",this);
     }
     
-    public String listCommand(Regional region, CommandEvent event) throws Exception {
+    @CmdHelp(description="List groups the logged in agent is a member of")
+    public String listCommand(Regional region) throws Exception {
         String resp="Groups:";
         synchronized(groups) {
             for(GroupData g:groups.values()) {

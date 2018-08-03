@@ -21,6 +21,7 @@ public class Log {
     public static final int ABORT=CRIT;
     public static final int CRASH=CRIT; // why not
     public static final DateFormat datetime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    public static boolean LOGTDS=true;
     
     public static String decode(int l) {
         switch (l) {
@@ -49,8 +50,9 @@ public class Log {
     public static void log(JSLBot bot,int errorlevel,String message,Throwable t) {
         String username="SYSTEM";
         if (bot!=null) { username=bot.getUsername(); }
-        String tds=datetime.format(new Date());
-        System.out.println("["+decodeFixed(errorlevel)+"] "+tds+" <"+username+"> - "+message);
+        String tds="";
+        if (LOGTDS) { tds=datetime.format(new Date())+" "; }
+        System.out.println("["+decodeFixed(errorlevel)+"] "+tds+"<"+username+"> - "+message);
         if (t!=null) { t.printStackTrace(System.out); }
     }
     

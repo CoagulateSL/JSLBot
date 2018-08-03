@@ -1,5 +1,10 @@
 package net.coagulate.JSLBot;
 import java.io.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -10,6 +15,7 @@ import java.security.cert.CertificateException;
 import java.util.*;
 import static net.coagulate.JSLBot.Event.EVENTTYPE.*;
 import net.coagulate.JSLBot.Handlers.CnC;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Packet;
@@ -91,7 +97,6 @@ public class JSLBot extends Thread {
         }
         return null;
     }
-    
     
     
     
@@ -436,6 +441,23 @@ public class JSLBot extends Thread {
         if (match.getParameterTypes()[0]!=Regional.class) { throw new IllegalArgumentException("Command must take regional data as first parmeter, command is "+name+" in class "+h.getClass().getName()); }
         return match;
     }
+    public String getHelp(String command) {
+        command=command.toLowerCase();
+        Handler handler=immediatehandlers.get("CMD/"+command).get(0);
+        if (handler==null) { throw new IllegalArgumentException("Could not find command"); }
+        Method m=getMethod(handler,command);
+        String ret="\nCommand: "+command;
+        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+((CmdHelp)(m.getAnnotation(CmdHelp.class))).description(); }
+        for (Parameter param:m.getParameters()) {
+            if (!param.getType().equals(Regional.class)) {
+                ret+="\n"+param.getName();
+                if (param.getAnnotation(ParamHelp.class)!=null) {
+                    ret+=" - "+param.getAnnotation(ParamHelp.class).description();
+                }
+            }
+        }
+        return ret;
+    }
 
     private List<Object> getParameters(Method method, CommandEvent event) {
         List<Object> parameters=new ArrayList<>();
@@ -475,8 +497,19 @@ public class JSLBot extends Thread {
     }
 
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @Target(ElementType.METHOD)
+    public @interface CmdHelp {
+        String description();
+    }
 
-
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @Target(ElementType.PARAMETER)
+    public @interface ParamHelp {
+        String description();
+    }
 
 
 

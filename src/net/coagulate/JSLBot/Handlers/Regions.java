@@ -7,6 +7,8 @@ import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Global;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDBoolean;
@@ -152,7 +154,10 @@ public class Regions extends Handler {
     }
 
 
-    public String lookupCommand(Regional region,String name) throws IOException {
+    @CmdHelp(description = "Look up a region handle from a region name")
+    public String lookupCommand(Regional region,
+            @ParamHelp(description="Name of region to lookup")
+            String name) throws IOException {
         if (name==null || name.equals("")) { return "No NAME parameter passed."; }
         Long cached=Global.regionHandle(name);
         MapNameRequest request=new MapNameRequest();
@@ -170,6 +175,7 @@ public class Regions extends Handler {
         }
         return "Lookup failed";
     }
+    @CmdHelp(description="List regions currently known to the botz")
     public String listCommand(Regional region) {
         String response="\n";
         for (Regional regional:bot.getRegionals()) {

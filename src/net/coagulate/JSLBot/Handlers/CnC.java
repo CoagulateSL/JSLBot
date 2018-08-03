@@ -21,6 +21,8 @@ import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
 import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
@@ -245,10 +247,6 @@ public class CnC extends Handler {
         runCommands(from,source,message,"");
     }
 
-    private String internalCommands(String command,String parts[],LLUUID source) {
-        return null;
-    }
-    
     private String parseCommand(String message,Map<String,String> paramsout1) {
         String parts[]=message.split(" ");
         int index=0;
@@ -314,11 +312,15 @@ public class CnC extends Handler {
         }
     }
 
+    @CmdHelp(description = "Request the bot shutdown")
     public String quitCommand(Regional region) {
         bot.shutdown("Instant Message instructed us to quit");
         return "Shutting down as requested (this message will not be delivered)";
     }
-    public String loadHandlerCommand(Regional region,String name) throws Exception {
+    @CmdHelp(description = "Add a handler to the bot's AI, restarting is recommended after this")
+    public String loadHandlerCommand(Regional region,
+            @ParamHelp(description = "Class name to add to the bot")
+            String name) throws Exception {
         Handler h=bot.register(name);
         return "Module "+h.getClass().getName()+" loaded";
     }
@@ -352,19 +354,27 @@ public class CnC extends Handler {
         else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
     }
 
-    public String helpCommand(Regional r) {
-        String ret="HELP\n";
+    @CmdHelp(description="Get help, optionally about a command")
+    public String helpCommand(Regional r,
+            @ParamHelp(description="Command to get detailed information on")
+            String command) {
+        if (command!=null) {
+            return helpSyntax(r,command);
+        }
+        String ret="COMMANDS: (issue 'help command <command name>' for more)\n";
         Map<String, Map<String, String>> commands = bot.getCommands();
         List<String> cmds = new ArrayList<>();
         cmds.addAll(commands.keySet());
         Collections.sort(cmds);
-        for (String command:cmds) {
-            ret=ret+command+"\n";
+        for (String c:cmds) {
+            ret=ret+c+"\n";
         }
         return ret;
     }
 
-
+    private String helpSyntax(Regional r, String command) {
+        return bot.getHelp(command);
+    }
 
 
     

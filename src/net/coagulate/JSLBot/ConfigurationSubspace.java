@@ -1,5 +1,7 @@
 package net.coagulate.JSLBot;
 
+import java.util.Set;
+
 /** A configuration "subspace", basically just uses "." separators in the key name.
  *
  * @author Iain Price <git@predestined.net>
@@ -27,5 +29,10 @@ public class ConfigurationSubspace extends Configuration {
     }
     
     public Configuration getMaster() {return c;}
+
+    @Override
+    public Set<String> get() {
+        return getMaster().get();
+    }
     
 }

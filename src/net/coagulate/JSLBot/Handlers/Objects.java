@@ -6,6 +6,8 @@ import java.util.List;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import static net.coagulate.JSLBot.Log.warn;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate_bObjectData;
@@ -144,13 +146,17 @@ public class Objects extends Handler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @CmdHelp(description = "List all objects to the console (debugging only)")
     public String listCommand(Regional region) {
         for (Integer id:region.getObjects()) {
             System.out.println(region.getObject(id).toString());
         }
         return "Dumped to console because so many.";
     }
-    public String findCommand(Regional region,String name) {
+    @CmdHelp(description="Find an object by a name fragment")
+    public String findCommand(Regional region,
+            @ParamHelp(description="Fragment of a name to search for")
+            String name) {
         ObjectData best=null;
         if (name==null) { return "Must supply 'name <text>' parameter"; }
         name=name.toLowerCase();

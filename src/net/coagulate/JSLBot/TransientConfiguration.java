@@ -2,6 +2,7 @@ package net.coagulate.JSLBot;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /** A configuration provider that only stores values temporarily.
  *
@@ -29,4 +30,9 @@ public class TransientConfiguration extends Configuration {
         }
         return response;
     }   
+
+    @Override
+    public Set<String> get() {
+        return kv.keySet();
+    }
 }

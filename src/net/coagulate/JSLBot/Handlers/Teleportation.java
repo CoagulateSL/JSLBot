@@ -9,6 +9,8 @@ import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDInteger;
@@ -143,7 +145,16 @@ public class Teleportation extends Handler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public String goCommand(Regional r,String region,String x,String y,String z) throws IOException {
+    @CmdHelp(description = "Initiate a teleport to a target location")
+    public String goCommand(Regional r,
+            @ParamHelp(description="Name of region to teleport to")
+            String region,
+            @ParamHelp(description="X Co-ordinate to request")
+            String x,
+            @ParamHelp(description="Y Co-ordinate to request")
+            String y,
+            @ParamHelp(description="Z Co-ordinate to request")
+            String z) throws IOException {
         TeleportLocationRequest tp=new TeleportLocationRequest();
         tp.bagentdata.vagentid=bot.getUUID();
         tp.bagentdata.vsessionid=bot.getSession();
