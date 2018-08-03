@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Handlers;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import net.coagulate.JSLBot.Circuit;
@@ -47,7 +48,7 @@ public class Teleportation extends Handler {
     Object signal=new Object();
     @Override
     public void initialise() throws Exception {
-        bot.addCommand("teleport", this);
+        bot.addCommand("go", this);
         bot.addImmediateUDP("TeleportProgress", this);
         bot.addImmediateUDP("TeleportStart",this);
         bot.addImmediateXML("TeleportFinish",this);
@@ -59,12 +60,6 @@ public class Teleportation extends Handler {
 
     @Override
     public void loggedIn() throws Exception {
-    }
-
-    @Override
-    public String help(String command) {
-        if (command.equals("teleport")) { return "teleport region <region> x <x> y <y> z <z>\nTeleport to the specified region and x,y,z co-ordinates"; }
-        return "Unknown command "+command;
     }
 
     @Override
@@ -148,33 +143,25 @@ public class Teleportation extends Handler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
-        if (eventname.equals("teleport")) {
-            if (!(parameters.containsKey("x"))) { return "Missing X parameter"; }
-            if (!(parameters.containsKey("y"))) { return "Missing Y parameter"; }
-            if (!(parameters.containsKey("z"))) { return "Missing Z parameter"; }
-            if (!(parameters.containsKey("region"))) { return "Missing region parameter"; }
-            TeleportLocationRequest tp=new TeleportLocationRequest();
-            tp.bagentdata.vagentid=bot.getUUID();
-            tp.bagentdata.vsessionid=bot.getSession();
-            tp.binfo.vposition=new LLVector3(parameters.get("x"),parameters.get("y"),parameters.get("z"));
-            Map<String,String> lookupparams=new HashMap<>();
-            lookupparams.put("name",parameters.get("region"));
-            String regionhandle=new CommandEvent(bot, null, "region.lookup", lookupparams, null).execute();
-            if (Debug.REGIONHANDLES) { debug(bot,"Region lookup for "+parameters.get("region")+" gave handle "+new U64(regionhandle)); }
-            try { tp.binfo.vregionhandle=new U64(regionhandle);  }
-            catch (NumberFormatException e) { return "Failed to resolve region name "+parameters.get("region"); }
-            bot.send(tp,true);
-            //bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
-            teleporting=true;
-            synchronized(signal) { signal.wait(10000); }
-            if (teleporting==true) { log(bot,CRIT,"Timer expired while teleporting, lost in transit?"); } 
-            boolean completed=!teleporting;
-            teleporting=false;
-            return "TP Sequence finished, success code is "+completed;
-        }
-        return null;
+    public String goCommand(Regional r,String region,String x,String y,String z) throws IOException {
+        TeleportLocationRequest tp=new TeleportLocationRequest();
+        tp.bagentdata.vagentid=bot.getUUID();
+        tp.bagentdata.vsessionid=bot.getSession();
+        tp.binfo.vposition=new LLVector3(x,y,z);
+        Map<String,String> lookupparams=new HashMap<>();
+        lookupparams.put("name",region);
+        String regionhandle=new CommandEvent(bot, null, "regions.lookup", lookupparams, null).execute();
+        if (Debug.REGIONHANDLES) { debug(bot,"Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
+        try { tp.binfo.vregionhandle=new U64(regionhandle);  }
+        catch (NumberFormatException e) { return "Failed to resolve region name "+region; }
+        bot.send(tp,true);
+        //bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
+        teleporting=true;
+        try { synchronized(signal) { signal.wait(10000); } } catch (InterruptedException e) {}
+        if (teleporting==true) { log(bot,CRIT,"Timer expired while teleporting, lost in transit?"); } 
+        boolean completed=!teleporting;
+        teleporting=false;
+        return "TP Sequence finished, success code is "+completed;
     }
     
 }

@@ -36,16 +36,25 @@ public class Groups extends Handler {
     @Override
     public void initialise() throws Exception { 
         bot.addXML("AgentGroupDataUpdate", this);
-        bot.addCommand("groups.list",this);
+        bot.addCommand("list",this);
     }
+    
+    public String listCommand(Regional region, CommandEvent event) throws Exception {
+        String resp="Groups:";
+        synchronized(groups) {
+            for(GroupData g:groups.values()) {
+                resp+="\n";
+                resp+=g.groupname+" ("+g.uuid.toUUIDString()+") ";
+                if (g.contribution!=0) { resp+="Contribution:"+g.contribution+" "; }
+                if (g.listinprofile) { resp+="Listed"; } else { resp+="Unlisted"; }
+            }
+        }
+        return resp;
+    }
+        
 
     @Override
     public void loggedIn() throws Exception {
-    }
-
-    @Override
-    public String help(String command) {
-        return "Unknown command";
     }
 
     private void agentGroupDataUpdate(LLSDMap body, Regional region) {
@@ -94,23 +103,6 @@ public class Groups extends Handler {
         if (eventname.equals("AgentGroupDataUpdate")) { agentGroupDataUpdate(event.map(),region); }
     }
 
-    @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
-        if (eventname.equalsIgnoreCase("groups.list")) {
-            String resp="Groups:";
-            synchronized(groups) {
-                for(GroupData g:groups.values()) {
-                    resp+="\n";
-                    resp+=g.groupname+" ("+g.uuid.toUUIDString()+") ";
-                    if (g.contribution!=0) { resp+="Contribution:"+g.contribution+" "; }
-                    if (g.listinprofile) { resp+="Listed"; } else { resp+="Unlisted"; }
-                }
-            }
-            return resp;
-        }
-        return "Unknown command";
-    }
-    
     public class GroupData {
         String groupname=null;
         LLSDBinary grouppowers=null;

@@ -2,11 +2,14 @@ package net.coagulate.JSLBot;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.*;
 import static net.coagulate.JSLBot.Event.EVENTTYPE.*;
+import net.coagulate.JSLBot.Handlers.CnC;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Packet;
@@ -45,12 +48,12 @@ public class JSLBot extends Thread {
         if (location==null || location.equals("")) { location="home"; }  // default to home
         //String potentialmaster=config.get("owner");
         Set<Handler> newbrain=new HashSet<Handler>();
+        setup(newbrain,config.get("firstname"),config.get("lastname"),config.get("password"),location);
         String handlerlist=config.get("handlers","");
         for (String name:handlerlist.split(",")) {
             try { newbrain.add(createHandler(name)); }
             catch (Exception e) { error("Handler "+name+" failed to initialise: "+e.toString(),e); }
         }
-        setup(newbrain,config.get("firstname"),config.get("lastname"),config.get("password"),location);
         note("JSLBot initialisation complete, ready to launch");
     }
     // alternative convenience instansiators
@@ -112,7 +115,21 @@ public class JSLBot extends Thread {
         throw new IllegalStateException("Still not connected after timeout");
     }
     
-    private void setup(Set<Handler> newbrain,String firstname,String lastname,String password,String loginlocation) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {        
+    private void setup(Set<Handler> newbrain,String firstname,String lastname,String password,String loginlocation) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException, NoSuchMethodException {        
+        // test that method names are preserved
+        String argname=this.getClass().getDeclaredMethod("setup",Set.class,String.class,String.class,String.class,String.class).getParameters()[0].getName();
+        if (argname.equals("arg0") || (!argname.equals("newbrain"))) {
+            System.out.println("===== FATAL ERROR =====");
+            System.out.println("The name of the first method for setup() is "+argname);
+            System.out.println("In the source this is called 'newbrain'");
+            System.out.println("JSLBot uses reflection to read parameter names to implement bot commands");
+            System.out.println("It is necessary to include parameter names in the compiled bytecode");
+            System.out.println("This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
+            System.out.println("Command functionality will not work without this feature, the bot has been aborted for safety reasons");
+            System.out.println("NetBeans note: Add to compiler additional options and DISABLE compile on save whic ignores these settings");
+            throw new IllegalArgumentException("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
+        }
+        
         jslinterface=new JSLInterface(this);
         LLCATruster.initialise(); // probably compromises the SSL engine in various ways :(
         this.brain=newbrain;
@@ -120,10 +137,6 @@ public class JSLBot extends Thread {
         this.lastname=lastname;
         this.password=password;
         this.loginlocation=loginlocation;  
-        if (brain==null) { brain=new HashSet<>(); }
-        // nominated for 'best line of code, 2016'
-        // ^^ nominated for most useul comment for dating my intermittent work on this project, now mid 2018.
-        if (brain.isEmpty()) { warn("Bot has no brain and will be a virtual zombie."); }
     }
     
     /** Launch bot AI.
@@ -135,6 +148,10 @@ public class JSLBot extends Thread {
         setName("JSLBot Brain for "+firstname+" "+lastname);
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
         // catch and report.  "mainLoop()" should guard against everything its self so this means that function is broken
+        if (brain==null) { brain=new HashSet<>(); }
+        // nominated for 'best line of code, 2016'
+        // ^^ nominated for most useul comment for dating my intermittent work on this project, now mid 2018.
+        if (brain.isEmpty()) { warn("Bot has no brain and will be a virtual zombie."); }
         try { mainLoop(); }
         catch (Exception e) { error("Main bot loop crashed - "+e.toString(),e); }
     }
@@ -300,7 +317,15 @@ public class JSLBot extends Thread {
     public void addImmediateUDP(String type,Handler handler) { addImmediateHandler("UDP/"+type,handler); }
     public void addXML(String type,Handler handler) { addHandler("XML/"+type,handler); }
     public void addImmediateXML(String type,Handler handler) { addImmediateHandler("XML/"+type,handler); }
-    public void addCommand(String type,Handler handler) { addHandler("CMD/"+type,handler); addImmediateHandler("CMD/"+type,handler); }
+    public void addCommand(String name,Handler handler) {
+        if (handler.getClass()==CnC.class) {
+            addHandler("CMD/"+name,handler); addImmediateHandler("CMD/"+name,handler);
+        } else {
+            String lcname=handler.getClass().getSimpleName()+"."+name;
+            lcname=lcname.toLowerCase();
+            addHandler("CMD/"+lcname,handler); addImmediateHandler("CMD/"+lcname,handler);
+        }
+    }
             
     
     // handle received packets
@@ -321,8 +346,9 @@ public class JSLBot extends Thread {
                     if (event.type()==UDP) { h.processImmediateUDP(event.region(), (UDPEvent) event,event.getName()); }
                     if (event.type()==XML) { h.processImmediateXML(event.region(), (XMLEvent) event,event.getName()); }
                     if (event.type()==COMMAND && ((CommandEvent)event).immediate()) {
-                        if (Debug.TRACKCOMMANDS) { debug("Command "+((CommandEvent)event).getName()+" invoking immediate handler "+h.getClass().getSimpleName()); }
-                        response=h.execute(event.region(), (CommandEvent) event,event.getName(),((CommandEvent)event).parameters());
+                        String commandname=((CommandEvent)event).getName();                        
+                        if (Debug.TRACKCOMMANDS) { debug("Command "+commandname+" invoking immediate handler "+h.getClass().getSimpleName()); }
+                        response=executeCommand(commandname,(CommandEvent)event,h);
                     }
                 }
                 catch (Exception e) { error("IMMEDIATE MODE handler "+h+" for event "+messageid+" crashed with exception "+e.toString(),e); }
@@ -334,6 +360,7 @@ public class JSLBot extends Thread {
     }
     void distribute(Event event) throws IOException { // dequeued events in the delayed (bot AI) thread.
         String messageid=event.getPrefixedName();
+        //System.out.println(messageid);
         String response=null;
         event.status(Event.STATUS.RUNNING);
         // log unhandled messages, as a reminder of things to do if nothing else
@@ -354,8 +381,9 @@ public class JSLBot extends Thread {
                     if (event.type()==UDP) { h.processUDP(event.region(), (UDPEvent) event,event.getName()); }
                     if (event.type()==XML) { h.processXML(event.region(), (XMLEvent) event,event.getName()); }
                     if (event.type()==COMMAND && !((CommandEvent)event).immediate()) {
-                        if (Debug.TRACKCOMMANDS) { debug("Command "+((CommandEvent)event).getName()+" invoking delayed handler "+h.getClass().getSimpleName()); }
-                        response=h.execute(event.region(), (CommandEvent) event,event.getName(),((CommandEvent)event).parameters());
+                        String commandname=((CommandEvent)event).getName().toLowerCase();
+                        if (Debug.TRACKCOMMANDS) { debug("Command "+commandname+" invoking delayed handler "+h.getClass().getSimpleName()); }
+                        response=executeCommand(commandname,(CommandEvent)event,h);
                         if (response!=null && !response.equals("") && ((CommandEvent)event).respondTo()!=null) {
                             im(((CommandEvent)event).respondTo(),"> "+response);
                             ((CommandEvent)event).respondTo(response);
@@ -376,6 +404,92 @@ public class JSLBot extends Thread {
     }
     void notifyHandlers() throws Exception { for (Handler h:brain) { h.loggedIn(); }}
     
+
+
+
+
+    private String executeCommand(String name, CommandEvent event, Handler handler) {
+        // find the target method
+        String response;
+        name=name.toLowerCase();
+        try {
+            Method method=getMethod(handler,name);
+            List<Object> parameters=getParameters(method,event);
+            response=call(handler,method,parameters);
+        }
+        catch (Throwable t) {response="Command failed: "+t.toString(); }
+        return response;
+    }
+
+    private Method getMethod(Handler h, String fullname) {
+        Method match=null;
+        String[] nameparts=fullname.split("\\.");
+        String name=nameparts[nameparts.length-1];
+        for (Method m:h.getClass().getMethods()) {
+            if (m.getName().toLowerCase().equals(name+"command") && m.getName().endsWith("Command")) {
+                if (match!=null) { throw new IllegalArgumentException("Multiple coded commands called "+name+" in "+h.getClass().getName()); }
+                match=m;
+            }
+        }
+        if (match==null) { throw new IllegalArgumentException("No command called "+name+" exists in "+h.getClass().getName()); }
+        if (match.getParameterCount()<1) { throw new IllegalArgumentException("Command must have at least one parameter, regional data, in command "+name+" class "+h.getClass().getName()); }
+        if (match.getParameterTypes()[0]!=Regional.class) { throw new IllegalArgumentException("Command must take regional data as first parmeter, command is "+name+" in class "+h.getClass().getName()); }
+        return match;
+    }
+
+    private List<Object> getParameters(Method method, CommandEvent event) {
+        List<Object> parameters=new ArrayList<>();
+        parameters.add(event.region()); boolean firstparam=true;
+        for (Parameter param:method.getParameters()) {
+            //System.out.println(param.toString());
+            if (firstparam) { firstparam=false; }
+            else {
+                String paramname=param.getName();
+                if (event.parameters().containsKey(paramname)) { parameters.add(event.parameters().get(paramname)); }
+                else { parameters.add(null); }
+            }
+        }
+        return parameters;
+    }
+
+    private String call(Handler handler, Method method, List<Object> parameters) throws Throwable {
+        try {
+            return (String) method.invoke(handler,parameters.toArray());
+        } catch (IllegalAccessException ex) {
+            throw new IllegalArgumentException("Command with incorrect access method - "+method.getName()+" in "+handler.getClass().getName());
+        } catch (InvocationTargetException ex) {
+            if (ex.getCause()==null) { throw new NullPointerException("Command InvocationTargetException with null initCause in "+method.getName()+" in "+handler.getClass().getName()); }
+            throw (ex.getCause());
+        }
+    }
+
+    public Map<String,Map<String,String>> getCommands() {
+        Map<String,Map<String,String>> ret=new HashMap<>();
+        for (String name:delayedhandlers.keySet()) {
+            if (name.startsWith("CMD/")) {
+                name=name.substring(4);
+                ret.put(name,null);
+            }
+        }
+        return ret;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public void mainLoop() throws Exception {
         initialiseHandlers();
         performLogin(firstname,lastname,password,loginlocation);

@@ -2,8 +2,6 @@ package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
-import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Global;
@@ -45,11 +43,10 @@ public class Regions extends Handler {
 
     @Override
     public void initialise() throws Exception {
-        bot.addCommand("region.lookup", this);
-        bot.addCommand("region.flookup", this);
+        bot.addCommand("lookup", this);
         bot.addImmediateUDP("MapBlockReply", this);
-        bot.addCommand("regions.list",this);
-        bot.addCommand("parcels.list",this);
+        bot.addCommand("list",this);
+        bot.addCommand("parcels",this);
         bot.addUDP("ParcelOverlay",this);
         bot.addXML("ParcelProperties",this);
         bot.addUDP("SimulatorViewerTimeMessage",this);
@@ -83,14 +80,6 @@ public class Regions extends Handler {
     @Override
     public void loggedIn() throws Exception {
         
-    }
-
-    @Override
-    public String help(String command) {
-        if (command.equals("region.lookup")) { return "region.lookup name <regionname>\nAttempts a lookup on regionname, mostly for testing."; }
-        if (command.equals("regions.list")) { return "regions.list\nDumps information about regions.."; }
-        if (command.equals("parcels.list")) { return "parcels.list\nDumps information about parcels in the current region"; }
-        return "Unknown command "+command;
     }
 
     private void parcelOverlay(ParcelOverlay parceloverlay, Regional r) throws IOException {
@@ -162,46 +151,40 @@ public class Regions extends Handler {
         if (eventname.equals("ParcelProperties")) { parcelProperties(event.map(),region); }        
     }
 
-    @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
-        if (eventname.equalsIgnoreCase("region.lookup") || eventname.equalsIgnoreCase("region.flookup")) {
-            String name=parameters.get("name");
-            if (name==null || name.equals("")) { return "No NAME parameter passed."; }
-            Long cached=Global.regionHandle(name);
-            if (cached!=null && (!eventname.equals("region.flookup"))) { return Long.toUnsignedString(cached); }
-            MapNameRequest request=new MapNameRequest();
-            request.bagentdata.vagentid=bot.getUUID();
-            request.bagentdata.vsessionid=bot.getSession();
-            request.bnamedata.vname=new Variable1(name);
-            bot.send(request);
-            Date now=new Date();
-            while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
-                synchronized(signal) { signal.wait(1000); }
-            }
-            cached=Global.regionHandle(name);
-            if (cached!=null) {
-                return Long.toUnsignedString(cached);
-            }
-            return "Lookup failed";
-        }
-        String response="\n";
-        if (eventname.equalsIgnoreCase("regions.list")) {
-            for (Regional regional:bot.getRegionals()) {
-                response+=Long.toUnsignedString(regional.handle());
-                // DONT ASK :P
-                //response+=" [[";
-                //Long inverted=handle>>32;
-                //inverted+=(handle&0xffffffff)<<32;
-                //response+=Long.toUnsignedString(inverted)+"]]";
-                response+=": "+regional.dump()+"\n";
-            }
-            return response;
-        }
 
-        if (eventname.equalsIgnoreCase("parcels.list")) {
-            return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
+    public String lookupCommand(Regional region,String name) throws IOException {
+        if (name==null || name.equals("")) { return "No NAME parameter passed."; }
+        Long cached=Global.regionHandle(name);
+        MapNameRequest request=new MapNameRequest();
+        request.bagentdata.vagentid=bot.getUUID();
+        request.bagentdata.vsessionid=bot.getSession();
+        request.bnamedata.vname=new Variable1(name);
+        bot.send(request);
+        Date now=new Date();
+        while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
+            try { synchronized(signal) { signal.wait(1000); } } catch (InterruptedException e) {}
         }
-        return null;
+        cached=Global.regionHandle(name);
+        if (cached!=null) {
+            return Long.toUnsignedString(cached);
+        }
+        return "Lookup failed";
     }
+    public String listCommand(Regional region) {
+        String response="\n";
+        for (Regional regional:bot.getRegionals()) {
+            response+=Long.toUnsignedString(regional.handle());
+            // DONT ASK :P
+            //response+=" [[";
+            //Long inverted=handle>>32;
+            //inverted+=(handle&0xffffffff)<<32;
+            //response+=Long.toUnsignedString(inverted)+"]]";
+            response+=": "+regional.dump()+"\n";
+        }
+        return response;
+    }
+    public String parcelsCommand(Regional region) {
+        return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
+   }
 
 }

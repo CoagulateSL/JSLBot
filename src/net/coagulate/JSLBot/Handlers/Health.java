@@ -1,7 +1,5 @@
 package net.coagulate.JSLBot.Handlers;
 
-import java.util.Map;
-import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
@@ -50,11 +48,6 @@ public class Health extends Handler {
     }
 
     @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -64,8 +57,4 @@ public class Health extends Handler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public String help(String command) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

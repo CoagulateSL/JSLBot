@@ -6,8 +6,11 @@
 package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.coagulate.JSLBot.Circuit;
 import net.coagulate.JSLBot.CommandEvent;
@@ -80,6 +83,7 @@ public class CnC extends Handler {
         bot.addUDP("ChatFromSimulator", this);
         bot.addUDP("AlertMessage",this);
         bot.addCommand("quit",this);
+        bot.addCommand("help",this);
     }
 
     public static Date parseRegionRestart(String m) throws IOException {
@@ -266,20 +270,13 @@ public class CnC extends Handler {
                 }
             }
         }
-        return keyword;
+        return command;
     }
     
     @Override
     public void loggedIn() throws Exception {
     }
     
-    public String help(String command) {
-        if (command.equals("quit")) { return "calls the shutdown() handler for the bot"; }
-        if (command.equals("loadhandler")) { return "loadhandler class <classname>\nLoads the named handler into the bot."; }
-        if (command.equals("unloadhandler")) { return "unloadhandler class <classname>\nUnloads the named handler from the bot."; }
-        return "Unknown command "+command;
-    }
-
     @Override
     public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -317,18 +314,13 @@ public class CnC extends Handler {
         }
     }
 
-    @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
-        if (eventname.equalsIgnoreCase("quit")) {
-            bot.shutdown("Instant Message instructed us to quit");
-            return "Shutting down as requested (this message will not be delivered)";
-        }
-        if (eventname.equalsIgnoreCase("loadhandler")) {
-            String handlername=event.parameters().get("class");
-            Handler h=bot.register(handlername);
-            return "Module "+h.getClass().getName()+" loaded";
-        }
-        return null;
+    public String quitCommand(Regional region) {
+        bot.shutdown("Instant Message instructed us to quit");
+        return "Shutting down as requested (this message will not be delivered)";
+    }
+    public String loadHandlerCommand(Regional region,String name) throws Exception {
+        Handler h=bot.register(name);
+        return "Module "+h.getClass().getName()+" loaded";
     }
 
     private void runCommands(String from, LLUUID source, String message, String prefix) throws IOException {
@@ -360,7 +352,17 @@ public class CnC extends Handler {
         else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
     }
 
-    
+    public String helpCommand(Regional r) {
+        String ret="HELP\n";
+        Map<String, Map<String, String>> commands = bot.getCommands();
+        List<String> cmds = new ArrayList<>();
+        cmds.addAll(commands.keySet());
+        Collections.sort(cmds);
+        for (String command:cmds) {
+            ret=ret+command+"\n";
+        }
+        return ret;
+    }
 
 
 

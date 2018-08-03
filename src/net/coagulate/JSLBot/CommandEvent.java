@@ -23,7 +23,7 @@ public class CommandEvent extends Event {
     boolean immediate() { return immediate; }
     
     public CommandEvent(JSLBot bot,Regional r,String name,Map<String,String> parameters,LLUUID respondto) {
-        super(bot, r,name);
+        super(bot, r,name.toLowerCase());
         this.parameters=parameters;
         this.respondto=respondto;
     }

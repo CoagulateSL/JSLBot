@@ -3,8 +3,6 @@ package net.coagulate.JSLBot.Handlers;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
-import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
@@ -40,19 +38,12 @@ public class Objects extends Handler {
         bot.addImmediateUDP("ImprovedTerseObjectUpdate", this);
         bot.addImmediateUDP("KillObject",this);
         bot.addImmediateUDP("ObjectPropertiesFamily",this);
-        bot.addCommand("objects",this);
-        bot.addCommand("findobject",this);
+        bot.addCommand("list",this);
+        bot.addCommand("find",this);
     }
 
     @Override
     public void loggedIn() throws Exception {
-    }
-
-    @Override
-    public String help(String command) {
-        if (command.equalsIgnoreCase("objects")) { return "Dump object data (all objects) to console (because so many)"; }
-        if (command.equalsIgnoreCase("findobject name <namefragment>")) { return "Find an object by name"; }
-        return "Unknown command";
     }
 
     private void processObjectData(ObjectUpdate data,Regional r) throws IOException {
@@ -153,31 +144,26 @@ public class Objects extends Handler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
-        if (eventname.equalsIgnoreCase("objects")) {
-            for (Integer id:region.getObjects()) {
-                System.out.println(region.getObject(id).toString());
-            }
-            return "Dumped to console because so many.";
+    public String listCommand(Regional region) {
+        for (Integer id:region.getObjects()) {
+            System.out.println(region.getObject(id).toString());
         }
-        if (eventname.equalsIgnoreCase("findobject")) {
-            ObjectData best=null;
-            String searching=event.parameters().get("name");
-            if (searching==null) { return "Must supply 'name <text>' parameter"; }
-            searching=searching.toLowerCase();
-            for (Integer id:region.getObjects()) {
-                ObjectData check = region.getObject(id);
-                if (check.parentid.value==0) {
-                    if (check.name!=null) {
-                        if (check.name.toLowerCase().indexOf(searching)>=0) { best=check; }
-                    }
+        return "Dumped to console because so many.";
+    }
+    public String findCommand(Regional region,String name) {
+        ObjectData best=null;
+        if (name==null) { return "Must supply 'name <text>' parameter"; }
+        name=name.toLowerCase();
+        for (Integer id:region.getObjects()) {
+            ObjectData check = region.getObject(id);
+            if (check.parentid.value==0) {
+                if (check.name!=null) {
+                    if (check.name.toLowerCase().indexOf(name)>=0) { best=check; }
                 }
             }
-            if (best==null) { return "No such object found"; }
-            return searching+"->"+best.toString();            
         }
-        return "Unknown command";
+        if (best==null) { return "No such object found"; }
+        return name+"->"+best.toString();            
     }
 
 }

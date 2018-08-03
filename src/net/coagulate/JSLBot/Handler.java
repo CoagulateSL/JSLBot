@@ -1,7 +1,5 @@
 package net.coagulate.JSLBot;
 
-import java.util.Map;
-
 /** General template for a Handler and the various methods it may receive events through.
  *
  * @author Iain Prive <git@predestined.net>
@@ -28,12 +26,7 @@ public abstract class Handler {
     public abstract void processUDP(Regional region, UDPEvent event, String eventname) throws Exception;
     /** Queued handler for XML events */
     public abstract void processXML(Regional region, XMLEvent event, String eventname) throws Exception;
-    // commands can be run in either mode at the callers choice.
-    /** Handle commands, may be in either IMMEDIATE or Queued mode at the callers discretion */
-    public abstract String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception;
     /** Hook for post login activities */
     public abstract void loggedIn() throws Exception;
-    /** Called to get help about a registered command */
-    public abstract String help(String command);
     
 }

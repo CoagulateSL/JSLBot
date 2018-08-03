@@ -1,9 +1,7 @@
 package net.coagulate.JSLBot.Handlers;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
@@ -53,11 +51,6 @@ public class Sink extends Handler {
 
     @Override
     public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

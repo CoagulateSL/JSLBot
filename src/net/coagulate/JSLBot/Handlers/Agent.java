@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Handler;
@@ -71,12 +70,6 @@ public class Agent extends Handler {
         req.bagentdata.vsessionid=bot.getSession();
         req.bmoneydata.vtransactionid=new LLUUID();
         bot.send(req,true);
-    }
-
-    @Override
-    public String help(String command) {
-        if (command.equalsIgnoreCase("status")) { return "Reports the status of the agent"; }
-        return "Undocumented command";
     }
 
     private void coarseLocationUpdate(Regional regionid,CoarseLocationUpdate up) { // this is a rough map of all region avatars, as shown in say world map
@@ -175,12 +168,8 @@ public class Agent extends Handler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public String execute(Regional region, CommandEvent event, String eventname, Map<String,String> parameters) throws Exception {
-        if (eventname.equalsIgnoreCase("status")) {
-            return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
-        }
-        return null;
+    public String statusCommand(Regional region) {
+        return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
     }
     
 }

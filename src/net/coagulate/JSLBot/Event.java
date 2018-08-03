@@ -43,7 +43,11 @@ public abstract class Event {
     
     public JSLBot bot() { return bot; }
     
-    Event(JSLBot bot,Regional r,String name) { this.bot=bot; this.r=r; this.name=name; setType(); }
+    Event(JSLBot bot,Regional r,String name) {
+        this.bot=bot; this.r=r; this.name=name; setType();
+        if (bot==null) { throw new IllegalArgumentException("Bot is mandatory"); }
+        if (name==null || name.isEmpty()) { throw new IllegalArgumentException("Event name is mandatory"); }
+    }
     
     private void setType() {
         if (this instanceof UDPEvent) { type=UDP; return ;}
