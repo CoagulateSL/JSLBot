@@ -43,11 +43,11 @@ public abstract class BotUtils {
         InetAddress addr = InetAddress.getLocalHost();
         NetworkInterface ni = NetworkInterface.getByInetAddress(addr);
         if (ni == null)
-            return null;
+            throw new IllegalArgumentException("No network interfaces found for "+addr.toString());
 
         byte[] mac = ni.getHardwareAddress();
         if (mac == null)
-            return null;
+            throw new IllegalArgumentException("No MAC on network interface found for "+addr.toString());
         return hex(mac);
     }
 
