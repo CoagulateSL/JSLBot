@@ -1,9 +1,11 @@
 package net.coagulate.JSLBot;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 /** Stand alone single bot launcher.
  *
@@ -25,6 +27,7 @@ public class Test {
         if (args.length<1) { System.out.println("Supply config file as parameter"); return; }
         String CONFIGFILE=args[0];
         //initConfig(CONFIGFILE);
+        if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
         Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
 
@@ -33,38 +36,35 @@ public class Test {
     
     /** Builds a base configuration file */
     static void initConfig(String CONFIGFILE) throws Exception {
-        System.out.println("CREATING NEW CONFIGURATION FILE IN 3 SECONDS.  ABORT NOW.");
-        Thread.sleep(3000);
         Map<String,String> m=new HashMap<>();
         
-        // as a minumum, the bot code its self will attempt to look up
-        //
-        // firstname
-        // lastname
-        // password - which may be a plain text value, or the $1$<MD5> format that the web API uses.  naturally we recommend storing the MD5 hash
-        //
-        // optional but highly recommended, set "owner" to your avatar's UUID.  this value is also read by the bot and used to assume 
-        // authorisation by modules that use security permissions... once you are the owner you can then use the instant message interface
-        // to configure everything else.
-        //
-        // also optional but highly recommended, set "handlers" to at least "CnC", without any modules the bot is essentially uncontrollable
-        // the CnC modules handles the IM command interface, so you can then add other modules and configure the bot etc from there.
-        // NOTE this value is case sensitive and is actually a Java classname
-        //
-        // Security note: the md5 hash is probably not considered secure any more, and this is an unsalted hash so rainbow tables will destroy this
-        // I wouldn't really consider this to be that secure, protect your configuration files as if it were a plaintext password.
+        System.out.println("---- ALERT ----\nConfiguration file '"+CONFIGFILE+"' does not exist.\nIf you complete this process it will be created\n\n");
+        Scanner in=new Scanner(System.in);
         
-        m.put("firstname","FIRSTNAME");
-        m.put("lastname","LASTNAME");
-        m.put("password",BotUtils.md5hash("PASSWORD"));
-        m.put("owner","YOURUUID");
-        m.put("handlers","CnC");
-        
+        System.out.print("Bot's first name: "); String firstname=in.nextLine();
+        System.out.print("Bot's last name: "); String lastname=in.nextLine();
+        System.out.print("Bot's password: "); String password=in.nextLine();
+        System.out.println("Handlers: CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups");
+        System.out.println("Login Location: home");
+        System.out.println("Authoriser: OwnerOnly");
+        System.out.print("Owner UUID: ");String owneruuid=in.nextLine();
+        System.out.println("\nCreating initial configuration file ...");
+
+        m.put("firstname",firstname);
+        m.put("lastname",lastname);
+        m.put("CnC.authoriser","OwnerOnly");
+        m.put("handlers","CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups");
+        m.put("loginlocation","home");
+        m.put("CnC.authorisation.owneruuid",owneruuid);
+        m.put("password",BotUtils.md5hash(password));
+
         FileOutputStream fos=new FileOutputStream(CONFIGFILE);
         ObjectOutputStream oos=new ObjectOutputStream(fos);
         oos.writeObject(m);
         oos.close();
         fos.close();
+        
+        System.out.println("Configuration file created, initiating bot startup\n\n");
     }
 
     // something i keep around for reference, its a region restart message.
