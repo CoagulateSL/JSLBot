@@ -15,6 +15,8 @@ import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Global;
 import net.coagulate.JSLBot.Handler;
+import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
+import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
@@ -50,8 +52,21 @@ public class CnC extends Handler {
 
     JSLBot bot;
     Configuration config;
-    
-    public CnC(Configuration c) { super(c); config=c; }
+    private Authorisation auth=null;
+    public CnC(Configuration c) {
+        super(c); config=c;
+        String authoriser=c.get("authoriser", "OwnerOnly");
+        if (authoriser.indexOf(".")==-1) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
+        try {
+            auth=(Authorisation) Class.forName(authoriser).getConstructor(Configuration.class).newInstance(c.subspace("authorisation"));
+        } catch (Exception e) {
+            Log.error(bot,"Unable to load authoriser "+authoriser, e);
+        }
+        if (auth==null) {
+            Log.error(bot,"No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
+            auth=new DenyAll(c.subspace("authorisation"));
+        }
+    }
     @Override
     public String toString() {
         return "Instant Message Command and Control handler for JSLBot";
@@ -160,6 +175,8 @@ public class CnC extends Handler {
                 if (audiblenum!=1) {  volume="vol:"+audible+" ";}
                 Log.debug(bot,"Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
             }
+            String prefix=config.get("publiccommandprefix","*");
+            runCommands(from, source, message, prefix);
         }
         if (eventname.equals("ImprovedInstantMessage")) {
             ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
@@ -168,181 +185,50 @@ public class CnC extends Handler {
             // this is a HEAVILY overloaded conduit of information
             // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
             switch (messagetype) {
-                case 0: //Indicates a regular IM from another agent
-                    processInstantMessage(m);
-                    break;
-
-                case 1: //Simple notification box with an OK button
-                    Log.log(bot, NOTE, "System sends notification: "+messagetext);
-                    break;
-
-                case 2: //"Used to show a countdown notification with an OK button, deprecated now"
-                    Log.log(bot,NOTE,"Deprecated countdown notification: "+messagetext);
-                    break;
-
-                case 3: //You've been invited to join a group
-                    Log.log(bot,INFO,"Group invite received: "+messagetext);
-                    break;
-
-                case 4: //Inventory offer
-                    Log.log(bot,INFO,"Inventory offer: "+messagetext);
-                    break;
-
-                case 5: //Accepted inventory offer
-                    Log.log(bot,INFO,"Accepted inventory offer: "+messagetext);
-                    break;
-
-                case 6: //Declined inventory offer
-                    Log.log(bot,INFO,"Declined inventory offer: "+messagetext);
-                    break;
-
-                case 7: //Group vote
-                    Log.log(bot,NOTE,"Group vote?: "+messagetext);
-                    break;
-
-                case 8: //"A message to everyone in the agent's group, deprecated"
-                    Log.log(bot,NOTE,"Deprecated group message: "+messagetext);
-                    break;
-
-                case 9: //An object is offering its inventory
-                    Log.log(bot,NOTE,"Object sending inventory offer: "+messagetext);
-                    break;
-
-                case 10: //Accept an inventory offer from an object
-                    Log.log(bot,NOTE,"Object inventory offer accepted: "+messagetext);
-                    break;
-
-                case 11: //Decline an inventory offer from an object
-                    Log.log(bot,NOTE,"Object inventory offer declined: "+messagetext);
-                    break;
-
-                case 12: //Default --as value #0 but for offline tools
-                    Log.log(bot,NOTE,"Offline message (not processed): "+messagetext);
-                    break;
-
-                case 13: //"Start a session, or add users to a session"
-                    Log.log(bot,NOTE,"Session start/add: "+messagetext);
-                    break;
-
-                case 14: //"Start a session, but don't prune offline users"
-                    Log.log(bot,NOTE,"Start session without prune offline: "+messagetext);
-                    break;
-
-                case 15: //Start a session with your group
-                    Log.log(bot,NOTE,"Start group session: "+messagetext);
-                    break;
-
-                case 16: //Start a session without a calling card (finder or objects)
-                    Log.log(bot,NOTE,"Session without calling card: "+messagetext);
-                    break;
-
-                case 17: //Send a message to a session
-                    Log.log(bot,NOTE,"Message to session: "+messagetext);
-                    break;
-
-                case 18: //Leave a session
-                    Log.log(bot,NOTE,"Leave session: "+messagetext);
-                    break;
-
-                case 19: //Indicates that the IM is from an object
-                    Log.log(bot,NOTE,"Object IM: "+messagetext);
-                    break;
-
-                case 20: //"Sent an IM to a busy user, this is the auto response"
-                    Log.log(bot,NOTE,"Busy Autoresponse: "+messagetext);
-                    break;
-
-                case 21: //Shows the message in the console and chat history
-                    Log.log(bot,NOTE,"Console/Chat message: "+messagetext);
-                    break;
-
-                case 22: //Send a teleport lure
-                    Log.log(bot,INFO,"Teleport Lure: "+messagetext);
-                    break;
-
-                case 23: //Response sent to the agent which inititiated a teleport invitation
-                    Log.log(bot,NOTE,"TP Response type 23: "+messagetext);
-                    break;
-
-                case 24: //Response sent to the agent which inititiated a teleport invitation
-                    Log.log(bot,NOTE,"TP Response type 24: "+messagetext);
-                    break;
-
-                case 25: //Godlike request teleport (only useful if you have Linden permissions)
-                    Log.log(bot,WARN,"GODLIKE TELEPORT LURE: "+messagetext);
-                    break;
-                
-                case 26: //"A placeholder type for future expansion, currently not used"
-                    Log.log(bot,WARN,"Placeholder 26: "+messagetext);
-                    break;
-
-                case 27: //"Notification of a new group election, this is deprecated"
-                    Log.log(bot,WARN,"Group election (deprecated): "+messagetext);
-                    break;
-
-                case 28: //IM to tell the user to go to an URL
-                    Log.log(bot,NOTE,"Open URL: "+messagetext);
-                    break;
-
-                case 29: //IM for help
-                    Log.log(bot,NOTE,"Help IM: "+messagetext);
-                    break;
-
-                case 30: //"IM sent automatically on call for help, sends a lure to each Helper reached"
-                    Log.log(bot,NOTE,"Call for help: "+messagetext);
-                    break;
-
-                case 31: //Like an IM but won't go to email
-                    Log.log(bot,NOTE,"Non emailable IM: "+messagetext);
-                    break;
-
-                case 32: //IM from a group officer to all group members
-                    Log.log(bot,NOTE,"Group Officer: "+messagetext);
-                    break;
-
-                case 33: //Group notice requested
-                    Log.log(bot,NOTE,"Group notice: "+messagetext);
-                    break;
-
-                case 34: //Unknown
-                    Log.log(bot,NOTE,"Unknown 34: "+messagetext);
-                    break;
-
-                case 35: //Accept a group invitation
-                    Log.log(bot,NOTE,"Accepted group invite: "+messagetext);
-                    break;
-
-                case 36: //Decline a group invitation
-                    Log.log(bot,NOTE,"Declined group invite: "+messagetext);
-                    break;
-
-                case 37: //Unknown
-                    Log.log(bot,NOTE,"Unknown 37: "+messagetext);
-                    break;
-
-                case 38: //An avatar is offering you friendship
-                    Log.log(bot,NOTE,"Friendship request: "+messagetext);
-                    break;
-
-                case 39: //An avatar has accepted your friendship offer
-                    Log.log(bot,NOTE,"Friendship accepted: "+messagetext);
-                    break;
-
-                case 40: //An avatar has declined your friendship offer
-                    Log.log(bot,NOTE,"Friendship declined: "+messagetext);
-                    break;
-
-                case 41: //Indicates that a user has started typing
-                    //Log.log(bot,DEBUG,"User is typing: "+messagetext); // beyond tedious to log
-                    break;
-
-                case 42: //Indicates that a user has stopped typing
-                    //Log.log(bot,DEBUG,"User stopped typing: "+messagetext); // also beyond tedious to log
-                    break;
-                
-                default:
-                    Log.log(bot, WARN, "Unhandled Instant Message Dialog Type #"+messagetype);
-                    break;
+                case 0: processInstantMessage(m); break;
+                case 1: Log.log(bot, NOTE, "System sends notification: "+messagetext); break;
+                case 2: Log.log(bot,NOTE,"Deprecated countdown notification: "+messagetext); break;
+                case 3: Log.log(bot,INFO,"Group invite received: "+messagetext); break;
+                case 4: Log.log(bot,INFO,"Inventory offer: "+messagetext); break;
+                case 5: Log.log(bot,INFO,"Accepted inventory offer: "+messagetext); break;
+                case 6: Log.log(bot,INFO,"Declined inventory offer: "+messagetext); break;
+                case 7: Log.log(bot,NOTE,"Group vote?: "+messagetext); break;
+                case 8: Log.log(bot,NOTE,"Deprecated group message: "+messagetext); break;
+                case 9: Log.log(bot,NOTE,"Object sending inventory offer: "+messagetext); break;
+                case 10: Log.log(bot,NOTE,"Object inventory offer accepted: "+messagetext); break;
+                case 11: Log.log(bot,NOTE,"Object inventory offer declined: "+messagetext); break;
+                case 12: Log.log(bot,NOTE,"Offline message (not processed): "+messagetext); break;
+                case 13: Log.log(bot,NOTE,"Session start/add: "+messagetext); break;
+                case 14: Log.log(bot,NOTE,"Start session without prune offline: "+messagetext); break;
+                case 15: Log.log(bot,NOTE,"Start group session: "+messagetext); break;
+                case 16: Log.log(bot,NOTE,"Session without calling card: "+messagetext); break;
+                case 17: Log.log(bot,NOTE,"Message to session: "+messagetext); break;
+                case 18: Log.log(bot,NOTE,"Leave session: "+messagetext); break;
+                case 19: Log.log(bot,NOTE,"Object IM: "+messagetext); break;
+                case 20: Log.log(bot,NOTE,"Busy Autoresponse: "+messagetext); break;
+                case 21: Log.log(bot,NOTE,"Console/Chat message: "+messagetext); break;
+                case 22: Log.log(bot,INFO,"Teleport Lure: "+messagetext); break;
+                case 23: Log.log(bot,NOTE,"TP Response type 23: "+messagetext); break;
+                case 24: Log.log(bot,NOTE,"TP Response type 24: "+messagetext); break;
+                case 25: Log.log(bot,WARN,"GODLIKE TELEPORT LURE: "+messagetext); break;
+                case 26: Log.log(bot,WARN,"Placeholder 26: "+messagetext); break;
+                case 27: Log.log(bot,WARN,"Group election (deprecated): "+messagetext); break;
+                case 28: Log.log(bot,NOTE,"Open URL: "+messagetext); break;
+                case 29: Log.log(bot,NOTE,"Help IM: "+messagetext); break;
+                case 30: Log.log(bot,NOTE,"Call for help: "+messagetext); break;
+                case 31: Log.log(bot,NOTE,"Non emailable IM: "+messagetext); break;
+                case 32: Log.log(bot,NOTE,"Group Officer: "+messagetext); break;
+                case 33: Log.log(bot,NOTE,"Group notice: "+messagetext); break;
+                case 34: Log.log(bot,NOTE,"Unknown 34: "+messagetext); break;
+                case 35: Log.log(bot,NOTE,"Accepted group invite: "+messagetext); break;
+                case 36: Log.log(bot,NOTE,"Declined group invite: "+messagetext); break;
+                case 37: Log.log(bot,NOTE,"Unknown 37: "+messagetext); break;
+                case 38: Log.log(bot,NOTE,"Friendship request: "+messagetext); break;
+                case 39: Log.log(bot,NOTE,"Friendship accepted: "+messagetext); break;
+                case 40: Log.log(bot,NOTE,"Friendship declined: "+messagetext); break;
+                case 41: break; //Log.log(bot,DEBUG,"User is typing: "+messagetext); // beyond tedious to log
+                case 42: break; //Log.log(bot,DEBUG,"User stopped typing: "+messagetext); // also beyond tedious to log
+                default: Log.log(bot, WARN, "Unhandled Instant Message Dialog Type #"+messagetype); break;
             }
             
         }
@@ -355,11 +241,17 @@ public class CnC extends Handler {
         String message=m.bmessageblock.vmessage.toString();
         // extract and cut it all up
         log(bot,INFO,"CnC processing instant message <"+from+"> "+message);
+        runCommands(from,source,message,"");
+    }
+
+    private String internalCommands(String command,String parts[],LLUUID source) {
+        return null;
+    }
+    
+    private String parseCommand(String message,Map<String,String> paramsout1) {
         String parts[]=message.split(" ");
         int index=0;
         String command=parts[0]; index++;
-        String response="You do not have permission to run "+command;
-        Map<String,String> params=new HashMap<>();
         String keyword="";
         String parameter="";
         for (int i=index;i<parts.length;i++) {
@@ -372,32 +264,13 @@ public class CnC extends Handler {
                     if (parameter.startsWith("\"")) {
                         parameter=parameter.substring(1,parameter.length()-1);
                     }
-                    params.put(keyword,parameter);
+                    paramsout1.put(keyword,parameter);
                     keyword=""; parameter="";
                 }
             }
         }
-        response = internalCommands(command,parts,source);
-
-
-        if (response==null) {
-            try {
-                response=new CommandEvent(bot, null, command, params,source).execute();
-            }
-            catch (Exception e) {
-                Log.log(bot,Log.WARN,"CnC Subcommand exceptioned:"+e.toString(),e);
-                response="Exception:"+e.toString();
-            }
-        }
-        if (bot.quitting()) { note(bot,"Not sending IM response due to shutdown: "+response); }
-        else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
+        return keyword;
     }
-
-    private String internalCommands(String command,String parts[],LLUUID source) {
-        return null;
-    }
-    
-
     
     @Override
     public void loggedIn() throws Exception {
@@ -460,4 +333,40 @@ public class CnC extends Handler {
         }
         return null;
     }
+
+    private void runCommands(String from, LLUUID source, String message, String prefix) throws IOException {
+        boolean prefixok=false;
+        if (prefix==null || prefix.isEmpty()) { prefixok=true; }
+        if (!prefixok) { 
+            if (message.startsWith(prefix)) {
+                message=message.substring(prefix.length());
+                prefixok=true;
+            }
+        }
+        if (!prefixok) { return; }
+        Log.note(bot,source.toUUIDString()+" <"+from+"> invokes command "+message);
+        Map<String,String> params=new HashMap<>();
+        String keyword=parseCommand(message,params);
+        String response;
+        try {
+            CommandEvent command = new CommandEvent(bot, null, keyword, params,source);
+            command.invokerUsername(from); command.invokerUUID(source);
+            response=auth.approve(command);
+            if (response==null) { response=command.execute(); }
+        }
+        catch (Exception e) {
+            Log.log(bot,Log.WARN,"CnC Subcommand exceptioned:"+e.toString(),e);
+            response="Exception:"+e.toString();
+        }
+
+        if (bot.quitting()) { note(bot,"Not sending IM response due to shutdown: "+response); }
+        else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
+    }
+
+    
+
+
+
+
+    
 }

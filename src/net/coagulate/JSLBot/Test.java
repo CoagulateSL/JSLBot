@@ -22,7 +22,8 @@ public class Test {
         // 2) alternatively you can just make a configuration for each bot from scratch, each in its own store or file.
         // a lot depends on your backing store, the file provider can serve different files to different bots via instansiation, 
         // or separate namespaces of one file to separate bots, via recursive instansiation (see Configuration's constructors)
-        String CONFIGFILE="C:\\users\\iain\\jslbot.ini";
+        if (args.length<1) { System.out.println("Supply config file as parameter"); return; }
+        String CONFIGFILE=args[0];
         //initConfig(CONFIGFILE);
         Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());

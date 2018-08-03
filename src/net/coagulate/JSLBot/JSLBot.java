@@ -35,6 +35,7 @@ public class JSLBot extends Thread {
     private boolean quit=false; public boolean quitting() { return quit; }
     private String quitreason="";
     
+    JSLInterface jslinterface; public JSLInterface api() { return jslinterface; }
     
     // create a bot from a configuration store
     public JSLBot(Configuration conf) throws Exception {
@@ -111,7 +112,8 @@ public class JSLBot extends Thread {
         throw new IllegalStateException("Still not connected after timeout");
     }
     
-    private void setup(Set<Handler> newbrain,String firstname,String lastname,String password,String loginlocation) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    private void setup(Set<Handler> newbrain,String firstname,String lastname,String password,String loginlocation) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {        
+        jslinterface=new JSLInterface(this);
         LLCATruster.initialise(); // probably compromises the SSL engine in various ways :(
         this.brain=newbrain;
         this.firstname=firstname;

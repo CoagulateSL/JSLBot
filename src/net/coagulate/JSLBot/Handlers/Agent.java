@@ -1,13 +1,16 @@
 package net.coagulate.JSLBot.Handlers;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.Log;
 import static net.coagulate.JSLBot.Log.*;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.AgentDataUpdate;
@@ -17,6 +20,10 @@ import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bAgentData;
 import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bLocation;
 import net.coagulate.JSLBot.Packets.Messages.MoneyBalanceReply;
 import net.coagulate.JSLBot.Packets.Messages.MoneyBalanceRequest;
+import net.coagulate.JSLBot.Packets.Messages.OfflineNotification;
+import net.coagulate.JSLBot.Packets.Messages.OfflineNotification_bAgentBlock;
+import net.coagulate.JSLBot.Packets.Messages.OnlineNotification;
+import net.coagulate.JSLBot.Packets.Messages.OnlineNotification_bAgentBlock;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
@@ -44,6 +51,8 @@ public class Agent extends Handler {
         bot.addImmediateUDP("AgentMovementComplete",this);
         bot.addImmediateUDP("TeleportLocal",this);
         bot.addImmediateUDP("MoneyBalanceReply",this);
+        bot.addImmediateUDP("OnlineNotification", this); // we actually notify on this oO
+        bot.addImmediateUDP("OfflineNotification", this); // we actually notify on this oO        
         bot.addUDP("CoarseLocationUpdate",this);  // rough agent locations
         bot.addCommand("status", this);
     }
@@ -89,10 +98,38 @@ public class Agent extends Handler {
         regionid.setCoarseAgentLocations(locmap);
     }
 
+    private final Set<LLUUID> online=new HashSet<>();
+    private final Set<LLUUID> offline=new HashSet<>();
     private int balance=0;
     @Override
     public void processImmediateUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
         Message m=event.body();
+        if (eventname.equals("OnlineNotification")) {
+            List<OnlineNotification_bAgentBlock> agents=((OnlineNotification)event.body()).bagentblock;
+            for (OnlineNotification_bAgentBlock block:agents) {
+                LLUUID uuid=block.vagentid;
+                synchronized(online) {
+                    if (!online.contains(uuid)) {
+                        Log.log(bot, INFO, "Friend ONLINE: "+bot.getDisplayName(uuid)+" ("+bot.getUserName(uuid)+") ["+uuid.toUUIDString()+"]");
+                        online.add(uuid);
+                    }
+                }
+                synchronized(offline) { offline.remove(uuid); }
+            }
+        }
+        if (eventname.equals("OfflineNotification")) {
+            List<OfflineNotification_bAgentBlock> agents=((OfflineNotification)event.body()).bagentblock;
+            for (OfflineNotification_bAgentBlock block:agents) {
+                LLUUID uuid=block.vagentid;
+                synchronized (offline) {
+                    if (!offline.contains(uuid)) { 
+                        Log.log(bot, INFO, "Friend offline: "+bot.getDisplayName(uuid)+" ("+bot.getUserName(uuid)+") ["+uuid.toUUIDString()+"]");
+                        offline.add(uuid);
+                    }
+                }
+                synchronized(online) { online.remove(uuid); }
+            }
+        }        
         if (eventname.equals("AgentDataUpdate")) {
             AgentDataUpdate adu=(AgentDataUpdate) m;
             firstname=adu.bagentdata.vfirstname.toString();

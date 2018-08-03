@@ -28,6 +28,13 @@ public class CommandEvent extends Event {
         this.respondto=respondto;
     }
 
+    private String invokerusername=null;
+    public String invokerUsername() { return invokerusername; }
+    public void invokerUsername(String invoker) { this.invokerusername=invoker; }
+    private LLUUID invokeruuid=null;
+    public LLUUID invokerUUID() { return invokeruuid; }
+    public void invokerUUID(LLUUID invokeruuid) { this.invokeruuid=invokeruuid; }
+    
     @Override
     public String dump() {
         String ret="COMMAND: "+getName();

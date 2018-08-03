@@ -29,7 +29,6 @@ import net.coagulate.JSLBot.XMLEvent;
  * @author Iain Price <git@predestined.net>
  */
 public class Objects extends Handler {
-    
     public Objects(Configuration c) { super(c); }
     @Override
     public String toString() {

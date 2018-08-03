@@ -1,19 +1,12 @@
 package net.coagulate.JSLBot.Handlers;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Log;
-import static net.coagulate.JSLBot.Log.INFO;
-import net.coagulate.JSLBot.Packets.Messages.OfflineNotification;
-import net.coagulate.JSLBot.Packets.Messages.OfflineNotification_bAgentBlock;
-import net.coagulate.JSLBot.Packets.Messages.OnlineNotification;
-import net.coagulate.JSLBot.Packets.Messages.OnlineNotification_bAgentBlock;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
@@ -37,8 +30,6 @@ public class Sink extends Handler {
         ai.addUDP("AvatarAppearance",this); // because we don't see things really
         ai.addUDP("AttachedSound", this); // because we certainly don't care to hear things :P
         ai.addUDP("ViewerEffect",this); // think this is stuff like look at beams etc etc (?)  since we dont really care about sight... meh
-        ai.addUDP("OnlineNotification", this); // we actually notify on this oO
-        ai.addUDP("OfflineNotification", this); // we actually notify on this oO
         ai.addUDP("AttachedSoundGainChange",this); // sound zzz
         ai.addUDP("RegionHandshake",this); // handled internally by circuit, though does little.  can be hooked for "on connect()" functionality
         ai.addUDP("SoundTrigger",this); // sound from "outside current region" (sounds really interesting to a bot)
@@ -74,24 +65,7 @@ public class Sink extends Handler {
 
     @Override
     public void processUDP(JSLBot bot, Regional region, UDPEvent event, String eventname) throws Exception {
-        if (eventname.equals("OnlineNotification")) {
-            List<OnlineNotification_bAgentBlock> agents=((OnlineNotification)event.body()).bagentblock;
-            for (OnlineNotification_bAgentBlock block:agents) {
-                LLUUID uuid=block.vagentid;
-                Log.log(bot, INFO, "Friend ONLINE: "+bot.getDisplayName(uuid)+" ("+bot.getUserName(uuid)+") ["+uuid.toUUIDString()+"]");
-                offline.remove(uuid);
-                online.add(uuid);
-            }
-        }
-        if (eventname.equals("OfflineNotification")) {
-            List<OfflineNotification_bAgentBlock> agents=((OfflineNotification)event.body()).bagentblock;
-            for (OfflineNotification_bAgentBlock block:agents) {
-                LLUUID uuid=block.vagentid;
-                Log.log(bot, INFO, "Friend offline: "+bot.getDisplayName(uuid)+" ("+bot.getUserName(uuid)+") ["+uuid.toUUIDString()+"]");
-                online.remove(uuid);
-                offline.add(uuid);
-            }
-        }
+
     }
 
     @Override
