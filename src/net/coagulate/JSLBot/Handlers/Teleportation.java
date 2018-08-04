@@ -25,11 +25,13 @@ import static net.coagulate.JSLBot.Log.info;
 import static net.coagulate.JSLBot.Log.log;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
+import net.coagulate.JSLBot.Packets.Messages.TeleportLandmarkRequest;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocationRequest;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLureRequest;
 import net.coagulate.JSLBot.Packets.Messages.TeleportProgress;
 import net.coagulate.JSLBot.Packets.Messages.TeleportStart;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Regional;
@@ -51,6 +53,7 @@ public class Teleportation extends Handler {
     @Override
     public void initialise() throws Exception {
         bot.addCommand("go", this);
+        bot.addCommand("home", this);
         bot.addImmediateUDP("TeleportProgress", this);
         bot.addImmediateUDP("TeleportStart",this);
         bot.addImmediateXML("TeleportFinish",this);
@@ -171,12 +174,28 @@ public class Teleportation extends Handler {
         catch (NumberFormatException e) { return "Failed to resolve region name "+region; }
         bot.send(tp,true);
         //bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
+        boolean completed=waitTeleport();
+        return "TP Sequence finished, success code is "+completed;
+    }
+ 
+    @CmdHelp(description = "Go home")
+    public String homeCommand(Regional r) throws IOException {
+        TeleportLandmarkRequest req=new TeleportLandmarkRequest();
+        req.binfo.vagentid=bot.getUUID();
+        req.binfo.vsessionid=bot.getSession();
+        req.binfo.vlandmarkid=new LLUUID();
+        bot.send(req,true);
+        boolean completed=waitTeleport();
+        return "Return home sequence, success code is "+completed;
+        
+    }
+    
+    private boolean waitTeleport() {
         teleporting=true;
         try { synchronized(signal) { signal.wait(10000); } } catch (InterruptedException e) {}
         if (teleporting==true) { log(bot,CRIT,"Timer expired while teleporting, lost in transit?"); } 
         boolean completed=!teleporting;
         teleporting=false;
-        return "TP Sequence finished, success code is "+completed;
+        return completed;
     }
-    
 }
