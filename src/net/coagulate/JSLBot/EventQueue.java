@@ -80,17 +80,23 @@ public class EventQueue extends Thread {
                 for (int c; (c = in.read()) >= 0;)
                     read=read+((char)c);
                 //System.out.println("Event queue:"+read);
+                LLSD document=null;
                 try {
-                    LLSD document=new LLSD(read);
-                    LLSDMap map=(LLSDMap) document.getFirst();
-                    LLSDInteger llsdid=(LLSDInteger) map.get("id");
-                    id=llsdid.get();
-                    //System.out.println("Eventqueue#"+id+":"+document.toXML());
-                    LLSDMap outermap=(LLSDMap) document.getFirst();
-                    LLSDArray eventslist = (LLSDArray) outermap.get("events");
-                    process(eventslist);
+                    document=new LLSD(read);
                 }
-                catch (Exception e) { error("Exception processing event queue message",e); }
+                catch (Exception e) { error("Parse error loading LLSD document:"+e.toString()); System.out.println(read); }
+                if (document!=null) {
+                    try {
+                        LLSDMap map=(LLSDMap) document.getFirst();
+                        LLSDInteger llsdid=(LLSDInteger) map.get("id");
+                        id=llsdid.get();
+                        //System.out.println("Eventqueue#"+id+":"+document.toXML());
+                        LLSDMap outermap=(LLSDMap) document.getFirst();
+                        LLSDArray eventslist = (LLSDArray) outermap.get("events");
+                        process(eventslist);
+                    }
+                    catch (Exception e) { error("Exception processing event queue message",e); }
+                }
             }
             else { if (Debug.EVENTQUEUE) { debug("Event queue poller expired, repolling."); } }
         }
