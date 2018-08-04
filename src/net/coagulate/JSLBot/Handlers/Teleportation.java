@@ -119,7 +119,11 @@ public class Teleportation extends Handler {
             // this is a HEAVILY overloaded conduit of information
             // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
 
-            if (messagetype==22) { 
+            if (messagetype==22) {
+                CommandEvent check=new CommandEvent(bot, region, "teleportation.acceptlure", new HashMap<String,String>(), m.bagentdata.vagentid);
+                check.invokerUUID(m.bagentdata.vagentid);
+                String reject=((CnC)(bot.getHandler("CnC"))).checkAuth(check);
+                if (reject!=null) { return; } 
                 Log.log(bot,NOTE,"Accepting Teleport Lure: "+messagetext);
                 TeleportLureRequest req=new TeleportLureRequest();
                 req.binfo.vagentid=bot.getUUID();

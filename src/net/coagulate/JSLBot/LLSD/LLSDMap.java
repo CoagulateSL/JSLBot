@@ -6,11 +6,8 @@
 package net.coagulate.JSLBot.LLSD;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -46,6 +43,7 @@ public class LLSDMap extends Container {
         return data.containsKey(key);
     }
     public Atomic get(String key) { return data.get(key); }
+    public Atomic get(String key,Atomic def) { if (data.containsKey(key)) { return data.get(key); } else { return def; } }
 
     public void put(String ack, Atomic atom) {
         data.put(ack,atom);

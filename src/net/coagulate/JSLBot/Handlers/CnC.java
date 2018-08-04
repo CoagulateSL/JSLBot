@@ -376,6 +376,10 @@ public class CnC extends Handler {
         return bot.getHelp(command);
     }
 
+    public String checkAuth(CommandEvent check) {
+        return auth.approve(check);
+    }
+
 
     
 }

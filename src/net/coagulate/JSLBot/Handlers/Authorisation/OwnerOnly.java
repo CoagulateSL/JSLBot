@@ -35,8 +35,8 @@ public class OwnerOnly extends Authorisation {
         String invokerusername=event.invokerUsername();
         LLUUID invokeruuid=event.invokerUUID();
         if (invokeruuid==null && invokerusername==null) { return "No invoker in supplied command event"; }
-        if (invokeruuid.equals(owneruuid)) { return null; } // approve
-        if (invokerusername.equalsIgnoreCase(ownerusername)) { return null; }
+        if (invokeruuid!=null && invokeruuid.equals(owneruuid)) { return null; } // approve
+        if (invokerusername!=null && invokerusername.equalsIgnoreCase(ownerusername)) { return null; }
         return "This bot is in owner only mode and you are not the owner recorded.";
     }
 }

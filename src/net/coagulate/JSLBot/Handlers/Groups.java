@@ -1,8 +1,10 @@
 package net.coagulate.JSLBot.Handlers;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
@@ -14,7 +16,15 @@ import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
+import static net.coagulate.JSLBot.Log.note;
+import static net.coagulate.JSLBot.Log.warn;
+import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
+import net.coagulate.JSLBot.Packets.Messages.JoinGroupReply;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
+import net.coagulate.JSLBot.Packets.Types.U32BE;
+import net.coagulate.JSLBot.Packets.Types.U8;
+import net.coagulate.JSLBot.Packets.Types.Variable1;
+import net.coagulate.JSLBot.Packets.Types.Variable2;
 import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
@@ -37,6 +47,8 @@ public class Groups extends Handler {
     public void initialise() throws Exception { 
         bot.addXML("AgentGroupDataUpdate", this);
         bot.addCommand("list",this);
+        bot.addImmediateUDP("ImprovedInstantMessage",this);
+        bot.addImmediateUDP("JoinGroupReply",this);
     }
     
     @CmdHelp(description="List groups the logged in agent is a member of")
@@ -65,8 +77,8 @@ public class Groups extends Handler {
                 LLSDMap group = (LLSDMap) it.next();
                 String groupname=((LLSDString)(group.get("GroupName"))).toString();
                 LLSDBinary grouppowers=(LLSDBinary) group.get("GroupPowers");
-                boolean listinprofile=((LLSDBoolean)group.get("ListInProfile")).get();
-                boolean acceptnotices=((LLSDBoolean)group.get("AcceptNotices")).get();
+                boolean listinprofile=((LLSDBoolean)group.get("ListInProfile",new LLSDBoolean(true))).get();
+                boolean acceptnotices=((LLSDBoolean)group.get("AcceptNotices",new LLSDBoolean(true))).get();
                 int contribution=((LLSDInteger)group.get("Contribution")).get();
                 LLUUID uuid=((LLSDUUID)group.get("GroupID")).toLLUUID();
                 GroupData g;
@@ -85,7 +97,7 @@ public class Groups extends Handler {
     private Map<Long,GroupData> groups=new HashMap<>();
 
     @Override
-    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -95,8 +107,42 @@ public class Groups extends Handler {
     }
 
     @Override
-    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
+        if (eventname.equals("ImprovedInstantMessage")) {
+            ImprovedInstantMessage m=(ImprovedInstantMessage)event.body();
+            if (m.bmessageblock.vdialog.value==3) {
+                U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
+                int fee=feeraw.value;
+                LLUUID groupid=m.bmessageblock.vid;
+                Map<String,String> param=new HashMap<>();
+                param.put("groupid",groupid.toString());
+                CommandEvent join=new CommandEvent(bot, region, "groups.join", param, null);
+                join.invokerUsername(m.bmessageblock.vfromagentname.toString());
+                String reject=((CnC)(bot.getHandler("CnC"))).checkAuth(join);
+                byte num=35;
+                if (fee>0) { num=36; warn(bot,"Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); }
+                if (num==35 && reject!=null) { note(bot,"Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); num=36;}
+                ImprovedInstantMessage im=new ImprovedInstantMessage();
+                im.bagentdata.vagentid=bot.getUUID();
+                im.bagentdata.vsessionid=bot.getSession();
+                im.bmessageblock.vfromagentname=new Variable1(bot.getUsername());
+                im.bmessageblock.vtoagentid=groupid;
+                im.bmessageblock.vmessage=new Variable2();
+                im.bmessageblock.vid=m.bmessageblock.vid;
+                im.bmessageblock.vdialog=new U8(num);
+                bot.send(im,true);
+            }
+            return;
+        }
+        if (eventname.equals("JoinGroupReply")) {
+            JoinGroupReply jgr=(JoinGroupReply)event.body();
+            String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
+            if (jgr.bgroupdata.vsuccess.value!=0) {
+                note(bot,"Joined group "+groupid);
+            } else {
+                warn(bot,"Failed to join group "+groupid);
+            }
+        }
     }
 
     @Override
