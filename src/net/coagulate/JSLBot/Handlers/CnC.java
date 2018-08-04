@@ -85,6 +85,7 @@ public class CnC extends Handler {
         bot.addUDP("ChatFromSimulator", this);
         bot.addUDP("AlertMessage",this);
         bot.addCommand("quit",this);
+        bot.addCommand("restart",this);
         bot.addCommand("help",this);
     }
 
@@ -380,6 +381,10 @@ public class CnC extends Handler {
         return auth.approve(check);
     }
 
-
+    @CmdHelp(description = "Causes the bot to reconnect to SL without quitting")
+    public String restartCommand(Regional r) {
+        bot.forceReconnect();
+        return "This IM reply probably will be lost due to the restart.";
+    }
     
 }

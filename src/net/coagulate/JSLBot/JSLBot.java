@@ -43,6 +43,9 @@ public class JSLBot extends Thread {
 
     private boolean quit=false; public boolean quitting() { return quit; }
     private String quitreason="";
+    private final boolean DEFAULT_RECONNECT=false;
+    private boolean reconnect=false; public void setReconnect() { reconnect=true; }
+    public void forceReconnect() { reconnect=true; shutdown("Forced to reconnect"); }
     
     JSLInterface jslinterface; public JSLInterface api() { return jslinterface; }
     
@@ -157,8 +160,14 @@ public class JSLBot extends Thread {
         // nominated for 'best line of code, 2016'
         // ^^ nominated for most useul comment for dating my intermittent work on this project, now mid 2018.
         if (brain.isEmpty()) { warn("Bot has no brain and will be a virtual zombie."); }
-        try { mainLoop(); }
-        catch (Exception e) { error("Main bot loop crashed - "+e.toString(),e); }
+        reconnect=true;
+        while (reconnect) {
+            quit=false; quitreason=""; connected=false; primary=null;
+            reconnect=DEFAULT_RECONNECT;
+            immediatehandlers=new HashMap<>(); delayedhandlers=new HashMap<>(); circuits=new HashMap<>();
+            try { mainLoop(); }
+            catch (Exception e) { error("Main bot loop crashed - "+e.toString(),e); }
+        }
     }
 
     private class ShutdownHook extends Thread {
