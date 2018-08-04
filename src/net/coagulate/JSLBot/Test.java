@@ -31,6 +31,15 @@ public class Test {
         Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
 
+        if (args.length>=2) {
+            System.out.println("*** SECURITY NOTE *** REPLACING CnC.authorisation.owneruuid with "+args[1]);
+            config.put("CnC.authorisation.owneruuid", args[1]);
+        }
+        if (args.length>=3) {
+            System.out.println("*** SECURITY NOTE *** REPLACING CnC.authorisation.ownerusername with "+args[2]);
+            config.put("CnC.authorisation.ownerusername", args[2]);
+        }
+        
         new JSLBot(config).run(); // lose control to bot.  call start() to background the bot and continue execution here.
     }
     
