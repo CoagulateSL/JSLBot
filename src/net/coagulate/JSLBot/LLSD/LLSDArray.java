@@ -24,7 +24,8 @@ public class LLSDArray extends Container implements Iterable {
     public LLSDArray(NodeList nodes) throws IOException {
         for (int i=0;i<nodes.getLength();i++) {
             Node n=nodes.item(i);
-            data.add(Atomic.create(n));
+            Atomic atom=Atomic.create(n);
+            if (atom!=null) { data.add(atom); }
         }
     }
     

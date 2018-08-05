@@ -25,6 +25,7 @@ public abstract class Atomic {
         if (type.equals("uuid")) { return new LLSDUUID(item); }
         if (type.equals("binary")) { return new LLSDBinary(item); }
         if (type.equals("date")) { return new LLSDString(item); }
+        if (type.equals("undef")) { return null; }
         throw new IOException("Unknown LLSD type "+type);
     }
     public String toXML() { return toXML(""); }

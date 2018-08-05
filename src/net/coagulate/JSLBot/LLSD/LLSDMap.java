@@ -21,7 +21,7 @@ public class LLSDMap extends Container {
         for (int i=0;i<nodes.getLength();i+=2) {
             String key=nodes.item(i).getFirstChild().getNodeValue();
             Atomic a=Atomic.create(nodes.item(i+1));
-            data.put(key, a);
+            if (a!=null) { data.put(key, a); }
         }
     }
 
