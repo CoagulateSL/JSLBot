@@ -65,9 +65,11 @@ public class EventQueue extends Thread {
             connection.setRequestProperty("Content-Length",Integer.toString(postdata.length));
             connection.setUseCaches(false);
 
-            try( DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
-                  wr.write( postdata );
-            }
+            try{
+                DataOutputStream wr = new DataOutputStream( connection.getOutputStream());
+                wr.write( postdata );
+                wr.close();
+            } catch (Exception e) { warn("Error writing to event queue, sleeping"); try { Thread.sleep(5000); } catch (Exception ee){}}
             if (Debug.EVENTQUEUE) { debug("Entering event queue wait"); }
             int status=connection.getResponseCode();
             if (status==404) { 
