@@ -20,6 +20,7 @@ import net.coagulate.JSLBot.Packets.Messages.AgentMovementComplete;
 import net.coagulate.JSLBot.Packets.Messages.CloseCircuit;
 import net.coagulate.JSLBot.Packets.Messages.CompletePingCheck;
 import net.coagulate.JSLBot.Packets.Messages.DisableSimulator;
+import net.coagulate.JSLBot.Packets.Messages.KickUser;
 import net.coagulate.JSLBot.Packets.Messages.LogoutRequest;
 import net.coagulate.JSLBot.Packets.Messages.PacketAck;
 import net.coagulate.JSLBot.Packets.Messages.PacketAck_bPackets;
@@ -436,6 +437,11 @@ public class Circuit extends Thread implements Closeable {
             ping.bpingid.vpingid=((StartPingCheck) m).bpingid.vpingid;
             send(ping);
             internal=true;
+        }
+        if (m instanceof KickUser) {
+            KickUser kick=(KickUser)m;
+            internal=true;
+            owner.shutdown("Kicked from Second Life: "+kick.buserinfo.vreason.toString());
         }
         if (m instanceof RegionHandshake) {
             // this comes back soon after we establish the connection, and needs to be replied to explicitly (not just acked)
