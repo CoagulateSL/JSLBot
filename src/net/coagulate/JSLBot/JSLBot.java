@@ -539,10 +539,11 @@ public class JSLBot extends Thread {
         while (!quit) {
             Event event=null;
             synchronized(queue) {
-                while (queue.isEmpty()) {
-                    queue.wait();
+                if (queue.isEmpty()) {
+                    try { queue.wait(2500); }
+                    catch (InterruptedException iex) {}
                 }
-                event=queue.remove(0);
+                if (!queue.isEmpty()) { event=queue.remove(0); }
             }
             if (event!=null) {
                 if (event instanceof Event) {
@@ -553,7 +554,7 @@ public class JSLBot extends Thread {
             }
 
         }
-        note("Bot exited:"+quitreason);
+        note("Bot exited: "+quitreason);
     }
 
     public CAPS getCAPS() { return primary.getCAPS(); }
