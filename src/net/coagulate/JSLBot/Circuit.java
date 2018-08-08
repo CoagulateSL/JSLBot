@@ -223,7 +223,7 @@ public class Circuit extends Thread implements Closeable {
     private void maintenance() throws IOException {
         long interval=new Date().getTime()-lackpacket.getTime();
         if (interval>(Constants.CIRCUIT_PING*1000)) {
-            debug("Circuit silent for "+Constants.CIRCUIT_TIMEOUT+" seconds, sending ping.");
+            debug("Circuit silent for more than "+Constants.CIRCUIT_PING+" seconds, sending ping.");
             StartPingCheck ping=new StartPingCheck();
             send(ping,true);
         }        
