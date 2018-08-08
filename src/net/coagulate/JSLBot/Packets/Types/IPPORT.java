@@ -1,14 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.coagulate.JSLBot.Packets.Types;
 
-/**
+/** Read an IPPORT, basically a 16 bit int.
  *
- * @author Iain
+ * @author Iain Price <git@predestined.net>
  */
-public class IPPORT extends Unimplemented{
-    
+public class IPPORT extends U16{
+    // may be wrong endian, who knows.
 }
