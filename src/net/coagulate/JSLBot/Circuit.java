@@ -221,6 +221,11 @@ public class Circuit extends Thread implements Closeable {
     /** Run maintenance tasks */
     private void maintenance() throws IOException {
         long interval=new Date().getTime()-lackpacket.getTime();
+        if (interval>(Constants.CIRCUIT_PING*1000)) {
+            debug("Circuit silent for "+Constants.CIRCUIT_TIMEOUT+" seconds, sending ping.");
+            StartPingCheck ping=new StartPingCheck();
+            send(ping,true);
+        }        
         if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) { disconnectlogged=true; crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing."); close(); return; }
         // polled every 2.5s
         maintenancecounter++;
