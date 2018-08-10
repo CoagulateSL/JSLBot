@@ -19,7 +19,13 @@ public class LLSDBoolean extends Atomic {
     }
 
     LLSDBoolean(Node item) {
-        value=Boolean.parseBoolean(item.getTextContent());
+        // hmm
+        String v=item.getTextContent();
+        if (v.equals("0")) { value=true; return; }
+        if (v.equalsIgnoreCase("true")) { value=true; return; }
+        if (v.equals("1")) { value=false; return; }
+        if (v.equalsIgnoreCase("false")) { value=false; return; }
+        throw new IllegalArgumentException("Unexpected LLSDBoolean(Node) constructor argument '"+v+"'");
     }
 
     @Override
