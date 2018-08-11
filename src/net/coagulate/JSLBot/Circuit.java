@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Messages.AgentFOV;
 import net.coagulate.JSLBot.Packets.Messages.AgentMovementComplete;
 import net.coagulate.JSLBot.Packets.Messages.CloseCircuit;
 import net.coagulate.JSLBot.Packets.Messages.CompletePingCheck;
@@ -465,6 +466,14 @@ public class Circuit extends Thread implements Closeable {
             replypacket.setReliable(true);
             replypacket.setZeroCode(true);
             send(replypacket);
+            // open our eyes
+            AgentFOV fov=new AgentFOV();
+            fov.bagentdata.vagentid=owner.getUUID();
+            fov.bagentdata.vcircuitcode=new U32(owner.getCC());
+            fov.bagentdata.vsessionid=owner.getSession();
+            fov.bfovblock.vgencounter=new U32(1);
+            fov.bfovblock.vverticalangle=new F32((float)(2*Math.PI));
+            send(fov,true);
         }
         if (m instanceof DisableSimulator) {
             if (!disconnectlogged) { disconnectlogged=true; info("Circuit closure was requested from Simulator "+regionname+" via DisableSimulator"); }
