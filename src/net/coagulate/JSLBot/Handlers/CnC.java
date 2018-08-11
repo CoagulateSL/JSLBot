@@ -341,7 +341,7 @@ public class CnC extends Handler {
         String keyword=parseCommand(message,params);
         String response;
         try {
-            CommandEvent command = new CommandEvent(bot, null, keyword, params,source);
+            CommandEvent command = new CommandEvent(bot, bot.getRegional(), keyword, params,source);
             command.invokerUsername(from); command.invokerUUID(source);
             response=auth.approve(command);
             if (response==null) { response=command.execute(); }

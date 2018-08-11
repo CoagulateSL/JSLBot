@@ -47,6 +47,7 @@ public abstract class Event {
         this.bot=bot; this.r=r; this.name=name; setType();
         if (bot==null) { throw new IllegalArgumentException("Bot is mandatory"); }
         if (name==null || name.isEmpty()) { throw new IllegalArgumentException("Event name is mandatory"); }
+        if (r==null) { throw new IllegalArgumentException("Region argument is mandatory, use bot.getRegion() if necessary"); }
     }
     
     private void setType() {

@@ -168,7 +168,7 @@ public class Teleportation extends Handler {
         tp.binfo.vposition=new LLVector3(x,y,z);
         Map<String,String> lookupparams=new HashMap<>();
         lookupparams.put("name",region);
-        String regionhandle=new CommandEvent(bot, null, "regions.lookup", lookupparams, null).execute();
+        String regionhandle=new CommandEvent(bot, bot.getRegional(), "regions.lookup", lookupparams, null).execute();
         if (Debug.REGIONHANDLES) { debug(bot,"Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
         try { tp.binfo.vregionhandle=new U64(regionhandle);  }
         catch (NumberFormatException e) { return "Failed to resolve region name "+region; }
