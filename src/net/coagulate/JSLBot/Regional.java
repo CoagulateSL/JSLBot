@@ -24,13 +24,18 @@ public class Regional {
     
     
     private Map<Integer,ObjectData> objects=new HashMap<>();
-    public boolean hasObject(int id) { synchronized(objects) { if (objects.containsKey(id)) { return true; } return false; } }
+    public boolean hasObject(int id) {
+        synchronized(objects) { if (objects.containsKey(id)) { return true; } return false; }
+    }
     public ObjectData getObject(int id) {
         synchronized (objects) {
             if (!objects.containsKey(id)) { objects.put(id,new ObjectData(circuit.bot())); }
             return objects.get(id);
         }
     }
+    public Set<Integer> getObjects() {
+        return objects.keySet();
+    }    
     public void killObject(int value) {
         synchronized(objects) {
             //if (!objects.containsKey(value)) { debug(bot,"Removing object we didn't know anything about"); }
@@ -59,9 +64,6 @@ public class Regional {
         return d;
     }
 
-    public Set<Integer> getObjects() {
-        return objects.keySet();
-    }
 
     public Long handle() { return circuit.handle(); }
     
