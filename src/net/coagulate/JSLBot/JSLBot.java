@@ -56,22 +56,32 @@ public class JSLBot extends Thread {
         String location=config.get("loginlocation");
         if (location==null || location.equals("")) { location="home"; }  // default to home
         //String potentialmaster=config.get("owner");
-        Set<Handler> newbrain=new HashSet<Handler>();
-        setup(newbrain,config.get("firstname"),config.get("lastname"),config.get("password"),location);
+        
         String handlerlist=config.get("handlers","");
-        for (String name:handlerlist.split(",")) {
-            try { newbrain.add(createHandler(name)); }
-            catch (Exception e) { error("Handler "+name+" failed to initialise: "+e.toString(),e); }
-        }
+        Set<String> handlernames=new HashSet<>();
+        for (String h:handlerlist.split(",")) { handlernames.add(h); }
+        Set<Handler> newbrain=createBrain(handlernames);
+        setup(newbrain,config.get("firstname"),config.get("lastname"),config.get("password"),location);
         note("JSLBot initialisation complete, ready to launch");
     }
     // alternative convenience instansiators
     public JSLBot(String firstname,String lastname,String password) throws Exception { setup(null,firstname,lastname,password,"home"); }
     public JSLBot(String firstname,String lastname,String password,String loginlocation) throws Exception { setup(null,firstname,lastname,password,loginlocation); }
-    public JSLBot(Set<Handler> brain,String firstname,String lastname,String password) throws Exception { setup(brain,firstname,lastname,password,"home"); }
-    public JSLBot(Set<Handler> brain,String firstname,String lastname,String password,String loginlocation) throws Exception { setup(brain,firstname,lastname,password,loginlocation); }
+    public JSLBot(Set<String> handlers, String firstname,String lastname,String password) throws Exception {
+        setup(createBrain(handlers),firstname,lastname,password,"home");
+    }
+    public JSLBot(Set<String> handlers,String firstname,String lastname,String password,String loginlocation) throws Exception {
+        setup(createBrain(handlers),firstname,lastname,password,loginlocation);
+    }
 
-    
+    private Set<Handler> createBrain(Set<String> handlers) {
+        Set<Handler> newbrain=new HashSet<>();
+        for (String name:handlers) {
+            try { newbrain.add(createHandler(name)); }
+            catch (Exception e) { error("Handler "+name+" failed to initialise: "+e.toString(),e); }
+        }
+        return newbrain;
+    }
     
     
     
@@ -250,14 +260,37 @@ public class JSLBot extends Thread {
         p.bagentdata.vcircuitcode=new U32(getCC());
         send(p);
     }
+    private Date lastagentupdate=null;
+    private float drawdistance=(float) 64.0;
+    public void forceAgentUpdate() throws IOException { agentUpdate(true); }
+    public void agentUpdate() throws IOException { agentUpdate(false); }
     /** Send this generally useful message down the primary UDP circuit */
-    public void agentUpdate() throws IOException {
+    public void agentUpdate(boolean force) throws IOException {
+        if (quitting()) { return; }
+        // dont spam too many of these
+        if (!force && lastagentupdate!=null) {
+            if ((new Date().getTime())-lastagentupdate.getTime()<Constants.AGENT_UPDATE_FREQUENCY_MILLISECONDS) { return; }
+        }
+        lastagentupdate=new Date();
         AgentUpdate p=new AgentUpdate();
         p.bagentdata.vagentid=getUUID();
         p.bagentdata.vsessionid=getSession();
-        Packet agentupdate=new Packet(p);
-        agentupdate.setReliable(true);
-        send(agentupdate);
+        LLVector3 camera = getPos();
+        camera.z+=5;
+        p.bagentdata.vcameracenter=camera;
+        p.bagentdata.vfar=new F32(drawdistance);
+        if (Math.random()>0.5) { p.bagentdata.vcontrolflags=new U32(1<<26); }
+        p.bagentdata.vbodyrotation.x=(float) (Math.random()*Math.PI*2);
+        p.bagentdata.vbodyrotation.y=(float) (Math.random()*Math.PI*2);
+        p.bagentdata.vbodyrotation.z=(float) (Math.random()*Math.PI*2);
+        p.bagentdata.vheadrotation.x=(float) (Math.random()*Math.PI*2);
+        p.bagentdata.vheadrotation.y=(float) (Math.random()*Math.PI*2);
+        p.bagentdata.vheadrotation.z=(float) (Math.random()*Math.PI*2);
+        p.bagentdata.vcameraataxis.x=1;
+        p.bagentdata.vcameraleftaxis.y=1;
+        p.bagentdata.vcameraupaxis.z=y;
+        send(p);
+        //debug("Agent Updated");
     }
 
     /** Send this generally useful message down the primary UDP circuit */
@@ -540,7 +573,7 @@ public class JSLBot extends Thread {
             Event event=null;
             synchronized(queue) {
                 if (queue.isEmpty()) {
-                    try { queue.wait(2500); }
+                    try { queue.wait(1000); }
                     catch (InterruptedException iex) {}
                 }
                 if (!queue.isEmpty()) { event=queue.remove(0); }
@@ -552,6 +585,7 @@ public class JSLBot extends Thread {
                     catch (Exception ex) { error("Event distributor crashed, continuing, but that event is imcompletely handled"+e.getName(),ex); }
                 } else { warn("Unknown class on event queue"+event.getClass().getName()); }
             }
+            agentUpdate();
 
         }
         note("Bot exited: "+quitreason);
@@ -667,7 +701,11 @@ public class JSLBot extends Thread {
 
     /** Get all circuits */
     public Collection<Circuit> getCircuits() {
-        return circuits.values();
+        synchronized(circuits) {
+            Set<Circuit> ret=new HashSet<>();
+            ret.addAll(circuits.values());
+            return ret;
+        }
     }
 
     /** Initiate disconnection from SL */
@@ -696,8 +734,21 @@ public class JSLBot extends Thread {
     public LLVector3 getLookAt() { return new LLVector3(lx,ly,lz); }
     public void setLookAt(float x,float y,float z) { lx=x; ly=y; lz=z; }
 
-
-
+    public void setFOV(float angle) throws IOException {
+        AgentFOV fov=new AgentFOV();
+        fov.bagentdata.vagentid=getUUID();
+        fov.bagentdata.vcircuitcode=new U32(getCC());
+        fov.bagentdata.vsessionid=getSession();
+        fov.bfovblock.vgencounter=new U32(0);
+        fov.bfovblock.vverticalangle=new F32(angle);
+        send(fov,true);
+    }
+    public void setMaxFOV() throws IOException { setFOV((float) (Math.PI*2.0)); }
+    public void setMinFOV() throws IOException { setFOV(0); }
+    public void drawDistance(float newdd) throws IOException {
+        drawdistance=newdd;
+        forceAgentUpdate();
+    }
 
 
 

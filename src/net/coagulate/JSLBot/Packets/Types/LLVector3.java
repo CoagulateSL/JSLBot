@@ -13,9 +13,21 @@ import java.nio.ByteOrder;
  * @author Iain
  */
 public class LLVector3 extends Type{
+
+    public static LLVector3 random() {
+        LLVector3 v=new LLVector3();
+        v.x=(float) (Math.random()*10.0-5.0);
+        v.y=(float) (Math.random()*10.0-5.0);
+        v.z=(float) (Math.random()*10.0-5.0);
+        return v;
+    }
     public float x=0;
     public float y=0;
     public float z=0;
+
+    public LLVector3(ByteBuffer buffer) {
+        read(buffer);
+    }
     @Override
     public int size() {
         return 12;

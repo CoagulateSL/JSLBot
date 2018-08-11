@@ -24,10 +24,12 @@ public class ObjectData {
     public LLUUID group=null;
     public LLUUID lastowner=null;
     public boolean agent=false;
+    public String floattext="";
     public JSLBot bot;
     private float x=-1;
     private float y=-1;
     private float z=-1;
+    public int crc=0;
     public ObjectData(JSLBot bot) { this.bot=bot; }
     public String toString() {
         String r="";
@@ -45,6 +47,7 @@ public class ObjectData {
     }
 
     public void position(float newx,float newy,float newz) {
+        //System.out.println(newx+","+newy+","+newz);
         x=newx; y=newy; z=newz;
         if (fullid!=null && bot!=null && bot.getUUID()!=null) {
             if (fullid.equals(bot.getUUID())) {

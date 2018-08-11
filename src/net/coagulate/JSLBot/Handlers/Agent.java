@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Handlers;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import net.coagulate.JSLBot.Log;
 import static net.coagulate.JSLBot.Log.*;
 import net.coagulate.JSLBot.Packets.Message;
@@ -53,6 +55,10 @@ public class Agent extends Handler {
         bot.addImmediateUDP("OfflineNotification", this); // we actually notify on this oO        
         bot.addUDP("CoarseLocationUpdate",this);  // rough agent locations
         bot.addCommand("status", this);
+        bot.addCommand("maxfov", this);
+        bot.addCommand("minfov", this);
+        bot.addCommand("update", this);
+        bot.addCommand("draw", this);
     }
 
     private String grouptitle="";
@@ -173,5 +179,19 @@ public class Agent extends Handler {
     public String statusCommand(Regional region) {
         return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
     }
-    
+
+    @CmdHelp(description="Sets the FOV (field of view) to TWO_PI")
+    public String maxfovCommand(Regional region) throws IOException { bot.setMaxFOV(); return "Set"; }
+    @CmdHelp(description="Sets the FOV (field of view) to Zero")
+    public String minfovCommand(Regional region) throws IOException { bot.setMinFOV(); return "Set"; }    
+    @CmdHelp(description="Send agent update")
+    public String updateCommand(Regional region) throws IOException { bot.agentUpdate(); return "Sent"; }
+    @CmdHelp(description = "Set agent's draw distance")
+    public String drawCommand(Regional region,
+            @ParamHelp(description="Meters draw distance")
+            String distance) throws IOException {
+        bot.drawDistance(Float.parseFloat(distance));
+        return "Draw Distance Set";
+    }
 }
+

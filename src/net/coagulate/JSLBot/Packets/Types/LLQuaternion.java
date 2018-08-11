@@ -16,6 +16,11 @@ public class LLQuaternion extends Type {
     public float x=0;
     public float y=0;
     public float z=0;
+
+    public LLQuaternion(){}
+    public LLQuaternion(ByteBuffer buffer) {
+        read(buffer);
+    }
     @Override
     public int size() {
         return 12;

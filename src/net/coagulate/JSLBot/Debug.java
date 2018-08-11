@@ -19,4 +19,5 @@ public class Debug {
     public static final boolean EVENTQUEUE=false; // debug the stages of the event queue thread
     public static final boolean REGIONHANDLES=false; // debug region handle usage.
     public static final boolean TRACKCOMMANDS=false; // dump status changes on command events
+    public static final boolean TRACKNEWOBJECTS=false; // debug when objects are discovered
 }

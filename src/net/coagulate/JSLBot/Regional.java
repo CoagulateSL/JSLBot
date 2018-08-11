@@ -33,6 +33,16 @@ public class Regional {
             return objects.get(id);
         }
     }
+    public ObjectData getObject(LLUUID uuid) {
+        synchronized (objects) {
+            for (ObjectData od:objects.values()) {
+                if (od.fullid!=null && od.fullid.equals(uuid)) {
+                    return od;
+                }
+            }
+        }
+        return null;
+    }
     public Set<Integer> getObjects() {
         return objects.keySet();
     }    

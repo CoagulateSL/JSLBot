@@ -11,6 +11,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -203,5 +204,18 @@ public abstract class BotUtils {
             outputbytes[offset]=b; offset++;
         }    
         return outputbytes;
+    }
+
+    public static String readZeroTerminatedString(ByteBuffer buffer) {
+        List<Byte> bytes=new ArrayList<>();
+        byte b=-1;
+        while (b!=0) {
+            b=buffer.get();
+            if (b>0) { bytes.add(b); }
+        }
+        Byte[] bytesarray=bytes.toArray(new Byte[0]);
+        byte[] ba=new byte[bytesarray.length]; 
+        for (int i=0;i<bytesarray.length;i++) { ba[i]=bytesarray[i]; }
+        return new String(ba);
     }
 }

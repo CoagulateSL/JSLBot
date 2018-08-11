@@ -190,12 +190,15 @@ public class Teleportation extends Handler {
         
     }
     
-    private boolean waitTeleport() {
+    private boolean waitTeleport() throws IOException {
         teleporting=true;
         try { synchronized(signal) { signal.wait(10000); } } catch (InterruptedException e) {}
         if (teleporting==true) { log(bot,CRIT,"Timer expired while teleporting, lost in transit?"); } 
         boolean completed=!teleporting;
         teleporting=false;
+        bot.setMaxFOV();
+        bot.agentUpdate();
         return completed;
     }
+    
 }

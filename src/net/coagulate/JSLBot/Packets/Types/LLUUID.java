@@ -24,6 +24,10 @@ public class LLUUID extends Type {
         }
     }
 
+    public LLUUID(ByteBuffer buffer) {
+        read(buffer);
+    }
+
     @Override
     public int size() { return 16; }
 
