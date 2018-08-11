@@ -14,6 +14,8 @@ import java.nio.ByteOrder;
  */
 public class F32 extends Type{
     public float value=0;
+    public F32() {}
+    public F32(float v) { value=v; }
     @Override
     public int size() {
         return 4;
