@@ -20,7 +20,7 @@ public class Variable2 extends Type {
         char[] array=string.toCharArray();
         value=new byte[array.length+1];
         for (int i=0;i<array.length;i++) { value[i]=(byte) array[i]; }
-        array[array.length-1]=0;
+        value[value.length-1]=0;
     }
     @Override
     public int size() {
