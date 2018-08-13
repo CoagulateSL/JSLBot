@@ -57,6 +57,7 @@ public class Teleportation extends Handler {
         bot.addImmediateUDP("TeleportProgress", this);
         bot.addImmediateUDP("TeleportStart",this);
         bot.addImmediateXML("TeleportFinish",this);
+        bot.addImmediateXML("TeleportFailed",this);
         bot.addImmediateUDP("TeleportLocal",this);
         bot.addUDP("ImprovedInstantMessage",this);
     }
@@ -81,6 +82,8 @@ public class Teleportation extends Handler {
         if (eventname.equals("TeleportLocal")) {
             TeleportLocal tp=(TeleportLocal) p;
             info(bot,"Teleportation completed locally");
+            bot.completeAgentMovement();
+            bot.forceAgentUpdate();
             teleporting=false;
             synchronized(signal) { signal.notifyAll(); }
         }
@@ -88,6 +91,30 @@ public class Teleportation extends Handler {
 
     @Override
     public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
+        if (eventname.equals("TeleportFailed")) {
+            //System.out.println(event.map().toXML());
+            String code="";
+            String reason="";
+            LLSDArray alertinfoarray = (LLSDArray) event.map().get("AlertInfo");
+            if (alertinfoarray!=null) {
+                LLSDMap inner=(LLSDMap) alertinfoarray.get().get(0);
+                code=((LLSDString)(inner.get("Message"))).toString();
+            }
+            LLSDArray infoarray=(LLSDArray) event.map().get("Info");
+            if (infoarray!=null) {
+                LLSDMap inner=(LLSDMap)infoarray.get().get(0);
+                reason=((LLSDString)(inner.get("Reason"))).toString();
+            }
+            bot.completeAgentMovement();
+            bot.forceAgentUpdate();
+            if (code.equalsIgnoreCase("CouldntTPCloser")) {
+                teleporting=false;
+                bot.note("Teleport couldn't get closer");
+            } else {
+                bot.warn("Teleport failed ["+code+"] - "+reason);
+            }
+            synchronized(signal) { signal.notifyAll(); }
+        }
         if (eventname.equals("TeleportFinish")) {            
             // get the data for the new region
             LLSDMap body=event.map();
@@ -105,7 +132,7 @@ public class Teleportation extends Handler {
             Circuit circuit=bot.createCircuit(targetaddress,simport.get(),regionhandle.toLong(),caps.toString());
             bot.setPrimaryCircuit(circuit);
             bot.completeAgentMovement();
-            bot.agentUpdate();
+            bot.forceAgentUpdate();
             // fire up the event queue
             // set flag, notify the waiting thread
             teleporting=false;
@@ -175,7 +202,7 @@ public class Teleportation extends Handler {
         bot.send(tp,true);
         //bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
         boolean completed=waitTeleport();
-        return "TP Sequence finished, success code is "+completed;
+        if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
     }
  
     @CmdHelp(description = "Go home")
@@ -186,7 +213,7 @@ public class Teleportation extends Handler {
         req.binfo.vlandmarkid=new LLUUID();
         bot.send(req,true);
         boolean completed=waitTeleport();
-        return "Return home sequence, success code is "+completed;
+        if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
         
     }
     
