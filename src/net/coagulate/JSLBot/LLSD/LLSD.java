@@ -9,12 +9,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.w3c.dom.Document;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -47,6 +45,7 @@ public class LLSD extends Container {
                 boolean handled=false;
                 if (type.equals("array")) { contents.add(new LLSDArray(n.getChildNodes())); handled=true; }
                 if (type.equals("map")) { contents.add(new LLSDMap(n.getChildNodes())); handled=true; }
+                if (type.equals("undef")) { handled=true; }
                 if (!handled) { throw new IOException("Found container of type "+type+" which we don't know about.  Parse error most likely."); }
             }
         } catch (SAXException|ParserConfigurationException ex) {
@@ -66,6 +65,7 @@ public class LLSD extends Container {
     }
 
     public Container getFirst() {
+        if (contents.isEmpty()) { return null; }
         return contents.get(0);
     }
 }
