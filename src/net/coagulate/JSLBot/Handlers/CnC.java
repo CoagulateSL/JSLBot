@@ -87,6 +87,7 @@ public class CnC extends Handler {
         bot.addCommand("quit",this);
         bot.addCommand("restart",this);
         bot.addCommand("help",this);
+        bot.addCommand("im",this);
     }
 
     public static Date parseRegionRestart(String m) throws IOException {
@@ -386,5 +387,14 @@ public class CnC extends Handler {
         bot.forceReconnect();
         return "This IM reply probably will be lost due to the restart.";
     }
-    
+
+    @CmdHelp(description="Send an instant message")
+    public String imCommand(Regional r,
+            @ParamHelp(description = "UUID to message")
+            String uuid,
+            @ParamHelp(description = "Message to send")
+            String message) throws IOException {
+        bot.im(new LLUUID(uuid), message);
+        return "IM sent";
+    }
 }
