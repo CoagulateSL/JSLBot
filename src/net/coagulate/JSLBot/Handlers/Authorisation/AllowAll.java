@@ -7,7 +7,7 @@ import net.coagulate.JSLBot.Log;
 
 /**
  *
- * @author iain
+ * @author Iain Price
  */
 public class AllowAll extends Authorisation {
     public AllowAll(JSLBot bot,Configuration c) {

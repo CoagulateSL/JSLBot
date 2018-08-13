@@ -5,7 +5,7 @@ import org.w3c.dom.Node;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class LLSDUUID extends Atomic {
 

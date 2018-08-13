@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class F32 extends Type{
     public float value=0;

@@ -6,7 +6,7 @@ import net.coagulate.JSLBot.JSLBot;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class Fixed4 extends Unimplemented{
 

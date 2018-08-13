@@ -9,7 +9,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class LLSDArray extends Container implements Iterable {
     private List<Atomic> data=new ArrayList<>();

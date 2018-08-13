@@ -17,7 +17,7 @@ import net.coagulate.JSLBot.LLSD.LLSDString;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class EventQueue extends Thread {
     private String eventqueue;

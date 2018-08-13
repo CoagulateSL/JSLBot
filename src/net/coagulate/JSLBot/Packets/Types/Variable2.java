@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class Variable2 extends Type {
 

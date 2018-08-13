@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class U16BE extends U16 {
     public U16BE() {super(ByteOrder.BIG_ENDIAN);}

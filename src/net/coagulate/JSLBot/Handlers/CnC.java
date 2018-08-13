@@ -46,7 +46,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class CnC extends Handler {
 

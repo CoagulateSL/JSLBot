@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class U32 extends Type {
     public int value;

@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class U64 extends Type {
     public long value=0;

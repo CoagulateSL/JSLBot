@@ -5,7 +5,7 @@ import javax.xml.bind.DatatypeConverter;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class LLUUID extends Type {
     byte[] uuid=new byte[16];

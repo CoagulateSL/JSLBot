@@ -8,7 +8,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class LLSDMap extends Container {
     private Map<String,Atomic> data=new HashMap<>();

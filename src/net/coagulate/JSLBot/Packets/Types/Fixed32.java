@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.Packets.Types;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class Fixed32 extends Unimplemented{
     

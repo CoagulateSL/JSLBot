@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class U32BE extends U32 {
     public U32BE(int a) { super(a,ByteOrder.BIG_ENDIAN); }

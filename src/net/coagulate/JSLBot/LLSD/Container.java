@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.LLSD;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public abstract class Container extends Atomic{
     

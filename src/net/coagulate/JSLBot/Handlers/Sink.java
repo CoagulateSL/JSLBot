@@ -12,7 +12,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class Sink extends Handler {
     public Sink(JSLBot bot,Configuration c) {super(bot,c);}

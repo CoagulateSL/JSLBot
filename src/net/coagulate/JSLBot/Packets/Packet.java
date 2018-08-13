@@ -24,7 +24,7 @@ import net.coagulate.JSLBot.Packets.Types.U16BE;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class Packet {
     byte flags;

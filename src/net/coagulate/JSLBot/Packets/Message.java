@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 /**
  *
- * @author iain
+ * @author Iain Price
  */
 public interface Message {
 

@@ -19,7 +19,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class CAPS {
     private String caps;

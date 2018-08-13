@@ -8,7 +8,7 @@ import static net.coagulate.JSLBot.Event.STATUS.*;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public abstract class Event {
 

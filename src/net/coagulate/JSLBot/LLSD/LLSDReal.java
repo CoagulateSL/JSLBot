@@ -4,7 +4,7 @@ import org.w3c.dom.Node;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class LLSDReal extends Atomic {
 

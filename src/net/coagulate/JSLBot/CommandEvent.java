@@ -6,7 +6,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /**
  *
- * @author iain
+ * @author Iain Price
  */
 public class CommandEvent extends Event {
     // K=V style parameters, typeless

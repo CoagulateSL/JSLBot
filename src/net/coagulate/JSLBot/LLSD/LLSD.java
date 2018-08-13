@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class LLSD extends Container {
     List<Container> contents=new ArrayList<>();

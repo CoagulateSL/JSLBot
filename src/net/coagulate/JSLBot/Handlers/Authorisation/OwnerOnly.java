@@ -8,7 +8,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /**
  *
- * @author iain
+ * @author Iain Price
  */
 public class OwnerOnly extends Authorisation {
     private String ownerusername;

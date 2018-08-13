@@ -6,7 +6,7 @@ import net.coagulate.JSLBot.JSLBot;
 
 /**
  *
- * @author iain
+ * @author Iain Price
  */
 public abstract class Authorisation {
     public Authorisation(JSLBot bot,Configuration c){}

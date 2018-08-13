@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public abstract class Type {
     public Type() {}

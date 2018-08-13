@@ -7,7 +7,7 @@ import net.coagulate.JSLBot.Log;
 
 /**
  *
- * @author iain
+ * @author Iain Price
  */
 public class DenyAll extends Authorisation {
 

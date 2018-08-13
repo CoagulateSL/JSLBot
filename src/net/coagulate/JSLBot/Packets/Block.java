@@ -16,7 +16,7 @@ import net.coagulate.JSLBot.Packets.Types.U8;
 
 /**
  *
- * @author iain
+ * @author Iain Price
  */
 public abstract class Block {
     public ByteBuffer writeBlock() { throw new UnsupportedOperationException("Not implemented"); }

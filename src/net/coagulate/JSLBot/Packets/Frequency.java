@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.Packets;
 
 /**
  *
- * @author Iain
+ * @author Iain Price
  */
 public class Frequency {
     public static final int LOW=1;
