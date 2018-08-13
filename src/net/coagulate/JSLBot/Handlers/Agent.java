@@ -36,7 +36,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /** Deal with messages about the Agent (and other agents).
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Agent extends Handler {
     public Agent(JSLBot bot,Configuration c) {super(bot,c);}

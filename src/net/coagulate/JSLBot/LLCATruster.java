@@ -19,7 +19,7 @@ import javax.net.ssl.X509TrustManager;
 
 /** The badly implemented SSL verifier for the Linden Labs CA.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class LLCATruster implements X509TrustManager,HostnameVerifier {
 

@@ -26,7 +26,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 /** Some general purpose useful stuff
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public abstract class BotUtils {
     /** Turns a byte array into a hex string */

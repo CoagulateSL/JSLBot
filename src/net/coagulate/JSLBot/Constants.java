@@ -2,7 +2,7 @@ package net.coagulate.JSLBot;
 
 /**  Some fairly arbitrary constants.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public abstract class Constants {
 

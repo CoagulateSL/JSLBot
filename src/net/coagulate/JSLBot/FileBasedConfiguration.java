@@ -12,7 +12,7 @@ import java.util.Set;
 
 /** Implementation of the Configuration system that uses a simple object-store file.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class FileBasedConfiguration extends Configuration {
 

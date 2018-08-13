@@ -6,7 +6,7 @@ import java.util.Map;
 
 /** JSL Public "API" (the useful part that does all the work for you).
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class JSLInterface {
     private JSLBot bot;

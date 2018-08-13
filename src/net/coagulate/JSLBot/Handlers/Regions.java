@@ -36,7 +36,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /** Region based information parser
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Regions extends Handler {
 

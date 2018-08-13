@@ -4,7 +4,7 @@ import java.util.Set;
 
 /** General abstract API for the configuration system, K=V style.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public abstract class Configuration {
     

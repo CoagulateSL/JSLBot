@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 /** Stand alone single bot launcher.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Test {
 

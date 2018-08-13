@@ -40,7 +40,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /** Implements the teleportation (sub) protocol
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Teleportation extends Handler {
 

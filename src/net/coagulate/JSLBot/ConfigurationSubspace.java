@@ -4,7 +4,7 @@ import java.util.Set;
 
 /** A configuration "subspace", basically just uses "." separators in the key name.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class ConfigurationSubspace extends Configuration {
 

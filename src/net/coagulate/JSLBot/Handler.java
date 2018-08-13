@@ -2,7 +2,7 @@ package net.coagulate.JSLBot;
 
 /** General template for a Handler and the various methods it may receive events through.
  *
- * @author Iain Prive <git@predestined.net>
+ * @author Iain Prive
  */
 public abstract class Handler {
     protected JSLBot bot;    

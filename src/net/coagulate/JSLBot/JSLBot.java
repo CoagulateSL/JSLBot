@@ -24,7 +24,7 @@ import org.apache.xmlrpc.XmlRpcException;
 
 /** Creates and runs a JSLBot.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class JSLBot extends Thread {
     // bot level data
@@ -307,14 +307,10 @@ public class JSLBot extends Thread {
 
     /** Send an instant message immediately using the primary circuit */
     public void im(LLUUID uuid,String message) throws IOException {
-        ImprovedInstantMessage reply=new ImprovedInstantMessage();
-        reply.bagentdata.vagentid=getUUID();
-        reply.bagentdata.vsessionid=getSession();
+        ImprovedInstantMessage reply=new ImprovedInstantMessage(this);
         reply.bmessageblock.vtoagentid=uuid;
         reply.bmessageblock.vmessage=new Variable2(message);
-        Packet replypacket=new Packet(reply);
-        replypacket.setReliable(true);
-        send(replypacket);
+        send(reply,true);
     }    
 
     

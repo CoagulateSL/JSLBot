@@ -11,7 +11,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /**  Swallows health messages, and even stores the health.
  * If such things are interesting.
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Health extends Handler {
 

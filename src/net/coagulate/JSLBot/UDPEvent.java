@@ -5,7 +5,7 @@ import net.coagulate.JSLBot.Packets.Message;
 /** Encapsulate a received UDP message packet as an Event.
  * There are some issues with trying to have packets extend events, since they once extended something else.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class UDPEvent extends Event {
     private Message content;

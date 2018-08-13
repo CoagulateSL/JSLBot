@@ -6,7 +6,7 @@ import java.util.Date;
 
 /** Simple logging thing.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Log {
     public static final int DEBUG=-1;

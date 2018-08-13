@@ -1,7 +1,7 @@
 package net.coagulate.JSLBot;
 
 /** Just some flags, mostly for over verbose stuff.
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Debug {
     

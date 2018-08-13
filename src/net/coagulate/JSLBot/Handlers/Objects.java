@@ -42,7 +42,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /** Processes messages about objects within the world
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Objects extends Handler {
     

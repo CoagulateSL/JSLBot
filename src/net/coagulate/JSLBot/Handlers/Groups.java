@@ -38,7 +38,7 @@ import net.coagulate.JSLBot.XMLEvent;
 
 /** Handle group related activities and messages.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Groups extends Handler {
 

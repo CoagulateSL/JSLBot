@@ -5,7 +5,7 @@ import net.coagulate.JSLBot.LLSD.LLSDMap;
 
 /** Encapsulates an EventQueue XML document as an event.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class XMLEvent extends Event {
     private Atomic content;

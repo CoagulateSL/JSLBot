@@ -6,7 +6,7 @@ import java.util.Set;
 
 /** A configuration provider that only stores values temporarily.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class TransientConfiguration extends Configuration {
     Map<String,String> kv=new HashMap<>();

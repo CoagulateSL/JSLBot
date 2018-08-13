@@ -13,7 +13,7 @@ import net.coagulate.JSLBot.Packets.Types.S32;
 
 /**  Class that holds regional level data.
  * A not very interesting mostly container class.
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public class Regional {
 

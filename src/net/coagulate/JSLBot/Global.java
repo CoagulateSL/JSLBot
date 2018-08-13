@@ -8,7 +8,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /**  Stuff that all instances can share, that has nothign to do with us.
  *
- * @author Iain Price <git@predestined.net>
+ * @author Iain Price
  */
 public final class Global {
     private static final Map<LLUUID,String> lastnames=new HashMap<>();
