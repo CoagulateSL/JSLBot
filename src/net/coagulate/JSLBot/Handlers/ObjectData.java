@@ -30,7 +30,8 @@ public class ObjectData {
     private float y=-1;
     private float z=-1;
     public int crc=0;
-    public ObjectData(JSLBot bot) { this.bot=bot; }
+    public ObjectData(JSLBot bot,int id) { this.bot=bot; this.id=new U32(id); }
+    public ObjectData(JSLBot bot,U32 id) { this.bot=bot; this.id=id; }
     public String toString() {
         String r="";
         if (id!=null) { r+="#"+id.value; } else { r+="id??"; }
