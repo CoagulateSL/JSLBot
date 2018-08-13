@@ -396,6 +396,7 @@ public class JSLBot extends Thread {
                         String commandname=((CommandEvent)event).getName();                        
                         if (Debug.TRACKCOMMANDS) { debug("Command "+commandname+" invoking immediate handler "+h.getClass().getSimpleName()); }
                         response=executeCommand(commandname,(CommandEvent)event,h);
+                        if (response!=null && !response.isEmpty()) { ((CommandEvent)event).response(response); }
                     }
                 }
                 catch (Exception e) { error("IMMEDIATE MODE handler "+h+" for event "+messageid+" crashed with exception "+e.toString(),e); }
@@ -413,7 +414,7 @@ public class JSLBot extends Thread {
         // log unhandled messages, as a reminder of things to do if nothing else
         if (!(delayedhandlers.containsKey(messageid) || immediatehandlers.containsKey(messageid))) {
             if (Debug.UNHANDLEDALL) { debug("Unhandled packet was "+event.dump()); }
-            if (unhandled.contains(messageid)) { return; }
+            if (unhandled.contains(messageid)) { event.status(Event.STATUS.COMPLETE); return; }
             note("Unhandled packet type "+messageid);
             if (Debug.UNHANDLEDONCE) { debug("Unhandled packet was "+event.dump()); }
             unhandled.add(messageid);
@@ -435,6 +436,7 @@ public class JSLBot extends Thread {
                             im(((CommandEvent)event).respondTo(),"> "+response);
                             ((CommandEvent)event).respondTo(response);
                         }
+                        if (response!=null && !response.isEmpty()) { ((CommandEvent)event).response(response); }
                     }
                 }
                 catch (Exception e) { error("Handler (not-immediate) "+h+" for event "+messageid+" crashed with exception "+e.toString(),e); }
@@ -743,8 +745,8 @@ public class JSLBot extends Thread {
         fov.bfovblock.vverticalangle=new F32(angle);
         send(fov,true);
     }
-    public void setMaxFOV() throws IOException { setFOV((float) (Math.PI*2.0)); }
-    public void setMinFOV() throws IOException { setFOV(0); }
+    public void setMaxFOV() throws IOException { setFOV((float) (Math.PI)); }
+    public void setMinFOV() throws IOException { setFOV((float) 0.01); }
     public void drawDistance(float newdd) throws IOException {
         drawdistance=newdd;
         forceAgentUpdate();
