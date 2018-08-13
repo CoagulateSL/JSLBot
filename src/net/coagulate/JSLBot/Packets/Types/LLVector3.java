@@ -28,6 +28,15 @@ public class LLVector3 extends Type{
     public LLVector3(ByteBuffer buffer) {
         read(buffer);
     }
+
+    public LLVector3(String pos) {
+        pos=pos.replaceAll("<","");
+        pos=pos.replaceAll(">","");
+        String[] comps = pos.split(",");
+        x=Float.parseFloat(comps[0]);
+        y=Float.parseFloat(comps[1]);
+        z=Float.parseFloat(comps[2]);
+    }
     @Override
     public int size() {
         return 12;
