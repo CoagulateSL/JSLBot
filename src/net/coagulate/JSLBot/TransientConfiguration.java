@@ -13,7 +13,7 @@ public class TransientConfiguration extends Configuration {
 
     @Override
     public String get(String param) {
-        if (!kv.containsKey(param)) { return kv.get(param); }
+        if (kv.containsKey(param)) { return kv.get(param); }
         return null;
     }
 
