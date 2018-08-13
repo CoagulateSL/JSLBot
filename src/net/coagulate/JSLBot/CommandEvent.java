@@ -52,6 +52,13 @@ public class CommandEvent extends Event {
         immediate(false);
         bot().submit(this);
     }    
+    
+    public String submitAndWait(long i) throws IOException {
+        submit();
+        waitFinish(i);
+        return response();
+    }
+    public void submitAndWait() throws IOException { submitAndWait(10000); }
     /** Submits the command for immediate execution, the thread calling this function will be hijacked to execute the command.
      * There are sometimes very good reasons for this, and sometimes its definitely the wrong thing to do.  If you're not sure, use submit().
      * @return
@@ -61,5 +68,9 @@ public class CommandEvent extends Event {
         immediate(true);
         return bot().submit(this);
     }
-        
+
+    void response(String response) {
+        this.response=response;
+    }
+
 }
