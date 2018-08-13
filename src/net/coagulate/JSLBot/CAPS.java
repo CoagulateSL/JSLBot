@@ -84,7 +84,7 @@ public class CAPS {
     }
 
     /** Call a specific cap, with a suffix and an optional document */
-    LLSDMap invokeCAPS(String cap,String appendtocap,LLSD content) throws IOException
+    public LLSDMap invokeCAPS(String cap,String appendtocap,LLSD content) throws IOException
     {return invokeXML(capabilities.get(cap).toString()+appendtocap,content);}
     /** Call a URL for an XML exchange
      * 
@@ -94,7 +94,7 @@ public class CAPS {
      * @throws MalformedURLException
      * @throws IOException 
      */
-    LLSDMap invokeXML(String url,LLSD content) throws MalformedURLException, IOException {
+    public LLSDMap invokeXML(String url,LLSD content) throws MalformedURLException, IOException {
         if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
         HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
         byte[] postdata=new byte[0];
@@ -119,6 +119,7 @@ public class CAPS {
         String read="";
         for (int c; (c = in.read()) >= 0;)
             read=read+((char)c);
+        //System.out.println(read);
         return (LLSDMap) new LLSD(read).getFirst();
         
     }    
