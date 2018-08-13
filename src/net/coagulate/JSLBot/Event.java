@@ -6,6 +6,7 @@
 package net.coagulate.JSLBot;
 
 import java.io.IOException;
+import java.util.Date;
 import static net.coagulate.JSLBot.Event.EVENTTYPE.*;
 import static net.coagulate.JSLBot.Event.STATUS.*;
 
@@ -16,13 +17,17 @@ import static net.coagulate.JSLBot.Event.STATUS.*;
  */
 public abstract class Event {
 
+    Object statusmonitor=new Object();
     /** Stages an event goes through */
     public enum STATUS { UNSUBMITTED, IMMEDIATE, QUEUED, RUNNING, COMPLETE }
     private STATUS status=UNSUBMITTED;
     public STATUS status() { return status; }
     void status (STATUS status) {
-        this.status=status;
-        if (Debug.TRACKCOMMANDS && type==COMMAND) { Log.debug(bot(),"Command "+getName()+" entering status "+status); }
+        synchronized(statusmonitor) {
+            this.status=status;
+            if (Debug.TRACKCOMMANDS && type==COMMAND) { Log.debug(bot(),"Command "+getName()+" entering status "+status); }
+            statusmonitor.notify();
+        }
     }
     
     /** Supported event types */
@@ -72,5 +77,15 @@ public abstract class Event {
     public void submit() throws IOException {
         bot().submit(this);
     }
-    
+
+    public void waitFinish(long milliseconds) {
+        long expire=new Date().getTime()+milliseconds;
+        while ((new Date().getTime())<expire) {
+            synchronized(statusmonitor) {
+                try { statusmonitor.wait(1000); } catch (InterruptedException e) { }
+            }
+            if (status==COMPLETE) { return; }
+        }
+        throw new IllegalStateException("Command timed out in status "+status().toString());
+    }
 }
