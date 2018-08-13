@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class SaveAssetIntoInventory extends Block implements Message {
@@ -10,4 +11,8 @@ public class SaveAssetIntoInventory extends Block implements Message {
 	public SaveAssetIntoInventory_bAgentData bagentdata=new SaveAssetIntoInventory_bAgentData();
 	@Sequence(1)
 	public SaveAssetIntoInventory_bInventoryData binventorydata=new SaveAssetIntoInventory_bInventoryData();
+	public SaveAssetIntoInventory(){}
+	public SaveAssetIntoInventory(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

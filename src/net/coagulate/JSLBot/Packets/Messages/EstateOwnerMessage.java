@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class EstateOwnerMessage extends Block implements Message {
@@ -12,4 +13,9 @@ public class EstateOwnerMessage extends Block implements Message {
 	public EstateOwnerMessage_bMethodData bmethoddata=new EstateOwnerMessage_bMethodData();
 	@Sequence(2)
 	public List<EstateOwnerMessage_bParamList> bparamlist;
+	public EstateOwnerMessage(){}
+	public EstateOwnerMessage(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class MapItemReply extends Block implements Message {
@@ -12,4 +13,8 @@ public class MapItemReply extends Block implements Message {
 	public MapItemReply_bRequestData brequestdata=new MapItemReply_bRequestData();
 	@Sequence(2)
 	public List<MapItemReply_bData> bdata;
+	public MapItemReply(){}
+	public MapItemReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

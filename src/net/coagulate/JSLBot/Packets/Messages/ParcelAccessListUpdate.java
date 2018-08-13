@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ParcelAccessListUpdate extends Block implements Message {
@@ -12,4 +13,9 @@ public class ParcelAccessListUpdate extends Block implements Message {
 	public ParcelAccessListUpdate_bData bdata=new ParcelAccessListUpdate_bData();
 	@Sequence(2)
 	public List<ParcelAccessListUpdate_bList> blist;
+	public ParcelAccessListUpdate(){}
+	public ParcelAccessListUpdate(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

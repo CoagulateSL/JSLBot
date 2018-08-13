@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class UpdateAttachment extends Block implements Message {
@@ -14,4 +15,9 @@ public class UpdateAttachment extends Block implements Message {
 	public UpdateAttachment_bOperationData boperationdata=new UpdateAttachment_bOperationData();
 	@Sequence(3)
 	public UpdateAttachment_bInventoryData binventorydata=new UpdateAttachment_bInventoryData();
+	public UpdateAttachment(){}
+	public UpdateAttachment(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

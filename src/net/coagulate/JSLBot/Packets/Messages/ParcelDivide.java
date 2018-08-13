@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ParcelDivide extends Block implements Message {
@@ -10,4 +11,9 @@ public class ParcelDivide extends Block implements Message {
 	public ParcelDivide_bAgentData bagentdata=new ParcelDivide_bAgentData();
 	@Sequence(1)
 	public ParcelDivide_bParcelData bparceldata=new ParcelDivide_bParcelData();
+	public ParcelDivide(){}
+	public ParcelDivide(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class PickGodDelete extends Block implements Message {
@@ -10,4 +11,9 @@ public class PickGodDelete extends Block implements Message {
 	public PickGodDelete_bAgentData bagentdata=new PickGodDelete_bAgentData();
 	@Sequence(1)
 	public PickGodDelete_bData bdata=new PickGodDelete_bData();
+	public PickGodDelete(){}
+	public PickGodDelete(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

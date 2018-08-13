@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class CreateGroupReply extends Block implements Message {
@@ -10,4 +11,8 @@ public class CreateGroupReply extends Block implements Message {
 	public CreateGroupReply_bAgentData bagentdata=new CreateGroupReply_bAgentData();
 	@Sequence(1)
 	public CreateGroupReply_bReplyData breplydata=new CreateGroupReply_bReplyData();
+	public CreateGroupReply(){}
+	public CreateGroupReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

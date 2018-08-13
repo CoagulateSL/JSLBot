@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GroupActiveProposalsRequest extends Block implements Message {
@@ -12,4 +13,9 @@ public class GroupActiveProposalsRequest extends Block implements Message {
 	public GroupActiveProposalsRequest_bGroupData bgroupdata=new GroupActiveProposalsRequest_bGroupData();
 	@Sequence(2)
 	public GroupActiveProposalsRequest_bTransactionData btransactiondata=new GroupActiveProposalsRequest_bTransactionData();
+	public GroupActiveProposalsRequest(){}
+	public GroupActiveProposalsRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AgentWearablesRequest extends Block implements Message {
@@ -8,4 +9,9 @@ public class AgentWearablesRequest extends Block implements Message {
 	public final String getName() { return "AgentWearablesRequest"; }
 	@Sequence(0)
 	public AgentWearablesRequest_bAgentData bagentdata=new AgentWearablesRequest_bAgentData();
+	public AgentWearablesRequest(){}
+	public AgentWearablesRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

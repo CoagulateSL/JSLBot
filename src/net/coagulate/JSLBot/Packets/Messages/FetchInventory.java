@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class FetchInventory extends Block implements Message {
@@ -10,4 +11,9 @@ public class FetchInventory extends Block implements Message {
 	public FetchInventory_bAgentData bagentdata=new FetchInventory_bAgentData();
 	@Sequence(1)
 	public List<FetchInventory_bInventoryData> binventorydata;
+	public FetchInventory(){}
+	public FetchInventory(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

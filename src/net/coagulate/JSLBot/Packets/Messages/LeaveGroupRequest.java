@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class LeaveGroupRequest extends Block implements Message {
@@ -10,4 +11,9 @@ public class LeaveGroupRequest extends Block implements Message {
 	public LeaveGroupRequest_bAgentData bagentdata=new LeaveGroupRequest_bAgentData();
 	@Sequence(1)
 	public LeaveGroupRequest_bGroupData bgroupdata=new LeaveGroupRequest_bGroupData();
+	public LeaveGroupRequest(){}
+	public LeaveGroupRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

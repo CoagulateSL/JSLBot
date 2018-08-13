@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class DirLandReply extends Block implements Message {
@@ -12,4 +13,8 @@ public class DirLandReply extends Block implements Message {
 	public DirLandReply_bQueryData bquerydata=new DirLandReply_bQueryData();
 	@Sequence(2)
 	public List<DirLandReply_bQueryReplies> bqueryreplies;
+	public DirLandReply(){}
+	public DirLandReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

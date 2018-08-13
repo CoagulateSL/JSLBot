@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class EventNotificationRemoveRequest extends Block implements Message {
@@ -10,4 +11,9 @@ public class EventNotificationRemoveRequest extends Block implements Message {
 	public EventNotificationRemoveRequest_bAgentData bagentdata=new EventNotificationRemoveRequest_bAgentData();
 	@Sequence(1)
 	public EventNotificationRemoveRequest_bEventData beventdata=new EventNotificationRemoveRequest_bEventData();
+	public EventNotificationRemoveRequest(){}
+	public EventNotificationRemoveRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

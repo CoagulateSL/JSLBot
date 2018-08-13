@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AcceptCallingCard extends Block implements Message {
@@ -12,4 +13,9 @@ public class AcceptCallingCard extends Block implements Message {
 	public AcceptCallingCard_bTransactionBlock btransactionblock=new AcceptCallingCard_bTransactionBlock();
 	@Sequence(2)
 	public List<AcceptCallingCard_bFolderData> bfolderdata;
+	public AcceptCallingCard(){}
+	public AcceptCallingCard(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

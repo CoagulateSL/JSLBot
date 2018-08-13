@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class SetScriptRunning extends Block implements Message {
@@ -10,4 +11,9 @@ public class SetScriptRunning extends Block implements Message {
 	public SetScriptRunning_bAgentData bagentdata=new SetScriptRunning_bAgentData();
 	@Sequence(1)
 	public SetScriptRunning_bScript bscript=new SetScriptRunning_bScript();
+	public SetScriptRunning(){}
+	public SetScriptRunning(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class VelocityInterpolateOff extends Block implements Message {
@@ -8,4 +9,9 @@ public class VelocityInterpolateOff extends Block implements Message {
 	public final String getName() { return "VelocityInterpolateOff"; }
 	@Sequence(0)
 	public VelocityInterpolateOff_bAgentData bagentdata=new VelocityInterpolateOff_bAgentData();
+	public VelocityInterpolateOff(){}
+	public VelocityInterpolateOff(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

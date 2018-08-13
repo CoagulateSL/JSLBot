@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class RegionInfo extends Block implements Message {
@@ -12,4 +13,9 @@ public class RegionInfo extends Block implements Message {
 	public RegionInfo_bRegionInfo bregioninfo=new RegionInfo_bRegionInfo();
 	@Sequence(2)
 	public RegionInfo_bRegionInfo2 bregioninfo2=new RegionInfo_bRegionInfo2();
+	public RegionInfo(){}
+	public RegionInfo(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AvatarNotesUpdate extends Block implements Message {
@@ -10,4 +11,9 @@ public class AvatarNotesUpdate extends Block implements Message {
 	public AvatarNotesUpdate_bAgentData bagentdata=new AvatarNotesUpdate_bAgentData();
 	@Sequence(1)
 	public AvatarNotesUpdate_bData bdata=new AvatarNotesUpdate_bData();
+	public AvatarNotesUpdate(){}
+	public AvatarNotesUpdate(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

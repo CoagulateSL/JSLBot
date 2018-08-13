@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ObjectGrabUpdate extends Block implements Message {
@@ -12,4 +13,9 @@ public class ObjectGrabUpdate extends Block implements Message {
 	public ObjectGrabUpdate_bObjectData bobjectdata=new ObjectGrabUpdate_bObjectData();
 	@Sequence(2)
 	public List<ObjectGrabUpdate_bSurfaceInfo> bsurfaceinfo;
+	public ObjectGrabUpdate(){}
+	public ObjectGrabUpdate(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class UpdateCreateInventoryItem extends Block implements Message {
@@ -10,4 +11,8 @@ public class UpdateCreateInventoryItem extends Block implements Message {
 	public UpdateCreateInventoryItem_bAgentData bagentdata=new UpdateCreateInventoryItem_bAgentData();
 	@Sequence(1)
 	public List<UpdateCreateInventoryItem_bInventoryData> binventorydata;
+	public UpdateCreateInventoryItem(){}
+	public UpdateCreateInventoryItem(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

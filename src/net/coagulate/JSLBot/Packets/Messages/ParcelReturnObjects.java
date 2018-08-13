@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ParcelReturnObjects extends Block implements Message {
@@ -14,4 +15,9 @@ public class ParcelReturnObjects extends Block implements Message {
 	public List<ParcelReturnObjects_bTaskIDs> btaskids;
 	@Sequence(3)
 	public List<ParcelReturnObjects_bOwnerIDs> bownerids;
+	public ParcelReturnObjects(){}
+	public ParcelReturnObjects(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

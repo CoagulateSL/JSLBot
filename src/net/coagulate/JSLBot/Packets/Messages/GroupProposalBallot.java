@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GroupProposalBallot extends Block implements Message {
@@ -10,4 +11,9 @@ public class GroupProposalBallot extends Block implements Message {
 	public GroupProposalBallot_bAgentData bagentdata=new GroupProposalBallot_bAgentData();
 	@Sequence(1)
 	public GroupProposalBallot_bProposalData bproposaldata=new GroupProposalBallot_bProposalData();
+	public GroupProposalBallot(){}
+	public GroupProposalBallot(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

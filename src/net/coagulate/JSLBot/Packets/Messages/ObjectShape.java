@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ObjectShape extends Block implements Message {
@@ -10,4 +11,9 @@ public class ObjectShape extends Block implements Message {
 	public ObjectShape_bAgentData bagentdata=new ObjectShape_bAgentData();
 	@Sequence(1)
 	public List<ObjectShape_bObjectData> bobjectdata;
+	public ObjectShape(){}
+	public ObjectShape(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

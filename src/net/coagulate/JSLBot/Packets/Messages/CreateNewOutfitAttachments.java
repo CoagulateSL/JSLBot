@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class CreateNewOutfitAttachments extends Block implements Message {
@@ -12,4 +13,9 @@ public class CreateNewOutfitAttachments extends Block implements Message {
 	public CreateNewOutfitAttachments_bHeaderData bheaderdata=new CreateNewOutfitAttachments_bHeaderData();
 	@Sequence(2)
 	public List<CreateNewOutfitAttachments_bObjectData> bobjectdata;
+	public CreateNewOutfitAttachments(){}
+	public CreateNewOutfitAttachments(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

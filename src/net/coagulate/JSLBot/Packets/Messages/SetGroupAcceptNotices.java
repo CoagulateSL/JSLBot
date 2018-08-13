@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class SetGroupAcceptNotices extends Block implements Message {
@@ -12,4 +13,9 @@ public class SetGroupAcceptNotices extends Block implements Message {
 	public SetGroupAcceptNotices_bData bdata=new SetGroupAcceptNotices_bData();
 	@Sequence(2)
 	public SetGroupAcceptNotices_bNewData bnewdata=new SetGroupAcceptNotices_bNewData();
+	public SetGroupAcceptNotices(){}
+	public SetGroupAcceptNotices(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

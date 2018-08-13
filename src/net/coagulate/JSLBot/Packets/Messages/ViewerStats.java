@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ViewerStats extends Block implements Message {
@@ -16,4 +17,9 @@ public class ViewerStats extends Block implements Message {
 	public ViewerStats_bFailStats bfailstats=new ViewerStats_bFailStats();
 	@Sequence(4)
 	public List<ViewerStats_bMiscStats> bmiscstats;
+	public ViewerStats(){}
+	public ViewerStats(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

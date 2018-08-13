@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AgentFOV extends Block implements Message {
@@ -10,4 +11,9 @@ public class AgentFOV extends Block implements Message {
 	public AgentFOV_bAgentData bagentdata=new AgentFOV_bAgentData();
 	@Sequence(1)
 	public AgentFOV_bFOVBlock bfovblock=new AgentFOV_bFOVBlock();
+	public AgentFOV(){}
+	public AgentFOV(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

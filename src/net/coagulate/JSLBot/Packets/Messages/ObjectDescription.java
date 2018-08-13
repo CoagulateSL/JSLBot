@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ObjectDescription extends Block implements Message {
@@ -10,4 +11,9 @@ public class ObjectDescription extends Block implements Message {
 	public ObjectDescription_bAgentData bagentdata=new ObjectDescription_bAgentData();
 	@Sequence(1)
 	public List<ObjectDescription_bObjectData> bobjectdata;
+	public ObjectDescription(){}
+	public ObjectDescription(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

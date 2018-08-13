@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class UpdateMuteListEntry extends Block implements Message {
@@ -10,4 +11,9 @@ public class UpdateMuteListEntry extends Block implements Message {
 	public UpdateMuteListEntry_bAgentData bagentdata=new UpdateMuteListEntry_bAgentData();
 	@Sequence(1)
 	public UpdateMuteListEntry_bMuteData bmutedata=new UpdateMuteListEntry_bMuteData();
+	public UpdateMuteListEntry(){}
+	public UpdateMuteListEntry(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

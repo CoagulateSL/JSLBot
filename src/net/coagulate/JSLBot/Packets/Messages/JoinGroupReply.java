@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class JoinGroupReply extends Block implements Message {
@@ -10,4 +11,8 @@ public class JoinGroupReply extends Block implements Message {
 	public JoinGroupReply_bAgentData bagentdata=new JoinGroupReply_bAgentData();
 	@Sequence(1)
 	public JoinGroupReply_bGroupData bgroupdata=new JoinGroupReply_bGroupData();
+	public JoinGroupReply(){}
+	public JoinGroupReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

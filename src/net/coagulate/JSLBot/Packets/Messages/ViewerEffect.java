@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ViewerEffect extends Block implements Message {
@@ -10,4 +11,9 @@ public class ViewerEffect extends Block implements Message {
 	public ViewerEffect_bAgentData bagentdata=new ViewerEffect_bAgentData();
 	@Sequence(1)
 	public List<ViewerEffect_bEffect> beffect;
+	public ViewerEffect(){}
+	public ViewerEffect(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

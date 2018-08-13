@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AvatarGroupsReply extends Block implements Message {
@@ -12,4 +13,8 @@ public class AvatarGroupsReply extends Block implements Message {
 	public List<AvatarGroupsReply_bGroupData> bgroupdata;
 	@Sequence(2)
 	public AvatarGroupsReply_bNewGroupData bnewgroupdata=new AvatarGroupsReply_bNewGroupData();
+	public AvatarGroupsReply(){}
+	public AvatarGroupsReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

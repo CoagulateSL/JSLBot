@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AgentHeightWidth extends Block implements Message {
@@ -10,4 +11,9 @@ public class AgentHeightWidth extends Block implements Message {
 	public AgentHeightWidth_bAgentData bagentdata=new AgentHeightWidth_bAgentData();
 	@Sequence(1)
 	public AgentHeightWidth_bHeightWidthBlock bheightwidthblock=new AgentHeightWidth_bHeightWidthBlock();
+	public AgentHeightWidth(){}
+	public AgentHeightWidth(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

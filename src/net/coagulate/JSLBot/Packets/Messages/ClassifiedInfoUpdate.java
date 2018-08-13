@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ClassifiedInfoUpdate extends Block implements Message {
@@ -10,4 +11,9 @@ public class ClassifiedInfoUpdate extends Block implements Message {
 	public ClassifiedInfoUpdate_bAgentData bagentdata=new ClassifiedInfoUpdate_bAgentData();
 	@Sequence(1)
 	public ClassifiedInfoUpdate_bData bdata=new ClassifiedInfoUpdate_bData();
+	public ClassifiedInfoUpdate(){}
+	public ClassifiedInfoUpdate(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AgentAlertMessage extends Block implements Message {
@@ -10,4 +11,8 @@ public class AgentAlertMessage extends Block implements Message {
 	public AgentAlertMessage_bAgentData bagentdata=new AgentAlertMessage_bAgentData();
 	@Sequence(1)
 	public AgentAlertMessage_bAlertData balertdata=new AgentAlertMessage_bAlertData();
+	public AgentAlertMessage(){}
+	public AgentAlertMessage(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

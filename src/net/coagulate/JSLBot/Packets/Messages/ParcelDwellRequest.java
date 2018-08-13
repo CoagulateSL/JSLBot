@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ParcelDwellRequest extends Block implements Message {
@@ -10,4 +11,9 @@ public class ParcelDwellRequest extends Block implements Message {
 	public ParcelDwellRequest_bAgentData bagentdata=new ParcelDwellRequest_bAgentData();
 	@Sequence(1)
 	public ParcelDwellRequest_bData bdata=new ParcelDwellRequest_bData();
+	public ParcelDwellRequest(){}
+	public ParcelDwellRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

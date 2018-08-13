@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AgentPause extends Block implements Message {
@@ -8,4 +9,9 @@ public class AgentPause extends Block implements Message {
 	public final String getName() { return "AgentPause"; }
 	@Sequence(0)
 	public AgentPause_bAgentData bagentdata=new AgentPause_bAgentData();
+	public AgentPause(){}
+	public AgentPause(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

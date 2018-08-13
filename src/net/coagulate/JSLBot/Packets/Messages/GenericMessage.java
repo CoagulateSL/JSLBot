@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GenericMessage extends Block implements Message {
@@ -12,4 +13,9 @@ public class GenericMessage extends Block implements Message {
 	public GenericMessage_bMethodData bmethoddata=new GenericMessage_bMethodData();
 	@Sequence(2)
 	public List<GenericMessage_bParamList> bparamlist;
+	public GenericMessage(){}
+	public GenericMessage(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

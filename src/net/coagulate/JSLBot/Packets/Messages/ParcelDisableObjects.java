@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ParcelDisableObjects extends Block implements Message {
@@ -14,4 +15,9 @@ public class ParcelDisableObjects extends Block implements Message {
 	public List<ParcelDisableObjects_bTaskIDs> btaskids;
 	@Sequence(3)
 	public List<ParcelDisableObjects_bOwnerIDs> bownerids;
+	public ParcelDisableObjects(){}
+	public ParcelDisableObjects(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

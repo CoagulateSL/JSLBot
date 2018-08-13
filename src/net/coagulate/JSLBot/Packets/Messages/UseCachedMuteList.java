@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class UseCachedMuteList extends Block implements Message {
@@ -8,4 +9,8 @@ public class UseCachedMuteList extends Block implements Message {
 	public final String getName() { return "UseCachedMuteList"; }
 	@Sequence(0)
 	public UseCachedMuteList_bAgentData bagentdata=new UseCachedMuteList_bAgentData();
+	public UseCachedMuteList(){}
+	public UseCachedMuteList(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

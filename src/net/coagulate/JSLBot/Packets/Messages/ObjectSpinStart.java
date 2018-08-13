@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ObjectSpinStart extends Block implements Message {
@@ -10,4 +11,9 @@ public class ObjectSpinStart extends Block implements Message {
 	public ObjectSpinStart_bAgentData bagentdata=new ObjectSpinStart_bAgentData();
 	@Sequence(1)
 	public ObjectSpinStart_bObjectData bobjectdata=new ObjectSpinStart_bObjectData();
+	public ObjectSpinStart(){}
+	public ObjectSpinStart(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GroupProfileRequest extends Block implements Message {
@@ -10,4 +11,9 @@ public class GroupProfileRequest extends Block implements Message {
 	public GroupProfileRequest_bAgentData bagentdata=new GroupProfileRequest_bAgentData();
 	@Sequence(1)
 	public GroupProfileRequest_bGroupData bgroupdata=new GroupProfileRequest_bGroupData();
+	public GroupProfileRequest(){}
+	public GroupProfileRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

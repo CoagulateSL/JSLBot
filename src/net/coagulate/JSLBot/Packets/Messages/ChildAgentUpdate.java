@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ChildAgentUpdate extends Block implements Message {
@@ -22,4 +23,9 @@ public class ChildAgentUpdate extends Block implements Message {
 	public List<ChildAgentUpdate_bAgentAccess> bagentaccess;
 	@Sequence(7)
 	public List<ChildAgentUpdate_bAgentInfo> bagentinfo;
+	public ChildAgentUpdate(){}
+	public ChildAgentUpdate(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

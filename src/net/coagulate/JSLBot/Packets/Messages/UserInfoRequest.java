@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class UserInfoRequest extends Block implements Message {
@@ -8,4 +9,9 @@ public class UserInfoRequest extends Block implements Message {
 	public final String getName() { return "UserInfoRequest"; }
 	@Sequence(0)
 	public UserInfoRequest_bAgentData bagentdata=new UserInfoRequest_bAgentData();
+	public UserInfoRequest(){}
+	public UserInfoRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

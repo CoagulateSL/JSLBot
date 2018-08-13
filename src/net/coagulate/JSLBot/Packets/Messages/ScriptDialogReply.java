@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ScriptDialogReply extends Block implements Message {
@@ -10,4 +11,9 @@ public class ScriptDialogReply extends Block implements Message {
 	public ScriptDialogReply_bAgentData bagentdata=new ScriptDialogReply_bAgentData();
 	@Sequence(1)
 	public ScriptDialogReply_bData bdata=new ScriptDialogReply_bData();
+	public ScriptDialogReply(){}
+	public ScriptDialogReply(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

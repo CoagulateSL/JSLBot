@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GroupTitleUpdate extends Block implements Message {
@@ -8,4 +9,9 @@ public class GroupTitleUpdate extends Block implements Message {
 	public final String getName() { return "GroupTitleUpdate"; }
 	@Sequence(0)
 	public GroupTitleUpdate_bAgentData bagentdata=new GroupTitleUpdate_bAgentData();
+	public GroupTitleUpdate(){}
+	public GroupTitleUpdate(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

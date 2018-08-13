@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class CopyInventoryFromNotecard extends Block implements Message {
@@ -12,4 +13,9 @@ public class CopyInventoryFromNotecard extends Block implements Message {
 	public CopyInventoryFromNotecard_bNotecardData bnotecarddata=new CopyInventoryFromNotecard_bNotecardData();
 	@Sequence(2)
 	public List<CopyInventoryFromNotecard_bInventoryData> binventorydata;
+	public CopyInventoryFromNotecard(){}
+	public CopyInventoryFromNotecard(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

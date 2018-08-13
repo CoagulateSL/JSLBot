@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class StartAuction extends Block implements Message {
@@ -10,4 +11,8 @@ public class StartAuction extends Block implements Message {
 	public StartAuction_bAgentData bagentdata=new StartAuction_bAgentData();
 	@Sequence(1)
 	public StartAuction_bParcelData bparceldata=new StartAuction_bParcelData();
+	public StartAuction(){}
+	public StartAuction(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class MapLayerReply extends Block implements Message {
@@ -10,4 +11,8 @@ public class MapLayerReply extends Block implements Message {
 	public MapLayerReply_bAgentData bagentdata=new MapLayerReply_bAgentData();
 	@Sequence(1)
 	public List<MapLayerReply_bLayerData> blayerdata;
+	public MapLayerReply(){}
+	public MapLayerReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

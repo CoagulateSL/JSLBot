@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class AgentDropGroup extends Block implements Message {
@@ -8,4 +9,8 @@ public class AgentDropGroup extends Block implements Message {
 	public final String getName() { return "AgentDropGroup"; }
 	@Sequence(0)
 	public AgentDropGroup_bAgentData bagentdata=new AgentDropGroup_bAgentData();
+	public AgentDropGroup(){}
+	public AgentDropGroup(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GroupVoteHistoryItemReply extends Block implements Message {
@@ -14,4 +15,8 @@ public class GroupVoteHistoryItemReply extends Block implements Message {
 	public GroupVoteHistoryItemReply_bHistoryItemData bhistoryitemdata=new GroupVoteHistoryItemReply_bHistoryItemData();
 	@Sequence(3)
 	public List<GroupVoteHistoryItemReply_bVoteItem> bvoteitem;
+	public GroupVoteHistoryItemReply(){}
+	public GroupVoteHistoryItemReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

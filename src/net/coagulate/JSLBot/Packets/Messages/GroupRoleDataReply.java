@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GroupRoleDataReply extends Block implements Message {
@@ -12,4 +13,8 @@ public class GroupRoleDataReply extends Block implements Message {
 	public GroupRoleDataReply_bGroupData bgroupdata=new GroupRoleDataReply_bGroupData();
 	@Sequence(2)
 	public List<GroupRoleDataReply_bRoleData> broledata;
+	public GroupRoleDataReply(){}
+	public GroupRoleDataReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

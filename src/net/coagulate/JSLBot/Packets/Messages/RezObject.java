@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class RezObject extends Block implements Message {
@@ -12,4 +13,9 @@ public class RezObject extends Block implements Message {
 	public RezObject_bRezData brezdata=new RezObject_bRezData();
 	@Sequence(2)
 	public RezObject_bInventoryData binventorydata=new RezObject_bInventoryData();
+	public RezObject(){}
+	public RezObject(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ActivateGestures extends Block implements Message {
@@ -10,4 +11,9 @@ public class ActivateGestures extends Block implements Message {
 	public ActivateGestures_bAgentData bagentdata=new ActivateGestures_bAgentData();
 	@Sequence(1)
 	public List<ActivateGestures_bData> bdata;
+	public ActivateGestures(){}
+	public ActivateGestures(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

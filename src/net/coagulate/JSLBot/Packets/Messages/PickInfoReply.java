@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class PickInfoReply extends Block implements Message {
@@ -10,4 +11,8 @@ public class PickInfoReply extends Block implements Message {
 	public PickInfoReply_bAgentData bagentdata=new PickInfoReply_bAgentData();
 	@Sequence(1)
 	public PickInfoReply_bData bdata=new PickInfoReply_bData();
+	public PickInfoReply(){}
+	public PickInfoReply(JSLBot bot) {
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

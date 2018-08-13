@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ModifyLand extends Block implements Message {
@@ -14,4 +15,9 @@ public class ModifyLand extends Block implements Message {
 	public List<ModifyLand_bParcelData> bparceldata;
 	@Sequence(3)
 	public List<ModifyLand_bModifyBlockExtended> bmodifyblockextended;
+	public ModifyLand(){}
+	public ModifyLand(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

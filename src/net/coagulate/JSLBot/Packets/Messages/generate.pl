@@ -84,6 +84,7 @@ sub processblock {
 	open OUTPUT,">".$messagename.".java";
 	print OUTPUT "package net.coagulate.JSLBot.Packets.Messages;\n";
 	print OUTPUT "import java.util.*;\n";
+	print OUTPUT "import net.coagulate.JSLBot.JSLBot;\n";
 	print OUTPUT "import net.coagulate.JSLBot.Packets.*;\n";
 	print OUTPUT "import net.coagulate.JSLBot.Packets.Types.*;\n";
 	print OUTPUT "public class $messagename extends Block implements Message {\n";
@@ -100,10 +101,12 @@ sub processblock {
 
 	# process the inner blocks now...
 	my $innerblockcount=0;
+	my $hasagentblock=0; my $hasagentid=0; my $hassessionid=0;
 	while ((shift @p) eq "{") {
 		my $blockname="b".shift @p;
 		my $qty=shift @p;
 		my $repeat=0;
+		if ($qty eq "Single" and lc($blockname) eq "bagentdata") { $hasagentblock=1; }
 		if ($qty eq "Multiple") { $repeat=shift @p; }
 
 		if ($qty eq "Single") {
@@ -138,6 +141,8 @@ sub processblock {
 			my $varname="v".shift @p;
 			if (lc($varname) eq "final") { $varname="Final_"; }
 			my $vartype=shift @p;
+			if ($vartype eq "LLUUID" and lc($blockname) eq "bagentdata" and lc($varname) eq "vsessionid") { $hassessionid=1; }
+			if ($vartype eq "LLUUID" and lc($blockname) eq "bagentdata" and lc($varname) eq "vagentid") { $hasagentid=1; }
 			if ($vartype eq "Variable") { $vartype.=shift @p; } #unimaginative solution
 			if ($vartype eq "Fixed") { $vartype.=shift @p; } #unimaginative solution
 			shift @p; #shift off the line's }
@@ -152,6 +157,13 @@ sub processblock {
 		print OUTPUT2 "}\n";
 		$innerblockcount++; if ($innerblockcount>10) { die "Recursive block level loop?"; }
 	}
+	if ($hasagentblock==1) {
+		print OUTPUT "\tpublic $messagename(){}\n";
+		print OUTPUT "\tpublic $messagename(JSLBot bot) {\n";
+		if ($hassessionid==1) { print OUTPUT "\t\tbagentdata.vsessionid=bot.getSession();\n"; }
+		if ($hasagentid==1) { print OUTPUT "\t\tbagentdata.vagentid=bot.getUUID();\n"; }
+		print OUTPUT "\t}\n";
+	} 
 	print OUTPUT "}\n";
 	close OUTPUT;
 	print "\n";

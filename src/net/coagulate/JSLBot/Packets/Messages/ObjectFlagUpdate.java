@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ObjectFlagUpdate extends Block implements Message {
@@ -8,4 +9,9 @@ public class ObjectFlagUpdate extends Block implements Message {
 	public final String getName() { return "ObjectFlagUpdate"; }
 	@Sequence(0)
 	public ObjectFlagUpdate_bAgentData bagentdata=new ObjectFlagUpdate_bAgentData();
+	public ObjectFlagUpdate(){}
+	public ObjectFlagUpdate(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

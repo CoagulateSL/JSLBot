@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class InviteGroupRequest extends Block implements Message {
@@ -12,4 +13,9 @@ public class InviteGroupRequest extends Block implements Message {
 	public InviteGroupRequest_bGroupData bgroupdata=new InviteGroupRequest_bGroupData();
 	@Sequence(2)
 	public List<InviteGroupRequest_bInviteData> binvitedata;
+	public InviteGroupRequest(){}
+	public InviteGroupRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class GrantUserRights extends Block implements Message {
@@ -10,4 +11,9 @@ public class GrantUserRights extends Block implements Message {
 	public GrantUserRights_bAgentData bagentdata=new GrantUserRights_bAgentData();
 	@Sequence(1)
 	public List<GrantUserRights_bRights> brights;
+	public GrantUserRights(){}
+	public GrantUserRights(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

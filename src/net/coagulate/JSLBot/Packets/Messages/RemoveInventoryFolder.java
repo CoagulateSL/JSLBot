@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class RemoveInventoryFolder extends Block implements Message {
@@ -10,4 +11,9 @@ public class RemoveInventoryFolder extends Block implements Message {
 	public RemoveInventoryFolder_bAgentData bagentdata=new RemoveInventoryFolder_bAgentData();
 	@Sequence(1)
 	public List<RemoveInventoryFolder_bFolderData> bfolderdata;
+	public RemoveInventoryFolder(){}
+	public RemoveInventoryFolder(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

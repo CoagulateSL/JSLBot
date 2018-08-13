@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ObjectPermissions extends Block implements Message {
@@ -12,4 +13,9 @@ public class ObjectPermissions extends Block implements Message {
 	public ObjectPermissions_bHeaderData bheaderdata=new ObjectPermissions_bHeaderData();
 	@Sequence(2)
 	public List<ObjectPermissions_bObjectData> bobjectdata;
+	public ObjectPermissions(){}
+	public ObjectPermissions(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

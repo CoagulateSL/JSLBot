@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ParcelBuy extends Block implements Message {
@@ -12,4 +13,9 @@ public class ParcelBuy extends Block implements Message {
 	public ParcelBuy_bData bdata=new ParcelBuy_bData();
 	@Sequence(2)
 	public ParcelBuy_bParcelData bparceldata=new ParcelBuy_bParcelData();
+	public ParcelBuy(){}
+	public ParcelBuy(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

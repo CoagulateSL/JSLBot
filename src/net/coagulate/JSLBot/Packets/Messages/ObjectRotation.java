@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class ObjectRotation extends Block implements Message {
@@ -10,4 +11,9 @@ public class ObjectRotation extends Block implements Message {
 	public ObjectRotation_bAgentData bagentdata=new ObjectRotation_bAgentData();
 	@Sequence(1)
 	public List<ObjectRotation_bObjectData> bobjectdata;
+	public ObjectRotation(){}
+	public ObjectRotation(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Messages;
 import java.util.*;
+import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 public class MapLayerRequest extends Block implements Message {
@@ -8,4 +9,9 @@ public class MapLayerRequest extends Block implements Message {
 	public final String getName() { return "MapLayerRequest"; }
 	@Sequence(0)
 	public MapLayerRequest_bAgentData bagentdata=new MapLayerRequest_bAgentData();
+	public MapLayerRequest(){}
+	public MapLayerRequest(JSLBot bot) {
+		bagentdata.vsessionid=bot.getSession();
+		bagentdata.vagentid=bot.getUUID();
+	}
 }
