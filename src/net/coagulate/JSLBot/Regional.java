@@ -29,7 +29,7 @@ public class Regional {
     }
     public ObjectData getObject(int id) {
         synchronized (objects) {
-            if (!objects.containsKey(id)) { objects.put(id,new ObjectData(circuit.bot())); }
+            if (!objects.containsKey(id)) { objects.put(id,new ObjectData(circuit.bot(),id)); }
             return objects.get(id);
         }
     }
