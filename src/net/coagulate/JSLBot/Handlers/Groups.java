@@ -11,6 +11,7 @@ import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDBoolean;
@@ -55,6 +56,7 @@ public class Groups extends Handler {
         bot.addCommand("list",this);
         bot.addCommand("invite",this);
         bot.addCommand("eject",this);
+        bot.addCommand("roster",this);
         bot.addImmediateUDP("ImprovedInstantMessage",this);
         bot.addImmediateUDP("JoinGroupReply",this);
     }
@@ -91,7 +93,7 @@ public class Groups extends Handler {
         egrid.vejecteeid=avatar;
         egr.bejectdata.add(egrid);
         bot.send(egr,true);
-        return "Invite sent";
+        return "Ejection request sent";
     }
     
     @CmdHelp(description="List groups the logged in agent is a member of")
@@ -193,6 +195,26 @@ public class Groups extends Handler {
         if (eventname.equals("AgentGroupDataUpdate")) { agentGroupDataUpdate(event.map(),region); }
     }
 
+    Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
+    public LLSDMap getMembership(LLUUID uuid) {
+        for (LLUUID compare:groupmembership.keySet()) { if (compare.equals(uuid)) { return groupmembership.get(compare); } }
+        return null;
+    }
+    public void rosterCommand(Regional region,String uuid) throws IOException {
+        /*GroupMembersRequest gmr=new GroupMembersRequest();
+        gmr.bagentdata.vagentid=bot.getUUID();
+        gmr.bagentdata.vsessionid=bot.getSession();
+        gmr.bgroupdata.vgroupid=new LLUUID(uuid);
+        gmr.bgroupdata.vrequestid=new LLUUID(uuid);        
+        bot.send(gmr,true);*/
+        LLSDMap req=new LLSDMap();
+        req.put("group_id",new LLSDUUID(uuid));
+        LLSD llsd=new LLSD(req);
+        LLSDMap response = bot.getCAPS().invokeCAPS("GroupMemberData", "", llsd);
+        LLSDMap members=(LLSDMap) response.get("members");
+        if (members==null) { throw new NullPointerException("Failed to extract members map"); }
+        groupmembership.put(new LLUUID(uuid),members);
+    }
     public class GroupData {
         String groupname=null;
         LLSDBinary grouppowers=null;

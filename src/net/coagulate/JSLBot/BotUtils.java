@@ -124,6 +124,7 @@ public abstract class BotUtils {
         req.add("GetObjectCost");
         req.add("GetObjectPhysicsData");
         req.add("GroupProposalBallot");
+        req.add("GroupMemberData");
         req.add("HomeLocation");
         req.add("LandResources");
         req.add("MapLayer");
