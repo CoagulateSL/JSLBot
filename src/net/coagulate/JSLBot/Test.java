@@ -13,7 +13,7 @@ import java.util.Scanner;
  */
 public class Test {
 
-    /** Launch a singular bot and lose our thread to its AI thread.
+    /** Launch a singular bot using a config store and lose our thread to its AI thread.
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
@@ -26,20 +26,9 @@ public class Test {
         // or separate namespaces of one file to separate bots, via recursive instansiation (see Configuration's constructors)
         if (args.length<1) { System.out.println("Supply config file as parameter"); return; }
         String CONFIGFILE=args[0];
-        //initConfig(CONFIGFILE);
         if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
         Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
-
-        if (args.length>=2) {
-            System.out.println("*** SECURITY NOTE *** REPLACING CnC.authorisation.owneruuid with "+args[1]);
-            config.put("CnC.authorisation.owneruuid", args[1]);
-        }
-        if (args.length>=3) {
-            System.out.println("*** SECURITY NOTE *** REPLACING CnC.authorisation.ownerusername with "+args[2]);
-            config.put("CnC.authorisation.ownerusername", args[2]);
-        }
-        
         new JSLBot(config).run(); // lose control to bot.  call start() to background the bot and continue execution here.
     }
     
@@ -57,6 +46,7 @@ public class Test {
         System.out.println("Login Location: home");
         System.out.println("Authoriser: OwnerOnly");
         System.out.print("Owner UUID: ");String owneruuid=in.nextLine();
+        System.out.print("Owner Username: ");String ownername=in.nextLine();
         System.out.println("\nCreating initial configuration file ...");
 
         m.put("firstname",firstname);
@@ -65,6 +55,7 @@ public class Test {
         m.put("handlers","CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups");
         m.put("loginlocation","home");
         m.put("CnC.authorisation.owneruuid",owneruuid);
+        m.put("CnC.authorisation.ownerusername",ownername);
         m.put("password",BotUtils.md5hash(password));
 
         FileOutputStream fos=new FileOutputStream(CONFIGFILE);
@@ -76,9 +67,4 @@ public class Test {
         System.out.println("Configuration file created, initiating bot startup\n\n");
     }
 
-    // something i keep around for reference, its a region restart message.
-        /*CnC.parseRegionRestart("<? LLSD/XML ?>\n" +
-"<llsd><map><key>MINUTES</key><integer>4</integer><key>NAME</key><string>Cerasi</string></map></llsd>");*/
-
-    
 }

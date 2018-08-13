@@ -21,7 +21,7 @@ public class XMLEvent extends Event {
         return body().toXML();
     }
 
-    public LLSDMap map() { // "dangerous"
+    public LLSDMap map() { // "dangerous", assumes the body is a map, which it usually is.
         return (LLSDMap)body();
     }
 

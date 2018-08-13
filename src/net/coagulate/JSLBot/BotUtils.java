@@ -19,7 +19,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
-/** Some general purpose useful stuff
+/** Some general purpose useful static functions.
  *
  * @author Iain Price
  */
@@ -35,6 +35,7 @@ public abstract class BotUtils {
     
     /** Get the machine's mac address as a hex string, required by the SL login */
     public static String getMac() throws UnknownHostException, SocketException {
+        // this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
         Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
         byte[] mac=null;
         NetworkInterface stored=null;
@@ -54,8 +55,8 @@ public abstract class BotUtils {
     /** Hash a password using MD5 and prefix with $1$, used by SL login request */
     public static String md5hash(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (password.startsWith("$1$")) {
-            return password;
-        } // already hashed, or you have a really unfortunate choice of password :P
+            return password; // already hashed, or you have a really unfortunate choice of password :P
+        } 
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         byte[] digest = md5.digest(password.getBytes("UTF-8"));
         return "$1$" + hex(digest);
@@ -202,6 +203,7 @@ public abstract class BotUtils {
         return outputbytes;
     }
 
+    /** Read a zero byte terminated string from a byte buffer */
     public static String readZeroTerminatedString(ByteBuffer buffer) {
         List<Byte> bytes=new ArrayList<>();
         byte b=-1;

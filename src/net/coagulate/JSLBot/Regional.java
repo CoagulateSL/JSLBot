@@ -17,12 +17,17 @@ import net.coagulate.JSLBot.Packets.Types.S32;
  */
 public class Regional {
 
+    
     private Circuit circuit;
+    public Circuit circuit() { return circuit; }
+    private JSLBot bot() { return circuit.bot(); }
+    public long handle() { return circuit.handle(); }
+
     public Regional(Circuit c) {
         circuit=c;
     }
     
-    
+    // map of local object ids
     private Map<Integer,ObjectData> objects=new HashMap<>();
     public boolean hasObject(int id) {
         synchronized(objects) { if (objects.containsKey(id)) { return true; } return false; }
@@ -43,39 +48,16 @@ public class Regional {
         }
         return null;
     }
-    public Set<Integer> getObjects() {
-        return objects.keySet();
-    }    
-    public void killObject(int value) {
-        synchronized(objects) {
-            //if (!objects.containsKey(value)) { debug(bot,"Removing object we didn't know anything about"); }
-            //if (objects.containsKey(value)) { debug(bot,"Removing object we did know something about"); }
-            objects.remove(value);
-        }
-    }
+    public Set<Integer> getObjects() { return objects.keySet(); }    
+    public void killObject(int value) { synchronized(objects) { objects.remove(value); } }
 
 
+    // map of local agents
     private Map<LLUUID, LLVector3> coarseagentlocationmap=new HashMap<>();
-    public void setCoarseAgentLocations(Map<LLUUID, LLVector3> locmap) {
-        coarseagentlocationmap=locmap;
-    }
-
-    private JSLBot bot() { return circuit.bot(); }
-
-    public Circuit circuit() {
-        return circuit;
-    }
-
-    public String dump() {
-        String d="";
-        if (circuit==bot().primary) { d="[PRIMARY] "; }
-        d+="("+Global.regionName(circuit.handle())+") ";
-        d+=coarseagentlocationmap.size()+" agents, "+objects.size()+" objects";
-        return d;
-    }
+    public void setCoarseAgentLocations(Map<LLUUID, LLVector3> locmap) { coarseagentlocationmap=locmap; }
 
 
-    public Long handle() { return circuit.handle(); }
+
     
     private byte[][] parcelgrid=new byte[64][64];
     private Map<Byte,ParcelData> parceldata=new HashMap<>();
@@ -127,6 +109,16 @@ public class Regional {
     public void setSunPhase(float sunphase) { this.sunphase = sunphase; }
 
 
+    public String dump() {
+        String d="";
+        if (circuit==bot().primary) { d="[PRIMARY] "; }
+        d+="("+Global.regionName(circuit.handle())+") ";
+        d+=coarseagentlocationmap.size()+" agents, "+objects.size()+" objects";
+        return d;
+    }
+
+    
+    
 
     public class ParcelData {
 

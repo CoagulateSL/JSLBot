@@ -9,7 +9,8 @@ import java.util.Set;
  * @author Iain Price
  */
 public class TransientConfiguration extends Configuration {
-    Map<String,String> kv=new HashMap<>();
+    // our transient store
+    private Map<String,String> kv=new HashMap<>();
 
     @Override
     public String get(String param) {
