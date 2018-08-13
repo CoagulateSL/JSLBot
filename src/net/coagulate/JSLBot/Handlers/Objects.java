@@ -14,6 +14,8 @@ import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import static net.coagulate.JSLBot.Log.debug;
 import static net.coagulate.JSLBot.Log.warn;
+import net.coagulate.JSLBot.Packets.Messages.DeRezObject;
+import net.coagulate.JSLBot.Packets.Messages.DeRezObject_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.KillObject;
@@ -32,7 +34,6 @@ import net.coagulate.JSLBot.Packets.Types.F32;
 import net.coagulate.JSLBot.Packets.Types.LLQuaternion;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
-import net.coagulate.JSLBot.Packets.Types.U16;
 import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U8;
 import net.coagulate.JSLBot.Regional;
@@ -71,6 +72,7 @@ public class Objects extends Handler {
         bot.addCommand("find",this);
         bot.addCommand("get",this);
         bot.addCommand("uuid",this);
+        bot.addCommand("return",this);
     }
 
     @Override
@@ -274,6 +276,7 @@ public class Objects extends Handler {
             if ((compressedflags & MEDIAURL.getValue())==MEDIAURL.getValue()) { String mediaurl=BotUtils.readZeroTerminatedString(buffer); }
             if ((compressedflags & PARTICLES.getValue())==PARTICLES.getValue()) { byte[] particles=new byte[86]; buffer.get(particles); }
             // extra parameters
+            /*
             U8 extraparamcount=new U8(buffer);
             for (int i=0;i<extraparamcount.integer();i++) {
                 U16 paramtype=new U16(buffer);
@@ -286,7 +289,7 @@ public class Objects extends Handler {
             if ((compressedflags & NAMEVALUE.getValue())==NAMEVALUE.getValue()) { String namevalues=BotUtils.readZeroTerminatedString(buffer); 
                 System.out.println("Compressed name values : "+namevalues);
             }
-            
+            */
             
             
             //System.out.println("Compressed update for "+localid);
@@ -322,4 +325,37 @@ public class Objects extends Handler {
         return "Sent request to simulator";
     }
 
+    @CmdHelp(description="Return a prim by UUID or localid")
+    public String returnCommand(Regional region,
+            @ParamHelp(description="UUID of prim to return")
+            String primuuid,
+            @ParamHelp(description = "LocalID of prim to return")
+            String localid) throws IOException
+    {
+        // One way or another we need the local ID
+        int id=0;
+        if (localid!=null) { id=Integer.parseInt(localid); } else
+        {
+            if (primuuid==null) { return "9 - You must supply Prim UUID or Local simulator ID"; }
+            // extract by primuuid
+            LLUUID uuid=new LLUUID(primuuid);
+            ObjectData od=region.getObject(uuid);
+            if (od==null) { return "1 - Could not find object by UUID "+primuuid; }
+            id=od.id.value;
+        }
+        DeRezObject dro=new DeRezObject();
+        // conn into
+        dro.bagentdata.vagentid=bot.getUUID(); dro.bagentdata.vsessionid=bot.getSession();
+        // object to return
+        DeRezObject_bObjectData drood=new DeRezObject_bObjectData();
+        drood.vobjectlocalid=new U32(id);
+        dro.bobjectdata=new ArrayList<>(); dro.bobjectdata.add(drood);
+        // derez config - type 9 is return to owner, 10 to return to 'last owner'.  9 seems to work :P
+        dro.bagentblock.vdestination=new U8(9);
+        //dro.bagentblock.vtransactionid=LLUUID.random();
+        dro.bagentblock.vpacketcount=new U8(1);
+        dro.bagentblock.vpacketnumber=new U8(1);
+        bot.send(dro,true);
+        return "0 - Returned object";
+    }
 }
