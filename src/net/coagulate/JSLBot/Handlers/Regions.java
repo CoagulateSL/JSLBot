@@ -2,6 +2,8 @@ package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Global;
@@ -21,7 +23,10 @@ import net.coagulate.JSLBot.Packets.Messages.MapBlockReply;
 import net.coagulate.JSLBot.Packets.Messages.MapBlockReply_bData;
 import net.coagulate.JSLBot.Packets.Messages.MapNameRequest;
 import net.coagulate.JSLBot.Packets.Messages.ParcelOverlay;
+import net.coagulate.JSLBot.Packets.Messages.ParcelPropertiesRequest;
 import net.coagulate.JSLBot.Packets.Messages.SimulatorViewerTimeMessage;
+import net.coagulate.JSLBot.Packets.Types.F32;
+import net.coagulate.JSLBot.Packets.Types.S32;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Packets.Types.Variable1;
 import net.coagulate.JSLBot.Regional;
@@ -49,9 +54,10 @@ public class Regions extends Handler {
         bot.addImmediateUDP("MapBlockReply", this);
         bot.addCommand("list",this);
         bot.addCommand("parcels",this);
-        bot.addUDP("ParcelOverlay",this);
-        bot.addXML("ParcelProperties",this);
-        bot.addUDP("SimulatorViewerTimeMessage",this);
+        bot.addCommand("id",this);
+        bot.addImmediateUDP("ParcelOverlay",this);
+        bot.addImmediateXML("ParcelProperties",this);
+        bot.addImmediateUDP("SimulatorViewerTimeMessage",this);
     }
 
     private Object signal=new Object();
@@ -100,8 +106,11 @@ public class Regions extends Handler {
         LLSDMap data=(LLSDMap)array.get().get(0);        
         //System.out.println(data.toXML());
         LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
+        //System.out.println("Got parcel id "+parcelid.toString());
         ParcelData parcel=region.getParcel((byte) parcelid.get());
-        
+        int sequenceid = ((LLSDInteger)data.get("SequenceID")).get();
+        requestresponses.put(sequenceid,parcelid.get());
+        synchronized(requestresponses) { requestresponses.notifyAll(); }
         parcel.ownerprims=((LLSDInteger)data.get("OwnerPrims")).get();
         parcel.groupprims=((LLSDInteger)data.get("GroupPrims")).get();
         parcel.otherprims=((LLSDInteger)data.get("OtherPrims")).get();
@@ -135,22 +144,21 @@ public class Regions extends Handler {
     @Override
     public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("MapBlockReply")) { mapBlockReply((MapBlockReply)event.body(),region); }    
-    }
-
-    @Override
-    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
         if (eventname.equals("ParcelOverlay")) { parcelOverlay((ParcelOverlay)event.body(),region); }
         if (eventname.equals("SimulatorViewerTimeMessage")) { simTime((SimulatorViewerTimeMessage)event.body(),region); }
     }
 
     @Override
-    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
         if (eventname.equals("ParcelProperties")) { parcelProperties(event.map(),region); }        
+    }
+
+    @Override
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
+    }
+
+    @Override
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
     }
 
 
@@ -192,5 +200,28 @@ public class Regions extends Handler {
     public String parcelsCommand(Regional region) {
         return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
    }
+    
+    Map<Integer,Integer> requestresponses=new HashMap<>();
+    private Object requestidlock=new Object();
+    private int parceldetailsrequestid=0;
+    private int getRequestId() { synchronized(requestidlock) {  parceldetailsrequestid++; return parceldetailsrequestid; } }
+    public String idCommand(Regional region,String x,String y) throws IOException {
+        int reqid=getRequestId();
+        ParcelPropertiesRequest prr=new ParcelPropertiesRequest();
+        prr.bagentdata.vagentid=bot.getUUID();
+        prr.bagentdata.vsessionid=bot.getSession();
+        prr.bparceldata.vsequenceid=new S32(reqid);
+        prr.bparceldata.vnorth=new F32(Float.parseFloat(y));
+        prr.bparceldata.vsouth=new F32(Float.parseFloat(y));
+        prr.bparceldata.veast=new F32(Float.parseFloat(x));
+        prr.bparceldata.vwest=new F32(Float.parseFloat(x));
+        bot.send(prr,true);
+        long expire=new Date().getTime()+5000;
+        while (!requestresponses.containsKey(reqid) && expire>(new Date().getTime())) {
+            synchronized(requestresponses) { try { requestresponses.wait(1000); }  catch (InterruptedException e) {}}
+        }
+        if (requestresponses.containsKey(reqid)) { return requestresponses.get(reqid)+""; }
+        return "";
+    }
 
 }
