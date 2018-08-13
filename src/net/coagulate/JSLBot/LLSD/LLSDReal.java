@@ -24,7 +24,7 @@ public class LLSDReal extends Atomic {
 
     @Override
     public String toXML(String lineprefix) {
-        return lineprefix+"<integer>"+value+"</integer>\n";
+        return lineprefix+"<real>"+value+"</real>\n";
     }
     public String toString() { return ""+value; }
 
