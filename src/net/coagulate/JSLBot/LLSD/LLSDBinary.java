@@ -5,8 +5,8 @@
  */
 package net.coagulate.JSLBot.LLSD;
 
+import java.nio.ByteBuffer;
 import java.util.Base64;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import org.w3c.dom.Node;
 
 /**
@@ -22,6 +22,9 @@ public class LLSDBinary extends Atomic {
 
     LLSDBinary(Node item) {
         value=item.getTextContent();
+    }
+    public LLSDBinary(int a) {
+        value=Base64.getEncoder().encodeToString(ByteBuffer.allocate(4).putInt(a).array());
     }
 
     @Override
