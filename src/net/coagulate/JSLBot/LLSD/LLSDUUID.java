@@ -23,9 +23,13 @@ public class LLSDUUID extends Atomic {
         value=new LLUUID(item.getTextContent());
     }
 
+    public LLSDUUID() {
+        value=new LLUUID();
+    }
+
     @Override
     public String toXML(String lineprefix) {
-        return lineprefix+"<uuid>"+value.toString()+"</uuid>\n";
+        return lineprefix+"<uuid>"+value.toUUIDString()+"</uuid>\n";
     }
     public String toString() { return value.toString(); }
 
