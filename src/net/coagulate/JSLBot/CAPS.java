@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
@@ -84,8 +85,16 @@ public class CAPS {
     }
 
     /** Call a specific cap, with a suffix and an optional document */
-    public LLSDMap invokeCAPS(String cap,String appendtocap,LLSD content) throws IOException
-    {return invokeXML(capabilities.get(cap).toString()+appendtocap,content);}
+    public LLSDMap invokeCAPS(String capname,String appendtocap,LLSD content) throws IOException
+    {
+        Atomic rawcap = capabilities.get(capname);
+        if (rawcap==null) {
+            //for (String cap:capabilities.keys()) { System.out.println("KNOWN CAP: "+cap); }
+            throw new IOException("Unknown CAPS "+capname);
+        }
+        String cap=rawcap.toString();
+        return invokeXML(cap+appendtocap,content);
+    }
     /** Call a URL for an XML exchange
      * 
      * @param url Target URL
