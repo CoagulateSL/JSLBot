@@ -1,6 +1,8 @@
 package net.coagulate.JSLBot.Handlers;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,7 +20,11 @@ import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
 import static net.coagulate.JSLBot.Log.note;
 import static net.coagulate.JSLBot.Log.warn;
+import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest;
+import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest_bEjectData;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
+import net.coagulate.JSLBot.Packets.Messages.InviteGroupRequest;
+import net.coagulate.JSLBot.Packets.Messages.InviteGroupRequest_bInviteData;
 import net.coagulate.JSLBot.Packets.Messages.JoinGroupReply;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.U32BE;
@@ -47,8 +53,45 @@ public class Groups extends Handler {
     public void initialise() throws Exception { 
         bot.addXML("AgentGroupDataUpdate", this);
         bot.addCommand("list",this);
+        bot.addCommand("invite",this);
+        bot.addCommand("eject",this);
         bot.addImmediateUDP("ImprovedInstantMessage",this);
         bot.addImmediateUDP("JoinGroupReply",this);
+    }
+
+    @CmdHelp(description = "Invite a user to a given group/role")
+    public String inviteCommand(Regional region,String avataruuid,String groupuuid,String roleuuid) throws IOException {
+        LLUUID avatar=new LLUUID(avataruuid);
+        LLUUID group=new LLUUID(groupuuid);
+        LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
+        InviteGroupRequest igr=new InviteGroupRequest();
+        igr.bagentdata.vagentid=bot.getUUID();
+        igr.bagentdata.vsessionid=bot.getSession();
+        igr.bgroupdata.vgroupid=group;
+        igr.binvitedata=new ArrayList<>();
+        InviteGroupRequest_bInviteData igrid=new InviteGroupRequest_bInviteData();
+        igrid.vinviteeid=avatar;
+        igrid.vroleid=role;
+        igr.binvitedata.add(igrid);
+        bot.send(igr,true);
+        return "Invite sent";
+    }
+
+    @CmdHelp(description = "Eject a user from a given group/role")
+    public String ejectCommand(Regional region,String avataruuid,String groupuuid) throws IOException {
+        LLUUID avatar=new LLUUID(avataruuid);
+        LLUUID group=new LLUUID(groupuuid);
+        //LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
+        EjectGroupMemberRequest egr=new EjectGroupMemberRequest();
+        egr.bagentdata.vagentid=bot.getUUID();
+        egr.bagentdata.vsessionid=bot.getSession();
+        egr.bgroupdata.vgroupid=group;
+        egr.bejectdata=new ArrayList<>();
+        EjectGroupMemberRequest_bEjectData egrid=new EjectGroupMemberRequest_bEjectData();
+        egrid.vejecteeid=avatar;
+        egr.bejectdata.add(egrid);
+        bot.send(egr,true);
+        return "Invite sent";
     }
     
     @CmdHelp(description="List groups the logged in agent is a member of")
