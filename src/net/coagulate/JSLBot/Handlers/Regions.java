@@ -2,8 +2,6 @@ package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Global;
@@ -40,13 +38,9 @@ import net.coagulate.JSLBot.XMLEvent;
  */
 public class Regions extends Handler {
 
-    public Regions(JSLBot bot,Configuration conf) {
-        super(bot,conf);
-    }
+    public Regions(JSLBot bot,Configuration conf) { super(bot,conf); }
     @Override
-    public String toString() {
-        return "Region tracking and manager, required for bot initiated Teleportation";
-    }
+    public String toString() { return "Region tracking and manager, required for bot initiated Teleportation"; }
 
     @Override
     public void initialise() throws Exception {
@@ -60,7 +54,55 @@ public class Regions extends Handler {
         bot.addImmediateUDP("SimulatorViewerTimeMessage",this);
     }
 
-    private Object signal=new Object();
+    @Override
+    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
+        if (eventname.equals("MapBlockReply")) { mapBlockReply((MapBlockReply)event.body(),region); }    
+        if (eventname.equals("ParcelOverlay")) { parcelOverlay((ParcelOverlay)event.body(),region); }
+        if (eventname.equals("SimulatorViewerTimeMessage")) { simTime((SimulatorViewerTimeMessage)event.body(),region); }
+    }
+    @Override
+    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
+        if (eventname.equals("ParcelProperties")) { parcelProperties(event.map(),region); }        
+    }
+    @Override
+    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {}
+    @Override
+    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {}
+    @Override
+    public void loggedIn() throws Exception {}
+
+    
+    /////////////////////////////// MAP BLOCK LOOKUP ( REGION HANDLE FROM REGION NAME )
+    
+    @CmdHelp(description = "Look up a region handle from a region name")
+    public String lookupCommand(Regional region,
+            @ParamHelp(description="Name of region to lookup")
+            String name) throws IOException
+    {
+        if (name==null || name.equals("")) { return "No NAME parameter passed."; }
+        // check cache
+        Long cached=Global.regionHandle(name);
+        if (cached!=null) { return Long.toUnsignedString(cached); }
+        // issue request
+        MapNameRequest request=new MapNameRequest(bot); 
+        request.bnamedata.vname=new Variable1(name);
+        bot.send(request);
+        // sleep on the signal, checking for a result when woken
+        Date now=new Date();
+        while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
+            try { synchronized(mapblockreplysignal) { mapblockreplysignal.wait(1000); } } catch (InterruptedException e) {}
+        }
+        cached=Global.regionHandle(name);
+        if (cached!=null) { return Long.toUnsignedString(cached); }
+        return "Lookup failed";
+    }
+    
+    private Object mapblockreplysignal=new Object();
+    /** Process a map block reply into a region handle, store globally, and signal any waiting threads.
+     * Must be immediate mode so it can signal delayed mode handlers.
+     * @param p Map block reply packet
+     * @param regionid Region originating the reply
+     */
     private void mapBlockReply(MapBlockReply p,Regional regionid) {
         //System.out.println(p.dump());
         for (MapBlockReply_bData data:p.bdata) {
@@ -75,42 +117,74 @@ public class Regions extends Handler {
                 Global.regionName(handle.value,data.vname.toString());
             }
         }
-        synchronized(signal) {
-            signal.notifyAll();
+        synchronized(mapblockreplysignal) {
+            mapblockreplysignal.notifyAll();
         }        
     }
-    // done at circuit level
-    //private void regionHandshake (RegionHandshake rh,Regional regionid) {
-    //    Global.setRegionName(regionid.handle(),rh.bregioninfo.vsimname.toString());
-    //}
 
-
-    @Override
-    public void loggedIn() throws Exception {
-        
-    }
+    
+    ////////////////////////////// Parcel Overlay
+    // is just sent to us, so we stash it
+    // I think it's used to locate parcels, which can be of any odd size essentially
+    // note the "byte" id used here is not related to the parcel's local ID...
 
     private void parcelOverlay(ParcelOverlay parceloverlay, Regional r) throws IOException {
         int quadrant=parceloverlay.bparceldata.vsequenceid.value;
         int sequence=quadrant*1024;
         for (int i=0;i<1024;i++) {
             byte id=parceloverlay.bparceldata.vdata.value[i];
-            r.setParcelId(sequence,id);
+            r.setParcelMap(sequence,id);
             sequence++;
             Regional.ParcelData parcel = r.getParcel(id);
         }
     }
-
+    
+    @CmdHelp(description="Attempt to compute parcels and their size based on the overlay map, which may or may not work")
+    public String parcelsCommand(Regional region) {
+        return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
+    }
+    
+    
+    
+    
+    /////////////////////// Parcel Properties
+    // Getting info about a parcel
+    
+    /** Get a parcel's local ID from co-ordinates.
+     * 
+     * @param region Region
+     * @param x X Co-ordinate
+     * @param y Y Co-ordinate
+     * @return String prefixed with the ID number, or the blank string.
+     * @throws IOException 
+     */
+    public String idCommand(Regional region,String x,String y) throws IOException {
+        int reqid=region.getRequestId();
+        ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
+        prr.bparceldata.vsequenceid=new S32(reqid);
+        prr.bparceldata.vnorth=new F32(Float.parseFloat(y));
+        prr.bparceldata.vsouth=new F32(Float.parseFloat(y));
+        prr.bparceldata.veast=new F32(Float.parseFloat(x));
+        prr.bparceldata.vwest=new F32(Float.parseFloat(x));
+        region.circuit().send(prr,true);
+        long expire=new Date().getTime()+5000; // sleep on the signal
+        while (region.getResponse(reqid)==null && expire>(new Date().getTime())) {
+            synchronized(parcelpropertiessignal) { try { parcelpropertiessignal.wait(1000); }  catch (InterruptedException e) {}}
+        }
+        if (region.getResponse(reqid)!=null) { return region.getResponse(reqid)+""; }
+        return "";
+    }
+    // signal for incoming parcel properties
+    private Object parcelpropertiessignal=new Object();
     private void parcelProperties(LLSDMap body, Regional region) throws IOException {
         LLSDArray array=(LLSDArray)body.get("ParcelData");
         LLSDMap data=(LLSDMap)array.get().get(0);        
         //System.out.println(data.toXML());
         LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
         //System.out.println("Got parcel id "+parcelid.toString());
-        ParcelData parcel=region.getParcel((byte) parcelid.get());
+        ParcelData parcel=region.getParcel(parcelid.get());
         int sequenceid = ((LLSDInteger)data.get("SequenceID")).get();
-        requestresponses.put(sequenceid,parcelid.get());
-        synchronized(requestresponses) { requestresponses.notifyAll(); }
+        region.requestResponse(sequenceid,parcelid.get());
         parcel.ownerprims=((LLSDInteger)data.get("OwnerPrims")).get();
         parcel.groupprims=((LLSDInteger)data.get("GroupPrims")).get();
         parcel.otherprims=((LLSDInteger)data.get("OtherPrims")).get();
@@ -133,95 +207,29 @@ public class Regions extends Handler {
         parcel.simwidetotalprims=((LLSDInteger)data.get("SimWideTotalPrims")).get();
         parcel.populated=true;
         //System.out.println(parcel);
+        synchronized(parcelpropertiessignal) { parcelpropertiessignal.notifyAll(); }
     }
 
+    
+    
+    
+    
+    
+    
+    ////////////////////// misc regional data
+    
     private void simTime(SimulatorViewerTimeMessage time, Regional region) {
         region.setDayUSec(time.btimeinfo.vusecsincestart.value);
         region.setSunDirection(time.btimeinfo.vsundirection);
         region.setSunPhase(time.btimeinfo.vsunphase.value);
     }
 
-    @Override
-    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        if (eventname.equals("MapBlockReply")) { mapBlockReply((MapBlockReply)event.body(),region); }    
-        if (eventname.equals("ParcelOverlay")) { parcelOverlay((ParcelOverlay)event.body(),region); }
-        if (eventname.equals("SimulatorViewerTimeMessage")) { simTime((SimulatorViewerTimeMessage)event.body(),region); }
-    }
-
-    @Override
-    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        if (eventname.equals("ParcelProperties")) { parcelProperties(event.map(),region); }        
-    }
-
-    @Override
-    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-    }
-
-    @Override
-    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
-    }
-
-
-    @CmdHelp(description = "Look up a region handle from a region name")
-    public String lookupCommand(Regional region,
-            @ParamHelp(description="Name of region to lookup")
-            String name) throws IOException {
-        if (name==null || name.equals("")) { return "No NAME parameter passed."; }
-        Long cached=Global.regionHandle(name);
-        MapNameRequest request=new MapNameRequest();
-        request.bagentdata.vagentid=bot.getUUID();
-        request.bagentdata.vsessionid=bot.getSession();
-        request.bnamedata.vname=new Variable1(name);
-        bot.send(request);
-        Date now=new Date();
-        while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
-            try { synchronized(signal) { signal.wait(1000); } } catch (InterruptedException e) {}
-        }
-        cached=Global.regionHandle(name);
-        if (cached!=null) {
-            return Long.toUnsignedString(cached);
-        }
-        return "Lookup failed";
-    }
     @CmdHelp(description="List regions currently known to the botz")
     public String listCommand(Regional region) {
         String response="\n";
         for (Regional regional:bot.getRegionals()) {
-            response+=Long.toUnsignedString(regional.handle());
-            // DONT ASK :P
-            //response+=" [[";
-            //Long inverted=handle>>32;
-            //inverted+=(handle&0xffffffff)<<32;
-            //response+=Long.toUnsignedString(inverted)+"]]";
-            response+=": "+regional.dump()+"\n";
+            response+=Long.toUnsignedString(regional.handle())+": "+regional.dump()+"\n";
         }
         return response;
     }
-    public String parcelsCommand(Regional region) {
-        return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
-   }
-    
-    Map<Integer,Integer> requestresponses=new HashMap<>();
-    private Object requestidlock=new Object();
-    private int parceldetailsrequestid=0;
-    private int getRequestId() { synchronized(requestidlock) {  parceldetailsrequestid++; return parceldetailsrequestid; } }
-    public String idCommand(Regional region,String x,String y) throws IOException {
-        int reqid=getRequestId();
-        ParcelPropertiesRequest prr=new ParcelPropertiesRequest();
-        prr.bagentdata.vagentid=bot.getUUID();
-        prr.bagentdata.vsessionid=bot.getSession();
-        prr.bparceldata.vsequenceid=new S32(reqid);
-        prr.bparceldata.vnorth=new F32(Float.parseFloat(y));
-        prr.bparceldata.vsouth=new F32(Float.parseFloat(y));
-        prr.bparceldata.veast=new F32(Float.parseFloat(x));
-        prr.bparceldata.vwest=new F32(Float.parseFloat(x));
-        bot.send(prr,true);
-        long expire=new Date().getTime()+5000;
-        while (!requestresponses.containsKey(reqid) && expire>(new Date().getTime())) {
-            synchronized(requestresponses) { try { requestresponses.wait(1000); }  catch (InterruptedException e) {}}
-        }
-        if (requestresponses.containsKey(reqid)) { return requestresponses.get(reqid)+""; }
-        return "";
-    }
-
 }

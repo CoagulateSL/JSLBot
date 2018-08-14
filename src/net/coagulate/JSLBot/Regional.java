@@ -57,18 +57,26 @@ public class Regional {
     public void setCoarseAgentLocations(Map<LLUUID, LLVector3> locmap) { coarseagentlocationmap=locmap; }
 
 
+    // store parcel related data
+    // each parcel request gets a unique ID
+    private int parceldetailsrequestid=0;
+    // which we allocate using this lock here
+    private Object requestidlock=new Object();
+    public int getRequestId() { synchronized(requestidlock) {  parceldetailsrequestid++; return parceldetailsrequestid; } }
+    private Map<Integer,Integer> requestresponses=new HashMap<>();
+    private Map<Integer,ParcelData> localparcelids=new HashMap<>();
+    public ParcelData getParcel(int get) {
+        if (!localparcelids.containsKey(get)) { localparcelids.put(get,new ParcelData(get,this)); }
+        return localparcelids.get(get);
+    }
+    public Integer getResponse(int requestid) { return requestresponses.get(requestid); }
+    public void requestResponse(int sequenceid, int get) { requestresponses.put(sequenceid,get); }
+
+        
 
     
     private byte[][] parcelgrid=new byte[64][64];
-    private Map<Byte,ParcelData> parceldata=new HashMap<>();
-    public void setParcelId(int sequence, byte b) {
-        parcelgrid[sequence/64][sequence%64]=b;
-        if (!parceldata.containsKey(b)) { synchronized(parceldata) { parceldata.put(b,new ParcelData(b,this)); } }
-    }
-    public ParcelData getParcel(byte parcelid) {
-        if (!parceldata.containsKey(parcelid)) { synchronized(parceldata) { parceldata.put(parcelid,new ParcelData(parcelid,this)); } }
-        return parceldata.get(parcelid);
-    }
+    public void setParcelMap(int sequence, byte b) { parcelgrid[sequence/64][sequence%64]=b; }
 
     public String dumpParcels() {
         Map<Byte,Integer> sizes=new HashMap<>();
@@ -85,7 +93,7 @@ public class Regional {
         String resp="";
         for (byte id:sizes.keySet()) {
             resp+="\n";
-            resp+="#"+(((int)id)&0xff);
+            resp+="#byeid#"+(((int)id)&0xff);
             resp+=" "+sizes.get(id)+"m2";
             totalsize+=sizes.get(id);
         }
@@ -117,14 +125,14 @@ public class Regional {
         return d;
     }
 
-    
+
     
 
     public class ParcelData {
 
         public boolean requested=false;
         public boolean populated=false;
-        public byte id=0;
+        public int id=0;
         public Regional region=null;
         public int ownerprims=-1;
         public int groupprims=-1;
@@ -155,7 +163,7 @@ public class Regional {
             return ret;
         }
         
-        public ParcelData(byte id,Regional region) {
+        public ParcelData(int id,Regional region) {
             this.id=id; this.region=region;
         }
         public void populate() throws IOException { populate(false); }
@@ -165,8 +173,7 @@ public class Regional {
             ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();
             req.bagentdata.vagentid=region.bot().getUUID();
             req.bagentdata.vsessionid=region.bot().getSession();
-            req.bparceldata.vlocalid=new S32();
-            req.bparceldata.vlocalid.value=(0xff&((int)id));
+            req.bparceldata.vlocalid=new S32(id);
             req.bparceldata.vsequenceid=new S32();
             req.bparceldata.vsequenceid.value=(0xff&((int)id));
             region.circuit().send(req,true);
