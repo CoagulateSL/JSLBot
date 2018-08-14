@@ -46,7 +46,7 @@ public class JSLBot extends Thread {
     private final boolean DEFAULT_RECONNECT=false;
     private boolean reconnect=false; public void setReconnect() { reconnect=true; }
     public void forceReconnect() { reconnect=true; shutdown("Forced to reconnect"); }
-    
+    public boolean ALWAYS_RECONNECT=false;
     JSLInterface jslinterface; public JSLInterface api() { return jslinterface; }
     
     // create a bot from a configuration store
@@ -156,6 +156,50 @@ public class JSLBot extends Thread {
         this.password=password;
         this.loginlocation=loginlocation;  
     }
+
+    // track our launch attempts, ALWAYS_RECONNECT will only permit 5 attempts in 10 minutes...
+    private Date[] launches=new Date[Constants.MAX_LAUNCH_ATTEMPTS];
+    private void loginLoopSafety() {
+        // if we have any null slots then we didn't even launch MAX times yet
+        for (int i=0;i<launches.length;i++) {
+            if (launches[i]==null) {
+                info("Reconnection Safety: We have not yet launched 5 times");
+                launches[i]=new Date(); return;// use slot, return OK
+            } 
+        }
+        // not not any null slots, whats the oldest timer?
+        Date oldest=null;
+        for (Date d:launches) {
+            if (oldest==null) { oldest=d; } 
+            else { if (d.before(oldest)) { oldest=d; } }
+        }
+        long ago=new Date().getTime()-oldest.getTime();
+        int secondsago=(int)ago;
+        info("Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
+        if (ago<(Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS)) { 
+            crit("Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");
+            loginLoopSafetyViolation();
+            return; // if we get here.
+        }
+        // otherwise, overwrite oldest date with now and continue
+        for (int i=0;i<launches.length;i++) {
+            if (launches[i]==oldest) { launches[i]=new Date(); return; }
+        }
+        // should never get here
+        throw new AssertionError("An oldest launch time was found in pass #1, but could not be found to be replaced in pass #2");
+    }
+    private void loginLoopSafetyViolation() {
+        // probably need some choices here, sometimes it's probably appropriate to "exit" the class, perhaps via an 'error' of some kind that wont get caught
+        // sometimes its probably appropriate to stop the whole system if the bot is critical (system.exit?)
+        // sometimes the remainder of the application is more important and it should continue, and we should just sleep, which is what we do for now
+        // no configuration here yet, hard coded 15 minute sleep, have fun with that.
+        for (int i=15;i>0;i--) {
+            crit("Reconnection Safety: RECONNECTION SAFETY HAS TRIPPED.  THREAD FORCE-SLEEPING FOR "+i+" MINUTES.");
+            try { Thread.sleep(60000); } catch (InterruptedException e) {}
+        }
+        warn("Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
+    }
+    
     
     /** Launch bot AI.
      * you can run this with Thread.start() if you want to run lots of bots
@@ -171,12 +215,15 @@ public class JSLBot extends Thread {
         // ^^ nominated for most useul comment for dating my intermittent work on this project, now mid 2018.
         if (brain.isEmpty()) { warn("Bot has no brain and will be a virtual zombie."); }
         reconnect=true;
-        while (reconnect) {
+        for (int i=0;i<launches.length;i++) { launches[i]=null; }
+        launches[0]=new Date();
+        while (ALWAYS_RECONNECT || reconnect) {
             quit=false; quitreason=""; connected=false; primary=null;
             reconnect=DEFAULT_RECONNECT;
             immediatehandlers=new HashMap<>(); delayedhandlers=new HashMap<>(); circuits=new HashMap<>();
             try { mainLoop(); }
             catch (Exception e) { error("Main bot loop crashed - "+e.toString(),e); }
+            loginLoopSafety();
         }
     }
 

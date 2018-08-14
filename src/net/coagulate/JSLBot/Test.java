@@ -29,7 +29,9 @@ public class Test {
         if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
         Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
-        new JSLBot(config).run(); // lose control to bot.  call start() to background the bot and continue execution here.
+        JSLBot bot=new JSLBot(config);
+        bot.ALWAYS_RECONNECT=true; // likely this will be cleaned up, but for testing...
+        bot.run(); // lose control to bot.  call start() to background the bot and continue execution here.
     }
     
     /** Builds a base configuration file */
