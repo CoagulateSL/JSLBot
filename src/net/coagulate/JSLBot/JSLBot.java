@@ -561,14 +561,15 @@ public class JSLBot extends Thread {
         return parameters;
     }
 
-    private String call(Handler handler, Method method, List<Object> parameters) throws Throwable {
+    private String call(Handler handler, Method method, List<Object> parameters) throws Exception {
         try {
             return (String) method.invoke(handler,parameters.toArray());
         } catch (IllegalAccessException ex) {
             throw new IllegalArgumentException("Command with incorrect access method - "+method.getName()+" in "+handler.getClass().getName());
         } catch (InvocationTargetException ex) {
             if (ex.getCause()==null) { throw new NullPointerException("Command InvocationTargetException with null initCause in "+method.getName()+" in "+handler.getClass().getName()); }
-            throw (ex.getCause());
+            if (ex.getCause() instanceof Exception) { throw ((Exception)(ex.getCause())); }
+            throw ex;
         }
     }
 

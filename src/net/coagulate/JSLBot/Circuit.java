@@ -328,11 +328,7 @@ public class Circuit extends Thread implements Closeable {
     public synchronized int getSequence() {
         return sequence++;
     }
-
-    /** Attempt to close the network socket if this class gets garbage collected somehow */
-    protected void finalize() { try { this.close(); super.finalize(); } catch (Exception e) {}}
-
-    
+   
     private Object lockdisconnecting=new Object();
     /** Close this circuit */
     @Override
