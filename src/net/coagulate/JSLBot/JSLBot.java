@@ -509,7 +509,7 @@ public class JSLBot extends Thread {
             List<Object> parameters=getParameters(method,event);
             response=call(handler,method,parameters);
         }
-        catch (Throwable t) {response="Command failed: "+t.toString(); warn("Command "+name+" failed",t); }
+        catch (Exception t) {response="Command failed: "+t.toString(); warn("Command "+name+" failed",t); }
         return response;
     }
 

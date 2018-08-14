@@ -330,7 +330,7 @@ public class Circuit extends Thread implements Closeable {
     }
 
     /** Attempt to close the network socket if this class gets garbage collected somehow */
-    protected void finalize() { try { this.close(); super.finalize(); } catch (Throwable e) {}}
+    protected void finalize() { try { this.close(); super.finalize(); } catch (Exception e) {}}
 
     
     private Object lockdisconnecting=new Object();
