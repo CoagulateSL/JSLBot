@@ -121,7 +121,7 @@ public class Agent extends Handler {
     @CmdHelp(description="Sets the FOV (field of view) to Zero")
     public String fovMinCommand(Regional region) throws IOException { bot.setMinFOV(); return "Set"; }    
     @CmdHelp(description="Send agent update")
-    public String update(Regional region) throws IOException { bot.agentUpdate(); return "Sent"; }
+    public String updateCommand(Regional region) throws IOException { bot.agentUpdate(); return "Sent"; }
     @CmdHelp(description = "Set agent's draw distance")
     public String drawdistsanceCommand(Regional region,
             @ParamHelp(description="Meters draw distance")
