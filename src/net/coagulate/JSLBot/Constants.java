@@ -8,9 +8,9 @@ public abstract class Constants {
     
     public static final int MAJOR_VERSION_NUMBER=0;
     public static final int MINOR_VERSION_NUMBER=7;
-    public static final int BUGFIX_VERSION_NUMBER=0;
+    public static final int BUGFIX_VERSION_NUMBER=1;
     
-    public static final String VERSION_DATE="2018-08-16";
+    public static final String VERSION_DATE="2018-08-17";
     public static final String COPYRIGHT_MESSAGE="(C) jslbot@predestined.net";
     
     public static String getVersionNumber() { return MAJOR_VERSION_NUMBER+"."+MINOR_VERSION_NUMBER+"."+BUGFIX_VERSION_NUMBER; }
