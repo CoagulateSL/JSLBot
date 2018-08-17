@@ -293,4 +293,11 @@ public class Brain {
     }
     @Override
     public String toString() { return bot.toString()+"/Brain"; }
+
+    Handler getHandler(String name) {
+        for (Handler h:brain) {
+            if (h.getClass().getSimpleName().equals(name)) { return h; }
+        }
+        throw new IllegalArgumentException("No handler called '"+name+"' is loaded");
+    }
 }

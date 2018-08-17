@@ -110,7 +110,7 @@ public class JSLBot extends Thread {
     }
 
 
-    
+    public Handler getHandler(String name) { return brain.getHandler(name); }
     
     /** Launch bot AI.
      * you can run this with Thread.start() if you want to run lots of bots

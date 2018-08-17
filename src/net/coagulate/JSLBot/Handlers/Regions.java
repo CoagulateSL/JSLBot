@@ -129,7 +129,7 @@ public class Regions extends Handler {
      * @return String prefixed with the ID number, or the blank string.
      * @throws IOException 
      */
-    public String regionIdCommand(Regional region,String x,String y) throws IOException {
+    public String parcelIdCommand(Regional region,String x,String y) throws IOException {
         int reqid=region.getRequestId();
         ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
         prr.bparceldata.vsequenceid=new S32(reqid);
