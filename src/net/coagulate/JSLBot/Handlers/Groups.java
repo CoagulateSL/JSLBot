@@ -113,7 +113,7 @@ public class Groups extends Handler {
             param.put("groupid",groupid.toString());
             CommandEvent join=new CommandEvent(bot, event.region(), "acceptGroupInvites", param, null);
             join.invokerUsername(m.bmessageblock.vfromagentname.toString());
-            String reject="REJECTED ALL"; //FIX ME((CnC)(bot.getHandler("CnC"))).checkAuth(join);
+            String reject=bot.brain().auth(join);
             byte num=35;
             if (fee>0) { num=36; warn(event,"Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); }
             if (num==35 && reject!=null) { note(event,"Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); num=36;}
@@ -170,6 +170,7 @@ public class Groups extends Handler {
         for (LLUUID compare:groupmembership.keySet()) { if (compare.equals(uuid)) { return groupmembership.get(compare); } }
         return null;
     }
+    @CmdHelp(description="Collect a group's roster")
     public void groupRosterCommand(Regional region,String uuid) throws IOException {
         /*GroupMembersRequest gmr=new GroupMembersRequest();
         gmr.bagentdata.vagentid=bot.getUUID();
