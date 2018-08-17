@@ -215,7 +215,8 @@ public class CnC extends Handler {
         String message=m.bmessageblock.vmessage.toString();
         // extract and cut it all up
         info(event,"CnC processing instant message <"+from+"> "+message);
-        runCommands(from,source,message,"");
+        String prefix=config.get("privatecommandprefix","*");
+        runCommands(from,source,message,prefix);
     }
 
     private String parseCommand(String message,Map<String,String> paramsout1) {
