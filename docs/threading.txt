@@ -23,6 +23,12 @@ Consequently the main AI thread has the freedom to "block" as long as it likes, 
 
 To simplify this, lets assume the bot has a command, "returnprims" which takes a region (and presumably x,y (and useless z for parcel ops)  which we'll gloss over here) and goes there, returns all prims, and leaves for home.
 
+With "commands", the caller is given the choice of immediate or delayed mode.  Immediate mode will make sense in many cases, e.g. "commands via instant messages" will be executes from the bot's AI thread running the IM message.
+Similarly a command calling another command will likely use immediate mode if its reliant on the result or completion of the other command.
+However, a command invoked by an external thread that must "run exclusively" (lock the bot) should be enqueued so that it runs not in parallel with any other exclusive commands.
+The external thread can however "sleep" on the completion of the command for a duration.
+The JSLBot "BotInterface" deals with most of this for external java code, IM invokations all run immediately within the IM thread (bot AI thread) and thus are in the delayed thread.
+
 This "command" would be a delayed mode command for the following reasons
 1) The time taken would be too long for any immediate thread
 2) The teleport operation actually requires a "region lookup" to get the target region handle, and this requires a query-response to the server, thus the UDP receiver thread must be free.
@@ -31,21 +37,23 @@ This "command" would be a delayed mode command for the following reasons
 In essence the basic events are as follows
 
 <something> queues a prim return and some other command on the "delayed queue"
-AI Thread) either becomes free, or is awoken by the adding to the queue, and pulls a command.
-AI Thread) Starts to process the command, enters teleport code and executes "region.lookup" on the target region
+AI Thread) either becomes free, or is awoken by the adding to the queue, and pulls the event (a command event)
+AI Thread) Starts to process the command, enters teleport code and executes "region.lookup" in immediate mode on the target region
 AI Thread) Enters region code and sends the UDP query.  It then 'sleeps' on a "region handles updated" signal (for up to 10 seconds before failing the TP)
 UDP thread) receives the region response packet.... if we queued this as delayed it wouldn't happen until after the teleport failed, so instead
 UDP thread) enters the "immediate" handler for the region lookup reply, which extracts the name and handle, stores them in the map, and wakes the AI thread before returning to its UDP based duties
 AI Thread) Wakes up, reads the map for the region handle and initiates the teleport, going to sleep on the "teleport complete" internal signal
 UDP Thread) Wakes up, receives various teleport start / progress packets, which IMMEDIATEly log messages and return to UDP receive mode
 EventQueue) The teleportFinish comes in over the event queue and is handled IMMEDIATEly, this data creates new circuits as instructed and completes agent movement
-(this is probably a bit slow for an immediate handler, but in the event queue this is less dangerous than the fast-response UDP stream)
+(this is probably a bit slow for an immediate handler, but in the event queue this is less dangerous than the fast-response required UDP thread)
 EventQueue) Sends teleport-complete internal signal and returns to its event queue (which may close in a while)
 AI Thread) Wakes up on the teleport-complete signal and looks at the response code to check success or failure
 AI Thread) should then take note of where it is, just in case, and initiates prim return
 AI Thread) Initiates teleport home
 (same series of events as above)
 AI Thread) Arriving home, the command is completed and it returns to its "poll delayed queue" operation
+AI Thread) Pulls next event from the queue 
+...
 
 The points being:
 Immediate threads are important for importing information during the execution of a command in the delayed thread.

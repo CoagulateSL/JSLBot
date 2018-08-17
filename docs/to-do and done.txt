@@ -1,0 +1,18 @@
+Todo
+----
+Better rate limiter?
+BotInterface class
+Group managment
+Parcel management
+Group moderation
+Object manipulation (return, reset scripts in)
+Financials
+
+
+Done
+----
+UDP Circuits (incl child agent), ZeroCoding, Reliable, ACKs, Retransmits and a probably inadequate rate limiter (on retransmits only)
+CAPS + Event Queue (including child agent)
+Instant Message (send and receive), 'chat' messages, friends list
+Region, Object and Avatar tracking (the basics)
+Teleportation + Lures (Intra-region / TPLocal, Inter-region to unknown region, Inter-region to connected region (child or previous sim connection))

@@ -1,0 +1,15 @@
+This is essentially just a "why did I write this" back story.
+
+Long long ago, in a region far far away... I set up a rental business, based off some quick maths and a whole lot of LSL scripting.  This business would turn out to be reasonably successful and grew for a while to cover multiple regions.
+
+As this grew, I found the ammount of maintenance tasks - chasing people for rent, evicting people, etc etc, was making the whole venture more of a chore (long story), and thus my initial interest in automation was sparked.
+
+Initially I researched and located the well-known libomv, which handily comes with its "Testclient" example code which I used as a base; I took the existing code and added a MySQL connection to it, added a loop that would poll for commands from the database and go execute them.  I got more involved in the SL protocol as I expanded the software to support "avatar privacy" settings and other developments, and integrated a "stub" into my rental software (which had now evolved far beyond LSL only solutions) to command the bots.
+
+There were some issues with this solution - running in a separate process to the rental software meant there was little oversight for the bots or what was going on, commands were stuffed into the database and probably executed at some point thereafter, hopefully successfully.  On top of this libomv was a little dated (at the time I used it), still trying to upload bake textures, and had some connectivity issues that caused me to write a "quit after 24 hours" timer into it.
+
+A few years later I met a conversion of libomv for java, and while this was less mature, and in fact had some bugs in it I filed fixes for, the tigher integration with the main process helped me better monitor things.  This was not without its issues, for example the bot had issues returning home after teleporting elsewhere to execute the command - 6 years later and my own codebase I have an idea why this might be, but at the time I would have severely struggled to diagnose the issue (which I think comes down to proactive cleansing of circuits, which shouldn't be done, based on my experiments)
+
+And so I eventually wanted to perfect this and started tinkering with my own bot, it took 2 years and many breaks to get it finished but I learned a lot about the way circuits work, XML, UDP, eventually got teleporting working reliably (which is a pretty good milestone), including return trips before the circuit is torn down as well as trips after the circuit has been closed remotely.
+
+At this point with the first "goal" in sight I continued to polish and refine the bot, and eventually took my rental software, branched it and gutted the existing bot code, replacing it with my own.  At the point of writing I will be rolling this to one of my two node rental cluster this weekend, and if it does the job well for a few weeks, the other node will be upgraded too, at which point the base code (not the rental specific part) will be released as an open source project to GitHub, which has probably already happened if you are reading this :)
