@@ -129,6 +129,7 @@ public class Regions extends Handler {
      * @return String prefixed with the ID number, or the blank string.
      * @throws IOException 
      */
+    @CmdHelp(description="Get a parcel's LocalID from region-local x and y co-ordinates")
     public String parcelIdCommand(Regional region,String x,String y) throws IOException {
         int reqid=region.getRequestId();
         ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
