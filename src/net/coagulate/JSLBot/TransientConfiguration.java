@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public class TransientConfiguration extends Configuration {
     // our transient store
-    private Map<String,String> kv=new HashMap<>();
+    private final Map<String,String> kv=new HashMap<>();
 
     @Override
     public String get(String param) {
@@ -23,6 +23,7 @@ public class TransientConfiguration extends Configuration {
         kv.put(param,value);
     }
 
+    @Override
     public String dump() {
         String response="";
         for (String k:kv.keySet()) {

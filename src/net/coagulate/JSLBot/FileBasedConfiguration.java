@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 /** Implementation of the Configuration system that uses a simple object-store file.
- *
+ * We should probably change this to a text file k=v "ini" style format 
  * @author Iain Price
  */
 public class FileBasedConfiguration extends Configuration {
@@ -21,11 +21,9 @@ public class FileBasedConfiguration extends Configuration {
     
     public FileBasedConfiguration(String filename) throws IOException, ClassNotFoundException {
         this.filename=filename;
-        FileInputStream fis=new FileInputStream(filename);
-        ObjectInputStream ois=new ObjectInputStream(fis);
-        kvstore=(Map<String, String>)ois.readObject();
-        ois.close();
-        fis.close();
+        try (FileInputStream fis = new FileInputStream(filename); ObjectInputStream ois = new ObjectInputStream(fis)) {
+            kvstore=(Map<String, String>)ois.readObject();
+        }
     }
     
     @Override
@@ -35,24 +33,25 @@ public class FileBasedConfiguration extends Configuration {
     }
 
     @Override
+    @SuppressWarnings("CallToPrintStackTrace")
     public void put(String key, String value) {
         kvstore.put(key,value);
         try {
             writeStore();
         } catch (IOException e) {
-            Log.log(null,Log.ERROR,"KVStore write failed, CONFIGURATION NOT SAVED : "+e.toString(),e);
+            System.err.println("KVStore write failed, CONFIGURATION NOT SAVED : "+e.toString());
+            e.printStackTrace();
         }
     }
     
     
     private void writeStore() throws FileNotFoundException, IOException {
-        FileOutputStream fos=new FileOutputStream(filename);
-        ObjectOutputStream oos=new ObjectOutputStream(fos);
-        oos.writeObject(kvstore);
-        oos.close();
-        fos.close();
+        try (FileOutputStream fos = new FileOutputStream(filename); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(kvstore);
+        }
     }
     
+    @Override
     public String dump() {
         String response="";
         for (String k:kvstore.keySet()) {

@@ -16,7 +16,6 @@ import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
-import static net.coagulate.JSLBot.Log.debug;
 import net.coagulate.JSLBot.Packets.Messages.MapBlockReply;
 import net.coagulate.JSLBot.Packets.Messages.MapBlockReply_bData;
 import net.coagulate.JSLBot.Packets.Messages.MapNameRequest;
@@ -39,35 +38,7 @@ import net.coagulate.JSLBot.XMLEvent;
 public class Regions extends Handler {
 
     public Regions(JSLBot bot,Configuration conf) { super(bot,conf); }
-    @Override
-    public String toString() { return "Region tracking and manager, required for bot initiated Teleportation"; }
 
-    @Override
-    public void initialise() throws Exception {
-        bot.addCommand("lookup", this);
-        bot.addImmediateUDP("MapBlockReply", this);
-        bot.addCommand("list",this);
-        bot.addCommand("parcels",this);
-        bot.addCommand("id",this);
-        bot.addImmediateUDP("ParcelOverlay",this);
-        bot.addImmediateXML("ParcelProperties",this);
-        bot.addImmediateUDP("SimulatorViewerTimeMessage",this);
-    }
-
-    @Override
-    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        if (eventname.equals("MapBlockReply")) { mapBlockReply((MapBlockReply)event.body(),region); }    
-        if (eventname.equals("ParcelOverlay")) { parcelOverlay((ParcelOverlay)event.body(),region); }
-        if (eventname.equals("SimulatorViewerTimeMessage")) { simTime((SimulatorViewerTimeMessage)event.body(),region); }
-    }
-    @Override
-    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        if (eventname.equals("ParcelProperties")) { parcelProperties(event.map(),region); }        
-    }
-    @Override
-    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {}
-    @Override
-    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {}
     @Override
     public void loggedIn() throws Exception {}
 
@@ -75,7 +46,7 @@ public class Regions extends Handler {
     /////////////////////////////// MAP BLOCK LOOKUP ( REGION HANDLE FROM REGION NAME )
     
     @CmdHelp(description = "Look up a region handle from a region name")
-    public String lookupCommand(Regional region,
+    public String regionLookupCommand(Regional region,
             @ParamHelp(description="Name of region to lookup")
             String name) throws IOException
     {
@@ -103,8 +74,8 @@ public class Regions extends Handler {
      * @param p Map block reply packet
      * @param regionid Region originating the reply
      */
-    private void mapBlockReply(MapBlockReply p,Regional regionid) {
-        //System.out.println(p.dump());
+    public void mapBlockReplyUDPImmediate(UDPEvent event) {
+        MapBlockReply p=(MapBlockReply) event.body();
         for (MapBlockReply_bData data:p.bdata) {
             // for some reason we get multiple replies, one has no access and 0 X/Y for a not found, not sure what this is about :)
             if (data.vaccess.value!=-1 && data.vx.value!=0 && data.vy.value!=0) {
@@ -113,7 +84,7 @@ public class Regions extends Handler {
                 handle.value=handle.value<<(32+8);
                 handle.value=handle.value | (data.vy.value<<8);
                 if (handle.value!=0) { Global.regionName(handle.value,data.vname.toString()); }
-                if (Debug.REGIONHANDLES) { debug(bot,"Map Block Reply computed handle "+Long.toUnsignedString(handle.value)); }
+                if (Debug.REGIONHANDLES) { debug(event,"Map Block Reply computed handle "+Long.toUnsignedString(handle.value)); }
                 Global.regionName(handle.value,data.vname.toString());
             }
         }
@@ -128,19 +99,19 @@ public class Regions extends Handler {
     // I think it's used to locate parcels, which can be of any odd size essentially
     // note the "byte" id used here is not related to the parcel's local ID...
 
-    private void parcelOverlay(ParcelOverlay parceloverlay, Regional r) throws IOException {
+    public void parcelOverlayUDPImmediate(UDPEvent event) {
+        ParcelOverlay parceloverlay=(ParcelOverlay) event.body();
         int quadrant=parceloverlay.bparceldata.vsequenceid.value;
         int sequence=quadrant*1024;
         for (int i=0;i<1024;i++) {
             byte id=parceloverlay.bparceldata.vdata.value[i];
-            r.setParcelMap(sequence,id);
+            event.region().setParcelMap(sequence,id);
             sequence++;
-            Regional.ParcelData parcel = r.getParcel(id);
         }
     }
     
     @CmdHelp(description="Attempt to compute parcels and their size based on the overlay map, which may or may not work")
-    public String parcelsCommand(Regional region) {
+    public String parcelListCommand(Regional region) {
         return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
     }
     
@@ -158,7 +129,7 @@ public class Regions extends Handler {
      * @return String prefixed with the ID number, or the blank string.
      * @throws IOException 
      */
-    public String idCommand(Regional region,String x,String y) throws IOException {
+    public String regionIdCommand(Regional region,String x,String y) throws IOException {
         int reqid=region.getRequestId();
         ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
         prr.bparceldata.vsequenceid=new S32(reqid);
@@ -176,15 +147,16 @@ public class Regions extends Handler {
     }
     // signal for incoming parcel properties
     private Object parcelpropertiessignal=new Object();
-    private void parcelProperties(LLSDMap body, Regional region) throws IOException {
+    public void parcelPropertiesXMLImmediate(XMLEvent event) {
+        LLSDMap body=event.map();
         LLSDArray array=(LLSDArray)body.get("ParcelData");
         LLSDMap data=(LLSDMap)array.get().get(0);        
         //System.out.println(data.toXML());
         LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
         //System.out.println("Got parcel id "+parcelid.toString());
-        ParcelData parcel=region.getParcel(parcelid.get());
+        ParcelData parcel=event.region().getParcel(parcelid.get());
         int sequenceid = ((LLSDInteger)data.get("SequenceID")).get();
-        region.requestResponse(sequenceid,parcelid.get());
+        event.region().requestResponse(sequenceid,parcelid.get());
         parcel.ownerprims=((LLSDInteger)data.get("OwnerPrims")).get();
         parcel.groupprims=((LLSDInteger)data.get("GroupPrims")).get();
         parcel.otherprims=((LLSDInteger)data.get("OtherPrims")).get();
@@ -218,14 +190,16 @@ public class Regions extends Handler {
     
     ////////////////////// misc regional data
     
-    private void simTime(SimulatorViewerTimeMessage time, Regional region) {
+    public void simulatorViewerTimeMessageUDPImmediate(UDPEvent event) {
+        Regional region = event.region();
+        SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage) event.body();
         region.setDayUSec(time.btimeinfo.vusecsincestart.value);
         region.setSunDirection(time.btimeinfo.vsundirection);
         region.setSunPhase(time.btimeinfo.vsunphase.value);
     }
 
     @CmdHelp(description="List regions currently known to the botz")
-    public String listCommand(Regional region) {
+    public String regionListCommand(Regional region) {
         String response="\n";
         for (Regional regional:bot.getRegionals()) {
             response+=Long.toUnsignedString(regional.handle())+": "+regional.dump()+"\n";

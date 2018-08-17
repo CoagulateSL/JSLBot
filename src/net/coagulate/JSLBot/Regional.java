@@ -18,7 +18,7 @@ import net.coagulate.JSLBot.Packets.Types.S32;
 public class Regional {
 
     
-    private Circuit circuit;
+    private final Circuit circuit;
     public Circuit circuit() { return circuit; }
     private JSLBot bot() { return circuit.bot(); }
     public long handle() { return circuit.handle(); }
@@ -28,9 +28,11 @@ public class Regional {
     }
     
     // map of local object ids
-    private Map<Integer,ObjectData> objects=new HashMap<>();
-    public boolean hasObject(int id) {
-        synchronized(objects) { if (objects.containsKey(id)) { return true; } return false; }
+    private final Map<Integer,ObjectData> objects=new HashMap<>();
+    public boolean hasObject(Integer id) {
+        synchronized(objects) {
+            return objects.containsKey(id);
+        }
     }
     public ObjectData getObject(int id) {
         synchronized (objects) {
@@ -61,10 +63,10 @@ public class Regional {
     // each parcel request gets a unique ID
     private int parceldetailsrequestid=0;
     // which we allocate using this lock here
-    private Object requestidlock=new Object();
+    private final Object requestidlock=new Object();
     public int getRequestId() { synchronized(requestidlock) {  parceldetailsrequestid++; return parceldetailsrequestid; } }
-    private Map<Integer,Integer> requestresponses=new HashMap<>();
-    private Map<Integer,ParcelData> localparcelids=new HashMap<>();
+    private final Map<Integer,Integer> requestresponses=new HashMap<>();
+    private final Map<Integer,ParcelData> localparcelids=new HashMap<>();
     public ParcelData getParcel(int get) {
         if (!localparcelids.containsKey(get)) { localparcelids.put(get,new ParcelData(get,this)); }
         return localparcelids.get(get);
@@ -75,7 +77,7 @@ public class Regional {
         
 
     
-    private byte[][] parcelgrid=new byte[64][64];
+    private final byte[][] parcelgrid=new byte[64][64];
     public void setParcelMap(int sequence, byte b) { parcelgrid[sequence/64][sequence%64]=b; }
 
     public String dumpParcels() {
@@ -155,6 +157,7 @@ public class Regional {
         public int maxprims=-1;
         public int simwidetotalprims=-1;
         
+        @Override
         public String toString() {
             String ret="";
             ret+=region.getName()+"#"+(((int)id)&0xff);
@@ -180,5 +183,6 @@ public class Regional {
         }
         
     }
-
+    @Override
+    public String toString() { return circuit.toString()+"/Regional"; }
 }

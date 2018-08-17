@@ -24,7 +24,7 @@ public class LLSD extends Container {
 
     // so many ways of doing things in this protocol..
     // yup, custom XML over HTTP over viewer's polling servers constantly.  some evolution from UDP.
-    public LLSD(String read) throws IOException {
+    public LLSD(String read) {
         try {
             // blah blah parse it
             DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -43,8 +43,8 @@ public class LLSD extends Container {
                 if (type.equals("undef")) { handled=true; }
                 if (!handled) { throw new IOException("Found container of type "+type+" which we don't know about.  Parse error most likely."); }
             }
-        } catch (SAXException|ParserConfigurationException ex) {
-            IOException f=new IOException(ex);
+        } catch (SAXException|ParserConfigurationException|IOException ex) {
+            IllegalArgumentException f=new IllegalArgumentException(ex);
             f.initCause(ex);
             throw f;
         }

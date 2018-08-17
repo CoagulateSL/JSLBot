@@ -15,6 +15,7 @@ public class Test {
 
     /** Launch a singular bot using a config store and lose our thread to its AI thread.
      * @param args the command line arguments
+     * @throws java.lang.Exception
      */
     public static void main(String[] args) throws Exception {
         System.out.println("JSLBot single-instance wrapper starting up");
@@ -60,11 +61,9 @@ public class Test {
         m.put("CnC.authorisation.ownerusername",ownername);
         m.put("password",BotUtils.md5hash(password));
 
-        FileOutputStream fos=new FileOutputStream(CONFIGFILE);
-        ObjectOutputStream oos=new ObjectOutputStream(fos);
-        oos.writeObject(m);
-        oos.close();
-        fos.close();
+        try (FileOutputStream fos = new FileOutputStream(CONFIGFILE); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(m);
+        }
         
         System.out.println("Configuration file created, initiating bot startup\n\n");
     }

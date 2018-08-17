@@ -46,27 +46,28 @@ public class Log {
             default: return "?"+l+"?!";
         }
     }
-    public static void log(JSLBot bot,int errorlevel,String message) { log(bot,errorlevel,message,null); }
-    public static void log(JSLBot bot,int errorlevel,String message,Throwable t) {
-        String username="SYSTEM";
-        if (bot!=null) { username=bot.getUsername(); }
+    
+    public static void log(Object instance,int errorlevel,String message) { log(instance,errorlevel,message,null); }
+    public static void log(Object instance,int errorlevel,String message,Throwable t) {
+        String id="SYSTEM";
+        if (instance!=null) { id=instance.toString(); }
         String tds="";
         if (LOGTDS) { tds=datetime.format(new Date())+" "; }
-        System.out.println("["+decodeFixed(errorlevel)+"] "+tds+"<"+username+"> - "+message);
+        System.out.println("["+decodeFixed(errorlevel)+"] "+tds+"<"+id+"> - "+message);
         if (t!=null) { t.printStackTrace(System.out); }
     }
     
-    public static void debug(JSLBot bot,String message) { debug(bot,message,null); }
-    public static void debug(JSLBot bot,String message,Throwable t) { log(bot,DEBUG,message,t); }
-    public static void info(JSLBot bot,String message) { info(bot,message,null); }
-    public static void info(JSLBot bot,String message,Throwable t) { log(bot,INFO,message,t); }
-    public static void note(JSLBot bot,String message) { note(bot,message,null); }
-    public static void note(JSLBot bot,String message,Throwable t) { log(bot,NOTE,message,t); }
-    public static void warn(JSLBot bot,String message) { warn(bot,message,null); }
-    public static void warn(JSLBot bot,String message,Throwable t) { log(bot,WARNING,message,t); }
-    public static void error(JSLBot bot,String message) { error(bot,message,null); }
-    public static void error(JSLBot bot,String message,Throwable t) { log(bot,ERROR,message,t); }
-    public static void crit(JSLBot bot,String message) { crit(bot,message,null); }
-    public static void crit(JSLBot bot,String message,Throwable t) { log(bot,CRITICAL,message,t); }
+    public static void debug(Object instance,String message) { debug(instance,message,null); }
+    public static void debug(Object instance,String message,Throwable t) { log(instance,DEBUG,message,t); }
+    public static void info(Object instance,String message) { info(instance,message,null); }
+    public static void info(Object instance,String message,Throwable t) { log(instance,INFO,message,t); }
+    public static void note(Object instance,String message) { note(instance,message,null); }
+    public static void note(Object instance,String message,Throwable t) { log(instance,NOTE,message,t); }
+    public static void warn(Object instance,String message) { warn(instance,message,null); }
+    public static void warn(Object instance,String message,Throwable t) { log(instance,WARNING,message,t); }
+    public static void error(Object instance,String message) { error(instance,message,null); }
+    public static void error(Object instance,String message,Throwable t) { log(instance,ERROR,message,t); }
+    public static void crit(Object instance,String message) { crit(instance,message,null); }
+    public static void crit(Object instance,String message,Throwable t) { log(instance,CRITICAL,message,t); }
             
 }

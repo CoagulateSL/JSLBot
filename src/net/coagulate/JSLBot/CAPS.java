@@ -21,16 +21,17 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  *
  * @author Iain Price
  */
-public class CAPS {
-    private String caps;
+public final class CAPS extends Thread {
+    // caps URL
+    private final String caps;
+    // retrieved capabilities
     private LLSDMap capabilities;
-    private String displaynames;
-    private Circuit circuit;
+    private final Circuit circuit;
     private EventQueue eq=null; EventQueue eventqueue() { return eq; }
     public JSLBot bot() { return circuit().bot(); }
     
     /** Create and interrogate CAPS.
-     * Launch EventQueueGet if applicable
+     * Note: You should almost always call launchEventQueue after creating CAPS.
      * @param circuit Owning circuit
      * @param capsseed CAPS url
      * @throws IOException 
@@ -38,20 +39,31 @@ public class CAPS {
     public CAPS(Circuit circuit,String capsseed) throws IOException {
         this.caps=capsseed;
         this.circuit=circuit;
+    }
+    
+    @Override
+    public void run() {
+        try {
+            initialise();
+            launchEventQueue();
+        } catch (IOException e) {
+            Log.error(this,"CAPS setup failed: "+e.toString(),e);
+        }
+    }
+    private void initialise() throws IOException {
         LLSDArray req=BotUtils.getCAPSArray();
         LLSD getcaps=new LLSD(req);
-        
         capabilities=invokeXML(caps,getcaps);
-
-        if (capabilities.containsKey("GetDisplayNames")) { displaynames=((LLSDString)(capabilities.get("GetDisplayNames"))).toString(); }
+    }
+    
+    private void launchEventQueue() {
         if (capabilities.containsKey("EventQueueGet")) {
-            eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString(),circuit.handle());
+            eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString());
             eq.setDaemon(true);
             eq.start();
-            info("CAPS seed interrogated successfully; EventQueueGet driver launched");
+            Log.info(this,"CAPS seed interrogated successfully; EventQueueGet driver launched");
         } else {
-            error("CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we are bound to the present sim.  This is neither normal or expected behaviour.");
-            throw new IOException("Second Life CAPS enquiry failed to produce an EventQueueGet capability; this is treated as fatal due to the funcionality loss this will cause.");
+            Log.error(this,"CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we are bound to the present sim.  This is neither normal or expected behaviour.");
         }
     }
     
@@ -79,7 +91,14 @@ public class CAPS {
         }
     }
 
-    /** Call a specific cap, with a suffix and an optional document */
+    /** Call a specific cap, with a suffix and an optional document.
+     * The list of CAPS intially requested is configured in BotUtils.
+     * @param capname Name of the CAP, as requested
+     * @param appendtocap URL suffix for the CAP
+     * @param content LLSD Document to supply to the CAP
+     * @return The LLSDMap response
+     * @throws IOException If the CAP fails, or the CAP requested is not known to us
+     */
     public LLSDMap invokeCAPS(String capname,String appendtocap,LLSD content) throws IOException
     {
         Atomic rawcap = capabilities.get(capname);
@@ -98,7 +117,7 @@ public class CAPS {
      * @throws MalformedURLException
      * @throws IOException 
      */
-    public LLSDMap invokeXML(String url,LLSD content) throws MalformedURLException, IOException {
+    public LLSDMap invokeXML(String url,LLSD content) throws IOException {
         if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
         HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
         byte[] postdata=new byte[0];
@@ -106,7 +125,7 @@ public class CAPS {
             connection.setRequestMethod("GET");
             connection.setDoOutput(false);
         } else {
-            postdata=(content.toXML()).getBytes(StandardCharsets.UTF_8);;
+            postdata=(content.toXML()).getBytes(StandardCharsets.UTF_8);
             connection.setRequestProperty("Content-Length",Integer.toString(postdata.length));
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
@@ -116,7 +135,7 @@ public class CAPS {
         connection.setUseCaches(false);
         if (content!=null) {
             try( DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
-              wr.write( postdata );
+                wr.write( postdata );
             }
         }
         Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
@@ -125,28 +144,12 @@ public class CAPS {
             read=read+((char)c);
         //System.out.println(read);
         return (LLSDMap) new LLSD(read).getFirst();
-        
     }    
     
     Circuit circuit() {
         return circuit;
     }
     public String regionName() { return circuit.getRegionName(); }
-    void debug(String message) { debug(message,null); }
-    void debug(String message, Throwable t) { Log.log(bot(),Log.DEBUG,"("+regionName()+") "+message,t); }
-    void info(String message) { info(message,null); }
-    void info(String message, Throwable t) { Log.log(bot(),Log.INFO,"("+regionName()+") "+message,t); }
-    void note(String message) { note(message,null); }
-    void note(String message, Throwable t) { Log.log(bot(),Log.NOTE,"("+regionName()+") "+message,t); }
-    void warn(String message) { warn(message,null); }
-    void warn(String message, Throwable t) { Log.log(bot(),Log.WARNING,"("+regionName()+") "+message,t); }
-    void error(String message) { error(message,null); }
-    void error(String message, Throwable t) { Log.log(bot(),Log.ERROR,"("+regionName()+") "+message,t); }
-    void crit(String message) { crit(message,null); }
-    void crit(String message, Throwable t) { Log.log(bot(),Log.CRITICAL,"("+regionName()+") "+message,t); }    
-
-
-
-
-
+    @Override
+    public String toString() { return circuit.toString()+" / CAPS"; }
 }

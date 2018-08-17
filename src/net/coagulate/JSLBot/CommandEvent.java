@@ -1,6 +1,11 @@
 package net.coagulate.JSLBot;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
@@ -12,10 +17,10 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  */
 public class CommandEvent extends Event {
     // K=V style parameters, typeless
-    private Map<String,String> parameters;
+    private final Map<String,String> parameters;
     public Map<String,String> parameters() {return parameters;}
     // auto IM the response to
-    private LLUUID respondto; public LLUUID respondTo() { return respondto; }
+    private final LLUUID respondto; public LLUUID respondTo() { return respondto; }
     public void respondTo(String response) { this.response=response; }
     // the response its self, for other threads to read.
     private String response=null;
@@ -51,12 +56,12 @@ public class CommandEvent extends Event {
     }
 
     /** Submits this command onto the queue for DELAYED processing by the AI thread.
-     * This is the most normal way to do things unless you know better.
-     * @throws IOException 
+     * This is the most normal way to do things unless you know better. 
      */
-    public void submit() throws IOException {
+    @Override
+    public void submit() {
         immediate(false);
-        bot().submit(this);
+        bot().brain().queue(this);
     }    
     /** Submits the command for DELAYED processing, then halts this thread until it completes or times out
      * 
@@ -69,7 +74,9 @@ public class CommandEvent extends Event {
         waitFinish(timeoutmillis);
         return response();
     }
-    /** Submits the command for Delayed processing and waits 10 seconds for it to complete */
+    /** Submits the command for Delayed processing and waits 10 seconds for it to complete
+     * @return 
+     * @throws java.io.IOException */
     public String submitAndWait() throws IOException { return submitAndWait(10000); }
     /** Submits the command for immediate execution, the thread calling this function will be hijacked to execute the command.
      * There are sometimes very good reasons for this, and sometimes its definitely the wrong thing to do.  If you're not sure, use submit().
@@ -78,7 +85,37 @@ public class CommandEvent extends Event {
      */
     public String execute() throws IOException {
         immediate(true);
-        return bot().submit(this);
+        return bot().brain().execute(this);
     }
+
+    String run(Object callon, Method handler) {
+        if(Debug.TRACKCOMMANDS) { Log.debug(this,"Entering run() for "+handler.getName()+" in class "+callon.getClass().getSimpleName()); }
+        try {
+            return (String) handler.invoke(callon,getParameters(handler,this).toArray());
+        } catch (IllegalAccessException|IllegalArgumentException ex) {
+            throw new AssertionError("Error accessing "+handler.getName()+" in class "+callon.getClass().getName(),ex);
+        } catch (InvocationTargetException ex) {
+            Throwable t=ex;
+            if (t.getCause()!=null) { t=t.getCause(); }
+            Log.debug(this,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+t.toString(),t);
+            return "Exception:"+t.toString();
+        }
+    }
+    
+
+    private List<Object> getParameters(Method method, CommandEvent event) {
+        List<Object> params=new ArrayList<>();
+        params.add(event.region()); boolean firstparam=true;
+        for (Parameter param:method.getParameters()) {
+            //System.out.println(param.toString());
+            if (firstparam) { firstparam=false; }
+            else {
+                String paramname=param.getName();
+                if (event.parameters().containsKey(paramname)) { params.add(event.parameters().get(paramname)); }
+                else { params.add(null); }
+            }
+        }
+        return params;
+    }    
 
 }

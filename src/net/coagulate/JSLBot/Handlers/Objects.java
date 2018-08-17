@@ -12,8 +12,6 @@ import static net.coagulate.JSLBot.Handlers.Objects.CompressedFlags.*;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import static net.coagulate.JSLBot.Log.debug;
-import static net.coagulate.JSLBot.Log.warn;
 import net.coagulate.JSLBot.Packets.Messages.DeRezObject;
 import net.coagulate.JSLBot.Packets.Messages.DeRezObject_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
@@ -38,7 +36,6 @@ import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U8;
 import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
-import net.coagulate.JSLBot.XMLEvent;
 
 /** Processes messages about objects within the world
  *
@@ -53,37 +50,18 @@ public class Objects extends Handler {
         public int getValue() { return id; }
     }
 
-    
     public Objects(JSLBot bot,Configuration c) { super(bot,c); }
-    @Override
-    public String toString() {
-        return "Object tracking manager";
-    }
-    @Override
-    public void initialise() throws Exception {
-        bot.addImmediateUDP("ObjectUpdate", this);
-        bot.addImmediateUDP("ImprovedTerseObjectUpdate", this);
-        bot.addImmediateUDP("KillObject",this);
-        bot.addImmediateUDP("ObjectPropertiesFamily",this);
-        bot.addImmediateUDP("ObjectUpdateCached",this);
-        bot.addImmediateUDP("ObjectUpdateCompressed",this);
-        bot.addCommand("list",this);
-        bot.addCommand("roots",this);
-        bot.addCommand("find",this);
-        bot.addCommand("get",this);
-        bot.addCommand("uuid",this);
-        bot.addCommand("return",this);
-    }
-
+    
     @Override
     public void loggedIn() throws Exception {
     }
 
-    private void processObjectData(ObjectUpdate data,Regional r) throws IOException {
+    public void objectUpdateUDPImmediate(UDPEvent event) {
+        ObjectUpdate data=(ObjectUpdate) event.body();
         // and request more info too
         //System.out.println(data.dump());
         for (ObjectUpdate_bObjectData obj:data.bobjectdata) {            
-            ObjectData od=r.getObject(obj.vid.value);
+            ObjectData od=event.region().getObject(obj.vid.value);
             od.id=obj.vid;
             od.fullid=obj.vfullid;
             od.clickaction=obj.vclickaction;
@@ -96,25 +74,27 @@ public class Objects extends Handler {
                 reqobjs.bobjectdata.vobjectid=obj.vfullid;
                 reqobjs.bobjectdata.vrequestflags=obj.vid;  // believe we can use this as its passed back
                 od.requested=true;
-                r.circuit().send(reqobjs,true);
+                event.region().circuit().send(reqobjs,true);
             }
         }
     }
 
-    private void killObjects(KillObject killobject, Regional r) {
+    public void killObjectUDPImmediate(UDPEvent event) {
+        KillObject killobject=(KillObject) event.body();
         List<KillObject_bObjectData> killlist = killobject.bobjectdata;
         for (KillObject_bObjectData kill:killlist) {
-            r.killObject(kill.vid.value);
+            event.region().killObject(kill.vid.value);
         }
     }
 
-    private void objectProperties(ObjectPropertiesFamily object, Regional r) {
+    public void objectPropertiesFamilyUDPImmediate(UDPEvent event) {
+        ObjectPropertiesFamily object=(ObjectPropertiesFamily) event.body();
         int objectid=object.bobjectdata.vrequestflags.value;
-        if (objectid==0) { warn(bot,"ObjectProperties request flags are zero, which should be the object id"); }
-        ObjectData ourobj = r.getObject(objectid);
+        if (objectid==0) { warn(event,"ObjectProperties request flags are zero, which should be the object id"); }
+        ObjectData ourobj = event.region().getObject(objectid);
         if (Debug.TRACKNEWOBJECTS) {
             if (ourobj.name==null || (!ourobj.name.equals(object.bobjectdata.vname.toString()))) {
-                debug(bot,"New object named "+object.bobjectdata.vname.toString()+" in region "+r.getName());
+                debug(event,"New object named "+object.bobjectdata.vname.toString()+" in region "+event.region().getName());
             }
         }
         ourobj.name=object.bobjectdata.vname.toString();
@@ -125,13 +105,14 @@ public class Objects extends Handler {
         
     }
 
-    private void improvedTerseObjectUpdate(ImprovedTerseObjectUpdate msg, Regional region) {
+    public void improvedTerseObjectUpdateUDPImmediate(UDPEvent event) {
+        ImprovedTerseObjectUpdate msg=(ImprovedTerseObjectUpdate) event.body();
         for (ImprovedTerseObjectUpdate_bObjectData obj:msg.bobjectdata) {
             byte data[]=obj.vdata.value; // this is not well documented, but based on code...
             //System.out.println("ITOU data length: "+data.length);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             U32 id=new U32(buffer);
-            ObjectData object = region.getObject(id.value);
+            ObjectData object = event.region().getObject(id.value);
             U8 state=new U8(buffer);
             U8 notavatar=new U8(buffer);
             boolean avatar=notavatar.value!=0;
@@ -152,52 +133,15 @@ public class Objects extends Handler {
         }
     }
 
-    @Override
-    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        if (eventname.equals("ObjectUpdate")) {
-            processObjectData((ObjectUpdate) event.body(),region);
-        }
-        if (eventname.equals("KillObject")) {
-            killObjects((KillObject)event.body(),region); 
-        }
-        if (eventname.equals("ObjectPropertiesFamily")) {
-            objectProperties((ObjectPropertiesFamily)event.body(),region);
-        }
-        if (eventname.equals("ImprovedTerseObjectUpdate")) { 
-            improvedTerseObjectUpdate((ImprovedTerseObjectUpdate)event.body(),region);
-        }
-        if (eventname.equals("ObjectUpdateCached")) { 
-            objectUpdateCached((ObjectUpdateCached)event.body(),region);
-        }
-        if (eventname.equals("ObjectUpdateCompressed")) { 
-            objectUpdateCompressed((ObjectUpdateCompressed)event.body(),region);
-        }        
-    }
-
-    @Override
-    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     @CmdHelp(description = "List all objects to the console (debugging only)")
-    public String listCommand(Regional region) {
+    public String objectListCommand(Regional region) {
         for (Integer id:region.getObjects()) {
             System.out.println(region.getObject(id).toString());
         }
         return "Dumped to console because so many.";
     }
     @CmdHelp(description = "List all unowned objects to the console (debugging only)")
-    public String rootsCommand(Regional region) {
+    public String objectRootsCommand(Regional region) {
         for (Integer id:region.getObjects()) {
             ObjectData o = region.getObject(id);
             if (o.parentid==null || o.parentid.value==0) {
@@ -207,7 +151,7 @@ public class Objects extends Handler {
         return "Dumped to console because so many.";
     }
     @CmdHelp(description="Find an object by a name fragment")
-    public String findCommand(Regional region,
+    public String objectFindCommand(Regional region,
             @ParamHelp(description="Fragment of a name to search for")
             String name) {
         ObjectData best=null;
@@ -226,7 +170,8 @@ public class Objects extends Handler {
         return name+"->"+best.toString();            
     }
 
-    private void objectUpdateCached(ObjectUpdateCached objectUpdateCached, Regional region) throws IOException {
+    public void objectUpdateCachedUDPImmediate(UDPEvent event) {
+        ObjectUpdateCached objectUpdateCached=(ObjectUpdateCached) event.body();
         RequestMultipleObjects request=new RequestMultipleObjects();
         request.bagentdata.vagentid=bot.getUUID();
         request.bagentdata.vsessionid=bot.getSession();
@@ -234,19 +179,20 @@ public class Objects extends Handler {
         for (ObjectUpdateCached_bObjectData data:objectUpdateCached.bobjectdata) {
             int id=data.vid.value;
             int crc=data.vcrc.value;
-            if (!region.hasObject(id)) {
-                if (Debug.TRACKNEWOBJECTS) { debug(bot,"Cached update to unknown object "+id+" in region "+region.getName()); }
+            if (!event.region().hasObject(id)) {
+                if (Debug.TRACKNEWOBJECTS) { debug(event,"Cached update to unknown object "+id+" in region "+event.region().getName()); }
                 RequestMultipleObjects_bObjectData reqod=new RequestMultipleObjects_bObjectData();
                 reqod.vcachemisstype=new U8(0);
                 reqod.vid=data.vid;
                 request.bobjectdata.add(reqod);
             }
         }
-        if (!request.bobjectdata.isEmpty()) { region.circuit().send(request,true); }
+        if (!request.bobjectdata.isEmpty()) { event.region().circuit().send(request,true); }
     }
  
-    private void objectUpdateCompressed(ObjectUpdateCompressed ouc, Regional region) throws IOException {
-        //debug(bot,ouc.dump());
+    public void objectUpdateCompressedUDPImmediate(UDPEvent event) {
+        ObjectUpdateCompressed ouc=(ObjectUpdateCompressed) event.body();
+        Regional region=event.region();
         for (ObjectUpdateCompressed_bObjectData data:ouc.bobjectdata) {
             ByteBuffer buffer=ByteBuffer.wrap(data.vdata.value);
             LLUUID uuid=new LLUUID(buffer);
@@ -297,7 +243,7 @@ public class Objects extends Handler {
     }
     
     @CmdHelp(description="Lookup or request a prim by UUID")
-    public String uuidCommand(Regional region,
+    public String objectUUIDCommand(Regional region,
             @ParamHelp(description="Prim UUID")
             String uuid) throws IOException {
         LLUUID lluuid=new LLUUID(uuid);
@@ -308,7 +254,7 @@ public class Objects extends Handler {
     
     
     @CmdHelp(description="Lookup or request a prim by local id")
-    public String getCommand(Regional region,
+    public String objectGetCommand(Regional region,
             @ParamHelp(description="Local prim id (32 bit int)")
             String localid) throws IOException {
         int id=Integer.parseInt(localid);
@@ -326,7 +272,7 @@ public class Objects extends Handler {
     }
 
     @CmdHelp(description="Return a prim by UUID or localid")
-    public String returnCommand(Regional region,
+    public String objectReturnCommand(Regional region,
             @ParamHelp(description="UUID of prim to return")
             String primuuid,
             @ParamHelp(description = "LocalID of prim to return")

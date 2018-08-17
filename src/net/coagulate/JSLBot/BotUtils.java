@@ -24,7 +24,10 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
  * @author Iain Price
  */
 public abstract class BotUtils {
-    /** Turns a byte array into a hex string */
+    /** Turns a byte array into a hex string
+     * @param in Byte array
+     * @return Hex string representation.
+     */
     public static String hex(byte[] in) {
         final StringBuilder builder = new StringBuilder();
         for(byte b : in) {
@@ -33,7 +36,12 @@ public abstract class BotUtils {
         return builder.toString();
     }     
     
-    /** Get the machine's mac address as a hex string, required by the SL login */
+    /** Get the machine's mac address as a hex string, required by the SL login.
+     * 
+     * @return Mac address in hex form.
+     * @throws UnknownHostException 
+     * @throws SocketException 
+     */
     public static String getMac() throws UnknownHostException, SocketException {
         // this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
         Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
@@ -52,7 +60,13 @@ public abstract class BotUtils {
         return hex(mac);
     }
 
-    /** Hash a password using MD5 and prefix with $1$, used by SL login request */
+    /** Hash a password using MD5 and prefix with $1$, used by SL login request.
+     * If already prefixed with $!$, returned verbatim
+     * @param password Password, cleartext or MD5 with $1$ prefix
+     * @return MD5 hex hash of the password, with $1$ prefix, as used in SL login protocol
+     * @throws NoSuchAlgorithmException MD5 is not supported (?)
+     * @throws UnsupportedEncodingException UTF-8 is not supported
+     */
     public static String md5hash(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (password.startsWith("$1$")) {
             return password; // already hashed, or you have a really unfortunate choice of password :P
@@ -62,7 +76,21 @@ public abstract class BotUtils {
         return "$1$" + hex(digest);
     }
  
-    /** Create and execute the XMLRPC logon command */
+    /** Create and execute the XMLRPC logon command.
+     * 
+     * @param bot The owning bot making the connection
+     * @param firstname Login first name
+     * @param lastname Login last name (maybe 'resident')
+     * @param password Password, in clear text or MD5 hex string preceeded by $!$
+     * @param location Login location
+     * @return Map of KV pairs from login server
+     * @throws MalformedURLException
+     * @throws UnknownHostException
+     * @throws SocketException
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     * @throws XmlRpcException 
+     */
     public static Map loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, UnknownHostException, SocketException, NoSuchAlgorithmException, UnsupportedEncodingException, XmlRpcException {
         XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
@@ -97,7 +125,10 @@ public abstract class BotUtils {
         return result;
     }
 
-    /** A list of caps we request from a sim. */
+    /** A list of caps we request from a sim.
+     * 
+     * @return 
+     */
     public static LLSDArray getCAPSArray() {
         //Mostly here because its a giant horrible block of text
         LLSDArray req = new LLSDArray();
@@ -192,7 +223,6 @@ public abstract class BotUtils {
         if (zerocount>0) {
             output.add((byte)0);
             output.add((byte)zerocount);
-            zerocount=0;
         }
         byte[] outputbytes = new byte[output.size()];
         int offset=0;
@@ -203,7 +233,11 @@ public abstract class BotUtils {
         return outputbytes;
     }
 
-    /** Read a zero byte terminated string from a byte buffer */
+    /** Read a zero byte terminated string from a byte buffer.
+     * 
+     * @param buffer
+     * @return 
+     */
     public static String readZeroTerminatedString(ByteBuffer buffer) {
         List<Byte> bytes=new ArrayList<>();
         byte b=-1;

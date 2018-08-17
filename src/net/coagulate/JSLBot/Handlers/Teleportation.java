@@ -17,13 +17,6 @@ import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.Log;
-import static net.coagulate.JSLBot.Log.CRIT;
-import static net.coagulate.JSLBot.Log.INFO;
-import static net.coagulate.JSLBot.Log.NOTE;
-import static net.coagulate.JSLBot.Log.debug;
-import static net.coagulate.JSLBot.Log.info;
-import static net.coagulate.JSLBot.Log.log;
-import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLandmarkRequest;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
@@ -45,90 +38,71 @@ import net.coagulate.JSLBot.XMLEvent;
 public class Teleportation extends Handler {
 
     public Teleportation(JSLBot bot,Configuration c){super(bot,c); config=c;}
-    @Override
-    public String toString() {
-        return "Teleportation manager";
-    }
-    Object signal=new Object();
-    @Override
-    public void initialise() throws Exception {
-        bot.addCommand("go", this);
-        bot.addCommand("home", this);
-        bot.addImmediateUDP("TeleportProgress", this);
-        bot.addImmediateUDP("TeleportStart",this);
-        bot.addImmediateXML("TeleportFinish",this);
-        bot.addImmediateXML("TeleportFailed",this);
-        bot.addImmediateUDP("TeleportLocal",this);
-        bot.addUDP("ImprovedInstantMessage",this);
-    }
 
+    Object signal=new Object();
     boolean teleporting=false;
 
     @Override
-    public void loggedIn() throws Exception {
+    public void loggedIn() throws Exception {}
+
+    
+    public void teleportProgressUDPImmediate(UDPEvent event) {
+        TeleportProgress tp=(TeleportProgress) event.body();
+        debug(event,"Teleport Progress: "+(tp).binfo.vmessage.toString());
+    }
+    public void teleportStartUDPImmediate(UDPEvent event) {
+        TeleportStart tp=(TeleportStart) event.body();
+        info(event,"Teleportation has started (with flags "+tp.binfo.vteleportflags.value+")");
+    }
+    public void teleportLocalUDPImmediate(UDPEvent event) {
+        TeleportLocal tp=(TeleportLocal) event.body();
+        info(event,"Teleportation completed locally");
+        bot.completeAgentMovement();
+        bot.forceAgentUpdate();
+        teleporting=false;
+        synchronized(signal) { signal.notifyAll(); }
     }
 
-    @Override
-    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        Message p=event.body();
-        if (eventname.equals("TeleportProgress")) {
-            TeleportProgress tp=(TeleportProgress) p;
-            Log.log(bot,Log.DEBUG,"Teleport Progress: "+((TeleportProgress) p).binfo.vmessage.toString());
+    
+    public void teleportFailedXMLImmediate(XMLEvent event) {
+        //System.out.println(event.map().toXML());
+        String code="";
+        String reason="";
+        LLSDArray alertinfoarray = (LLSDArray) event.map().get("AlertInfo");
+        if (alertinfoarray!=null) {
+            LLSDMap inner=(LLSDMap) alertinfoarray.get().get(0);
+            code=((LLSDString)(inner.get("Message"))).toString();
         }
-        if (eventname.equals("TeleportStart")) {
-            TeleportStart tp=(TeleportStart) p;
-            log(bot,INFO,"Teleportation has started (with flags "+tp.binfo.vteleportflags.value+")");
+        LLSDArray infoarray=(LLSDArray) event.map().get("Info");
+        if (infoarray!=null) {
+            LLSDMap inner=(LLSDMap)infoarray.get().get(0);
+            reason=((LLSDString)(inner.get("Reason"))).toString();
         }
-        if (eventname.equals("TeleportLocal")) {
-            TeleportLocal tp=(TeleportLocal) p;
-            info(bot,"Teleportation completed locally");
-            bot.completeAgentMovement();
-            bot.forceAgentUpdate();
+        bot.completeAgentMovement();
+        bot.forceAgentUpdate();
+        if (code.equalsIgnoreCase("CouldntTPCloser")) {
             teleporting=false;
-            synchronized(signal) { signal.notifyAll(); }
+            note(event,"Teleport couldn't get closer");
+        } else {
+            warn(event,"Teleport failed ["+code+"] - "+reason);
         }
+        synchronized(signal) { signal.notifyAll(); }
     }
-
-    @Override
-    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        if (eventname.equals("TeleportFailed")) {
-            //System.out.println(event.map().toXML());
-            String code="";
-            String reason="";
-            LLSDArray alertinfoarray = (LLSDArray) event.map().get("AlertInfo");
-            if (alertinfoarray!=null) {
-                LLSDMap inner=(LLSDMap) alertinfoarray.get().get(0);
-                code=((LLSDString)(inner.get("Message"))).toString();
-            }
-            LLSDArray infoarray=(LLSDArray) event.map().get("Info");
-            if (infoarray!=null) {
-                LLSDMap inner=(LLSDMap)infoarray.get().get(0);
-                reason=((LLSDString)(inner.get("Reason"))).toString();
-            }
-            bot.completeAgentMovement();
-            bot.forceAgentUpdate();
-            if (code.equalsIgnoreCase("CouldntTPCloser")) {
-                teleporting=false;
-                bot.note("Teleport couldn't get closer");
-            } else {
-                bot.warn("Teleport failed ["+code+"] - "+reason);
-            }
-            synchronized(signal) { signal.notifyAll(); }
-        }
-        if (eventname.equals("TeleportFinish")) {            
-            // get the data for the new region
-            LLSDMap body=event.map();
-            //System.out.println(body.toXML());
-            LLSDArray info=(LLSDArray) body.get("Info");
-            LLSDMap tpinfo=(LLSDMap) info.get().get(0);
-            LLSDBinary simip=(LLSDBinary) tpinfo.get("SimIP");
-            LLSDInteger simport=(LLSDInteger) tpinfo.get("SimPort");
-            LLSDBinary regionhandle=(LLSDBinary) tpinfo.get("RegionHandle");
-            if (Debug.REGIONHANDLES) { debug(bot,"TeleportFinish provided regionhandle "+Long.toUnsignedString(regionhandle.toLong())); }
-            String targetaddress=simip.toIP();
-            // create the circuit and transfer to it
-            //System.out.println(event.body().toXML());
-            LLSDString caps=(LLSDString) tpinfo.get("SeedCapability");
+    public void teleportFinishXMLImmediate(XMLEvent event) {
+        // get the data for the new region
+        LLSDMap body=event.map();
+        //System.out.println(body.toXML());
+        LLSDArray info=(LLSDArray) body.get("Info");
+        LLSDMap tpinfo=(LLSDMap) info.get().get(0);
+        LLSDBinary simip=(LLSDBinary) tpinfo.get("SimIP");
+        LLSDInteger simport=(LLSDInteger) tpinfo.get("SimPort");
+        LLSDBinary regionhandle=(LLSDBinary) tpinfo.get("RegionHandle");
+        if (Debug.REGIONHANDLES) { debug(event,"TeleportFinish provided regionhandle "+Long.toUnsignedString(regionhandle.toLong())); }
+        String targetaddress=simip.toIP();
+        // create the circuit and transfer to it
+        //System.out.println(event.body().toXML());
+        LLSDString caps=(LLSDString) tpinfo.get("SeedCapability");
+        try {
             Circuit circuit=bot.createCircuit(targetaddress,simport.get(),regionhandle.toLong(),caps.toString());
             bot.setPrimaryCircuit(circuit);
             bot.completeAgentMovement();
@@ -137,50 +111,51 @@ public class Teleportation extends Handler {
             // set flag, notify the waiting thread
             teleporting=false;
             synchronized(signal) { signal.notifyAll(); }
+        } catch (IOException e) {
+            crit(event,"Failed to create teleport finish circuit, we might be losing our connection");
         }
+
     }
 
-    @Override
-    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        if (eventname.equals("ImprovedInstantMessage")) {
-            ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
-            int messagetype=m.bmessageblock.vdialog.value;
-            String messagetext="["+m.bmessageblock.vfromagentname.toString()+"] "+m.bmessageblock.vmessage.toString();
-            // this is a HEAVILY overloaded conduit of information
-            // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
+    
+    public void improvedInstantMessageUDPDelayed(UDPEvent event) {
+        ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
+        int messagetype=m.bmessageblock.vdialog.value;
+        String messagetext="["+m.bmessageblock.vfromagentname.toString()+"] "+m.bmessageblock.vmessage.toString();
+        // this is a HEAVILY overloaded conduit of information
+        // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
 
-            if (messagetype==22) {
-                CommandEvent check=new CommandEvent(bot, region, "teleportation.acceptlure", new HashMap<String,String>(), m.bagentdata.vagentid);
-                check.invokerUUID(m.bagentdata.vagentid);
-                String reject=((CnC)(bot.getHandler("CnC"))).checkAuth(check);
-                if (reject!=null) { return; } 
-                Log.log(bot,NOTE,"Accepting Teleport Lure: "+messagetext);
-                TeleportLureRequest req=new TeleportLureRequest();
-                req.binfo.vagentid=bot.getUUID();
-                req.binfo.vsessionid=bot.getSession();
-                req.binfo.vlureid=m.bmessageblock.vid;
-                //System.out.println(m.dump());
-                teleporting=true;
-                bot.send(req,true);
-                synchronized(signal) { signal.wait(10000); }
-                if (teleporting==true) {
-                    log(bot,CRIT,"Timer expired while teleporting, lost in transit?");
-                    bot.im(m.bagentdata.vagentid,"Failed to accept teleport lure, lost in transit?");
-                } else {
-                    info(bot,"Completed teleport intiated from lure");
-                    bot.im(m.bagentdata.vagentid,"Accepted teleport lure and completed transit");
-                }
+        if (messagetype==22) {
+            CommandEvent check=new CommandEvent(bot, event.region(), "acceptLures", new HashMap<String,String>(), m.bagentdata.vagentid);
+            check.invokerUUID(m.bagentdata.vagentid);
+            String reject=bot.brain().auth(check);
+            if (reject!=null) { return; } 
+            note(event,"Accepting Teleport Lure: "+messagetext);
+            TeleportLureRequest req=new TeleportLureRequest();
+            req.binfo.vagentid=bot.getUUID();
+            req.binfo.vsessionid=bot.getSession();
+            req.binfo.vlureid=m.bmessageblock.vid;
+            //System.out.println(m.dump());
+            teleporting=true;
+            bot.send(req,true);
+            synchronized(signal) { try { signal.wait(10000); } catch (InterruptedException e) {} }
+            if (teleporting==true) {
+                crit(event,"Timer expired while teleporting, lost in transit?");
+                bot.im(m.bagentdata.vagentid,"Failed to accept teleport lure, lost in transit?");
+            } else {
+                info(event,"Completed teleport intiated from lure");
+                bot.im(m.bagentdata.vagentid,"Accepted teleport lure and completed transit");
             }
         }
     }
 
-    @Override
+    
     public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @CmdHelp(description = "Initiate a teleport to a target location")
-    public String goCommand(Regional r,
+    public String teleportCommand(Regional r,
             @ParamHelp(description="Name of region to teleport to")
             String region,
             @ParamHelp(description="X Co-ordinate to request")
@@ -195,8 +170,8 @@ public class Teleportation extends Handler {
         tp.binfo.vposition=new LLVector3(x,y,z);
         Map<String,String> lookupparams=new HashMap<>();
         lookupparams.put("name",region);
-        String regionhandle=new CommandEvent(bot, bot.getRegional(), "regions.lookup", lookupparams, null).execute();
-        if (Debug.REGIONHANDLES) { debug(bot,"Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
+        String regionhandle=new CommandEvent(bot, bot.getRegional(), "regionLookup", lookupparams, null).execute();
+        if (Debug.REGIONHANDLES) { Log.debug(r,"Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
         try { tp.binfo.vregionhandle=new U64(regionhandle);  }
         catch (NumberFormatException e) { return "Failed to resolve region name "+region; }
         bot.send(tp,true);
@@ -220,7 +195,7 @@ public class Teleportation extends Handler {
     private boolean waitTeleport() throws IOException {
         teleporting=true;
         try { synchronized(signal) { signal.wait(10000); } } catch (InterruptedException e) {}
-        if (teleporting==true) { log(bot,CRIT,"Timer expired while teleporting, lost in transit?"); } 
+        if (teleporting==true) { Log.crit(bot,"Timer expired while teleporting, lost in transit?"); } 
         boolean completed=!teleporting;
         teleporting=false;
         bot.setMaxFOV();

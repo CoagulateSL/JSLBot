@@ -9,7 +9,7 @@ import java.util.Map;
  * @author Iain Price
  */
 public class JSLInterface {
-    private JSLBot bot;
+    private final JSLBot bot;
     public JSLInterface(JSLBot bot) { this.bot=bot; }
 
     public void instantMessage(String uuid, String message) throws IOException {
@@ -31,7 +31,7 @@ public class JSLInterface {
         cmd.put("avataruuid",avataruuid);
         cmd.put("groupuuid",groupuuid);
         cmd.put("roleuuid",roleuuid);
-        new CommandEvent(bot, bot.getRegional(), "groups.invite", cmd, null).submitAndWait();
+        new CommandEvent(bot, bot.getRegional(), "groupInvite", cmd, null).submitAndWait();
     }
 
     public void groupEject(String avataruuid, String groupuuid) throws IOException {
@@ -40,14 +40,14 @@ public class JSLInterface {
         cmd.put("avataruuid",avataruuid);
         cmd.put("groupuuid",groupuuid);
         //cmd.put("roleuuid",roleuuid);
-        new CommandEvent(bot, bot.getRegional(), "groups.eject", cmd, null).submitAndWait();
+        new CommandEvent(bot, bot.getRegional(), "groupEject", cmd, null).submitAndWait();
     }
 
     public void groupRoster(String groupuuid) throws IOException {
         bot.waitConnection(15000);
         Map<String,String> cmd=new HashMap<>();
         cmd.put("uuid",groupuuid);
-        new CommandEvent(bot,bot.getRegional(),"groups.roster",cmd,null).submitAndWait();
+        new CommandEvent(bot,bot.getRegional(),"groupRoster",cmd,null).submitAndWait();
     }
 
 

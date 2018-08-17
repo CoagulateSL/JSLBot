@@ -8,7 +8,7 @@ import net.coagulate.JSLBot.LLSD.LLSDMap;
  * @author Iain Price
  */
 public class XMLEvent extends Event {
-    private Atomic content;
+    private final Atomic content;
     public Atomic body() { return content; }
 
     public XMLEvent(JSLBot bot,Regional r,Atomic content,String name) {

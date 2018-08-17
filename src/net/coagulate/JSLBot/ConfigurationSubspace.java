@@ -14,6 +14,7 @@ public class ConfigurationSubspace extends Configuration {
         this.c=c;
         p=prefix;
     }
+    @Override
     public String get(String param) {
         return c.get(p+"."+param);
     }
@@ -28,6 +29,7 @@ public class ConfigurationSubspace extends Configuration {
         return c.dump();
     }
     
+    @Override
     public Configuration getMaster() {return c;}
 
     @Override

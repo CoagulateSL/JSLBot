@@ -5,12 +5,9 @@ import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import static java.util.Collections.list;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.coagulate.JSLBot.Packets.Types.Type;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
@@ -92,7 +89,8 @@ public abstract class Block {
                 if (debug) { System.out.println("< Exit Block recursion: "+f.getType().getName()); }
             } else {
                 if (debug) { System.out.println("Field "+f.getName()+" of type "+f.getType().getName()); }
-                // TODO cache me, cos this is stupidly inefficient compared.  though probably still meaningless?
+                // cache me?, cos this is stupidly inefficient compared.  though probably still meaningless?
+                // removed this as a 'task entry', this may not be this simple, there are Variable length fields, perhaps we have to just scan.
                 size+=fieldSize(f);
             }
             

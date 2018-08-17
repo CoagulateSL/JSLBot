@@ -8,7 +8,7 @@ import net.coagulate.JSLBot.Packets.Message;
  * @author Iain Price
  */
 public class UDPEvent extends Event {
-    private Message content;
+    private final Message content;
     public Message body() { return content; }
 
     public UDPEvent(JSLBot bot,Regional r,Message content,String name) {

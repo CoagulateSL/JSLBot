@@ -19,8 +19,6 @@ import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
-import static net.coagulate.JSLBot.Log.note;
-import static net.coagulate.JSLBot.Log.warn;
 import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest;
 import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest_bEjectData;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
@@ -46,23 +44,8 @@ public class Groups extends Handler {
         super(bot,config);
     }
 
-    @Override
-    public String toString() { return "Manages groups"; }
-
-    
-    @Override
-    public void initialise() throws Exception { 
-        bot.addXML("AgentGroupDataUpdate", this);
-        bot.addCommand("list",this);
-        bot.addCommand("invite",this);
-        bot.addCommand("eject",this);
-        bot.addCommand("roster",this);
-        bot.addImmediateUDP("ImprovedInstantMessage",this);
-        bot.addImmediateUDP("JoinGroupReply",this);
-    }
-
     @CmdHelp(description = "Invite a user to a given group/role")
-    public String inviteCommand(Regional region,String avataruuid,String groupuuid,String roleuuid) throws IOException {
+    public String groupInviteCommand(Regional region,String avataruuid,String groupuuid,String roleuuid) throws IOException {
         LLUUID avatar=new LLUUID(avataruuid);
         LLUUID group=new LLUUID(groupuuid);
         LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -80,7 +63,7 @@ public class Groups extends Handler {
     }
 
     @CmdHelp(description = "Eject a user from a given group/role")
-    public String ejectCommand(Regional region,String avataruuid,String groupuuid) throws IOException {
+    public String groupEjectCommand(Regional region,String avataruuid,String groupuuid) throws IOException {
         LLUUID avatar=new LLUUID(avataruuid);
         LLUUID group=new LLUUID(groupuuid);
         //LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -97,7 +80,7 @@ public class Groups extends Handler {
     }
     
     @CmdHelp(description="List groups the logged in agent is a member of")
-    public String listCommand(Regional region) throws Exception {
+    public String groupsListCommand(Regional region) throws Exception {
         String resp="Groups:";
         synchronized(groups) {
             for(GroupData g:groups.values()) {
@@ -111,11 +94,53 @@ public class Groups extends Handler {
     }
         
 
+    
     @Override
     public void loggedIn() throws Exception {
     }
 
-    private void agentGroupDataUpdate(LLSDMap body, Regional region) {
+
+    private Map<Long,GroupData> groups=new HashMap<>();
+
+    
+    public void improvedInstantMessageUDPImmediate(UDPEvent event) {
+        ImprovedInstantMessage m=(ImprovedInstantMessage)event.body();
+        if (m.bmessageblock.vdialog.value==3) {
+            U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
+            int fee=feeraw.value;
+            LLUUID groupid=m.bmessageblock.vid;
+            Map<String,String> param=new HashMap<>();
+            param.put("groupid",groupid.toString());
+            CommandEvent join=new CommandEvent(bot, event.region(), "acceptGroupInvites", param, null);
+            join.invokerUsername(m.bmessageblock.vfromagentname.toString());
+            String reject="REJECTED ALL"; //FIX ME((CnC)(bot.getHandler("CnC"))).checkAuth(join);
+            byte num=35;
+            if (fee>0) { num=36; warn(event,"Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); }
+            if (num==35 && reject!=null) { note(event,"Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); num=36;}
+            ImprovedInstantMessage im=new ImprovedInstantMessage();
+            im.bagentdata.vagentid=bot.getUUID();
+            im.bagentdata.vsessionid=bot.getSession();
+            im.bmessageblock.vfromagentname=new Variable1(bot.getUsername());
+            im.bmessageblock.vtoagentid=groupid;
+            im.bmessageblock.vmessage=new Variable2();
+            im.bmessageblock.vid=m.bmessageblock.vid;
+            im.bmessageblock.vdialog=new U8(num);
+            bot.send(im,true);
+        }
+    }
+    
+    public void joinGroupReplyUDPImmediate(UDPEvent event) {
+        JoinGroupReply jgr=(JoinGroupReply)event.body();
+        String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
+        if (jgr.bgroupdata.vsuccess.value!=0) {
+            note(event,"Joined group "+groupid);
+        } else {
+            warn(event,"Failed to join group "+groupid);
+        }
+    }
+
+    public void agentGroupDataUpdateXMLDelayed(XMLEvent event) {
+        LLSDMap body=event.map();
         LLSDArray groupslist=(LLSDArray) body.get("GroupData");
         synchronized(groups) {
             for (Iterator it = groupslist.iterator(); it.hasNext();) {
@@ -138,69 +163,14 @@ public class Groups extends Handler {
             }
         }
     }
-    
-    private Map<Long,GroupData> groups=new HashMap<>();
-
-    @Override
-    public void processUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception {
-        if (eventname.equals("ImprovedInstantMessage")) {
-            ImprovedInstantMessage m=(ImprovedInstantMessage)event.body();
-            if (m.bmessageblock.vdialog.value==3) {
-                U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
-                int fee=feeraw.value;
-                LLUUID groupid=m.bmessageblock.vid;
-                Map<String,String> param=new HashMap<>();
-                param.put("groupid",groupid.toString());
-                CommandEvent join=new CommandEvent(bot, region, "groups.join", param, null);
-                join.invokerUsername(m.bmessageblock.vfromagentname.toString());
-                String reject=((CnC)(bot.getHandler("CnC"))).checkAuth(join);
-                byte num=35;
-                if (fee>0) { num=36; warn(bot,"Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); }
-                if (num==35 && reject!=null) { note(bot,"Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); num=36;}
-                ImprovedInstantMessage im=new ImprovedInstantMessage();
-                im.bagentdata.vagentid=bot.getUUID();
-                im.bagentdata.vsessionid=bot.getSession();
-                im.bmessageblock.vfromagentname=new Variable1(bot.getUsername());
-                im.bmessageblock.vtoagentid=groupid;
-                im.bmessageblock.vmessage=new Variable2();
-                im.bmessageblock.vid=m.bmessageblock.vid;
-                im.bmessageblock.vdialog=new U8(num);
-                bot.send(im,true);
-            }
-            return;
-        }
-        if (eventname.equals("JoinGroupReply")) {
-            JoinGroupReply jgr=(JoinGroupReply)event.body();
-            String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
-            if (jgr.bgroupdata.vsuccess.value!=0) {
-                note(bot,"Joined group "+groupid);
-            } else {
-                warn(bot,"Failed to join group "+groupid);
-            }
-        }
-    }
-
-    @Override
-    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        if (eventname.equals("AgentGroupDataUpdate")) { agentGroupDataUpdate(event.map(),region); }
-    }
+        
 
     Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
     public LLSDMap getMembership(LLUUID uuid) {
         for (LLUUID compare:groupmembership.keySet()) { if (compare.equals(uuid)) { return groupmembership.get(compare); } }
         return null;
     }
-    public void rosterCommand(Regional region,String uuid) throws IOException {
+    public void groupRosterCommand(Regional region,String uuid) throws IOException {
         /*GroupMembersRequest gmr=new GroupMembersRequest();
         gmr.bagentdata.vagentid=bot.getUUID();
         gmr.bagentdata.vsessionid=bot.getSession();

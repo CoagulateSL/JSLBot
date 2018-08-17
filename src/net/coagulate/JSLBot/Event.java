@@ -6,40 +6,59 @@ import static net.coagulate.JSLBot.Event.EVENTTYPE.*;
 import static net.coagulate.JSLBot.Event.STATUS.*;
 
 
-/**
+/**  Abstract superclass of different types of event we propagate.
  *
  * @author Iain Price
  */
 public abstract class Event {
 
-    Object statusmonitor=new Object();
+    // locking the status field, command event monitors this
+    final Object statusmonitor=new Object();
     /** Stages an event goes through */
     public enum STATUS { UNSUBMITTED, IMMEDIATE, QUEUED, RUNNING, COMPLETE }
     private STATUS status=UNSUBMITTED;
+    /** Get the event's current status
+     * 
+     * @return 
+     */
     public STATUS status() { return status; }
+    /** Set the event's current status
+     * 
+     * @param status 
+     */
     void status (STATUS status) {
         synchronized(statusmonitor) {
             this.status=status;
-            if (Debug.TRACKCOMMANDS && type==COMMAND) { Log.debug(bot(),"Command "+getName()+" entering status "+status); }
+            if (Debug.TRACKCOMMANDS && type==COMMAND) { Log.debug(r,"Command "+getName()+" entering status "+status); }
             statusmonitor.notify();
         }
     }
     
     /** Supported event types */
     public enum EVENTTYPE { UDP, XML, COMMAND };
-    private EVENTTYPE type; public EVENTTYPE type() { return type; }
-    public String typePrefix() { 
+    private EVENTTYPE type;
+    /** Get the events type
+     * 
+     * @return 
+     */
+    public EVENTTYPE type() { return type; }
+    /** Returns the type as a string
+     * 
+     * @return 
+     */
+    public String typeString() { 
         if (type==UDP) { return "UDP"; }
         if (type==XML) { return "XML"; }
-        if (type==COMMAND) { return "CMD"; }
-        throw new IllegalArgumentException("How did you get here?  The constructor should have thrown this exception.");
+        if (type==COMMAND) { return "Command"; }
+        throw new AssertionError("Unknown type.  How did you get here?  The constructor should have thrown this exception.");
     }
     
-    private Regional r;
-    /** Region this event originated from, if applicable */
+    private final Regional r;
+    /** Region this event originated from, if applicable
+     * @return  */
     public Regional region() { return r; }
 
-    private JSLBot bot;
+    private final JSLBot bot;
     
     public JSLBot bot() { return bot; }
     
@@ -57,12 +76,16 @@ public abstract class Event {
         throw new IllegalArgumentException("This class "+this.getClass().getName()+" is not assignable from the expected types");
     }
     
-    private String name;
+    @Override
+    public String toString() {
+        return r.toString()+"/"+getPrefixedName();
+    }
+    private final String name;
     public final String getName() { return name; }
     public abstract String dump();
     
     public String getPrefixedName() {
-        return typePrefix()+"/"+getName();
+        return typeString()+"/"+getName();
     }
     
     /** Submit event for full queue processing.
@@ -70,7 +93,7 @@ public abstract class Event {
      * @throws IOException 
      */
     public void submit() throws IOException {
-        bot().submit(this);
+        bot().brain().execute(this);
     }
 
     public void waitFinish(long milliseconds) {

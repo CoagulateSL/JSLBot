@@ -11,22 +11,16 @@ public abstract class Handler {
     public Handler(JSLBot bot,Configuration config){this.bot=bot; this.config=config;}
     @Override
     /** Name of the handler */
-    public abstract String toString();
-    /** Initialisation hook, called before login, use to register Event Handlers with the bot */
-    public abstract void initialise() throws Exception;
-    // handler for IMMEDIATE mode
-    // DO NOT USE OR IMPLEMENT UNLESS YOU ABSOLUTELY HAVE TO, KNOW WHY IT NEEDS TO BE HERE, AND UNDERSTAND WHY THERE IS A BIG CAPS WARNING HERE :P
-    // there are explanations of the threading model in JSLBot.java, go read those, if you still dont get it, seek advice
-    // messing up processImmediate will do horrible things to your bot, like cause it to get disconnected, or just timeout/deadlock
-    /** IMMEDIATE mode handler for UDP packets */
-    public abstract void processImmediateUDP(Regional region, UDPEvent event, String eventname) throws Exception;
-    /** IMMEDIATE mode handler for XML messages */
-    public abstract void processImmediateXML(Regional region, XMLEvent event, String eventname) throws Exception;
-    /** Queued handler for UDP packets */
-    public abstract void processUDP(Regional region, UDPEvent event, String eventname) throws Exception;
-    /** Queued handler for XML events */
-    public abstract void processXML(Regional region, XMLEvent event, String eventname) throws Exception;
-    /** Hook for post login activities */
+    public String toString() { return bot.toString()+"/"+this.getClass().getSimpleName(); }
+    /** Hook for post login activities
+     * @throws java.lang.Exception */
     public abstract void loggedIn() throws Exception;
+ 
     
+    protected void debug(Event event,String message) { Log.debug((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }
+    protected void info(Event event,String message) { Log.info((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }
+    protected void note(Event event,String message) { Log.note((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }
+    protected void warn(Event event,String message) { Log.warn((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }
+    protected void error(Event event,String message) { Log.error((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }
+    protected void crit(Event event,String message) { Log.crit((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }
 }

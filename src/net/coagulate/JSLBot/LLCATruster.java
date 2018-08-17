@@ -22,12 +22,13 @@ import javax.net.ssl.X509TrustManager;
  * @author Iain Price
  */
 public class LLCATruster implements X509TrustManager,HostnameVerifier {
-
+    
     private static X509Certificate[] cas;
     private static Boolean initialised=false;
     public synchronized static void initialise() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         if (initialised) { return; }
-        new LLCATruster();
+        LLCATruster llcaTruster = new LLCATruster();
+        HttpsURLConnection.setDefaultHostnameVerifier(llcaTruster);
         initialised=true;
     }
 
@@ -44,22 +45,25 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
         sc.init(null,new TrustManager[] {this}, new java.security.SecureRandom());
         // install
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(this);
     }
 
-    // FIXME
     @Override
     public boolean verify(String string, SSLSession ssls) {
-        return true;
+        throw new AssertionError("Verify for "+string+" called with session "+ssls.toString());
+        //return true;
     }
 
     @Override
     public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+        throw new AssertionError("CheckClientTrusted called in LLCATruster");
     }  
 
     @Override
     public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
-        // similarly checking this does anything might be smart
+        // FIXME
+        //System.out.println("Cert len:"+xcs.length);
+        //System.out.println("Random string:"+string);
+        //throw new AssertionError("CheckServerTrusted called in LLCATruster");
     }
 
     @Override

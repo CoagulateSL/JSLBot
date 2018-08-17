@@ -1,26 +1,19 @@
 package net.coagulate.JSLBot.Packets;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import net.coagulate.JSLBot.Circuit;
 import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Event;
-import net.coagulate.JSLBot.Packets.Types.Type;
-import net.coagulate.JSLBot.Packets.Types.U32BE;
-import net.coagulate.JSLBot.Packets.Types.U32;
-import net.coagulate.JSLBot.Packets.Types.U8;
 import net.coagulate.JSLBot.Packets.Messages.Lookup;
 import net.coagulate.JSLBot.Packets.Types.U16BE;
+import net.coagulate.JSLBot.Packets.Types.U32BE;
+import net.coagulate.JSLBot.Packets.Types.U8;
 
 /**
  *

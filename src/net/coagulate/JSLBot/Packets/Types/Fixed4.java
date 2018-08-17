@@ -2,7 +2,6 @@ package net.coagulate.JSLBot.Packets.Types;
 
 import java.nio.ByteBuffer;
 import net.coagulate.JSLBot.BotUtils;
-import net.coagulate.JSLBot.JSLBot;
 
 /**
  *
