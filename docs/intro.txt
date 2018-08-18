@@ -1,0 +1,17 @@
+Welcome to JSLBot
+
+JSLBot is a Java Second Life Bot, hence the name.
+
+Unlike most other offerings in the field, this was not built on or converted from libOMV, but was written from scratch in an attempt to streamline the implementation while learning the protocol allowing me to work on fixing implementation issues that appear in some other bots.
+
+(this said, thanks to LibOMV, Firestorm and Linden Labs for their open source implementations of the protocol which were used as reference implementations by me during development for helping to understand the less well documented aspects of the Second Life protocol)
+
+This is an early development release ; I have chosen this point to release the code as I am now using it in a production capacity within other interests I have - as such the bot is somewhat proven to work and be capable of executing basic functionality, if you're a programmer and prepared to integrate it.
+
+Future developments will attempt to flesh out the implementations, particularly around things bots usually end up manipulating - groups, objects, etc, as well as anything that crops up as a use case.
+
+The lower levels of the bot work quite well at this point, notably this means UDP circuits (multiple), XML message, event queues, teleporting and general infrastructure for communicating with the servers is mostly in place.  There are a few omissions perhaps in a few of the types, and some of the message formats require "sub-decoding".  There may be a few loose ends around recognising disconnected states and restarting the bot successfully.
+
+The middle layer is partially implemented; by this I mean the actual message processing to create a cohesive world state and allow interaction.  The bot understands some messages about parcels, regions, objects, instant/nearby chat messages and has a basic "IM" infrastructure for creating events, and a mechanism for external Java code to insert command events too.  That said there is a lot of functionality lacking, some intentionally (such as mesh / texture downloads, sound events, etc etc) where such things are felt not to be that useful to a bot, some simply because I've not reached the point of needing that.  Basic group/im/parcel functionality is available right now without having to code too much into JSLBot further.
+
+The higher layer is practically non existant ; by which I mean a reasonable user interface.  If you launch JSLBot out of the box it /should/ ask for some configuration data and connect to the server, and should be interactable from there by IM.  However the code currently lacks any way to configure it to accept messages from anywhere else or any "console" commands (i.e. interactivity, it's coded as a background service first and foremost and lacks a interactive user interface).  This is likely to be developed as a rudimentary addon to JSLBot, and a more web-orientated interface may be developed (though may be kept as a separate proprietary project / service).

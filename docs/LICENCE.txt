@@ -1,0 +1,8 @@
+This licence is likely to change.  This licence applies to any currently downloaded versions of this software, but does not extend to future versions (which may have a different licence)
+
+[ This isn't intended to be an attempt to screw anyone over, I'm in coding mode at the moment and dont want to sit down and examine the nuances of licences.  It's likely to be GPL or LGPL, perhaps the latter if i understand correctly as I am fine with the bot being reused as a component in a commercial product, provided the bot is not overly exploited etc etc - a typical open source setup - help the bot as a open source base and build your profit on the stuff you've developed from scratch to /supplement/ the bot - you should be reselling a service you built on top of the bot, not simply the bot its self.  I'm aware of the 'run on your own PC' bot packages available, this product should not simply be resold as such, because it does that out of the box and free, you must add significant value/service on top of this, by which I mean more than a stop/start button... ]
+
+For now, commercial reuse or profiting from this code is prohibited.  Copyright remains with me (the owner of the JSLBot repository on Github).  I am open to discussion, and revamping the entire licence in a future version.
+
+[ Until there is even any interest in this code, I have better things to do... ]
+
