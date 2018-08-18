@@ -292,37 +292,6 @@ public class JSLBot extends Thread {
     public void setPrimaryCircuit(Circuit c) { primary=c; }
     
 
-
-
-/*    public String getHelp(String command) {
-        command=command.toLowerCase();
-        Handler handler=immediatehandlers.get("CMD/"+command).get(0);
-        if (handler==null) { throw new IllegalArgumentException("Could not find command"); }
-        Method m=getMethod(handler,command);
-        String ret="\nCommand: "+command;
-        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+((CmdHelp)(m.getAnnotation(CmdHelp.class))).description(); }
-        for (Parameter param:m.getParameters()) {
-            if (!param.getType().equals(Regional.class)) {
-                ret+="\n"+param.getName();
-                if (param.getAnnotation(ParamHelp.class)!=null) {
-                    ret+=" - "+param.getAnnotation(ParamHelp.class).description();
-                }
-            }
-        }
-        return ret;
-    }
-    public Map<String,Map<String,String>> getCommands() {
-        Map<String,Map<String,String>> ret=new HashMap<>();
-        for (String name:delayedhandlers.keySet()) {
-            if (name.startsWith("CMD/")) {
-                name=name.substring(4);
-                ret.put(name,null);
-            }
-        }
-        return ret;
-    }
-*/
-
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
     @Target(ElementType.METHOD)

@@ -79,6 +79,14 @@ public class Brain {
             }
         }
     }
+    public Method getCommand(String name) {
+        return commandmap.get((name+"command").toLowerCase());
+    }
+    public Set<String> getCommands() {
+        Set<String> ret=new HashSet<>();
+        ret.addAll(commandmap.keySet());
+        return ret;
+    }
     
     private Handler createHandler(String name) throws InvocationTargetException {
         try {
@@ -300,4 +308,5 @@ public class Brain {
         }
         throw new IllegalArgumentException("No handler called '"+name+"' is loaded");
     }
+
 }

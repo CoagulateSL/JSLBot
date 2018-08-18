@@ -1,8 +1,14 @@
 package net.coagulate.JSLBot.Handlers;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.coagulate.JSLBot.Circuit;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
@@ -368,5 +374,39 @@ public class CnC extends Handler {
             String message) {
         bot.im(new LLUUID(uuid), message);
         return "IM sent";
+    }
+    
+    @CmdHelp(description="Get Help :)  If you see this you're doing it right")
+    public String helpCommand(Regional r,
+            @ParamHelp(description="Optional command to get more info about")
+            String command) {
+        if (command==null || command.isEmpty()) {
+            String response="";
+            Set<String> unsortedcommands = bot.brain().getCommands();
+            List<String> commands=new ArrayList<>();
+            commands.addAll(unsortedcommands);
+            Collections.sort(commands);
+            for (String acommand:commands) {
+                if (!response.isEmpty()) { response+=", "; } else { response="\n"; }
+                acommand=acommand.substring(0,acommand.length()-"command".length());
+                response+=acommand;
+            }
+            response+="\n\nUse 'help command <command>' for more information";
+            return response;
+        }
+        command=command.toLowerCase();
+        Method m=bot.brain().getCommand(command);
+        if (m==null) { throw new IllegalArgumentException("Could not find command"); }
+        String ret="\nCommand: "+command;
+        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+((CmdHelp)(m.getAnnotation(CmdHelp.class))).description(); }
+        for (Parameter param:m.getParameters()) {
+            if (!param.getType().equals(Regional.class)) {
+                ret+="\n"+param.getName();
+                if (param.getAnnotation(ParamHelp.class)!=null) {
+                    ret+=" - "+param.getAnnotation(ParamHelp.class).description();
+                }
+            }
+        }
+        return ret;
     }
 }
