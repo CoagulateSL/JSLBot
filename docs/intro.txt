@@ -15,3 +15,31 @@ The lower levels of the bot work quite well at this point, notably this means UD
 The middle layer is partially implemented; by this I mean the actual message processing to create a cohesive world state and allow interaction.  The bot understands some messages about parcels, regions, objects, instant/nearby chat messages and has a basic "IM" infrastructure for creating events, and a mechanism for external Java code to insert command events too.  That said there is a lot of functionality lacking, some intentionally (such as mesh / texture downloads, sound events, etc etc) where such things are felt not to be that useful to a bot, some simply because I've not reached the point of needing that.  Basic group/im/parcel functionality is available right now without having to code too much into JSLBot further.
 
 The higher layer is practically non existant ; by which I mean a reasonable user interface.  If you launch JSLBot out of the box it /should/ ask for some configuration data and connect to the server, and should be interactable from there by IM.  However the code currently lacks any way to configure it to accept messages from anywhere else or any "console" commands (i.e. interactivity, it's coded as a background service first and foremost and lacks a interactive user interface).  This is likely to be developed as a rudimentary addon to JSLBot, and a more web-orientated interface may be developed (though may be kept as a separate proprietary project / service).
+
+
+USAGE
+
+The most basic way is to compile the JAR file using ANT and then launch it, as instructed by ANT, from the dist folder.
+
+It's best not to use 'ant run' for the first launch as it tends to interfer with the console IO for some reason.
+
+You want to run the class 'net.coagulate.JSLBot.Test' in this mode.
+
+The bot should be given a single parameter - a writable location for a configuration file.
+
+On startup if this file is not found then it will be initialised, the bot's firstname, lastname and password are required, and an owner UUID AND name are required for ownership to work properly.
+
+Once started and connected to Second Life you may interact with it via instant message, try "help" or "*help" (the latter i suspect) to get a list of commands, then "*help command <command>" for more (e.g. "*help command help" will give help on the help command)
+
+Beyond this you'll probably need to improve the authorsers if you wish to control the bot from objects etc.
+
+ALTERNATIVE USAGE.
+
+Invoke a "new JSLBot(Configuration)", either with a preconstructed TransientConfiguration store, or a FileConfiguration store, or your own subclass implementation of Configuration.
+
+Then invoke either JSLBot.start() to run in the background or JSLBot.run() to lose your thread to JSLBot.
+
+You may interact with JSLBot through its API interface (call JSLBot.api() to acquire) and this class provides a few documented methods for queueing commands into the bot's brain.
+
+You may also wish to call JSLBot.setAlwaysReconnect().
+
