@@ -4,7 +4,7 @@ import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.JSLBot;
 
-/**
+/** General contract for an authorisation plugin.
  *
  * @author Iain Price
  */

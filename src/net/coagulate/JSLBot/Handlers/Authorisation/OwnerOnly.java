@@ -13,6 +13,11 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 public class OwnerOnly extends Authorisation {
     private String ownerusername;
     private LLUUID owneruuid;
+    /** Create an owner only authoriser.
+     * 
+     * @param bot The creating bot
+     * @param c The configuration, from which "ownerusername" and "owneruuid" will be read.
+     */
     public OwnerOnly(JSLBot bot,Configuration c) {
         super(bot,c);
         ownerusername=c.get("ownerusername");
@@ -25,6 +30,13 @@ public class OwnerOnly extends Authorisation {
         if (owneruuid!=null) { if (!permitted.isEmpty()) { permitted+=" "; } permitted+=owneruuid.toUUIDString(); }
         Log.info(bot,"OwnerOnly mode enabled, authorised for "+permitted);
     }
+    /** Approves events if issued by the owner.
+     * Rejects all if no uuid + username defined.
+     * Prefers to authorise by UUID but not all command event paths have this, will fall pack to the username match.
+     * @param event The command event to inspect
+     * @return Null if invoked by the owner and thus approved, otherwise a reason for rejection.
+     */
+    @Override
     public String approve(CommandEvent event) {
         if (owneruuid==null && ownerusername==null) { return "Owner authorisation configured but no owner set, essentially denying all"; }
         String invokerusername=event.invokerUsername();

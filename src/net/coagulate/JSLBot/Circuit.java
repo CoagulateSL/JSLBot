@@ -519,12 +519,8 @@ public final class Circuit extends Thread implements Closeable {
         }
         capsurl=newcapsurl;
         if (Debug.EVENTQUEUE) { debug("Establishing connection to CAPS for region "+getRegionName()); }
-        try {
-            caps=new CAPS(this,newcapsurl);
-            caps.start();
-        } catch (IOException e) {
-            crit("Failed to launch CAPS / event queue, we might be stranded",e);
-        }
+        caps=new CAPS(this,newcapsurl);
+        caps.start();
     }
 
     @Override
