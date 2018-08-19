@@ -6,8 +6,8 @@ import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
 
-/**
- *
+/**  Used to absorb message types we're not interested in and dont want unhandled warnings about.
+ * Mostly audio/visual cues.
  * @author Iain Price
  */
 public class Sink extends Handler {

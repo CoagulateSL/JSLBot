@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot;
 
-import java.io.IOException;
 import java.util.Date;
 import static net.coagulate.JSLBot.Event.EVENTTYPE.*;
 import static net.coagulate.JSLBot.Event.STATUS.*;
@@ -19,7 +18,7 @@ public abstract class Event {
     private STATUS status=UNSUBMITTED;
     /** Get the event's current status
      * 
-     * @return 
+     * @return The STATUS of this event
      */
     public STATUS status() { return status; }
     /** Set the event's current status
@@ -39,12 +38,12 @@ public abstract class Event {
     private EVENTTYPE type;
     /** Get the events type
      * 
-     * @return 
+     * @return The EVENTTYPE of this event
      */
     public EVENTTYPE type() { return type; }
     /** Returns the type as a string
      * 
-     * @return 
+     * @return The type of this event, UDP, XML or Command, as a string
      */
     public String typeString() { 
         if (type==UDP) { return "UDP"; }
@@ -55,7 +54,8 @@ public abstract class Event {
     
     private final Regional r;
     /** Region this event originated from, if applicable
-     * @return  */
+     * @return Regional data for the originating region
+     */
     public Regional region() { return r; }
 
     private final JSLBot bot;
@@ -90,9 +90,8 @@ public abstract class Event {
     
     /** Submit event for full queue processing.
      * While commands choose IMMEDIATE/DELAYED mode, every other event passes through both and the handlers decide where to be installed.
-     * @throws IOException 
      */
-    public void submit() throws IOException {
+    public void submit() {
         bot().brain().execute(this);
     }
 

@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -67,23 +66,21 @@ public class CommandEvent extends Event {
      * 
      * @param timeoutmillis Number of milliseconds before giving up waiting
      * @return Command response
-     * @throws IOException On failure
      */
-    public String submitAndWait(long timeoutmillis) throws IOException {
+    public String submitAndWait(long timeoutmillis) {
         submit();
         waitFinish(timeoutmillis);
         return response();
     }
     /** Submits the command for Delayed processing and waits 10 seconds for it to complete
-     * @return 
-     * @throws java.io.IOException */
-    public String submitAndWait() throws IOException { return submitAndWait(10000); }
+     * @return The final response from the command.
+     */
+    public String submitAndWait() { return submitAndWait(10000); }
     /** Submits the command for immediate execution, the thread calling this function will be hijacked to execute the command.
      * There are sometimes very good reasons for this, and sometimes its definitely the wrong thing to do.  If you're not sure, use submit().
      * @return Command response
-     * @throws IOException 
      */
-    public String execute() throws IOException {
+    public String execute() {
         immediate(true);
         return bot().brain().execute(this);
     }

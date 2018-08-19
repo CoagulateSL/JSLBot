@@ -4,8 +4,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/** Simple logging thing.
- *
+/** A logging system.
+ * That should probably be replaced by something nowadays in the core APIs.
  * @author Iain Price
  */
 public class Log {

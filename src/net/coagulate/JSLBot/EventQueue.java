@@ -25,13 +25,16 @@ public class EventQueue extends Thread {
     /** Create an event queue for the given CAPS, queue URL and region handle */
     EventQueue(CAPS caps, String queue) { this.caps=caps; eventqueue=queue; setDaemon(true); }
     /** Get the owning CAPS
-     * @return  */
+     * @return  The CAPS object that owns this event queue
+     */
     public CAPS caps() { return caps; }
     /** Get the owning circuit
-     * @return  */
+     * @return  The circuit from the CAPS that owns this Event Queue
+     */
     public Circuit circuit() { return caps().circuit(); }
     /** Get the owning bot
-     * @return  */
+     * @return  Bot from the CAPS from circuit that owns this Event Queue
+     */
     public JSLBot bot() { return circuit().bot(); }
     
     /** Call via start() to launch a background thread for polling the event queue */

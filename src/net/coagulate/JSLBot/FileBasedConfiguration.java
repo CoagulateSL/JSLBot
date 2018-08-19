@@ -19,10 +19,12 @@ public class FileBasedConfiguration extends Configuration {
     String filename="";
     Map<String,String> kvstore=new HashMap();
     
-    public FileBasedConfiguration(String filename) throws IOException, ClassNotFoundException {
+    public FileBasedConfiguration(String filename) {
         this.filename=filename;
         try (FileInputStream fis = new FileInputStream(filename); ObjectInputStream ois = new ObjectInputStream(fis)) {
             kvstore=(Map<String, String>)ois.readObject();
+        } catch (IOException|ClassNotFoundException e) {
+            throw new AssertionError("Could not load configuration file",e);
         }
     }
     

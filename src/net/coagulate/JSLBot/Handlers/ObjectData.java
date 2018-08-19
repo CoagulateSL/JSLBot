@@ -6,6 +6,11 @@ import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
+/** Stores data we know about an object.
+ * Do not expect all data to be present unless you've requested it previously.
+ * @author Iain Price
+ */
+
 public class ObjectData {
     public U32 id=null;
     public LLUUID fullid=null;

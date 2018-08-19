@@ -17,7 +17,7 @@ import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
-/**
+/** Handles a region's CAPabilitieS, a map of URLs and named endpoints.
  *
  * @author Iain Price
  */
@@ -28,19 +28,20 @@ public final class CAPS extends Thread {
     private LLSDMap capabilities;
     private final Circuit circuit;
     private EventQueue eq=null; EventQueue eventqueue() { return eq; }
-    public JSLBot bot() { return circuit().bot(); }
     
     /** Create and interrogate CAPS.
-     * Note: You should almost always call launchEventQueue after creating CAPS.
+     * Note: This just prepares the CAPS, you must complete the initialistion with either:
+     * You can call 'initialise()' and then 'launchEventQueue()' to connect in THIS thread.
+     * *OR* you can call start() which will perform both these operations in a background thread.
      * @param circuit Owning circuit
      * @param capsseed CAPS url
-     * @throws IOException 
      */
-    public CAPS(Circuit circuit,String capsseed) throws IOException {
+    public CAPS(Circuit circuit,String capsseed) {
         this.caps=capsseed;
         this.circuit=circuit;
     }
     
+    /** Initialises and launches the event queue, in a background thread */
     @Override
     public void run() {
         try {
@@ -50,13 +51,17 @@ public final class CAPS extends Thread {
             Log.error(this,"CAPS setup failed: "+e.toString(),e);
         }
     }
+    /** Initialise the CAPS - download the CAPS list from the server */
     private void initialise() throws IOException {
         LLSDArray req=BotUtils.getCAPSArray();
         LLSD getcaps=new LLSD(req);
         capabilities=invokeXML(caps,getcaps);
     }
-    
-    private void launchEventQueue() {
+    private boolean launched=false;
+    /** Launch the event queue driver, if the CAPS exists, which it should */
+    private synchronized void launchEventQueue() {
+        if (launched){return; }
+        launched=true;
         if (capabilities.containsKey("EventQueueGet")) {
             eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString());
             eq.setDaemon(true);
@@ -114,8 +119,7 @@ public final class CAPS extends Thread {
      * @param url Target URL
      * @param content LLSD document to POST, or null if GET mode only
      * @return LLSDMap response
-     * @throws MalformedURLException
-     * @throws IOException 
+     * @throws IOException If there is a failure with the CAPS
      */
     public LLSDMap invokeXML(String url,LLSD content) throws IOException {
         if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }

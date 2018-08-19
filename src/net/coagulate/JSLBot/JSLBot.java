@@ -7,7 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.MalformedURLException;
 import java.security.*;
-import java.security.cert.CertificateException;
 import java.util.*;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.*;
@@ -42,15 +41,26 @@ public class JSLBot extends Thread {
     private String quitreason="";
     private boolean reconnect=false; public void setReconnect() { reconnect=true; }
     public void forceReconnect() { reconnect=true; shutdown("Forced to reconnect"); }
-    public boolean ALWAYS_RECONNECT=false; public void setAlwaysReconnect() { ALWAYS_RECONNECT=true; reconnect=true;  }
-    JSLInterface jslinterface; public JSLInterface api() { return jslinterface; }
+    public boolean ALWAYS_RECONNECT=false;
+    /** Instruct the bot to always reconnect whne disconnected */
+    public void setAlwaysReconnect() { ALWAYS_RECONNECT=true; reconnect=true;  }
+    JSLInterface jslinterface;
+    /** Get the JSLInterface API object for this bot.
+     * 
+     * @return JSLInterface for this bot
+     */
+    public JSLInterface api() { return jslinterface; }
 
-    // create a bot from a configuration store
-    public JSLBot(Configuration conf) throws Exception {
+    /** Create a bot based on configuration data.
+     *
+     * @param conf The configuration data object
+     */
+
+    public JSLBot(Configuration conf) {
         loadConf(conf);
     }
     
-    private void loadConf(Configuration conf) throws Exception {
+    private void loadConf(Configuration conf) {
         // load from config and call 'setup'
         config=conf; 
         String location=config.get("loginlocation");
@@ -62,13 +72,14 @@ public class JSLBot extends Thread {
         setup(config.get("firstname"),config.get("lastname"),config.get("password"),location);
         note("JSLBot initialisation complete, ready to launch");
     }
-    // alternative convenience instansiators
-    public JSLBot(String firstname,String lastname,String password) throws Exception { setup(firstname,lastname,password,"home"); }
-    public JSLBot(String firstname,String lastname,String password,String loginlocation) throws Exception { setup(firstname,lastname,password,loginlocation); }
-    
-    
+
     // ********** BOT STARTUP **********
-    private boolean connected=false; public boolean connected() { return connected; }
+    private boolean connected=false; 
+    /** Reports if the bot is currently connected
+     * 
+     * @return True if connected.
+     */
+    public boolean connected() { return connected; }
     private final Object connectsignal=new Object();
     /** Wait up to a limited ammount of time for the bot to complete a connection.
      * 
@@ -85,19 +96,24 @@ public class JSLBot extends Thread {
         throw new IllegalStateException("Still not connected after timeout");
     }
     
-    private void setup(String firstname,String lastname,String password,String loginlocation) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException, NoSuchMethodException {        
+    private void setup(String firstname,String lastname,String password,String loginlocation) {
         // test that method names are preserved
-        String argname=this.getClass().getDeclaredMethod("setup",String.class,String.class,String.class,String.class).getParameters()[0].getName();
-        if (argname.equals("arg0") || (!argname.equals("firstname"))) {
-            System.out.println("===== FATAL ERROR =====");
-            System.out.println("The name of the first method for setup() is "+argname);
-            System.out.println("In the source this is called 'firstname'");
-            System.out.println("JSLBot uses reflection to read parameter names to implement bot commands");
-            System.out.println("It is necessary to include parameter names in the compiled bytecode");
-            System.out.println("This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
-            System.out.println("Command functionality will not work without this feature, the bot has been aborted for safety reasons");
-            System.out.println("NetBeans note: Add to compiler additional options and DISABLE compile on save which ignores these settings");
-            throw new AssertionError("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
+        try {
+            String argname=this.getClass().getDeclaredMethod("setup",String.class,String.class,String.class,String.class).getParameters()[0].getName();
+            if (argname.equals("arg0") || (!argname.equals("firstname"))) {
+                System.out.println("===== FATAL ERROR =====");
+                System.out.println("The name of the first method for setup() is "+argname);
+                System.out.println("In the source this is called 'firstname'");
+                System.out.println("JSLBot uses reflection to read parameter names to implement bot commands");
+                System.out.println("It is necessary to include parameter names in the compiled bytecode");
+                System.out.println("This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
+                System.out.println("Command functionality will not work without this feature, the bot has been aborted for safety reasons");
+                System.out.println("NetBeans note: Add to compiler additional options and DISABLE compile on save which ignores these settings");
+                throw new AssertionError("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
+            }
+        }
+        catch (NoSuchMethodException|SecurityException ex) {
+            throw new AssertionError("Unable to read signature of setup method??",ex);
         }
         
         jslinterface=new JSLInterface(this);
@@ -133,6 +149,7 @@ public class JSLBot extends Thread {
             brain.prepare();
             try { mainLoop(); }
             catch (Exception e) { error("Main bot loop crashed - "+e.toString(),e); }
+            connected=false; shutdown("Exited");
             brain.loginLoopSafety();
         }
     }
@@ -144,7 +161,7 @@ public class JSLBot extends Thread {
         public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
     }
     
-    /** Wrapper for logging in, implements retries and backoff. */
+    // Wrapper for logging in, implements retries and backoff.
     private void performLogin(String firstname,String lastname,String password,String location) throws Exception {
         Exception last=null;
         for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
@@ -169,7 +186,7 @@ public class JSLBot extends Thread {
     
     // ********** LOGIN CODE / BOT PRIMITIVES **********
     
-    /** Perform a login attempt */
+    // Perform a login attempt
     private void login(String firstname,String lastname,String password,String loginlocation) throws MalformedURLException, IOException, NoSuchAlgorithmException, XmlRpcException  {
         // authentication is performed over XMLRPC over HTTPS
         Map result=BotUtils.loginXMLRPC(this,firstname, lastname, password, loginlocation);
@@ -221,10 +238,13 @@ public class JSLBot extends Thread {
     }
     private Date lastagentupdate=null;
     private float drawdistance=(float) 64.0;
+    /** Push an agent update */
     public void forceAgentUpdate() { agentUpdate(true); }
+    /** Send an agent update if one has not been sent recently */
     public void agentUpdate() { agentUpdate(false); }
     /** Send this generally useful message down the primary UDP circuit
-     * @param force */
+     * @param force If true, ignore the usual timer-based spam prevention
+     */
     public void agentUpdate(boolean force) {
         if (quitting()) { return; }
         // dont spam too many of these
@@ -239,6 +259,7 @@ public class JSLBot extends Thread {
         camera.z+=5;
         p.bagentdata.vcameracenter=camera;
         p.bagentdata.vfar=new F32(drawdistance);
+        // FIXME CHECK THIS
         if (Math.random()>0.5) { p.bagentdata.vcontrolflags=new U32(1<<26); }
         p.bagentdata.vbodyrotation.x=(float) (Math.random()*Math.PI*2);
         p.bagentdata.vbodyrotation.y=(float) (Math.random()*Math.PI*2);
@@ -266,8 +287,9 @@ public class JSLBot extends Thread {
 
 
     /** Send an instant message immediately using the primary circuit
-     * @param uuid
-     * @param message */
+     * @param uuid UUID of agent to send message to
+     * @param message Message to send
+     */
     public void im(LLUUID uuid,String message) {
         ImprovedInstantMessage reply=new ImprovedInstantMessage(this);
         reply.bmessageblock.vtoagentid=uuid;
@@ -280,45 +302,71 @@ public class JSLBot extends Thread {
     // ********** TRANSMISSION PRIMITIVES **********
     /** Primary circuit, as in where the agent presence *is* */
     Circuit primary=null;  Circuit circuit() { return primary; }
+    
+    /** Get the name of the region the avatar is present in.
+     *
+     * @return Region name
+     */
     public String getRegionName() { return circuit().getRegionName(); }
     
+    /** Send a packet.
+     *
+     * @param p Packet to send
+     */
     public void send(Packet p) { primary.send(p); }
+
+    /** Send a Message, optionally reliably
+     *
+     * @param m Message to send
+     * @param reliable If set, use reliable mode
+     */
     public void send(Message m,boolean reliable) {
         Packet p=new Packet(m);
         p.setReliable(reliable);
         send(p);
     }
+    /** Send a message, without reliable flag.
+     * 
+     * @param m Message to send.
+     */
     public void send(Message m) {send(m,false); }
+    /** Change the primary circuit.
+     * Mainly used by the Teleporation Handler.
+     * @param c The new primary circuit.
+     */
     public void setPrimaryCircuit(Circuit c) { primary=c; }
     
-
+    /** Describes a command.
+     * Commands must have this annotation. */
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
     @Target(ElementType.METHOD)
     public @interface CmdHelp {
+
+        /** Get the description for this command
+         *
+         * @return This command's description
+         */
         String description();
     }
 
+    /** Describes an argument to a command. */
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
     @Target(ElementType.PARAMETER)
     public @interface ParamHelp {
+
+        /** Description for this parameter
+         *
+         * @return This parameter's description.
+         */
         String description();
     }
 
 
 
-
-
-
-
-
-
-
-
-
-
-    public void mainLoop() throws Exception {
+    // post login main loop, update + think in a loop, until we're quitting (disconnecting)
+    private void mainLoop() throws Exception {
         performLogin(firstname,lastname,password,loginlocation);
         brain.loggedIn();
         while (!quit) {
@@ -328,10 +376,15 @@ public class JSLBot extends Thread {
         note("Bot exited: "+quitreason);
     }
 
+    /** Get the primary circuit's CAPS.
+     * 
+     * @return CAPS object for the avatar's region.
+     */
     public CAPS getCAPS() { return primary.getCAPS(); }
     /** Resolve a UUID into a firstname, either via cache or via lookup
-     * @param uuid
-     * @return  */
+     * @param uuid UUID to look up
+     * @return  The first name
+     */
     public String getFirstName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.firstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
@@ -339,8 +392,9 @@ public class JSLBot extends Thread {
         return Global.firstName(uuid);
     }
     /** Resolve a UUID into lastname, either via cache or via lookup
-     * @param uuid
-     * @return  */
+     * @param uuid UUID to look up
+     * @return The last name
+     */
     public String getLastName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.lastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
@@ -348,8 +402,9 @@ public class JSLBot extends Thread {
         return Global.lastName(uuid);
     }
     /** Resolve a UUID into a username, either via cache or via lookup
-     * @param uuid
-     * @return  */
+     * @param uuid UUID to look up
+     * @return  User name
+     */
     public String getUserName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.userName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
@@ -357,8 +412,9 @@ public class JSLBot extends Thread {
         return Global.userName(uuid);
     }
     /** Resolve a UUID into a displayname, either via cache or via lookup
-     * @param uuid
-     * @return  */
+     * @param uuid UUID to look up
+     * @return  Display name
+     */
     public String getDisplayName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.displayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
@@ -377,7 +433,7 @@ public class JSLBot extends Thread {
      * @param handle Region handle
      * @param capsurl CAPS url for target region, potentially null for child agents which get this later.
      * @return Activated circuit for requested region handle
-     * @throws IOException 
+     * @throws IOException If the circuit fails to connect.
      */
     public Circuit createCircuit(String numericip, int port, long handle, String capsurl) throws IOException {
         synchronized(circuits) {
@@ -413,13 +469,15 @@ public class JSLBot extends Thread {
     }
 
     /** Get the regional info for the primary region
-     * @return  */
+     * @return  Primary region the avatar is present in
+     */
     public Regional getRegional() {
         return primary.regional();
     }
 
     /** Get regional data for all connected circuit
-     * @return  */
+     * @return  Get all connected regionals
+     */
     public Set<Regional> getRegionals() {
         Set<Regional> regionalset=new HashSet<>();
         synchronized(circuits) {
@@ -431,14 +489,19 @@ public class JSLBot extends Thread {
         return regionalset;
     }
 
-    /** Get the circuit for a given region handle */
+    /** Get the circuit for a given region handle
+     * 
+     * @param regionhandle Region handle to query
+     * @return Circuit for the region handle, or null
+     */
     Circuit getCircuit(Long regionhandle) {
         return circuits.get(regionhandle); 
     }
 
     /** Get all circuits
-     * @return  */
-    public Collection<Circuit> getCircuits() {
+     * @return Set of all circuits
+     */
+    public Set<Circuit> getCircuits() {
         synchronized(circuits) {
             Set<Circuit> ret=new HashSet<>();
             ret.addAll(circuits.values());
@@ -447,8 +510,10 @@ public class JSLBot extends Thread {
     }
 
     /** Initiate disconnection from SL
-     * @param reason */
+     * @param reason Reason for disconnecting.
+     */
     public void shutdown(String reason) {
+        connected=false; 
         if (quit) { return; } // do not re-enter
         quit=true; quitreason=reason;
         warn("Shutdown requested: "+reason);

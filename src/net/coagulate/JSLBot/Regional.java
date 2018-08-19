@@ -11,7 +11,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.S32;
 
-/**  Class that holds regional level data.
+/**  Class that holds per region mutable data.
  * A not very interesting mostly container class.
  * @author Iain Price
  */
@@ -29,17 +29,36 @@ public class Regional {
     
     // map of local object ids
     private final Map<Integer,ObjectData> objects=new HashMap<>();
+    public void killObject(int value) { synchronized(objects) { objects.remove(value); } }
+
+    /** Does an object exist by local ID?
+     *
+     * @param id The LOCAL ID of the object
+     * @return True if it is known to us
+     */
     public boolean hasObject(Integer id) {
         synchronized(objects) {
             return objects.containsKey(id);
         }
     }
+    
+    /** Get an objects data by local id.
+     *
+     * @param id The LOCAL ID of the object
+     * @return The appropriate object data, potentially new and blank.
+     */
     public ObjectData getObject(int id) {
         synchronized (objects) {
             if (!objects.containsKey(id)) { objects.put(id,new ObjectData(circuit.bot(),id)); }
             return objects.get(id);
         }
     }
+    
+    /** Get an objects data by UUID.
+     *
+     * @param uuid The in world UUID of the object
+     * @return The appropriate object data, or null if not found
+     */
     public ObjectData getObject(LLUUID uuid) {
         synchronized (objects) {
             for (ObjectData od:objects.values()) {
@@ -50,13 +69,21 @@ public class Regional {
         }
         return null;
     }
+    /** Get all the locally known objects.
+     * 
+     * @return Set of LOCAL IDs
+     */
     public Set<Integer> getObjects() { return objects.keySet(); }    
-    public void killObject(int value) { synchronized(objects) { objects.remove(value); } }
-
+    
+    
+    
+    
 
     // map of local agents
     private Map<LLUUID, LLVector3> coarseagentlocationmap=new HashMap<>();
     public void setCoarseAgentLocations(Map<LLUUID, LLVector3> locmap) { coarseagentlocationmap=locmap; }
+
+
 
 
     // store parcel related data
@@ -64,13 +91,27 @@ public class Regional {
     private int parceldetailsrequestid=0;
     // which we allocate using this lock here
     private final Object requestidlock=new Object();
+    /** Generate a unique ID for requests.
+     *
+     * @return Unique int for this brain
+     */
     public int getRequestId() { synchronized(requestidlock) {  parceldetailsrequestid++; return parceldetailsrequestid; } }
+    // map of parcel lookup requests to parcel local ids
     private final Map<Integer,Integer> requestresponses=new HashMap<>();
+    // map of local parcel ids to parceldata structures
     private final Map<Integer,ParcelData> localparcelids=new HashMap<>();
+
+    /** Locate a parcel by local ID.
+     *
+     * @param get Parcel LOCAL ID
+     * @return Parcel Data, freshly created if necessary.
+     */
     public ParcelData getParcel(int get) {
         if (!localparcelids.containsKey(get)) { localparcelids.put(get,new ParcelData(get,this)); }
         return localparcelids.get(get);
     }
+    
+    
     public Integer getResponse(int requestid) { return requestresponses.get(requestid); }
     public void requestResponse(int sequenceid, int get) { requestresponses.put(sequenceid,get); }
 

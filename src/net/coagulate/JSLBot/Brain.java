@@ -13,7 +13,7 @@ import java.util.Set;
 import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 
-/** Bot's brain.
+/** Bot's brain, performs event handling etc.
  * This used to be a Set of Handler's in JSLBot its self but it comes with a lot of polluting Reflection code so it got moved here.
  * Note we get called by a lot of different threads, understanding "immediate" and "delayed" execution and the importance in terms of
  * both locking the bot from doing two things at once, as well as *NOT* locking important threads that have to deal with e.g. Circuit UDP traffic.
@@ -28,12 +28,15 @@ public class Brain {
     private final JSLBot bot;
     private boolean procrastinate=true;
 
-    public Brain(JSLBot bot) {
+    Brain(JSLBot bot) {
         this.bot=bot;
         this.brain = new HashSet<>();
     }
     boolean isEmpty() {return brain.isEmpty();}
 
+    /** Set up the bot.
+     * Clear the event queue and cached handler map, repopulate the command map.
+     */
     void prepare() {
         queue.clear();
         handlermap.clear();
@@ -41,13 +44,20 @@ public class Brain {
         populateCommandMap();
     }
     
-
+    /** Load a set of handlers into the bot.
+     * Should be done before initialisation.
+     * @param handlers Array of handler names, full class name if outside net.coagulate.JSLBot.Handlers
+     */
     void loadHandlers(String[] handlers) {
         for (String handler:handlers) {
             loadHandler(handler);
         }
     }
 
+    /** Attempt to load a handler into the brain.
+     * 
+     * @param handlername Class name, can be abbreviated if in core Handlers package
+     */
     private void loadHandler(String handlername){
         if (handlername==null) { throw new NullPointerException("No handler specified"); }
         try {
@@ -60,6 +70,9 @@ public class Brain {
         }
     }
      
+    /** Scan all handlers in the brain for commands.
+     * A command is a method that is annotated with CmdHelp (and optionally its parameters with ParamHelp), and whose method name ends with "command".
+     */
     private void populateCommandMap() {
         final boolean debug=false;
         for (Handler h:brain) {
@@ -71,23 +84,38 @@ public class Brain {
                     String commandname=m.getName().toLowerCase();
                     if (debug) { System.out.println(h.getClass().getName()+"."+m.getName()+" Entered into command bank as '"+commandname+"'"); }
                     if (commandmap.containsKey(commandname)) {
-                        Log.error(bot,"Duplicate definition for command "+commandname);
+                        Log.error(this,"Duplicate definition for command "+commandname);
                     } else {
-                        commandmap.put(commandname,m);
+                        if (commandname.endsWith("command")) { commandmap.put(commandname,m); }
+                        else { Log.warn(this,"Annotated command "+commandname+" does not have 'command' suffix and is inaccessible"); }
                     }
                 }
             }
         }
     }
+    /** Get a method from a command name.
+     * 
+     * @param name Command name (without suffix)
+     * @return Command's implementing method
+     */
     public Method getCommand(String name) {
         return commandmap.get((name+"command").toLowerCase());
     }
+    /** Get all commands.
+     * 
+     * @return A set of the command names in the map.  Note these have the 'command' suffix.
+     */
     public Set<String> getCommands() {
         Set<String> ret=new HashSet<>();
         ret.addAll(commandmap.keySet());
         return ret;
     }
-    
+    /** Instansiate a handler.
+     * 
+     * @param name Class name
+     * @return The handler
+     * @throws InvocationTargetException If the handler constructor throws an error.
+     */
     private Handler createHandler(String name) throws InvocationTargetException {
         try {
             String classname=name;
@@ -101,6 +129,11 @@ public class Brain {
         }
     }
 
+    /** lowercase the first character of the event name.
+     * (this path may be redundant, if we case insensitive compare?)
+     * @param event Event to get the name of
+     * @return Event name with first character in lower case
+     */
     private String formatEventName(Event event) {
         String method=event.getName();
         char c[]=method.toCharArray();
@@ -120,10 +153,13 @@ public class Brain {
     private final Map<String,Method> commandmap=new HashMap<>();
     
     private final Set<String> warned=new HashSet<>();
-    /** Runs the event in THIS thread
+    /** Runs the event in THIS thread.
      * 
-     * @param event
-     * @return 
+     * This is called in both the immediate and delayed modes, from different places.
+     * 
+     * @param event Event to process
+     * @param immediate Is this the immediate mode run?  If set, we will queue XML/UDP events for the 2nd delayed pass.
+     * @return Response, if any, of the event, may be null.
      */
     private String execute(Event event,boolean immediate) {
         String messageid=event.getPrefixedName();
@@ -181,7 +217,11 @@ public class Brain {
         event.status(Event.STATUS.COMPLETE);
         return response;
     }
-    
+    /** Find the handler we associate with a method.
+     * 
+     * @param method Method
+     * @return Handler that contains the method
+     */
     private Object findHandler(Method method) {
         Class c=method.getDeclaringClass();
         for (Handler h:brain) {
@@ -190,6 +230,10 @@ public class Brain {
         throw new IllegalArgumentException("Could not find declaring class for "+method);
     }
 
+    /** Search handlers for implementations of an event.
+     * Searches for Immediate and Delayed variations of UDP and XML events.
+     * @param event Event to scan for
+     */
     private void populateHandlerMap(Event event) {
         if (event instanceof UDPEvent || event instanceof XMLEvent) {
             populateHandlerMap(event,"Immediate");
@@ -197,6 +241,11 @@ public class Brain {
         }
     }
     
+    /** Populate the handler map for a type of event handler.
+     * Finds methods implementing the suffixed handler and stores the results in the handlermap.  Will store empty sets.
+     * @param event Event to populate for
+     * @param suffix Suffix to search for, e.g. Immediate or Delayed
+     */
     private void populateHandlerMap(Event event,String suffix) {
         // find all the handlers that have a method like this and accumulate them into a set =)
         String fen=formatEventName(event);
@@ -220,7 +269,11 @@ public class Brain {
         handlermap.put(fen, methods);
     }
 
-    
+    /** Process Delayed event queue.
+     * Called by, and only by, the BOT AI Thread.
+     * Sleeps, if procrastinating (not shutting down) for a defined delay.
+     * Pops an event off the queue if one is available and executes it as delayed mode execution (does not requeue event but runs in THIS thread)
+     */
     void think() {
         Event event=null;
         synchronized(queue) {
@@ -241,6 +294,9 @@ public class Brain {
         synchronized(queue) { queue.notifyAll(); }
     }
 
+    /** Tell handlers we are logged in.
+     * Some handlers will generate events such as "query balance" etc
+     */
     void loggedIn() {
         for (Handler h:brain) {
             try { h.loggedIn(); } catch (Exception e) { Log.error(this,"Handler "+h+" exceptioned handling login",e); }
@@ -249,6 +305,9 @@ public class Brain {
 
     // track our launch attempts, ALWAYS_RECONNECT will only permit 5 attempts in 10 minutes...
     private final Date[] launches=new Date[Constants.MAX_LAUNCH_ATTEMPTS];
+    /** Call on every login loop.
+     * Makes sure we dont get stuck in a rapidly spamming loop.  See Constants.java for the config.
+     */
     void loginLoopSafety() {
         // if we have any null slots then we didn't even launch MAX times yet
         for (int i=0;i<launches.length;i++) {
@@ -279,6 +338,9 @@ public class Brain {
         // should never get here
         throw new AssertionError("An oldest launch time was found in pass #1, but could not be found to be replaced in pass #2");
     }
+    /** Called if we are spamming logins.
+     * Sleeps for 15 minutes.
+     */
     private void loginLoopSafetyViolation() {
         // probably need some choices here, sometimes it's probably appropriate to "exit" the class, perhaps via an 'error' of some kind that wont get caught
         // sometimes its probably appropriate to stop the whole system if the bot is critical (system.exit?)
@@ -291,17 +353,30 @@ public class Brain {
         Log.warn(bot,"Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
     }    
     
-    
+    /** Set the authorisation module.
+     * 
+     * @param auth New module
+     */
     public void setAuth(Authorisation auth) {
         this.auth=auth;
     }
     
+    /** Check authorisation for an event.
+     * @see Authorisation 
+     * @param event Event to check
+     * @return null if approved, otherwise rejection reason
+     */
     public String auth(CommandEvent event) {
         return auth.approve(event);
     }
     @Override
     public String toString() { return bot.toString()+"/Brain"; }
 
+    /** Get a handler by name.
+     * 
+     * @param name Name of handler
+     * @return Handler if found, otherwise exception.
+     */
     Handler getHandler(String name) {
         for (Handler h:brain) {
             if (h.getClass().getSimpleName().equals(name)) { return h; }

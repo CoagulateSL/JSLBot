@@ -34,7 +34,7 @@ import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
 
-/** Handle group related activities and messages.
+/** Handle group related commands and messages.
  *
  * @author Iain Price
  */
@@ -59,6 +59,7 @@ public class Groups extends Handler {
         igrid.vroleid=role;
         igr.binvitedata.add(igrid);
         bot.send(igr,true);
+        note("Sent group invite to "+avatar.toUUIDString()+" to group "+group.toUUIDString()+" role "+role.toUUIDString());
         return "Invite sent";
     }
 
@@ -76,6 +77,7 @@ public class Groups extends Handler {
         egrid.vejecteeid=avatar;
         egr.bejectdata.add(egrid);
         bot.send(egr,true);
+        note("Ejected "+avatar.toUUIDString()+" from group "+group.toUUIDString());
         return "Ejection request sent";
     }
     
@@ -126,6 +128,7 @@ public class Groups extends Handler {
             im.bmessageblock.vid=m.bmessageblock.vid;
             im.bmessageblock.vdialog=new U8(num);
             bot.send(im,true);
+            note(event,"Sent accept response to group invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString());
         }
     }
     
@@ -172,12 +175,6 @@ public class Groups extends Handler {
     }
     @CmdHelp(description="Collect a group's roster")
     public void groupRosterCommand(Regional region,String uuid) throws IOException {
-        /*GroupMembersRequest gmr=new GroupMembersRequest();
-        gmr.bagentdata.vagentid=bot.getUUID();
-        gmr.bagentdata.vsessionid=bot.getSession();
-        gmr.bgroupdata.vgroupid=new LLUUID(uuid);
-        gmr.bgroupdata.vrequestid=new LLUUID(uuid);        
-        bot.send(gmr,true);*/
         LLSDMap req=new LLSDMap();
         req.put("group_id",new LLSDUUID(uuid));
         LLSD llsd=new LLSD(req);

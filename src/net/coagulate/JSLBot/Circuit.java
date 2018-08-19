@@ -31,7 +31,7 @@ import net.coagulate.JSLBot.Packets.Packet;
 import net.coagulate.JSLBot.Packets.Types.*;
 
 /** Handles a UDP circuit between us and a Simulator.
- * @author Iain Price <git@predestined,net>
+ * @author Iain Price
  */
 public final class Circuit extends Thread implements Closeable {
     private int circuitsequence=0;
@@ -111,7 +111,7 @@ public final class Circuit extends Thread implements Closeable {
      * Automatically starts the main circuit thread to receive said acknowledges.
      * Use me instead of run()
      * Note:  This function may take some time to return.
-     * @throws IOException 
+     * @throws IOException Failure to connect
      */
     public void connect() throws IOException {
         hasrunconnect=true;
@@ -508,7 +508,7 @@ public final class Circuit extends Thread implements Closeable {
 
     /** Fire up CAPS for this simulator.
      * Avoid replacing existing caps with a duplicate, log if we're replacing a non duplicate...
-     * @param newcapsurl 
+     * @param newcapsurl The new CAPS url
      */
     public void connectCAPS(String newcapsurl) {
         if (caps!=null && caps.eventqueue().isAlive()) {

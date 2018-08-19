@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,9 +9,14 @@ import java.util.Map;
  */
 public class JSLInterface {
     private final JSLBot bot;
-    public JSLInterface(JSLBot bot) { this.bot=bot; }
+    JSLInterface(JSLBot bot) { this.bot=bot; }
 
-    public void instantMessage(String uuid, String message) throws IOException {
+    /** Send and wait for an instant message to be sent.
+     *
+     * @param uuid User UUID to send message to
+     * @param message Message to send
+     */
+    public void instantMessage(String uuid, String message) {
         bot.waitConnection(15000);
         Map<String,String> cmd=new HashMap<>();
         cmd.put("uuid",uuid);
@@ -20,12 +24,23 @@ public class JSLInterface {
         new CommandEvent(bot, bot.getRegional(), "im", cmd, null).submitAndWait();
     }
 
-    public void groupInvite(String avataruuid, String groupuuid) throws IOException {
+    /** Invite a user to a group (Everybody role)
+     *
+     * @param avataruuid UUID of avatar to invite
+     * @param groupuuid UUID of group to invite to
+     */
+    public void groupInvite(String avataruuid, String groupuuid) {
         bot.waitConnection(15000);
         groupInvite(avataruuid,groupuuid,null);
     }
     
-    public void groupInvite(String avataruuid, String groupuuid, String roleuuid) throws IOException {
+    /** Invite a user to a group and role
+     * 
+     * @param avataruuid User UUID to invite
+     * @param groupuuid Group UUID to invite to
+     * @param roleuuid  Role UUID to invite to
+     */
+    public void groupInvite(String avataruuid, String groupuuid, String roleuuid) {
         bot.waitConnection(15000);
         Map<String,String> cmd=new HashMap<>();
         cmd.put("avataruuid",avataruuid);
@@ -34,7 +49,12 @@ public class JSLInterface {
         new CommandEvent(bot, bot.getRegional(), "groupInvite", cmd, null).submitAndWait();
     }
 
-    public void groupEject(String avataruuid, String groupuuid) throws IOException {
+    /** Eject a user from a group.
+     *
+     * @param avataruuid User UUID to eject from group
+     * @param groupuuid Group UUID to eject from
+     */
+    public void groupEject(String avataruuid, String groupuuid) {
         bot.waitConnection(15000);
         Map<String,String> cmd=new HashMap<>();
         cmd.put("avataruuid",avataruuid);
@@ -43,7 +63,11 @@ public class JSLInterface {
         new CommandEvent(bot, bot.getRegional(), "groupEject", cmd, null).submitAndWait();
     }
 
-    public void groupRoster(String groupuuid) throws IOException {
+    /** Collect a group roster from the server.
+     * Results must be queried from the group module.
+     * @param groupuuid Group UUID to retrieve.
+     */
+    public void groupRoster(String groupuuid) {
         bot.waitConnection(15000);
         Map<String,String> cmd=new HashMap<>();
         cmd.put("uuid",groupuuid);

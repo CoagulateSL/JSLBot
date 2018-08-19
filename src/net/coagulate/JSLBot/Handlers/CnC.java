@@ -111,6 +111,7 @@ public class CnC extends Handler {
             if (!handled) { warn(event,"Unhandled warning included info:"+info.vmessage.toString()+" / "+info.vextraparams.toString()); }
         }
     }
+    
     public void chatFromSimulatorUDPDelayed(UDPEvent event) {
         ChatFromSimulator msg = (ChatFromSimulator) event.body();
         String from=msg.bchatdata.vfromname.toString();
@@ -159,6 +160,7 @@ public class CnC extends Handler {
         String prefix=config.get("publiccommandprefix","*");
         runCommands(from, source, message, prefix);
     }
+    
     public void improvedInstantMessageUDPDelayed(UDPEvent event) {
         ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
         int messagetype=m.bmessageblock.vdialog.value;
@@ -337,32 +339,10 @@ public class CnC extends Handler {
         else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
     }
 
-/*    @CmdHelp(description="Get help, optionally about a command")
-    public String helpCommand(Regional r,
-            @ParamHelp(description="Command to get detailed information on")
-            String command) {
-        if (command!=null) {
-            return helpSyntax(r,command);
-        }
-        String ret="COMMANDS: (issue 'help command <command name>' for more)\n";
-        Map<String, Map<String, String>> commands = bot.getCommands();
-        List<String> cmds = new ArrayList<>();
-        cmds.addAll(commands.keySet());
-        Collections.sort(cmds);
-        for (String c:cmds) {
-            ret=ret+c+"\n";
-        }
-        return ret;
-    }
-
-    private String helpSyntax(Regional r, String command) {
-        return bot.getHelp(command);
-    }
-*/
-
     @CmdHelp(description = "Causes the bot to reconnect to SL without quitting")
     public String restartCommand(Regional r) {
         bot.forceReconnect();
+        warn("Restart command initiated");
         return "This IM reply probably will be lost due to the restart.";
     }
 
@@ -373,6 +353,7 @@ public class CnC extends Handler {
             @ParamHelp(description = "Message to send")
             String message) {
         bot.im(new LLUUID(uuid), message);
+        note("Sent IM to <"+uuid+"> "+bot.getUserName(new LLUUID(uuid))+" - "+message);
         return "IM sent";
     }
     

@@ -31,7 +31,7 @@ import net.coagulate.JSLBot.Regional.ParcelData;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
 
-/** Region based information parser
+/** Process region queries.
  *
  * @author Iain Price
  */
@@ -67,12 +67,11 @@ public class Regions extends Handler {
         if (cached!=null) { return Long.toUnsignedString(cached); }
         return "Lookup failed";
     }
-    
+    // signal
     private Object mapblockreplysignal=new Object();
     /** Process a map block reply into a region handle, store globally, and signal any waiting threads.
      * Must be immediate mode so it can signal delayed mode handlers.
-     * @param p Map block reply packet
-     * @param regionid Region originating the reply
+     * @param event Event
      */
     public void mapBlockReplyUDPImmediate(UDPEvent event) {
         MapBlockReply p=(MapBlockReply) event.body();
@@ -121,16 +120,12 @@ public class Regions extends Handler {
     /////////////////////// Parcel Properties
     // Getting info about a parcel
     
-    /** Get a parcel's local ID from co-ordinates.
-     * 
-     * @param region Region
-     * @param x X Co-ordinate
-     * @param y Y Co-ordinate
-     * @return String prefixed with the ID number, or the blank string.
-     * @throws IOException 
-     */
     @CmdHelp(description="Get a parcel's LocalID from region-local x and y co-ordinates")
-    public String parcelIdCommand(Regional region,String x,String y) throws IOException {
+    public String parcelIdCommand(Regional region,
+            @ParamHelp(description = "X co-ordinate within the parcel")
+            String x,
+            @ParamHelp(description = "Y co-ordinate within the parcel")
+            String y) throws IOException {
         int reqid=region.getRequestId();
         ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
         prr.bparceldata.vsequenceid=new S32(reqid);

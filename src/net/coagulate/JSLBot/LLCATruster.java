@@ -1,11 +1,9 @@
 package net.coagulate.JSLBot;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -25,26 +23,30 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
     
     private static X509Certificate[] cas;
     private static Boolean initialised=false;
-    public synchronized static void initialise() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    public synchronized static void initialise() {
         if (initialised) { return; }
         LLCATruster llcaTruster = new LLCATruster();
         HttpsURLConnection.setDefaultHostnameVerifier(llcaTruster);
         initialised=true;
     }
 
-    public LLCATruster() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-        // SSL connections to the SL service use a CA signed and held by Linden Labs.
-        // rather than have the user repeatedly fudge around with updating the keystore every time java updates (i hate that)
-        // we just use our own customised trust manager
-        // long winded java way of faking reading the cert from a stream
-        InputStream stream = new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
-        X509Certificate ca=(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(stream);
-        cas=new X509Certificate[]{ca};
-        // we're a TLS handler
-        SSLContext sc=SSLContext.getInstance("TLS");
-        sc.init(null,new TrustManager[] {this}, new java.security.SecureRandom());
-        // install
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    public LLCATruster() {
+        try {
+            // SSL connections to the SL service use a CA signed and held by Linden Labs.
+            // rather than have the user repeatedly fudge around with updating the keystore every time java updates (i hate that)
+            // we just use our own customised trust manager
+            // long winded java way of faking reading the cert from a stream
+            InputStream stream = new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
+            X509Certificate ca=(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(stream);
+            cas=new X509Certificate[]{ca};
+            // we're a TLS handler
+            SSLContext sc=SSLContext.getInstance("TLS");
+            sc.init(null,new TrustManager[] {this}, new java.security.SecureRandom());
+            // install
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (CertificateException|KeyManagementException|NoSuchAlgorithmException ex) {
+            throw new AssertionError("Error configuring SSL CA Trust",ex);
+        }
     }
 
     @Override

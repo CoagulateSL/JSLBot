@@ -31,7 +31,7 @@ import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
 
-/** Implements the teleportation (sub) protocol
+/** Handles teleportation, requests, status, success, failure, going home, tp lures, etc.
  *
  * @author Iain Price
  */
@@ -45,15 +45,17 @@ public class Teleportation extends Handler {
     @Override
     public void loggedIn() throws Exception {}
 
-    
+    // nothing more than a status message
     public void teleportProgressUDPImmediate(UDPEvent event) {
         TeleportProgress tp=(TeleportProgress) event.body();
         debug(event,"Teleport Progress: "+(tp).binfo.vmessage.toString());
     }
+    // also just a status message
     public void teleportStartUDPImmediate(UDPEvent event) {
         TeleportStart tp=(TeleportStart) event.body();
         info(event,"Teleportation has started (with flags "+tp.binfo.vteleportflags.value+")");
     }
+    // completion message, without any of the complexities of changing region
     public void teleportLocalUDPImmediate(UDPEvent event) {
         TeleportLocal tp=(TeleportLocal) event.body();
         info(event,"Teleportation completed locally");
@@ -63,7 +65,7 @@ public class Teleportation extends Handler {
         synchronized(signal) { signal.notifyAll(); }
     }
 
-    
+    // failure
     public void teleportFailedXMLImmediate(XMLEvent event) {
         //System.out.println(event.map().toXML());
         String code="";
@@ -88,6 +90,7 @@ public class Teleportation extends Handler {
         }
         synchronized(signal) { signal.notifyAll(); }
     }
+    // success, transfer to target circuit/caps
     public void teleportFinishXMLImmediate(XMLEvent event) {
         // get the data for the new region
         LLSDMap body=event.map();
@@ -116,8 +119,7 @@ public class Teleportation extends Handler {
         }
 
     }
-
-    
+    // of TP lures
     public void improvedInstantMessageUDPDelayed(UDPEvent event) {
         ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
         int messagetype=m.bmessageblock.vdialog.value;
@@ -148,12 +150,7 @@ public class Teleportation extends Handler {
             }
         }
     }
-
-    
-    public void processXML(Regional region, XMLEvent event, String eventname) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    // request TP
     @CmdHelp(description = "Initiate a teleport to a target location")
     public String teleportCommand(Regional r,
             @ParamHelp(description="Name of region to teleport to")
@@ -177,9 +174,10 @@ public class Teleportation extends Handler {
         bot.send(tp,true);
         //bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
         boolean completed=waitTeleport();
+        note("Teleport "+(completed?"completed":"FAILED")+" to "+region+" "+x+","+y+","+z);
         if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
     }
- 
+
     @CmdHelp(description = "Go home")
     public String homeCommand(Regional r) throws IOException {
         TeleportLandmarkRequest req=new TeleportLandmarkRequest();
@@ -188,6 +186,7 @@ public class Teleportation extends Handler {
         req.binfo.vlandmarkid=new LLUUID();
         bot.send(req,true);
         boolean completed=waitTeleport();
+        note("Teleport home "+(completed?"completed":"FAILED"));
         if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
         
     }

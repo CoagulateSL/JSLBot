@@ -10,6 +10,9 @@ import net.coagulate.JSLBot.JSLBot;
  */
 public abstract class Authorisation {
     public Authorisation(JSLBot bot,Configuration c){}
-    /** Returns null if approved, otherwise some explanative text */
+    /** Returns null if approved, otherwise some explanative text
+     * @param event The CommandEvent to approve/reject
+     * @return  Null if approved, otherwise a rejection reason.
+     */
     public abstract String approve(CommandEvent event);
 }

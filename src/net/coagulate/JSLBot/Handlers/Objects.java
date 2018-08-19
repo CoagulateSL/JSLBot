@@ -12,6 +12,7 @@ import static net.coagulate.JSLBot.Handlers.Objects.CompressedFlags.*;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.Log;
 import net.coagulate.JSLBot.Packets.Messages.DeRezObject;
 import net.coagulate.JSLBot.Packets.Messages.DeRezObject_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
@@ -37,7 +38,7 @@ import net.coagulate.JSLBot.Packets.Types.U8;
 import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 
-/** Processes messages about objects within the world
+/** Processes messages and commands about objects within the world
  *
  * @author Iain Price
  */
@@ -140,7 +141,7 @@ public class Objects extends Handler {
         }
         return "Dumped to console because so many.";
     }
-    @CmdHelp(description = "List all unowned objects to the console (debugging only)")
+    @CmdHelp(description = "List all unparented (root) objects to the console (debugging only)")
     public String objectRootsCommand(Regional region) {
         for (Integer id:region.getObjects()) {
             ObjectData o = region.getObject(id);
@@ -150,6 +151,7 @@ public class Objects extends Handler {
         }
         return "Dumped to console because so many.";
     }
+    
     @CmdHelp(description="Find an object by a name fragment")
     public String objectFindCommand(Regional region,
             @ParamHelp(description="Fragment of a name to search for")
@@ -302,6 +304,7 @@ public class Objects extends Handler {
         dro.bagentblock.vpacketcount=new U8(1);
         dro.bagentblock.vpacketnumber=new U8(1);
         bot.send(dro,true);
+        Log.note(region, "Returned prim "+primuuid+"/"+localid);
         return "0 - Returned object";
     }
 }
