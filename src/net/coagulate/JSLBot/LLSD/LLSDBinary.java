@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.Base64;
 import org.w3c.dom.Node;
 
-/**
- *
+/** Represent a binary object in LLSD format.
+ * Uses BASE64 encoding.
  * @author Iain Price
  */
 public class LLSDBinary extends Atomic {
@@ -26,6 +26,7 @@ public class LLSDBinary extends Atomic {
     public String toXML(String lineprefix) {
         return lineprefix+"<binary encoding=\"base64\">"+value+"</binary>\n";
     }
+    @Override
     public String toString() { return value; }
     public byte[] toByte() { return Base64.getDecoder().decode(value); }
 
@@ -37,12 +38,12 @@ public class LLSDBinary extends Atomic {
 
     public long toLong() {
         byte[] by=toByte();
-        long value = 0;
+        long longvalue = 0;
         for (int i = 0; i < by.length; i++)
         {
-           value += ((long) by[by.length-1-i] & 0xffL) << (8 * i);
+           longvalue += ((long) by[by.length-1-i] & 0xffL) << (8 * i);
         }
-        return value;
+        return longvalue;
     }
 }
 

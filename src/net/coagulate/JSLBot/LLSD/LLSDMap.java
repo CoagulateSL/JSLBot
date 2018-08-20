@@ -1,19 +1,22 @@
 package net.coagulate.JSLBot.LLSD;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.w3c.dom.NodeList;
 
-/**
+/** A Map container in LLSD.
  *
  * @author Iain Price
  */
 public class LLSDMap extends Container {
-    private Map<String,Atomic> data=new HashMap<>();
+    private final Map<String,Atomic> data=new HashMap<>();
     
-    public LLSDMap(NodeList nodes) throws IOException {
+    /** Create an LLSD Map from a list of XML nodes.
+     *
+     * @param nodes NodeList contents of this map
+     */
+    public LLSDMap(NodeList nodes) {
         for (int i=0;i<nodes.getLength();i+=2) {
             String key=nodes.item(i).getFirstChild().getNodeValue();
             Atomic a=Atomic.create(nodes.item(i+1));
@@ -25,6 +28,7 @@ public class LLSDMap extends Container {
     }
     
     
+    @Override
     public String toXML(String prefix) {
         String resp=prefix+"<map>\n";
         for (String key:data.keySet()) {
@@ -40,6 +44,13 @@ public class LLSDMap extends Container {
         return data.containsKey(key);
     }
     public Atomic get(String key) { return data.get(key); }
+    
+    /** Get a key, with a default value if not present.
+     *
+     * @param key Key to get
+     * @param def Default atomic to return
+     * @return The atomic from the map, or the default if not present.
+     */
     public Atomic get(String key,Atomic def) { if (data.containsKey(key)) { return data.get(key); } else { return def; } }
 
     public void put(String ack, Atomic atom) {

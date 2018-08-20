@@ -1,15 +1,14 @@
 package net.coagulate.JSLBot.LLSD;
 
-import java.io.IOException;
 import org.w3c.dom.Node;
 
-/**
+/** Superclass for data containers in LLSD.
  *
  * @author Iain Price
  */
 public abstract class Atomic {
 
-    static Atomic create(Node item) throws IOException {
+    static Atomic create(Node item) {
         String type=item.getNodeName();
         if (type.equals("string")) { return new LLSDString(item); }
         if (type.equals("map")) { return new LLSDMap(item.getChildNodes()); }
@@ -21,7 +20,7 @@ public abstract class Atomic {
         if (type.equals("binary")) { return new LLSDBinary(item); }
         if (type.equals("date")) { return new LLSDString(item); }
         if (type.equals("undef")) { return null; }
-        throw new IOException("Unknown LLSD type "+type);
+        throw new AssertionError("Unknown LLSD type "+type);
     }
     public String toXML() { return toXML(""); }
     public abstract String toXML(String lineprefix);

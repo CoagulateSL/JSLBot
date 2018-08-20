@@ -13,17 +13,23 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**
- *
+/** Stores the deconstructed form of an LLSD document.
+ * Which is essentially XML with some defined types and the like, sent over HTTPS
  * @author Iain Price
  */
 public class LLSD extends Container {
     List<Container> contents=new ArrayList<>();
 
+    /** Build an LLSD object around an existing container.
+     * Typically a map, sometimes an array.
+     * @param c The container to wrap the LLSD document around
+     */
     public LLSD(Container c) { this.contents.add(c); }
 
-    // so many ways of doing things in this protocol..
-    // yup, custom XML over HTTP over viewer's polling servers constantly.  some evolution from UDP.
+    /** Convert a received document into Class form.
+     *
+     * @param read The XML/LLSD document as a String
+     */
     public LLSD(String read) {
         try {
             // blah blah parse it
@@ -41,7 +47,7 @@ public class LLSD extends Container {
                 if (type.equals("array")) { contents.add(new LLSDArray(n.getChildNodes())); handled=true; }
                 if (type.equals("map")) { contents.add(new LLSDMap(n.getChildNodes())); handled=true; }
                 if (type.equals("undef")) { handled=true; }
-                if (!handled) { throw new IOException("Found container of type "+type+" which we don't know about.  Parse error most likely."); }
+                if (!handled) { throw new AssertionError("Found container of type "+type+" which we don't know about.  Parse error most likely."); }
             }
         } catch (SAXException|ParserConfigurationException|IOException ex) {
             IllegalArgumentException f=new IllegalArgumentException(ex);
@@ -49,6 +55,12 @@ public class LLSD extends Container {
             throw f;
         }
     }
+
+    /** Format this document as XML/LLSD
+     *
+     * @param lineprefix Spaces to append to the start of the lines (used for indenting)
+     * @return XML Document as String
+     */
     @Override
     public String toXML(String lineprefix) {
         String response=lineprefix+"<llsd>\n";
@@ -59,6 +71,10 @@ public class LLSD extends Container {
         return response;
     }
 
+    /** Convenience method to get the first entry in this container.
+     * Mostly used internally for initial processing of the wrapped document.
+     * @return The first entry, as a container
+     */
     public Container getFirst() {
         if (contents.isEmpty()) { return null; }
         return contents.get(0);

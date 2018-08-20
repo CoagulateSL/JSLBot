@@ -1,22 +1,21 @@
 package net.coagulate.JSLBot.LLSD;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/**
+/** Represents an Array in LLSD format
  *
  * @author Iain Price
  */
 public class LLSDArray extends Container implements Iterable {
-    private List<Atomic> data=new ArrayList<>();
+    private final List<Atomic> data = new ArrayList<>();
     
     public LLSDArray() {}
 
-    public LLSDArray(NodeList nodes) throws IOException {
+    public LLSDArray(NodeList nodes) {
         for (int i=0;i<nodes.getLength();i++) {
             Node n=nodes.item(i);
             Atomic atom=Atomic.create(n);
@@ -28,6 +27,7 @@ public class LLSDArray extends Container implements Iterable {
     public void add(Atomic a) { data.add(a); }
     public List<Atomic> get() { return data; }
     
+    @Override
     public String toXML(String prefix) {
         String resp=prefix+"<array>\n";
         for (Atomic a:data) { resp+=a.toXML(prefix+"  "); }
