@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.Packets;
 
 import java.nio.ByteBuffer;
 
-/**
+/** Represents the Message section of a UDP packet
  *
  * @author Iain Price
  */

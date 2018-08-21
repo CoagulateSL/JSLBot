@@ -11,7 +11,7 @@ import java.util.Map;
 import net.coagulate.JSLBot.Packets.Types.Type;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
-/**
+/** Generic Block - the pieces that build UDP messages.
  *
  * @author Iain Price
  */
@@ -36,7 +36,7 @@ public abstract class Block {
                 int size=0;
                 for (Block b:l) { size=size+b.size(); }
                 return size+(new U8().size());
-            } catch (Exception e) {
+            } catch (IllegalAccessException | IllegalArgumentException e) {
                 throw new IllegalArgumentException("Unable to size supposed variable count block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),e);
             }
         }
@@ -54,8 +54,7 @@ public abstract class Block {
         // must start at 0 and be sequential.  The sub blocks start at zero themselves too.
         Map<Integer,Field> map=new HashMap<>();
         Field[] fs=this.getClass().getDeclaredFields();
-        for (int i=0;i<fs.length;i++) {
-            Field f=fs[i];
+        for (Field f : fs) {
             if (!f.getName().equals("this$0")) {
                 Sequence a=f.getDeclaredAnnotation(Sequence.class);
                 // all fields in the block MUST have a sequence
@@ -142,7 +141,7 @@ public abstract class Block {
                 qty.write(out);
                 for (Block b:l) { b.writeBytes(out); }
                 return;
-            } catch (Exception e) {
+            } catch (IllegalAccessException | IllegalArgumentException e) {
                 throw new IllegalArgumentException("Error writing variable count block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),e);
             }
         }        
@@ -180,7 +179,7 @@ public abstract class Block {
                 }
                 f.set(this,list);
                 return;
-            } catch (Exception e) {
+            } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {
                 throw new IllegalArgumentException("Failed to read LIST type (variable block type) from class "+this.getClass().getName()+" field "+f.getName()+" type "+f.getType().getName()+" generic type "+f.getGenericType().getTypeName(),e);
             }
         }
@@ -190,7 +189,7 @@ public abstract class Block {
             Type value=(Type) f.getType().newInstance();
             value.read(in);
             f.set(this,value);
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {
             throw new IllegalArgumentException("Failed to set class "+this.getClass().getName()+" field "+f.getName()+" type "+f.getType().getName(),e);
         }
     }
@@ -220,8 +219,8 @@ public abstract class Block {
                     counter++;
                 }
             }
-            if (o==null) { ret+="{null}\n"; } else { ret+=o.toString()+"\n"; }
-        } catch (Exception e) {
+            ret+=o.toString()+"\n";
+        } catch (IllegalAccessException | IllegalArgumentException e) {
             ret+=e.toString();
         }
         return ret;

@@ -1,6 +1,7 @@
 package net.coagulate.JSLBot.Packets;
 
-/**
+/** Message frequencies.
+ * Should probably be an Enum or something.
  *
  * @author Iain Price
  */

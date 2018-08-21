@@ -2,7 +2,6 @@ package net.coagulate.JSLBot;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
@@ -151,18 +150,9 @@ public final class Circuit extends Thread implements Closeable {
                     rx.put(receive.getData(),0,receive.getLength());
                     rx.position(0);
                     Packet p;
-                    try {
-                        p=Packet.decode(rx);
-                        for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
-                    } catch (RuntimeException | ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-                        error("UDP packet decode gave exception "+e.toString(),e);
-                        p=null;
-                    }
-                    if (p==null) {
-                        crit("Failed to parse a packet; acks and stuff may be lost");
-                    } else {
-                        processPacket(p);
-                    }
+                    p=Packet.decode(rx);
+                    for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
+                    processPacket(p);
                 }
                 catch (SocketTimeoutException e) {if (Debug.ACK) { debug("Exiting receive without event"); } } // as requested, and we dont care
                 // timeout is just to make sure we get HERE \/ once in a while
@@ -336,9 +326,7 @@ public final class Circuit extends Thread implements Closeable {
             ByteBuffer decodeme=ByteBuffer.allocate(transmit.length);
             decodeme.put(transmit);
             decodeme.position(0);
-            try { debug("Reverse engineered: "+Packet.decode(decodeme).dump()); }
-            catch (ClassNotFoundException | IllegalAccessException | RuntimeException | InstantiationException | NoSuchMethodException | InvocationTargetException e)
-            { error("REVERSE ENGINEERING EXCEPTION DECODING : "+e.toString(),e); }
+            debug("Reverse engineered: "+Packet.decode(decodeme).dump());
         }           
         DatagramPacket packet=new DatagramPacket(transmit,transmit.length,address);
         try { socket.send(packet); }
