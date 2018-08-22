@@ -14,7 +14,17 @@ public abstract class Event {
     // locking the status field, command event monitors this
     final Object statusmonitor=new Object();
     /** Stages an event goes through */
-    public enum STATUS { UNSUBMITTED, IMMEDIATE, QUEUED, RUNNING, COMPLETE }
+    public enum STATUS {
+        /** Freshly created unprocessed event. */
+        UNSUBMITTED, 
+        /** Event running through the immediate handlers */
+        IMMEDIATE, 
+        /** Event queued for delayed handlers */
+        QUEUED, 
+        /** Event running in delayed handlers */
+        RUNNING, 
+        /** Event completed */
+        COMPLETE }
     private STATUS status=UNSUBMITTED;
     /** Get the event's current status
      * 
