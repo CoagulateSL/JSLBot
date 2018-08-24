@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Handler;
@@ -27,7 +28,6 @@ import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
-import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 
 /** Deal with messages about the Agent (and other agents).
@@ -113,17 +113,17 @@ public class Agent extends Handler {
     }
 
     @CmdHelp(description = "Returns some basic information about the logged in agent")
-    public String statusCommand(Regional region) {
+    public String statusCommand(CommandEvent command) {
         return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
     }
     @CmdHelp(description="Sets the FOV (field of view) to TWO_PI")
-    public String fovMaxCommand(Regional region) throws IOException { bot.setMaxFOV(); return "Set"; }
+    public String fovMaxCommand(CommandEvent command) throws IOException { bot.setMaxFOV(); return "Set"; }
     @CmdHelp(description="Sets the FOV (field of view) to Zero")
-    public String fovMinCommand(Regional region) throws IOException { bot.setMinFOV(); return "Set"; }    
+    public String fovMinCommand(CommandEvent command) throws IOException { bot.setMinFOV(); return "Set"; }    
     @CmdHelp(description="Send agent update")
-    public String updateCommand(Regional region) throws IOException { bot.agentUpdate(); return "Sent"; }
+    public String updateCommand(CommandEvent command) throws IOException { bot.agentUpdate(); return "Sent"; }
     @CmdHelp(description = "Set agent's draw distance")
-    public String drawdistsanceCommand(Regional region,
+    public String drawdistsanceCommand(CommandEvent command,
             @ParamHelp(description="Meters draw distance")
             String set) throws IOException {
         bot.drawDistance(Float.parseFloat(set));

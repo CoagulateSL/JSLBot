@@ -30,7 +30,6 @@ import net.coagulate.JSLBot.Packets.Types.U32BE;
 import net.coagulate.JSLBot.Packets.Types.U8;
 import net.coagulate.JSLBot.Packets.Types.Variable1;
 import net.coagulate.JSLBot.Packets.Types.Variable2;
-import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
 
@@ -45,7 +44,7 @@ public class Groups extends Handler {
     }
 
     @CmdHelp(description = "Invite a user to a given group/role")
-    public String groupInviteCommand(Regional region,String avataruuid,String groupuuid,String roleuuid) throws IOException {
+    public String groupInviteCommand(CommandEvent command,String avataruuid,String groupuuid,String roleuuid) throws IOException {
         LLUUID avatar=new LLUUID(avataruuid);
         LLUUID group=new LLUUID(groupuuid);
         LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -64,7 +63,7 @@ public class Groups extends Handler {
     }
 
     @CmdHelp(description = "Eject a user from a given group/role")
-    public String groupEjectCommand(Regional region,String avataruuid,String groupuuid) throws IOException {
+    public String groupEjectCommand(CommandEvent command,String avataruuid,String groupuuid) throws IOException {
         LLUUID avatar=new LLUUID(avataruuid);
         LLUUID group=new LLUUID(groupuuid);
         //LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -82,7 +81,7 @@ public class Groups extends Handler {
     }
     
     @CmdHelp(description="List groups the logged in agent is a member of")
-    public String groupsListCommand(Regional region) throws Exception {
+    public String groupsListCommand(CommandEvent command) throws Exception {
         String resp="Groups:";
         synchronized(groups) {
             for(GroupData g:groups.values()) {
@@ -102,7 +101,7 @@ public class Groups extends Handler {
     }
 
 
-    private Map<Long,GroupData> groups=new HashMap<>();
+    private final Map<Long,GroupData> groups=new HashMap<>();
 
     
     public void improvedInstantMessageUDPImmediate(UDPEvent event) {
@@ -174,7 +173,7 @@ public class Groups extends Handler {
         return null;
     }
     @CmdHelp(description="Collect a group's roster")
-    public void groupRosterCommand(Regional region,String uuid) throws IOException {
+    public void groupRosterCommand(CommandEvent command,String uuid) throws IOException {
         LLSDMap req=new LLSDMap();
         req.put("group_id",new LLSDUUID(uuid));
         LLSD llsd=new LLSD(req);

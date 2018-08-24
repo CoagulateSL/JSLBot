@@ -88,7 +88,7 @@ public class CommandEvent extends Event {
     String run(Object callon, Method handler) {
         if(Debug.TRACKCOMMANDS) { Log.debug(this,"Entering run() for "+handler.getName()+" in class "+callon.getClass().getSimpleName()); }
         try {
-            return (String) handler.invoke(callon,getParameters(handler,this).toArray());
+            return (String) handler.invoke(callon,getParameters(handler).toArray());
         } catch (IllegalAccessException|IllegalArgumentException ex) {
             throw new AssertionError("Error accessing "+handler.getName()+" in class "+callon.getClass().getName(),ex);
         } catch (InvocationTargetException ex) {
@@ -100,15 +100,15 @@ public class CommandEvent extends Event {
     }
     
 
-    private List<Object> getParameters(Method method, CommandEvent event) {
+    private List<Object> getParameters(Method method) {
         List<Object> params=new ArrayList<>();
-        params.add(event.region()); boolean firstparam=true;
+        params.add(this); boolean firstparam=true;
         for (Parameter param:method.getParameters()) {
             //System.out.println(param.toString());
             if (firstparam) { firstparam=false; }
             else {
                 String paramname=param.getName();
-                if (event.parameters().containsKey(paramname)) { params.add(event.parameters().get(paramname)); }
+                if (parameters().containsKey(paramname)) { params.add(parameters().get(paramname)); }
                 else { params.add(null); }
             }
         }

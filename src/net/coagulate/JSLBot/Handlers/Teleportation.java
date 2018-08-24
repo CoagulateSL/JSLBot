@@ -1,6 +1,7 @@
 package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import net.coagulate.JSLBot.Circuit;
@@ -18,6 +19,8 @@ import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.Log;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
+import net.coagulate.JSLBot.Packets.Messages.StartLure;
+import net.coagulate.JSLBot.Packets.Messages.StartLure_bTargetData;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLandmarkRequest;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocationRequest;
@@ -27,6 +30,7 @@ import net.coagulate.JSLBot.Packets.Messages.TeleportStart;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
+import net.coagulate.JSLBot.Packets.Types.Variable1;
 import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
@@ -152,7 +156,7 @@ public class Teleportation extends Handler {
     }
     // request TP
     @CmdHelp(description = "Initiate a teleport to a target location")
-    public String teleportCommand(Regional r,
+    public String teleportCommand(CommandEvent command,
             @ParamHelp(description="Name of region to teleport to")
             String region,
             @ParamHelp(description="X Co-ordinate to request")
@@ -161,6 +165,7 @@ public class Teleportation extends Handler {
             String y,
             @ParamHelp(description="Z Co-ordinate to request")
             String z) throws IOException {
+        Regional r=command.region();
         TeleportLocationRequest tp=new TeleportLocationRequest();
         tp.bagentdata.vagentid=bot.getUUID();
         tp.bagentdata.vsessionid=bot.getSession();
@@ -179,7 +184,7 @@ public class Teleportation extends Handler {
     }
 
     @CmdHelp(description = "Go home")
-    public String homeCommand(Regional r) throws IOException {
+    public String homeCommand(CommandEvent command) throws IOException {
         TeleportLandmarkRequest req=new TeleportLandmarkRequest();
         req.binfo.vagentid=bot.getUUID();
         req.binfo.vsessionid=bot.getSession();
@@ -201,5 +206,35 @@ public class Teleportation extends Handler {
         bot.agentUpdate();
         return completed;
     }
+    
+    @CmdHelp(description = "Sends you a teleport lure")
+    public String lureMeCommand(CommandEvent command) throws IOException {
+        LLUUID targetuuid=command.invokerUUID();
+        if (targetuuid==null) { return "Failed to get target"; }
+        StartLure req=new StartLure(bot);
+        req.binfo.vmessage=new Variable1("Luring you, as requested");
+        req.btargetdata=new ArrayList<>();
+        StartLure_bTargetData target=new StartLure_bTargetData();
+        target.vtargetid=targetuuid;
+        req.btargetdata.add(target);
+        bot.send(req,true);
+        return "0 - TP Lure Request Sent";
+    }
+    
+    @CmdHelp(description = "Sends a teleport lure")
+    public String lureCommand(CommandEvent command,
+            @ParamHelp(description="UUID to lure")
+            String uuid) throws IOException {
+        LLUUID targetuuid=new LLUUID(uuid);
+        if (targetuuid==null) { return "Failed to get target"; }
+        StartLure req=new StartLure(bot);
+        req.binfo.vmessage=new Variable1("Sending lure, as requested by "+command.invokerUsername()+" ["+command.invokerUUID().toUUIDString()+"]");
+        req.btargetdata=new ArrayList<>();
+        StartLure_bTargetData target=new StartLure_bTargetData();
+        target.vtargetid=targetuuid;
+        req.btargetdata.add(target);
+        bot.send(req,true);
+        return "0 - TP Lure Request Sent";
+    }    
     
 }

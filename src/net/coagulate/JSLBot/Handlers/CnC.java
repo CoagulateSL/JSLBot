@@ -34,9 +34,13 @@ import static net.coagulate.JSLBot.Log.datetime;
 import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
 import net.coagulate.JSLBot.Packets.Messages.AlertMessage_bAlertInfo;
 import net.coagulate.JSLBot.Packets.Messages.ChatFromSimulator;
+import net.coagulate.JSLBot.Packets.Messages.ChatFromViewer;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
+import net.coagulate.JSLBot.Packets.Types.S32;
+import net.coagulate.JSLBot.Packets.Types.U8;
+import net.coagulate.JSLBot.Packets.Types.Variable2;
 import net.coagulate.JSLBot.Regional;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
@@ -306,7 +310,7 @@ public class CnC extends Handler {
     }
 
     @CmdHelp(description = "Request the bot shutdown")
-    public String quitCommand(Regional region) {
+    public String quitCommand(CommandEvent command) {
         bot.shutdown("Instant Message instructed us to quit");
         return "Shutting down as requested (this message will not be delivered)";
     }
@@ -340,14 +344,14 @@ public class CnC extends Handler {
     }
 
     @CmdHelp(description = "Causes the bot to reconnect to SL without quitting")
-    public String restartCommand(Regional r) {
+    public String restartCommand(CommandEvent command) {
         bot.forceReconnect();
         warn("Restart command initiated");
         return "This IM reply probably will be lost due to the restart.";
     }
 
     @CmdHelp(description="Send an instant message")
-    public String imCommand(Regional r,
+    public String imCommand(CommandEvent command,
             @ParamHelp(description = "UUID to message")
             String uuid,
             @ParamHelp(description = "Message to send")
@@ -358,7 +362,7 @@ public class CnC extends Handler {
     }
     
     @CmdHelp(description="Get Help :)  If you see this you're doing it right")
-    public String helpCommand(Regional r,
+    public String helpCommand(CommandEvent commandevent,
             @ParamHelp(description="Optional command to get more info about")
             String command) {
         if (command==null || command.isEmpty()) {
@@ -389,5 +393,22 @@ public class CnC extends Handler {
             }
         }
         return ret;
+    }
+    
+    @CmdHelp(description="Say a message in local chat")
+    public String sayCommand(CommandEvent event,String message) { return chat(1,message); }
+    @CmdHelp(description="Shout a message in local chat")
+    public String shoutCommand(CommandEvent event,String message) { return chat(2,message); }
+    @CmdHelp(description="Whisper a message in local chat")
+    public String whisperCommand(CommandEvent event,String message) { return chat(0,message); }
+
+    private String chat(int messagetype,String message) { return chat(messagetype,0,message); }
+    private String chat(int messagetype,int channel,String message) {
+        ChatFromViewer req=new ChatFromViewer(bot);
+        req.bchatdata.vtype=new U8(messagetype);
+        req.bchatdata.vchannel=new S32(channel);
+        req.bchatdata.vmessage=new Variable2(message);
+        bot.send(req,true);
+        return "0 - Sent";
     }
 }

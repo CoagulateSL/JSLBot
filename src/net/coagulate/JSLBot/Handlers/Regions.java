@@ -2,6 +2,7 @@ package net.coagulate.JSLBot.Handlers;
 
 import java.io.IOException;
 import java.util.Date;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Global;
@@ -46,7 +47,7 @@ public class Regions extends Handler {
     /////////////////////////////// MAP BLOCK LOOKUP ( REGION HANDLE FROM REGION NAME )
     
     @CmdHelp(description = "Look up a region handle from a region name")
-    public String regionLookupCommand(Regional region,
+    public String regionLookupCommand(CommandEvent command,
             @ParamHelp(description="Name of region to lookup")
             String name) throws IOException
     {
@@ -68,7 +69,7 @@ public class Regions extends Handler {
         return "Lookup failed";
     }
     // signal
-    private Object mapblockreplysignal=new Object();
+    private final Object mapblockreplysignal=new Object();
     /** Process a map block reply into a region handle, store globally, and signal any waiting threads.
      * Must be immediate mode so it can signal delayed mode handlers.
      * @param event Event
@@ -110,7 +111,7 @@ public class Regions extends Handler {
     }
     
     @CmdHelp(description="Attempt to compute parcels and their size based on the overlay map, which may or may not work")
-    public String parcelListCommand(Regional region) {
+    public String parcelListCommand(CommandEvent command) {
         return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
     }
     
@@ -121,11 +122,12 @@ public class Regions extends Handler {
     // Getting info about a parcel
     
     @CmdHelp(description="Get a parcel's LocalID from region-local x and y co-ordinates")
-    public String parcelIdCommand(Regional region,
+    public String parcelIdCommand(CommandEvent command,
             @ParamHelp(description = "X co-ordinate within the parcel")
             String x,
             @ParamHelp(description = "Y co-ordinate within the parcel")
             String y) throws IOException {
+        Regional region=command.region();
         int reqid=region.getRequestId();
         ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
         prr.bparceldata.vsequenceid=new S32(reqid);
@@ -142,7 +144,7 @@ public class Regions extends Handler {
         return "";
     }
     // signal for incoming parcel properties
-    private Object parcelpropertiessignal=new Object();
+    private final Object parcelpropertiessignal=new Object();
     public void parcelPropertiesXMLImmediate(XMLEvent event) {
         LLSDMap body=event.map();
         LLSDArray array=(LLSDArray)body.get("ParcelData");
@@ -195,7 +197,7 @@ public class Regions extends Handler {
     }
 
     @CmdHelp(description="List regions currently known to the botz")
-    public String regionListCommand(Regional region) {
+    public String regionListCommand(CommandEvent command) {
         String response="\n";
         for (Regional regional:bot.getRegionals()) {
             response+=Long.toUnsignedString(regional.handle())+": "+regional.dump()+"\n";

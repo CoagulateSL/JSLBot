@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import net.coagulate.JSLBot.BotUtils;
+import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
 import net.coagulate.JSLBot.Handler;
@@ -135,14 +136,16 @@ public class Objects extends Handler {
     }
 
     @CmdHelp(description = "List all objects to the console (debugging only)")
-    public String objectListCommand(Regional region) {
+    public String objectListCommand(CommandEvent command) {
+        Regional region=command.region();
         for (Integer id:region.getObjects()) {
             System.out.println(region.getObject(id).toString());
         }
         return "Dumped to console because so many.";
     }
     @CmdHelp(description = "List all unparented (root) objects to the console (debugging only)")
-    public String objectRootsCommand(Regional region) {
+    public String objectRootsCommand(CommandEvent command) {
+        Regional region=command.region();
         for (Integer id:region.getObjects()) {
             ObjectData o = region.getObject(id);
             if (o.parentid==null || o.parentid.value==0) {
@@ -153,9 +156,10 @@ public class Objects extends Handler {
     }
     
     @CmdHelp(description="Find an object by a name fragment")
-    public String objectFindCommand(Regional region,
+    public String objectFindCommand(CommandEvent command,
             @ParamHelp(description="Fragment of a name to search for")
             String name) {
+        Regional region=command.region();
         ObjectData best=null;
         if (region==null) { throw new NullPointerException("Null region passed to Objects.Find"); }
         if (name==null) { return "Must supply 'name <text>' parameter"; }
@@ -245,9 +249,10 @@ public class Objects extends Handler {
     }
     
     @CmdHelp(description="Lookup or request a prim by UUID")
-    public String objectUUIDCommand(Regional region,
+    public String objectUUIDCommand(CommandEvent command,
             @ParamHelp(description="Prim UUID")
             String uuid) throws IOException {
+        Regional region=command.region();
         LLUUID lluuid=new LLUUID(uuid);
         ObjectData od=region.getObject(lluuid);
         if (od==null) { return "Object not found by UUID"; }
@@ -256,9 +261,10 @@ public class Objects extends Handler {
     
     
     @CmdHelp(description="Lookup or request a prim by local id")
-    public String objectGetCommand(Regional region,
+    public String objectGetCommand(CommandEvent command,
             @ParamHelp(description="Local prim id (32 bit int)")
             String localid) throws IOException {
+        Regional region=command.region();
         int id=Integer.parseInt(localid);
         if (region.hasObject(id)) { return "Exists as "+region.getObject(id).name; }
         RequestMultipleObjects request=new RequestMultipleObjects();
@@ -274,12 +280,13 @@ public class Objects extends Handler {
     }
 
     @CmdHelp(description="Return a prim by UUID or localid")
-    public String objectReturnCommand(Regional region,
+    public String objectReturnCommand(CommandEvent command,
             @ParamHelp(description="UUID of prim to return")
             String primuuid,
             @ParamHelp(description = "LocalID of prim to return")
             String localid) throws IOException
     {
+        Regional region=command.region();
         // One way or another we need the local ID
         int id=0;
         if (localid!=null) { id=Integer.parseInt(localid); } else
