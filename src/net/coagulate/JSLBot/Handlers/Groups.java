@@ -11,6 +11,7 @@ import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
 import net.coagulate.JSLBot.LLSD.LLSDBinary;
@@ -19,6 +20,7 @@ import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
+import net.coagulate.JSLBot.Packets.Messages.ActivateGroup;
 import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest;
 import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest_bEjectData;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
@@ -101,8 +103,19 @@ public class Groups extends Handler {
     }
 
 
-    private final Map<Long,GroupData> groups=new HashMap<>();
+    private final Map<LLUUID,GroupData> groups=new HashMap<>();
 
+    private LLUUID findGroupUUID(String name) {
+        synchronized(groups) {
+            for (LLUUID uuid:groups.keySet()) {
+                GroupData gd=groups.get(uuid);
+                if (gd!=null) {
+                    if (gd.groupname.equalsIgnoreCase(name)) { return uuid; }
+                }
+            }
+        }
+        return null;
+    }
     
     public void improvedInstantMessageUDPImmediate(UDPEvent event) {
         ImprovedInstantMessage m=(ImprovedInstantMessage)event.body();
@@ -189,6 +202,28 @@ public class Groups extends Handler {
         boolean acceptnotices=true;
         int contribution=0;
         LLUUID uuid=null;
+    }
+    
+    @CmdHelp(description="Selects a group as active")
+    public String activateGroupCommand(CommandEvent event,
+            @ParamHelp(description="Group UUID to activate (or zero UUID for none)")
+            String uuid,
+            @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)")
+            String name)
+    {
+        if (uuid==null && name==null) { return "2 - You must supply a group uuid or name"; }
+        LLUUID target;
+        if (uuid==null || uuid.isEmpty()) {
+            target=findGroupUUID(name);
+        } else {
+            target=new LLUUID(uuid);
+        }
+        if (target==null && name!=null && name.equals("NONE")) { target=new LLUUID(); }
+        if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
+        ActivateGroup req=new ActivateGroup(bot);
+        req.bagentdata.vgroupid=target;
+        bot.send(req,true);
+        return "0 - Group activation requested";
     }
     
 }

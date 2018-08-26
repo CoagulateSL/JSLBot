@@ -260,4 +260,13 @@ public abstract class BotUtils {
         for (int i=0;i<bytesarray.length;i++) { ba[i]=bytesarray[i]; }
         return new String(ba);
     }
+
+    public static String unravel(Throwable t) {
+        String response="";
+        while (t!=null) {
+            response+= "\n["+t.getLocalizedMessage()+"]";
+            t=t.getCause();
+        }
+        return response;
+    }
 }

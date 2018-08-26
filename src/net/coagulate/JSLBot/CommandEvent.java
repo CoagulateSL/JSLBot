@@ -94,8 +94,8 @@ public class CommandEvent extends Event {
         } catch (InvocationTargetException ex) {
             Throwable t=ex;
             if (t.getCause()!=null) { t=t.getCause(); }
-            Log.debug(this,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+t.toString(),t);
-            return "Exception:"+t.toString();
+            Log.debug(this,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+BotUtils.unravel(t),t);
+            return "Exception inside handler "+handler.getName()+BotUtils.unravel(t);
         }
     }
     

@@ -45,6 +45,8 @@ public abstract class Block {
             return lltype.size();
         } catch (IllegalAccessException ex) {
             throw new IllegalArgumentException("Unable to size supposed LL Type "+this.getClass().getName()+" field "+f.getName()+" of type "+f.getType().getName(),ex);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Block assembly failure "+f.getName()+" is null");
         }
     }
     // gets the block's data fields, in order
@@ -81,9 +83,10 @@ public abstract class Block {
                 if (debug) { System.out.println("> Enter Block recursion: "+f.getType().getName()); }
                 try {
                     Block b=(Block)(f.get(this));
+                    if (b==null) { throw new NullPointerException("Block contents "+this.getClass().getSimpleName()+" is null"); }
                     size+=b.size();
                 } catch (IllegalArgumentException |IllegalAccessException ex) {
-                    throw new IllegalArgumentException("Block recursion exception",ex);
+                    throw new IllegalArgumentException("Exception in block "+this.getClass().getSimpleName()+"",ex);
                 }
                 if (debug) { System.out.println("< Exit Block recursion: "+f.getType().getName()); }
             } else {
@@ -220,7 +223,7 @@ public abstract class Block {
                 }
             }
             ret+=o.toString()+"\n";
-        } catch (IllegalAccessException | IllegalArgumentException e) {
+        } catch (NullPointerException|IllegalAccessException | IllegalArgumentException e) {
             ret+=e.toString();
         }
         return ret;
