@@ -112,6 +112,12 @@ public abstract class BotUtils {
         params.put("start",location);
         params.put("channel","JSLBot <Iain Maltz@Second Life>");
         params.put("platform","Lin");
+        List<String> options=new ArrayList<>();
+        options.add("inventory-root");
+        options.add("adult-compliant");
+        options.add("buddy-list");
+        options.add("login-flags");
+        params.put("options",options);
         String mac=BotUtils.getMac();
         if (mac==null) { throw new IllegalArgumentException("Failed to get MAC address"); } else { params.put("mac",mac); }
         // MD-5 =)
@@ -126,7 +132,8 @@ public abstract class BotUtils {
                 else {
                     if (output instanceof Integer) { printline+=("[Integer] "+(Integer)output); }
                     else {
-                        printline+=(output);
+                        String clas=result.get(s).getClass().getTypeName();
+                        printline+="["+clas+"] "+(output);
                     }
                 }
                 Log.debug(bot,printline);

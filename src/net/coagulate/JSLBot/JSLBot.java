@@ -45,6 +45,10 @@ public class JSLBot extends Thread {
     /** Instruct the bot to always reconnect whne disconnected */
     public void setAlwaysReconnect() { ALWAYS_RECONNECT=true; reconnect=true;  }
     JSLInterface jslinterface;
+    
+    private LLUUID inventoryroot=null;
+    public LLUUID getInventoryRoot() { return inventoryroot; }
+    
     /** Get the JSLInterface API object for this bot.
      * 
      * @return JSLInterface for this bot
@@ -208,6 +212,15 @@ public class JSLBot extends Thread {
         int port=(Integer)result.get("sim_port");
         int loginx=(Integer)result.get("region_x");
         int loginy=(Integer)result.get("region_y");
+        Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
+        Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
+        for (String key:rootmap.keySet()) {
+            if (Debug.AUTH) {
+                Log.debug(this, "Inventory Root "+key+" = "+rootmap.get(key));
+            }
+            inventoryroot=new LLUUID(rootmap.get(key));
+        }
+        //System.out.println("inventoryroot type is "+inventoryroot.getClass().getName());
         // derive region handle
         U64 handle=new U64();
         handle.value=loginx;
