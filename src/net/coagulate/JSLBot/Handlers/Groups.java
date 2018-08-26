@@ -166,15 +166,20 @@ public class Groups extends Handler {
                 boolean acceptnotices=((LLSDBoolean)group.get("AcceptNotices",new LLSDBoolean(true))).get();
                 int contribution=((LLSDInteger)group.get("Contribution")).get();
                 LLUUID uuid=((LLSDUUID)group.get("GroupID")).toLLUUID();
-                GroupData g;
-                if (groups.containsKey(uuid.toLong())) { g=groups.get(uuid.toLong()); } else { g=new GroupData(); }
-                g.groupname=groupname;
-                g.grouppowers=grouppowers;
-                g.listinprofile=listinprofile;
-                g.acceptnotices=acceptnotices;
-                g.contribution=contribution;
-                g.uuid=uuid;
-                groups.put(uuid.toLong(),g);
+                GroupData g=null;
+                synchronized(groups) { 
+                    for(LLUUID compare:groups.keySet()) {
+                        if (compare.equals(uuid)) { g=groups.get(compare); uuid=compare; }
+                    }
+                    if (g==null) { g=new GroupData(); }
+                    g.groupname=groupname;
+                    g.grouppowers=grouppowers;
+                    g.listinprofile=listinprofile;
+                    g.acceptnotices=acceptnotices;
+                    g.contribution=contribution;
+                    g.uuid=uuid;
+                    groups.put(uuid,g);
+                }
             }
         }
     }

@@ -7,7 +7,7 @@ import javax.xml.bind.DatatypeConverter;
  *
  * @author Iain Price
  */
-public class LLUUID extends Type {
+public class LLUUID extends Type implements Comparable<LLUUID> {
     byte[] uuid=new byte[16];
     public LLUUID() {}
     public LLUUID(String uuid) { 
@@ -71,4 +71,13 @@ public class LLUUID extends Type {
         String s=toString();
         return s.substring(0, 8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20);
     }
+
+    @Override
+    public int compareTo(LLUUID o) {
+        if (o.toLong()==toLong()) { return 0; }
+        if (o.toLong()>toLong()) { return 1; }
+        if (o.toLong()<toLong()) { return -1; }
+        throw new AssertionError("Code paths should be all complete at this point");
+    }
+
 }
