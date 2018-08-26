@@ -7,7 +7,7 @@ import javax.xml.bind.DatatypeConverter;
  *
  * @author Iain Price
  */
-public class LLUUID extends Type implements Comparable<LLUUID> {
+public final class LLUUID extends Type implements Comparable<LLUUID> {
     byte[] uuid=new byte[16];
     public LLUUID() {}
     public LLUUID(String uuid) { 
@@ -32,6 +32,7 @@ public class LLUUID extends Type implements Comparable<LLUUID> {
         return content;
     }
     
+    @Override
     public String toString() {
         return DatatypeConverter.printHexBinary(uuid);
     }
@@ -51,11 +52,17 @@ public class LLUUID extends Type implements Comparable<LLUUID> {
     public String dump() {
         return toString();
     }
+    @Override
     public boolean equals(Object t) {
         if (!(t instanceof LLUUID)) { System.out.println("REALLY ODD COMPARISON TO A UUID"); return false; }
         LLUUID l=(LLUUID)t;
         for (int i=0;i<16;i++) { if (uuid[i]!=l.uuid[i]) { return false; }}
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(toLong());
     }
 
     public long toLong() {
