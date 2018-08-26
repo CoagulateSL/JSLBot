@@ -15,6 +15,7 @@ import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import net.coagulate.JSLBot.Packets.Messages.AgentDataUpdate;
 import net.coagulate.JSLBot.Packets.Messages.AgentMovementComplete;
+import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
 import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate;
 import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bAgentData;
 import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bLocation;
@@ -24,10 +25,12 @@ import net.coagulate.JSLBot.Packets.Messages.OfflineNotification;
 import net.coagulate.JSLBot.Packets.Messages.OfflineNotification_bAgentBlock;
 import net.coagulate.JSLBot.Packets.Messages.OnlineNotification;
 import net.coagulate.JSLBot.Packets.Messages.OnlineNotification_bAgentBlock;
+import net.coagulate.JSLBot.Packets.Messages.SetStartLocationRequest;
 import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
+import net.coagulate.JSLBot.Packets.Types.Variable1;
 import net.coagulate.JSLBot.UDPEvent;
 
 /** Deal with messages about the Agent (and other agents).
@@ -149,5 +152,29 @@ public class Agent extends Handler {
         event.region().setCoarseAgentLocations(locmap);
     }
 
+    private LLUUID reporthometo=null;
+    @CmdHelp(description = "Set the agent's start location")
+    public String setHomeCommand(CommandEvent event) {
+        reporthometo=event.respondTo();
+        SetStartLocationRequest req=new SetStartLocationRequest(bot);
+        req.bstartlocationdata.vsimname=new Variable1(bot.getRegionName());
+        req.bstartlocationdata.vlocationid.value=1;
+        req.bstartlocationdata.vlocationpos=bot.getPos();
+        req.bstartlocationdata.vlocationlookat=bot.getLookAt();
+        bot.send(req,true);
+        return "0 - Set Home request sent";
+    }
+
+    public void alertMessageUDPDelayed(UDPEvent event) {
+        AlertMessage a=(AlertMessage) event.body();
+        if (a.balertinfo.size()>0) {
+            // this is a sweeping assumption, however, without knowing the full list of possibilities, i.e. the server code, this seems reasonable :|
+            if (a.balertinfo.get(0).vmessage.toString().toLowerCase().contains("home")) {
+                if (reporthometo!=null) {
+                    bot.im(reporthometo,a.balertdata.vmessage.toString());
+                }
+            }
+        }
+    }
 }
 

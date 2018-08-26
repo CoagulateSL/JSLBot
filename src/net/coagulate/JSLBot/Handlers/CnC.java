@@ -89,6 +89,7 @@ public class CnC extends Handler {
         for (AlertMessage_bAlertInfo info:msg.balertinfo) {
             String infotype=info.vmessage.toString();
             boolean handled=false;
+            if (infotype.toLowerCase().contains("home")) {handled=true;} // handled by agent
             if (infotype.equals("RegionRestartMinutes") || infotype.equals("RegionRestartSeconds")) {
                 handled=true;
                 Date when=parseRegionRestart(info.vextraparams.toString());
