@@ -163,46 +163,6 @@ This version is a 'todo' or 'wishlist' form of the file, where implemented or ig
 // teleporting agent's simulator and back to the viewer.
 // ****************************************************************************
 
-// StartLure viewer->sim
-// Sent from viewer to the local simulator to lure target id to near 
-// agent id. This will generate an instant message that will be routed 
-// through the space server and out to the userserver. When that IM 
-// goes through the userserver and the TargetID is online, the 
-// userserver will send an InitializeLure to the spaceserver. When that
-// packet is acked, the original instant message is finally forwarded to 
-// TargetID.
-{
-	StartLure	Low	70 NotTrusted Unencoded
-	{
-		AgentData	Single
-		{	AgentID			LLUUID			}
-		{	SessionID		LLUUID			}
-	}
-	{
-		Info	Single
-		{	LureType 		U8	 			}
-		{	Message			Variable	1	}
-	}
-	{
-		TargetData Variable
-		{	TargetID		LLUUID			}
-	}
-}
-
-// TeleportLureRequest viewer->sim
-// Message from target of lure to begin the teleport process on the 
-// local simulator.
-{
-	TeleportLureRequest	Low	71 NotTrusted Unencoded
-	{
-		Info	Single
-		{	AgentID		LLUUID	}
-		{	SessionID	LLUUID	}
-		{	LureID		LLUUID	}
-		{	TeleportFlags 	U32				}
-	}
-}
-
 // TeleportCancel viewer->sim
 // reliable
 {
@@ -220,24 +180,7 @@ This version is a 'todo' or 'wishlist' form of the file, where implemented or ig
 // Viewer to Simulator Messages
 // ***************************************************************************
 
-// ChatFromViewer
-// Specifies the text to be said and the "type", 
-// normal speech, shout, whisper.
-// with the specified radius
-{
-	ChatFromViewer Low 80 NotTrusted Zerocoded
-	{
-		AgentData			Single
-		{	AgentID			LLUUID		}
-		{	SessionID		LLUUID		}
-	}
-	{
-		ChatData			Single
-		{	Message			Variable 2	}
-		{	Type			U8			}
-		{	Channel			S32			}
-	}
-}
+
 
 // AgentRequestSit - Try to sit on an object
 {
@@ -2259,18 +2202,6 @@ This version is a 'todo' or 'wishlist' form of the file, where implemented or ig
 		{	AllowPublish	BOOL	}
 		{	MaturePublish	BOOL	}
 		{	OwnerRole		LLUUID	}
-	}
-}
-
-// used to switch an agent's currently active group.
-// viewer -> simulator -> dataserver -> AgentDataUpdate...
-{
-	ActivateGroup	Low	368 NotTrusted Zerocoded
-	{
-		AgentData	Single
-		{	AgentID		LLUUID	}
-		{	SessionID	LLUUID	}
-		{	GroupID		LLUUID	}
 	}
 }
 
