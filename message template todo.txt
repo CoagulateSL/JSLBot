@@ -2007,25 +2007,6 @@ This version is a 'todo' or 'wishlist' form of the file, where implemented or ig
 	}
 }
 
-// SetStartLocationRequest
-// viewer -> sim 
-// failure checked at sim and triggers ImprovedInstantMessage 
-// success triggers SetStartLocation 
-{
-	SetStartLocationRequest Low 324 NotTrusted Zerocoded
-	{
-		AgentData		Single
-		{	AgentID		LLUUID	}
-		{	SessionID	LLUUID	}
-	}
-	{
-		StartLocationData	Single
-		{	SimName			Variable	1	}	// string
-		{	LocationID		U32	}
-		{	LocationPos		LLVector3	}		// region coords
-		{	LocationLookAt	LLVector3	}
-	}
-}
 
 // *************************************************************************
 // Asset storage messages
