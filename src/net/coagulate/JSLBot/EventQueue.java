@@ -1,12 +1,10 @@
 package net.coagulate.JSLBot;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
@@ -82,11 +80,8 @@ public class EventQueue extends Thread {
                 return;
             }
             if (status!=502) {
-                String read="";
-                try (Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
-                    for (int c; (c = in.read()) >= 0;)
-                        read=read+((char)c);
-                }
+                Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
+                String read=s.next();
                 //System.out.println("Event queue:"+read);
                 LLSD document=null;
                 try {

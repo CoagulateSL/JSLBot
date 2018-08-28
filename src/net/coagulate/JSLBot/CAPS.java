@@ -1,14 +1,12 @@
 package net.coagulate.JSLBot;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
@@ -134,6 +132,7 @@ public final class CAPS extends Thread {
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
         }
+        connection.setReadTimeout(15000);
         connection.setRequestProperty("Content-Type","application/llsd+xml");
         connection.setRequestProperty("charset","utf-8");
         connection.setUseCaches(false);
@@ -142,11 +141,8 @@ public final class CAPS extends Thread {
                 wr.write( postdata );
             }
         }
-        Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-        String read="";
-        for (int c; (c = in.read()) >= 0;)
-            read=read+((char)c);
-        //System.out.println(read);
+        Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
+        String read=s.next();
         return (LLSDMap) new LLSD(read).getFirst();
     }    
     
