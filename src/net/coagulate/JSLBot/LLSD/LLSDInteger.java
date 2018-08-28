@@ -14,7 +14,9 @@ public class LLSDInteger extends Atomic {
     }
 
     LLSDInteger(Node item) {
-        value=Integer.parseInt(item.getTextContent());
+        String str=item.getTextContent();
+        if (str.isEmpty()) { return; }
+        value=Integer.parseInt(str);
     }
 
     @Override
