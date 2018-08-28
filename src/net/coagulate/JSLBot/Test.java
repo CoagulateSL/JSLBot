@@ -46,7 +46,7 @@ public class Test {
         System.out.print("Bot's first name: "); String firstname=in.nextLine();
         System.out.print("Bot's last name: "); String lastname=in.nextLine();
         System.out.print("Bot's password: "); String password=in.nextLine();
-        System.out.println("Handlers: CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups");
+        System.out.println("Handlers: CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups,Inventory");
         System.out.println("Login Location: home");
         System.out.println("Authoriser: OwnerOnly");
         System.out.print("Owner UUID: ");String owneruuid=in.nextLine();
@@ -56,7 +56,7 @@ public class Test {
         m.put("firstname",firstname);
         m.put("lastname",lastname);
         m.put("CnC.authoriser","OwnerOnly");
-        m.put("handlers","CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups");
+        m.put("handlers","CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups,Inventory");
         m.put("loginlocation","home");
         m.put("CnC.authorisation.owneruuid",owneruuid);
         m.put("CnC.authorisation.ownerusername",ownername);
