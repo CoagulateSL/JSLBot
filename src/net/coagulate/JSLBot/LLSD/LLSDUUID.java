@@ -11,6 +11,13 @@ public class LLSDUUID extends Atomic {
 
     private LLUUID value=new LLUUID();
 
+    /** Create a LSLUUID from a LLUUID
+     * 
+     * @see LLUUID
+     * @param uuid the LLUUID
+     */
+    public LLSDUUID(LLUUID uuid) { this.value=uuid; }
+    
     /** Create a LSLUUID from a UUID string
      *
      * @see LLUUID
