@@ -90,7 +90,7 @@ public class Brain {
                         if (commandname.endsWith("command")) {
                             if (CommandEvent.class==m.getParameters()[0].getType())
                             { commandmap.put(commandname,m); } else
-                            { Log.error(this,"Otherwise legitimate command has incorrect first parameter - should be type CommandEvent"); }
+                            { Log.error(this,"Otherwise legitimate command "+commandname+" has incorrect first parameter - should be type CommandEvent"); }
                         }
                         else { Log.warn(this,"Annotated command "+commandname+" does not have 'command' suffix and is inaccessible"); }
                     }
