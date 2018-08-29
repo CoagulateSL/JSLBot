@@ -54,10 +54,6 @@ public class Objects extends Handler {
 
     public Objects(JSLBot bot,Configuration c) { super(bot,c); }
     
-    @Override
-    public void loggedIn() throws Exception {
-    }
-
     public void objectUpdateUDPImmediate(UDPEvent event) {
         ObjectUpdate data=(ObjectUpdate) event.body();
         // and request more info too

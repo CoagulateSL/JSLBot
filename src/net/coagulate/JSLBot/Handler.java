@@ -15,8 +15,13 @@ public abstract class Handler {
     /** Hook for post login activities
      * @throws java.lang.Exception Throw any error for logging
      */
-    public abstract void loggedIn() throws Exception;
- 
+    public void loggedIn() throws Exception {}
+    
+    /** Maintenance hook, called every few seconds if implemented
+     * 
+     * @throws Exception Any error during the maintenance.
+     */
+    public void maintenance() throws Exception {}
     
     protected void debug(Event event,String message) { Log.debug((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }
     protected void info(Event event,String message) { Log.info((event==null?toString():event.toString()+"/"+getClass().getSimpleName()), message); }

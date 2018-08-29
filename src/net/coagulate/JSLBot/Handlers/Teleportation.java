@@ -46,9 +46,6 @@ public class Teleportation extends Handler {
     Object signal=new Object();
     boolean teleporting=false;
 
-    @Override
-    public void loggedIn() throws Exception {}
-
     // nothing more than a status message
     public void teleportProgressUDPImmediate(UDPEvent event) {
         TeleportProgress tp=(TeleportProgress) event.body();

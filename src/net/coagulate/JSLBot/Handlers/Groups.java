@@ -98,11 +98,6 @@ public class Groups extends Handler {
         
 
     
-    @Override
-    public void loggedIn() throws Exception {
-    }
-
-
     private final Map<LLUUID,GroupData> groups=new HashMap<>();
 
     private LLUUID findGroupUUID(String name) {

@@ -281,7 +281,7 @@ public class Brain {
     void think() {
         Event event=null;
         synchronized(queue) {
-            if (queue.isEmpty() && procrastinate) { try { queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS); } catch (InterruptedException iex) {} }
+            if (queue.isEmpty() && procrastinate) { Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating"); try { queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS); } catch (InterruptedException iex) {} }
             if (!queue.isEmpty()) { event=queue.remove(0); }
         }
         if (event!=null) { execute(event,false); }

@@ -40,10 +40,6 @@ public class Regions extends Handler {
 
     public Regions(JSLBot bot,Configuration conf) { super(bot,conf); }
 
-    @Override
-    public void loggedIn() throws Exception {}
-
-    
     /////////////////////////////// MAP BLOCK LOOKUP ( REGION HANDLE FROM REGION NAME )
     
     @CmdHelp(description = "Look up a region handle from a region name")

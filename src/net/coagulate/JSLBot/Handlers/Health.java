@@ -15,9 +15,6 @@ public class Health extends Handler {
     float health=0;
     public Health(JSLBot bot,Configuration c) { super(bot,c); this.verbose=Boolean.parseBoolean(c.get("verbose","false")); }
 
-    public void loggedIn() throws Exception {
-    }
-
     public void healthMessageUDPImmediate(UDPEvent event) {
         HealthMessage h=(HealthMessage) event.body();
         health=h.bhealthdata.vhealth.value;

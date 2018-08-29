@@ -27,7 +27,4 @@ public class Sink extends Handler {
     public void agentStateUpdateUDPDelayed(UDPEvent event){}
     public void agentStateUpdateXMLDelayed(XMLEvent event){}
 
-    @Override
-    public void loggedIn() throws Exception {
-    }
 }

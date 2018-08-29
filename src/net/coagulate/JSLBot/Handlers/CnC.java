@@ -257,10 +257,6 @@ public class CnC extends Handler {
     }
     
     
-    public void loggedIn() throws Exception {
-    }
-    
-
     public void enableSimulatorXMLImmediate(XMLEvent event) {
         LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap)event.body()).get("SimulatorInfo");
         for (Object m:simulatorinfos) {
