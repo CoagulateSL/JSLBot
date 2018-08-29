@@ -285,6 +285,7 @@ public class Brain {
             if (!queue.isEmpty()) { event=queue.remove(0); }
         }
         if (event!=null) { execute(event,false); }
+        callMaintenance();
     }
 
     /** Stops the brain procrastinating waiting for events.
@@ -303,10 +304,16 @@ public class Brain {
      */
     void loggedIn() {
         for (Handler h:brain) {
-            try { h.loggedIn(); } catch (Exception e) { Log.error(this,"Handler "+h+" exceptioned handling login",e); }
+            try { h.loggedIn(); } catch (Exception e) { Log.error(h,"Handler exceptioned handling login",e); }
         }
     }
 
+    private void callMaintenance() {
+        for (Handler h:brain) {
+            try {h.maintenance();} catch (Exception e) { Log.error(h,"Handler exceptioned during maintenance",e); }
+        }
+    }    
+    
     // track our launch attempts, ALWAYS_RECONNECT will only permit 5 attempts in 10 minutes...
     private final Date[] launches=new Date[Constants.MAX_LAUNCH_ATTEMPTS];
     /** Call on every login loop.

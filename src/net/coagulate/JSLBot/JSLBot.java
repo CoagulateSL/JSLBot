@@ -45,6 +45,12 @@ public class JSLBot extends Thread {
     /** Instruct the bot to always reconnect whne disconnected */
     public void setAlwaysReconnect() { ALWAYS_RECONNECT=true; reconnect=true;  }
     JSLInterface jslinterface;
+    /** Instruct the bot to attempt to return home periodically
+     * @param regionname Name of region we have as home.  Bot will periodically teleport home if not in this region.
+     */
+    public void homeSickFor(String regionname) { Log.debug(this,"Registered homesickness towards "+regionname); homesickfor=regionname; }
+    private String homesickfor=null;
+    public String homeSickFor() { return homesickfor; }
     
     private LLUUID inventoryroot=null;
     public LLUUID getInventoryRoot() { return inventoryroot; }

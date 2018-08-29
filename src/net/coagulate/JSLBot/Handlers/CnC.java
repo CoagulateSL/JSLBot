@@ -66,6 +66,8 @@ public class CnC extends Handler {
             auth=new DenyAll(bot,c.subspace("authorisation"));
         }
         bot.brain().setAuth(auth);
+        String homesick=c.get("homesickfor","");
+        if (homesick!=null && !homesick.isEmpty()) { bot.homeSickFor(homesick); }
     }
     
     private static Date parseRegionRestart(String m) {
@@ -408,4 +410,58 @@ public class CnC extends Handler {
         bot.send(req,true);
         return "0 - Sent";
     }
+    
+    private Date homesickness=null;
+    @Override
+    public void maintenance() {
+        if (bot.homeSickFor()==null) { return; }
+        if (bot.getRegionName()==null || bot.getRegionName().isEmpty()) { return; }
+        if (homesickness!=null && homesickness.after(new Date())) { return; }
+        if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
+            if (homesickness!=null) {
+                homesickness=null;
+                Log.debug(this,"No longer homesick");
+            }
+            return;
+        }
+        // we are not at home oO
+        // if our date thing is null this is the first time we've noticed ; set first TP home at now+60
+        if (homesickness==null) {
+            Log.debug(this,"Bot not at home, beginning to feel home sick");
+            homesickness=new Date(new Date().getTime()+60L*1000L);
+            return;
+        }
+        // otherwise, go home
+        Log.debug(this,"Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in maintenance
+        new CommandEvent(bot, bot.getRegional(), "home", new HashMap<>(), null).execute();
+        try { Thread.sleep(1000L); } catch (InterruptedException e) {}
+        if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
+            // success 
+            Log.debug(this,"Bot has successfully cured its self of homesickness by going home, bot is no longer homesick");
+            homesickness=null;
+            return;
+        }        
+        // failure, retry in 5
+        Log.debug(this,"Bot attempted to return home and will wait 5 minutes but had no luck, skulking for 5 minutes, bot remains homesick");
+        homesickness=new Date(new Date().getTime()+5L*60L*1000L);
+    }
+
+    @CmdHelp(description="Manage the homesickness of this bot")
+    public String homesickCommand(CommandEvent event,
+            @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear")
+            String region) {
+        if (region==null || region.isEmpty()) {
+            if (bot.homeSickFor()==null || bot.homeSickFor().isEmpty()) { return "Bot has no longing for any home"; }
+            return "Bot longs for its home of '"+bot.homeSickFor()+"'";
+        }
+        if (region.equals("NONE")) { 
+            bot.homeSickFor(null);
+            config.put("homesickfor","");
+            return "Bot longing for home cleared";
+        }
+        bot.homeSickFor(region);
+        config.put("homesickfor","");
+        return "Bot now longs for home of '"+bot.homeSickFor()+"'";
+    }
+    
 }
