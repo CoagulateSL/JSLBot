@@ -414,10 +414,10 @@ public class CnC extends Handler {
     private Date homesickness=null;
     @Override
     public void maintenance() {
-        if (bot.homeSickFor()==null) { return; }
-        if (bot.getRegionName()==null || bot.getRegionName().isEmpty()) { return; }
-        if (homesickness!=null && homesickness.after(new Date())) { return; }
-        if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
+        if (bot.homeSickFor()==null) { return; } // we dont get homesick
+        if (bot.getRegionName()==null || bot.getRegionName().isEmpty()) { return; } // we're nowhere (early login phase)
+        if (homesickness!=null && homesickness.after(new Date())) { return; } // if timer set, wait for it to pass
+        if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) { // if at home
             if (homesickness!=null) {
                 homesickness=null;
                 Log.debug(this,"No longer homesick");
@@ -442,7 +442,7 @@ public class CnC extends Handler {
             return;
         }        
         // failure, retry in 5
-        Log.debug(this,"Bot attempted to return home and will wait 5 minutes but had no luck, skulking for 5 minutes, bot remains homesick");
+        Log.debug(this,"Bot attempted to return home but had no luck, skulking for 5 minutes, bot remains homesick");
         homesickness=new Date(new Date().getTime()+5L*60L*1000L);
     }
 
