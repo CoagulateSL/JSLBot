@@ -42,6 +42,7 @@ public class Brain {
         handlermap.clear();
         commandmap.clear();
         populateCommandMap();
+        procrastinate=true;        
     }
     
     /** Load a set of handlers into the bot.
