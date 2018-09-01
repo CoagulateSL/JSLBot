@@ -36,5 +36,8 @@ public class ConfigurationSubspace extends Configuration {
     public Set<String> get() {
         return getMaster().get();
     }
+
+    @Override
+    public boolean persistent() { return getMaster().persistent(); }
     
 }

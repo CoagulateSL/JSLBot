@@ -57,4 +57,12 @@ public abstract class Configuration {
      * @return The root of the configuration space.
      */
     public Configuration getMaster() { return this; }
+    
+    /** Define if this configuration service will persist data.
+     * Some modules use this to determine if it's worth storing certain cache information in the
+     * configuration, e.g. inventory, uuid immutables etc.
+     * 
+     * @return True if this configuration is persistent.
+     */
+    public abstract boolean persistent();
 }

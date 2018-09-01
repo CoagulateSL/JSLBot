@@ -67,4 +67,7 @@ public class FileBasedConfiguration extends Configuration {
     public Set<String> get() {
         return kvstore.keySet();
     }
+
+    @Override
+    public boolean persistent() { return true; }
 }

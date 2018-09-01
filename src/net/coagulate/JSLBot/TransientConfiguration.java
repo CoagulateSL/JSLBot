@@ -37,4 +37,7 @@ public class TransientConfiguration extends Configuration {
     public Set<String> get() {
         return kv.keySet();
     }
+
+    @Override
+    public boolean persistent() { return false; }
 }
