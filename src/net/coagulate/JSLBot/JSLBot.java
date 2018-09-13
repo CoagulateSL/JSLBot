@@ -181,8 +181,9 @@ public class JSLBot extends Thread {
                 long delay = Constants.RETRY_INTERVAL*retries;
                 if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
                 note("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getMessage());
-                try { Thread.sleep(delay); } catch (InterruptedException f) {}
+                try { if (!quit) { Thread.sleep(delay); } } catch (InterruptedException f) {}
             }
+            if (quit) { return; }
         }
         crit("All login attempts failed!");
         throw new IOException("Failed login",last);
