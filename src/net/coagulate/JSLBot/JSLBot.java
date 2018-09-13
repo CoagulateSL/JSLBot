@@ -388,7 +388,7 @@ public class JSLBot extends Thread {
     // post login main loop, update + think in a loop, until we're quitting (disconnecting)
     private void mainLoop() throws Exception {
         performLogin(firstname,lastname,password,loginlocation);
-        brain.loggedIn();
+        if (!quit) { brain.loggedIn(); }
         while (!quit) {
             agentUpdate();
             brain.think();
