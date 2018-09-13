@@ -84,6 +84,7 @@ public abstract class BotUtils {
             throw new AssertionError("UTF-8 encoding is not supported on this platform (?!?)");
         }
         return "$1$" + hex(digest);
+        //return hex(digest);
     }
  
     /** Create and execute the XMLRPC logon command.
@@ -106,9 +107,10 @@ public abstract class BotUtils {
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
         XmlRpcClient client=new XmlRpcClient();
         client.setConfig(config);
-        HashMap params=new HashMap();
+        HashMap<String,Object> params=new HashMap();
         params.put("first",firstname);
         params.put("last",lastname);
+        params.put("extended_errors",1);
         params.put("start",location);
         params.put("channel","JSLBot <Iain Maltz@Second Life>");
         params.put("platform","Lin");
@@ -121,7 +123,16 @@ public abstract class BotUtils {
         String mac=BotUtils.getMac();
         if (mac==null) { throw new IllegalArgumentException("Failed to get MAC address"); } else { params.put("mac",mac); }
         // MD-5 =)
+        // TURNS OUT SECOND LIFE ONLY USES THE FIRST 16 CHARS
+        // but silently discards the rest in the user interface, so you can have >16 chars, but the rest dont do anything.
+        // However, if you MD5sum more than 16 chars you break the world.
+        if (password.length()>16) { password=password.substring(0,16); }
         params.put("passwd",BotUtils.md5hash(password));
+        if (Debug.AUTH) {
+            for (String k:params.keySet()) {
+                System.out.println(k+"="+params.get(k).toString());
+            }
+        }
         HashMap result=(HashMap)(client.execute("login_to_simulator",new Object[]{params}));
         if (Debug.AUTH) {
             // dump the result
