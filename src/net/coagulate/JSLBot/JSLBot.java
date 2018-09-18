@@ -22,6 +22,7 @@ public class JSLBot extends Thread {
     // bot level data
     private String firstname;
     private String lastname;
+    public boolean registershutdownhook=true;
     public String getFullName() { return firstname+" "+lastname; }
     public String getUsername() { return firstname+"."+lastname; }
 
@@ -146,7 +147,7 @@ public class JSLBot extends Thread {
     public void run() {
         note("JSLBot launching connection...");        
         setName("JSLBot Brain for "+firstname+" "+lastname);
-        Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
+        if (registershutdownhook) { Runtime.getRuntime().addShutdownHook(new ShutdownHook(this)); }
         // catch and report.  "mainLoop()" should guard against everything its self so this means that function is broken
         // nominated for 'best line of code, 2016'
         // ^^ nominated for most useul comment for dating my intermittent work on this project, now mid 2018.
