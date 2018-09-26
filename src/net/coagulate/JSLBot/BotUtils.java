@@ -126,7 +126,7 @@ public abstract class BotUtils {
         // TURNS OUT SECOND LIFE ONLY USES THE FIRST 16 CHARS
         // but silently discards the rest in the user interface, so you can have >16 chars, but the rest dont do anything.
         // However, if you MD5sum more than 16 chars you break the world.
-        if (password.length()>16) { password=password.substring(0,16); }
+        if (password.length()>16 && (!password.startsWith("$1$"))) { password=password.substring(0,16); }
         params.put("passwd",BotUtils.md5hash(password));
         if (Debug.AUTH) {
             for (String k:params.keySet()) {
