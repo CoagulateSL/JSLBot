@@ -460,7 +460,7 @@ public class CnC extends Handler {
             return "Bot longing for home cleared";
         }
         bot.homeSickFor(region);
-        config.put("homesickfor","");
+        config.put("homesickfor",region);
         return "Bot now longs for home of '"+bot.homeSickFor()+"'";
     }
     
