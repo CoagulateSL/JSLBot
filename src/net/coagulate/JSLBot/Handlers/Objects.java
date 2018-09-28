@@ -13,7 +13,6 @@ import static net.coagulate.JSLBot.Handlers.Objects.CompressedFlags.*;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.Log;
 import net.coagulate.JSLBot.Packets.Messages.DeRezObject;
 import net.coagulate.JSLBot.Packets.Messages.DeRezObject_bObjectData;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
@@ -88,11 +87,11 @@ public class Objects extends Handler {
     public void objectPropertiesFamilyUDPImmediate(UDPEvent event) {
         ObjectPropertiesFamily object=(ObjectPropertiesFamily) event.body();
         int objectid=object.bobjectdata.vrequestflags.value;
-        if (objectid==0) { warn(event,"ObjectProperties request flags are zero, which should be the object id"); }
+        if (objectid==0) { log.warning("ObjectProperties request flags are zero, which should be the object id"); }
         ObjectData ourobj = event.region().getObject(objectid);
         if (Debug.TRACKNEWOBJECTS) {
             if (ourobj.name==null || (!ourobj.name.equals(object.bobjectdata.vname.toString()))) {
-                debug(event,"New object named "+object.bobjectdata.vname.toString()+" in region "+event.region().getName());
+                log.finer("New object named "+object.bobjectdata.vname.toString()+" in region "+event.region().getName());
             }
         }
         ourobj.name=object.bobjectdata.vname.toString();
@@ -182,7 +181,7 @@ public class Objects extends Handler {
             int id=data.vid.value;
             int crc=data.vcrc.value;
             if (!event.region().hasObject(id)) {
-                if (Debug.TRACKNEWOBJECTS) { debug(event,"Cached update to unknown object "+id+" in region "+event.region().getName()); }
+                if (Debug.TRACKNEWOBJECTS) { log.finer("Cached update to unknown object "+id+" in region "+event.region().getName()); }
                 RequestMultipleObjects_bObjectData reqod=new RequestMultipleObjects_bObjectData();
                 reqod.vcachemisstype=new U8(0);
                 reqod.vid=data.vid;
@@ -307,7 +306,7 @@ public class Objects extends Handler {
         dro.bagentblock.vpacketcount=new U8(1);
         dro.bagentblock.vpacketnumber=new U8(1);
         bot.send(dro,true);
-        Log.note(region, "Returned prim "+primuuid+"/"+localid);
+        log.info("Returned prim "+primuuid+"/"+localid+" from region "+region);
         return "0 - Returned object";
     }
 }

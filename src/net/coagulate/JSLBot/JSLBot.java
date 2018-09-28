@@ -8,6 +8,9 @@ import java.lang.annotation.Target;
 import java.net.MalformedURLException;
 import java.security.*;
 import java.util.*;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
+import java.util.logging.Logger;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Packet;
@@ -19,6 +22,7 @@ import org.apache.xmlrpc.XmlRpcException;
  * @author Iain Price
  */
 public class JSLBot extends Thread {
+    private final Logger log;
     // bot level data
     private String firstname;
     private String lastname;
@@ -33,7 +37,7 @@ public class JSLBot extends Thread {
     private LLUUID uuid; public LLUUID getUUID() { return uuid; }
     private int circuitcode; public int getCircuitCode() { return circuitcode; }
     
-    private final Brain brain=new Brain(this);
+    private final Brain brain;
     public Brain brain(){return brain;}
     
     Configuration config=new TransientConfiguration();
@@ -49,7 +53,7 @@ public class JSLBot extends Thread {
     /** Instruct the bot to attempt to return home periodically
      * @param regionname Name of region we have as home.  Bot will periodically teleport home if not in this region.
      */
-    public void homeSickFor(String regionname) { Log.debug(this,"Registered homesickness towards "+regionname); homesickfor=regionname; }
+    public void homeSickFor(String regionname) { log.info("Registered homesickness towards "+regionname); homesickfor=regionname; }
     private String homesickfor=null;
     public String homeSickFor() { return homesickfor; }
     
@@ -68,6 +72,8 @@ public class JSLBot extends Thread {
      */
 
     public JSLBot(Configuration conf) {
+        log=Logger.getLogger("net.coagulate.JSLBot."+conf.get("firstname")+" "+conf.get("lastname"));
+        brain=new Brain(this);
         loadConf(conf);
     }
     
@@ -81,7 +87,7 @@ public class JSLBot extends Thread {
         String handlerlist=config.get("handlers","");
         brain.loadHandlers(handlerlist.split(","));
         setup(config.get("firstname"),config.get("lastname"),config.get("password"),location);
-        note("JSLBot initialisation complete, ready to launch");
+        log.info("JSLBot initialisation complete, ready to launch");
     }
 
     // ********** BOT STARTUP **********
@@ -133,7 +139,7 @@ public class JSLBot extends Thread {
         this.lastname=lastname;
         this.password=password;
         this.loginlocation=loginlocation;
-        Log.note(this,Constants.getVersion());
+        log.config(Constants.getVersion());
     }
 
 
@@ -145,13 +151,13 @@ public class JSLBot extends Thread {
      */
     @Override
     public void run() {
-        note("JSLBot launching connection...");        
+        log.info("JSLBot launching connection...");        
         setName("JSLBot Brain for "+firstname+" "+lastname);
         if (registershutdownhook) { Runtime.getRuntime().addShutdownHook(new ShutdownHook(this)); }
         // catch and report.  "mainLoop()" should guard against everything its self so this means that function is broken
         // nominated for 'best line of code, 2016'
         // ^^ nominated for most useul comment for dating my intermittent work on this project, now mid 2018.
-        if (brain.isEmpty()) { warn("Bot has no brain and will be a virtual zombie."); }
+        if (brain.isEmpty()) { log.warning("Bot has no brain and will be a virtual zombie."); }
         reconnect=true;
         while (ALWAYS_RECONNECT || reconnect) {
             quit=false; quitreason=""; connected=false; primary=null;
@@ -159,10 +165,14 @@ public class JSLBot extends Thread {
             circuits.clear();
             brain.prepare();
             try { mainLoop(); }
-            catch (Exception e) { error("Main bot loop crashed - "+e.toString(),e); }
+            catch (Exception e) { log.log(SEVERE,"Main bot loop crashed - "+e.toString(),e); }
             connected=false; shutdown("Exited");
             brain.loginLoopSafety();
         }
+    }
+
+    public Logger getLogger(String subspace) {
+        return Logger.getLogger(log.getName()+"."+subspace);
     }
 
     private class ShutdownHook extends Thread {
@@ -181,12 +191,13 @@ public class JSLBot extends Thread {
                 last=e;
                 long delay = Constants.RETRY_INTERVAL*retries;
                 if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
-                note("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getMessage());
+                if (e instanceof NullPointerException) { log.log(SEVERE,"Unexpected null pointer exception during login",e); }
+                else { log.info("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getClass().getSimpleName()+":"+e.getMessage()); }
                 try { if (!quit) { Thread.sleep(delay); } } catch (InterruptedException f) {}
             }
             if (quit) { return; }
         }
-        crit("All login attempts failed!");
+        log.severe("All login attempts failed!");
         throw new IOException("Failed login",last);
     }
     
@@ -206,7 +217,7 @@ public class JSLBot extends Thread {
             throw new IOException("Server gave error: "+((String)result.get("message")));
         }
         String message=(String)result.get("message");
-        note("Login MOTD: "+message);
+        log.info("Login MOTD: "+message);
 
         // the response contains things we'll need
         String fn=(String)result.get("first_name");
@@ -221,10 +232,11 @@ public class JSLBot extends Thread {
         int loginx=(Integer)result.get("region_x");
         int loginy=(Integer)result.get("region_y");
         Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
+        @SuppressWarnings("unchecked") // if it isn't, what do we do anyway?
         Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
         for (String key:rootmap.keySet()) {
             if (Debug.AUTH) {
-                Log.debug(this, "Inventory Root "+key+" = "+rootmap.get(key));
+                log.finer("Inventory Root "+key+" = "+rootmap.get(key));
             }
             inventoryroot=new LLUUID(rootmap.get(key));
         }
@@ -234,10 +246,10 @@ public class JSLBot extends Thread {
         handle.value=loginx;
         handle.value=handle.value<<(32);
         handle.value=handle.value | (loginy);     
-        if (Debug.AUTH || Debug.REGIONHANDLES) { debug("Computed initial handle of "+Long.toUnsignedString(handle.value)); }
+        if (Debug.AUTH || Debug.REGIONHANDLES) { log.finer("Computed initial handle of "+Long.toUnsignedString(handle.value)); }
         // caps
         String seedcaps=(String)result.get("seed_capability");
-        info("Login is complete, opening initial circuit.");
+        log.info("Login is complete, opening initial circuit.");
         Circuit initial=new Circuit(this, ip, port, handle.value,seedcaps);
         initial.connect();
         // for our main connection, "move in" to the sim, it's expecting us :P
@@ -394,7 +406,7 @@ public class JSLBot extends Thread {
             agentUpdate();
             brain.think();
         }
-        note("Bot exited: "+quitreason);
+        log.warning("Bot exited: "+quitreason);
     }
 
     /** Get the primary circuit's CAPS.
@@ -408,7 +420,7 @@ public class JSLBot extends Thread {
      */
     public String getFirstName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.firstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.firstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.firstName(uuid)==null) { Global.firstName(uuid,"???"); }
         return Global.firstName(uuid);
     }
@@ -418,7 +430,7 @@ public class JSLBot extends Thread {
      */
     public String getLastName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.lastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.lastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.lastName(uuid)==null) { Global.lastName(uuid,"???"); }
         return Global.lastName(uuid);
     }
@@ -428,7 +440,7 @@ public class JSLBot extends Thread {
      */
     public String getUserName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.userName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.userName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.userName(uuid)==null) { Global.userName(uuid,"???"); }
         return Global.userName(uuid);
     }
@@ -438,7 +450,7 @@ public class JSLBot extends Thread {
      */
     public String getDisplayName(LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.displayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { warn("Failed to lookup agent names",e); } }
+        if (Global.displayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.displayName(uuid)==null) { Global.displayName(uuid,"???"); }
         return Global.displayName(uuid);
     }
@@ -461,11 +473,11 @@ public class JSLBot extends Thread {
             if (circuits.containsKey(handle)) {
                 if (circuits.get(handle).isAlive()) {
                     // already got a circuit
-                    if (Debug.CIRCUIT) { debug("Duplicate circuit to "+handle+" ignored"); }
+                    if (Debug.CIRCUIT) { log.fine("Duplicate circuit to "+handle+" ignored"); }
                     return circuits.get(handle);
                 }
             }
-            if (Debug.CIRCUIT) { debug("New circuit to "+handle); }
+            if (Debug.CIRCUIT) { log.fine("New circuit to "+handle); }
             Circuit newcircuit=new Circuit(this, numericip, port, handle, capsurl);
             newcircuit.connect();
             circuits.put(handle,newcircuit);
@@ -482,10 +494,10 @@ public class JSLBot extends Thread {
         synchronized(circuits) {
             Circuit c=circuits.get(regionhandle);
             if (c!=null) { c.close(); }
-            if (circ!=c && c!=null) { error("Closing a region handle but the circuit is not the one we have registered"); }
+            if (circ!=c && c!=null) { log.severe("Closing a region handle but the circuit is not the one we have registered"); }
             circuits.remove(regionhandle);
             // dont warn if shutting down
-            if (!quit && c==primary) { crit("Closure of primary circuit detected, this is fatal?"); shutdown("Primary circuit lost, we have been disconnected?"); }
+            if (!quit && c==primary) { log.severe("Closure of primary circuit detected, this is fatal?"); shutdown("Primary circuit lost, we have been disconnected?"); }
         }
     }
 
@@ -537,7 +549,7 @@ public class JSLBot extends Thread {
         connected=false; 
         if (quit) { return; } // do not re-enter
         quit=true; quitreason=reason;
-        warn("Shutdown requested: "+reason);
+        log.warning("Shutdown requested: "+reason);
         Set<Circuit> closeme=new HashSet<>();
         for (Circuit c:getCircuits()) {
             closeme.add(c); // because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
@@ -582,18 +594,4 @@ public class JSLBot extends Thread {
 
     @Override
     public String toString() { return this.getFullName(); }
-    private void debug(String message) { debug(message,null); }
-    private void debug(String message, Throwable t) { Log.log(this,Log.DEBUG,message,t); }
-    private void info(String message) { info(message,null); }
-    private void info(String message, Throwable t) { Log.log(this,Log.INFO,message,t); }
-    private void note(String message) { note(message,null); }
-    private void note(String message, Throwable t) { Log.log(this,Log.NOTE,message,t); }
-    private void warn(String message) { warn(message,null); }
-    private void warn(String message, Throwable t) { Log.log(this,Log.WARNING,message,t); }
-    private void error(String message) { error(message,null); }
-    private void error(String message, Throwable t) { Log.log(this,Log.ERROR,message,t); }
-    private void crit(String message) { crit(message,null); }
-    private void crit(String message, Throwable t) { Log.log(this,Log.CRITICAL,message,t); }    
-
-
 }

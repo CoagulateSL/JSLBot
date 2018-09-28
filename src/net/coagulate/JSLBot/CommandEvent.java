@@ -6,6 +6,8 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import static java.util.logging.Level.INFO;
+import java.util.logging.Logger;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /** An event that represents an invoked command.
@@ -15,6 +17,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  * @author Iain Price
  */
 public class CommandEvent extends Event {
+    private Logger log;
     // K=V style parameters, typeless
     private final Map<String,String> parameters;
     public Map<String,String> parameters() {return parameters;}
@@ -33,6 +36,7 @@ public class CommandEvent extends Event {
     
     public CommandEvent(JSLBot bot,Regional r,String name,Map<String,String> parameters,LLUUID respondto) {
         super(bot, r,name.toLowerCase());
+        log=bot.getLogger("CommandEvent."+name);
         this.parameters=parameters;
         this.respondto=respondto;
     }
@@ -86,7 +90,7 @@ public class CommandEvent extends Event {
     }
 
     String run(Object callon, Method handler) {
-        if(Debug.TRACKCOMMANDS) { Log.debug(this,"Entering run() for "+handler.getName()+" in class "+callon.getClass().getSimpleName()); }
+        if(Debug.TRACKCOMMANDS) { log.fine("Entering run() for "+handler.getName()+" in class "+callon.getClass().getSimpleName()); }
         try {
             return (String) handler.invoke(callon,getParameters(handler).toArray());
         } catch (IllegalAccessException|IllegalArgumentException ex) {
@@ -94,7 +98,7 @@ public class CommandEvent extends Event {
         } catch (InvocationTargetException ex) {
             Throwable t=ex;
             if (t.getCause()!=null) { t=t.getCause(); }
-            Log.debug(this,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+BotUtils.unravel(t),t);
+            log.log(INFO,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+BotUtils.unravel(t),t);
             return "Exception inside handler "+handler.getName()+BotUtils.unravel(t);
         }
     }

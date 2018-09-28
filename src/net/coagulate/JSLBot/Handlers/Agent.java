@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Debug;
@@ -74,7 +75,7 @@ public class Agent extends Handler {
             LLUUID uuid=block.vagentid;
             synchronized(online) {
                 if (!online.contains(uuid)) {
-                    info(event,"Friend ONLINE: "+bot.getDisplayName(uuid)+" ("+bot.getUserName(uuid)+") ["+uuid.toUUIDString()+"]");
+                    log.log(Level.INFO, "Friend ONLINE: {0} ({1}) [{2}]", new Object[]{bot.getDisplayName(uuid), bot.getUserName(uuid), uuid.toUUIDString()});
                     online.add(uuid);
                 }
             }
@@ -87,7 +88,7 @@ public class Agent extends Handler {
             LLUUID uuid=block.vagentid;
             synchronized (offline) {
                 if (!offline.contains(uuid)) { 
-                    info(event,"Friend offline: "+bot.getDisplayName(uuid)+" ("+bot.getUserName(uuid)+") ["+uuid.toUUIDString()+"]");
+                    log.log(Level.INFO, "Friend offline: {0} ({1}) [{2}]", new Object[]{bot.getDisplayName(uuid), bot.getUserName(uuid), uuid.toUUIDString()});
                     offline.add(uuid);
                 }
             }
@@ -99,7 +100,7 @@ public class Agent extends Handler {
         bot.setPos(amc.bdata.vposition);
         bot.setLookAt(amc.bdata.vlookat);
         U64 regionhandle = amc.bdata.vregionhandle;
-        if (Debug.REGIONHANDLES) { debug(event,"AgentMovementComplete discovers region handle "+Long.toUnsignedString(regionhandle.value)); }
+        if (Debug.REGIONHANDLES) { log.fine("AgentMovementComplete discovers region handle "+Long.toUnsignedString(regionhandle.value)); }
     }
     public void teleportLocalUDPImmediate(UDPEvent event) {
         TeleportLocal tp=(TeleportLocal)event.body();
@@ -112,7 +113,7 @@ public class Agent extends Handler {
         int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
         int sqmspent=money.bmoneydata.vsquaremeterscommitted.value;
         String description=money.bmoneydata.vdescription.toString();
-        note(event,"Balance: "+balance+"L$, Land: "+sqmspent+"m2/"+sqmcredit+"m2 "+description);
+        log.log(Level.INFO, "Balance: {0}L$, Land: {1}m2/{2}m2 {3}", new Object[]{balance, sqmspent, sqmcredit, description});
     }
 
     @CmdHelp(description = "Returns some basic information about the logged in agent")
@@ -136,10 +137,10 @@ public class Agent extends Handler {
     
     public void coarseLocationUpdateUDPDelayed(UDPEvent event) {
         CoarseLocationUpdate up=(CoarseLocationUpdate) event.body();
-        if (event.region()==null) { note(event,"Coarse location update for null region, discarding"); return; }
+        if (event.region()==null) { log.info("Coarse location update for null region, discarding"); return; }
         List<CoarseLocationUpdate_bLocation> locations = up.blocation;
         List<CoarseLocationUpdate_bAgentData> agents = up.bagentdata;
-        if (locations.size()!=agents.size()) { crit(event,"Equal length co-ord/agent assumption violated"); return; }
+        if (locations.size()!=agents.size()) { log.severe("Equal length co-ord/agent assumption violated"); return; }
         Map<LLUUID,LLVector3> locmap=new HashMap<>();
         for (int i=0;i<locations.size();i++) {
             LLUUID agent=agents.get(i).vagentid;

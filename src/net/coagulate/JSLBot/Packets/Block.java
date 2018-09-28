@@ -19,6 +19,7 @@ public abstract class Block {
     public ByteBuffer writeBlock() { throw new UnsupportedOperationException("Not implemented"); }
     public void readBlock(ByteBuffer in)  { throw new UnsupportedOperationException("Not implemented"); }
     
+    @SuppressWarnings("unchecked") // reflect is a pain enough without force parameterising everything
     public int fieldSize(Field f) {
         if (Block.class.isAssignableFrom(f.getType())) {
             try {
@@ -31,7 +32,7 @@ public abstract class Block {
         }
         if (List.class.isAssignableFrom(f.getType())) {
             try {
-                List<Block> l=(List)(f.get(this));
+                List<Block> l=(List<Block>)(f.get(this));
                 Class listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
                 int size=0;
                 for (Block b:l) { size=size+b.size(); }
@@ -65,7 +66,7 @@ public abstract class Block {
             }
         }
         List<Field> result=new ArrayList<>();
-        List<Integer> sequence=new ArrayList();
+        List<Integer> sequence=new ArrayList<>();
         sequence.addAll(map.keySet());
         Collections.sort(sequence);
         for (Integer i:sequence) {
@@ -138,7 +139,8 @@ public abstract class Block {
         }
         if (List.class.isAssignableFrom(f.getType())) {
             try {
-                List<Block> l=(List)(f.get(this));
+                @SuppressWarnings("unchecked")
+                List<Block> l=(List<Block>)(f.get(this));
                 U8 qty=new U8();
                 qty.value=(byte) l.size();
                 qty.write(out);
@@ -172,7 +174,7 @@ public abstract class Block {
             try {
                 U8 qty=new U8();
                 qty.read(in);
-                List list=new ArrayList<>();
+                List<Block> list=new ArrayList<>();
                 for (int i=0;i<qty.value;i++) {
                     Class listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
                     if (debug) { System.out.println(listtype.getName()); }
@@ -215,7 +217,8 @@ public abstract class Block {
                 return ret;
             }
             if (List.class.isAssignableFrom(o.getClass())) {
-                List<Block> l=(List)o;
+                @SuppressWarnings("unchecked")
+                List<Block> l=(List<Block>)o;
                 int counter=0;
                 for (Block b:l) {
                     ret=ret+"{ #"+counter+" }  "+b.dump();

@@ -2,6 +2,8 @@ package net.coagulate.JSLBot.Handlers;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -9,6 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
 import net.coagulate.JSLBot.Circuit;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
@@ -26,11 +32,6 @@ import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.Log;
-import static net.coagulate.JSLBot.Log.ERROR;
-import static net.coagulate.JSLBot.Log.NOTE;
-import static net.coagulate.JSLBot.Log.WARN;
-import static net.coagulate.JSLBot.Log.datetime;
 import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
 import net.coagulate.JSLBot.Packets.Messages.AlertMessage_bAlertInfo;
 import net.coagulate.JSLBot.Packets.Messages.ChatFromSimulator;
@@ -59,10 +60,10 @@ public class CnC extends Handler {
         try {
             auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
         } catch (Exception e) {
-            Log.error(bot,"Unable to load authoriser "+authoriser, e);
+            log.log(SEVERE,"Unable to load authoriser "+authoriser, e);
         }
         if (auth==null) {
-            Log.error(bot,"No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
+            log.warning("No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
             auth=new DenyAll(bot,c.subspace("authorisation"));
         }
         bot.brain().setAuth(auth);
@@ -84,10 +85,10 @@ public class CnC extends Handler {
 
     private Date evacby=null;
     
-
+    public static final DateFormat datetime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     public void alertMessageUDPDelayed(UDPEvent event) {
         AlertMessage msg=(AlertMessage) event.body();
-        warn(event,"Simulator sends Alert, data message: "+msg.balertdata.vmessage.toString());
+        log.warning("Simulator "+event.region().circuit()+" sends Alert, data message: "+msg.balertdata.vmessage.toString());
         for (AlertMessage_bAlertInfo info:msg.balertinfo) {
             String infotype=info.vmessage.toString();
             boolean handled=false;
@@ -96,10 +97,10 @@ public class CnC extends Handler {
                 handled=true;
                 Date when=parseRegionRestart(info.vextraparams.toString());
                 int seconds=(int) ((when.getTime()-(new Date().getTime()))/1000);
-                int level = NOTE;
-                if (seconds<=180) { level=WARN; }
+                Level level = INFO;
+                if (seconds<=180) { level=WARNING; }
                 if (seconds<=60) {
-                    level=ERROR;
+                    level=SEVERE;
                     if (evacby==null ||evacby.before(new Date())) { // if not evacuating or it was in the past
                         evacby=new Date(when.getTime()+30000); // set to 30 seconds post evacuation so we dont do this more than once
                         Map<String,String> params=new HashMap<>();
@@ -111,14 +112,12 @@ public class CnC extends Handler {
                 String mins=Integer.toString(seconds/60);
                 String secs=Integer.toString(seconds % 60);
                 if (secs.length()==1) { secs="0"+secs; }
-                if (level==ERROR) { 
-                    error(event,"Simulator will shut down in "+mins+"m"+secs+"s at "+datetime.format(when));
-                } else { note(event,"Simulator will shut down in "+mins+"m"+secs+"s at "+datetime.format(when)); }
+                log.log(level,"Simulator "+event.region().circuit()+" will shut down in "+mins+"m"+secs+"s at "+datetime.format(when));
             }
-            if (!handled) { warn(event,"Unhandled warning included info:"+info.vmessage.toString()+" / "+info.vextraparams.toString()); }
+            if (!handled) { log.warning("Unhandled warning from "+event.region().circuit()+" included info:"+info.vmessage.toString()+" / "+info.vextraparams.toString()); }
         }
     }
-    
+     
     public void chatFromSimulatorUDPDelayed(UDPEvent event) {
         ChatFromSimulator msg = (ChatFromSimulator) event.body();
         String from=msg.bchatdata.vfromname.toString();
@@ -162,7 +161,7 @@ public class CnC extends Handler {
             }
             String volume="";
             if (audiblenum!=1) {  volume="vol:"+audible+" ";}
-            debug(event,"Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
+            log.fine("Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
         }
         String prefix=config.get("publiccommandprefix","*");
         runCommands(from, source, message, prefix);
@@ -176,49 +175,49 @@ public class CnC extends Handler {
         // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
         switch (messagetype) {
             case 0: processInstantMessage(event,m); break;
-            case 1: note(event, "System sends notification: "+messagetext); break;
-            case 2: note(event,"Deprecated countdown notification: "+messagetext); break;
-            case 3: info(event,"Group invite received: "+messagetext); break;
-            case 4: info(event,"Inventory offer: "+messagetext); break;
-            case 5: info(event,"Accepted inventory offer: "+messagetext); break;
-            case 6: info(event,"Declined inventory offer: "+messagetext); break;
-            case 7: note(event,"Group vote?: "+messagetext); break;
-            case 8: note(event,"Deprecated group message: "+messagetext); break;
-            case 9: note(event,"Object sending inventory offer: "+messagetext); break;
-            case 10: note(event,"Object inventory offer accepted: "+messagetext); break;
-            case 11: note(event,"Object inventory offer declined: "+messagetext); break;
-            case 12: note(event,"Offline message (not processed): "+messagetext); break;
-            case 13: note(event,"Session start/add: "+messagetext); break;
-            case 14: note(event,"Start session without prune offline: "+messagetext); break;
-            case 15: note(event,"Start group session: "+messagetext); break;
-            case 16: note(event,"Session without calling card: "+messagetext); break;
-            case 17: note(event,"Message to session: "+messagetext); break;
-            case 18: note(event,"Leave session: "+messagetext); break;
-            case 19: note(event,"Object IM: "+messagetext); break;
-            case 20: note(event,"Busy Autoresponse: "+messagetext); break;
-            case 21: note(event,"Console/Chat message: "+messagetext); break;
-            case 22: info(event,"Teleport Lure: "+messagetext); break;
-            case 23: note(event,"TP Response type 23: "+messagetext); break;
-            case 24: note(event,"TP Response type 24: "+messagetext); break;
-            case 25: warn(event,"GODLIKE TELEPORT LURE: "+messagetext); break;
-            case 26: warn(event,"Placeholder 26: "+messagetext); break;
-            case 27: warn(event,"Group election (deprecated): "+messagetext); break;
-            case 28: note(event,"Open URL: "+messagetext); break;
-            case 29: note(event,"Help IM: "+messagetext); break;
-            case 30: note(event,"Call for help: "+messagetext); break;
-            case 31: note(event,"Non emailable IM: "+messagetext); break;
-            case 32: note(event,"Group Officer: "+messagetext); break;
-            case 33: note(event,"Group notice: "+messagetext); break;
-            case 34: note(event,"Unknown 34: "+messagetext); break;
-            case 35: note(event,"Accepted group invite: "+messagetext); break;
-            case 36: note(event,"Declined group invite: "+messagetext); break;
-            case 37: note(event,"Unknown 37: "+messagetext); break;
-            case 38: note(event,"Friendship request: "+messagetext); break;
-            case 39: note(event,"Friendship accepted: "+messagetext); break;
-            case 40: note(event,"Friendship declined: "+messagetext); break;
+            case 1: log.info("System sends notification: "+messagetext); break;
+            case 2: log.info("Deprecated countdown notification: "+messagetext); break;
+            case 3: log.info("Group invite received: "+messagetext); break;
+            case 4: log.info("Inventory offer: "+messagetext); break;
+            case 5: log.info("Accepted inventory offer: "+messagetext); break;
+            case 6: log.info("Declined inventory offer: "+messagetext); break;
+            case 7: log.info("Group vote?: "+messagetext); break;
+            case 8: log.info("Deprecated group message: "+messagetext); break;
+            case 9: log.info("Object sending inventory offer: "+messagetext); break;
+            case 10: log.info("Object inventory offer accepted: "+messagetext); break;
+            case 11: log.info("Object inventory offer declined: "+messagetext); break;
+            case 12: log.info("Offline message (not processed): "+messagetext); break;
+            case 13: log.info("Session start/add: "+messagetext); break;
+            case 14: log.info("Start session without prune offline: "+messagetext); break;
+            case 15: log.info("Start group session: "+messagetext); break;
+            case 16: log.info("Session without calling card: "+messagetext); break;
+            case 17: log.info("Message to session: "+messagetext); break;
+            case 18: log.info("Leave session: "+messagetext); break;
+            case 19: log.info("Object IM: "+messagetext); break;
+            case 20: log.info("Busy Autoresponse: "+messagetext); break;
+            case 21: log.info("Console/Chat message: "+messagetext); break;
+            case 22: log.info("Teleport Lure: "+messagetext); break;
+            case 23: log.info("TP Response type 23: "+messagetext); break;
+            case 24: log.info("TP Response type 24: "+messagetext); break;
+            case 25: log.warning("GODLIKE TELEPORT LURE: "+messagetext); break;
+            case 26: log.warning("Placeholder 26: "+messagetext); break;
+            case 27: log.warning("Group election (deprecated): "+messagetext); break;
+            case 28: log.info("Open URL: "+messagetext); break;
+            case 29: log.info("Help IM: "+messagetext); break;
+            case 30: log.info("Call for help: "+messagetext); break;
+            case 31: log.info("Non emailable IM: "+messagetext); break;
+            case 32: log.info("Group Officer: "+messagetext); break;
+            case 33: log.info("Group notice: "+messagetext); break;
+            case 34: log.info("Unknown 34: "+messagetext); break;
+            case 35: log.info("Accepted group invite: "+messagetext); break;
+            case 36: log.info("Declined group invite: "+messagetext); break;
+            case 37: log.info("Unknown 37: "+messagetext); break;
+            case 38: log.info("Friendship request: "+messagetext); break;
+            case 39: log.info("Friendship accepted: "+messagetext); break;
+            case 40: log.info("Friendship declined: "+messagetext); break;
             case 41: break; //Log.log(bot,DEBUG,"User is typing: "+messagetext); // beyond tedious to log
             case 42: break; //Log.log(bot,DEBUG,"User stopped typing: "+messagetext); // also beyond tedious to log
-            default: warn(event, "Unhandled Instant Message Dialog Type #"+messagetype); break;
+            default: log.warning( "Unhandled Instant Message Dialog Type #"+messagetype); break;
         }
 
     }
@@ -229,7 +228,7 @@ public class CnC extends Handler {
         LLUUID source=m.bagentdata.vagentid;
         String message=m.bmessageblock.vmessage.toString();
         // extract and cut it all up
-        info(event,"CnC processing instant message <"+from+"> "+message);
+        log.info("CnC processing instant message <"+from+"> "+message);
         String prefix=config.get("privatecommandprefix","*");
         runCommands(from,source,message,prefix);
     }
@@ -268,7 +267,7 @@ public class CnC extends Handler {
             LLSDBinary handle=(LLSDBinary) map.get("Handle");
             String numericip=ip.toIP();
             byte[] handlebytes=handle.toByte();
-            if (Debug.REGIONHANDLES) { debug(event,"Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
+            if (Debug.REGIONHANDLES) { log.fine("Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
             new CircuitLauncher(bot,numericip,port.get(),handle.toLong()).start();
         }
     }
@@ -287,7 +286,7 @@ public class CnC extends Handler {
             try {
                 bot.createCircuit(numericip,port,handle,null);
             } catch (Exception e) {
-                Log.error(bot,"Failed to set up circuit to "+Global.regionName(handle)+" (#"+Long.toUnsignedString(handle)+")");
+                log.severe("Failed to set up circuit to "+Global.regionName(handle)+" (#"+Long.toUnsignedString(handle)+")");
             }
             
         }
@@ -299,13 +298,13 @@ public class CnC extends Handler {
         String simipandport=((LLSDString)(body.get("sim-ip-and-port"))).toString();
         for (Circuit c:bot.getCircuits()) {
             if (c.getSimIPAndPort().equalsIgnoreCase(simipandport)) {
-                if (Debug.EVENTQUEUE) { debug(event,"Matched ip and port to circuit for region "+c.getRegionName()); }
+                if (Debug.EVENTQUEUE) { log.fine("Matched ip and port to circuit for region "+c.getRegionName()); }
                 String seedcaps = ((LLSDString)(body.get("seed-capability"))).toString();
                 c.connectCAPS(seedcaps);
                 return;
             }
         }
-        error(event,"Did not find simipandport "+simipandport+" to bind the event queue to");
+        log.severe("Did not find simipandport "+simipandport+" to bind the event queue to");
     }
 
     @CmdHelp(description = "Request the bot shutdown")
@@ -323,7 +322,7 @@ public class CnC extends Handler {
             }
         }
         if (!prefixok) { return; }
-        Log.note(bot,source.toUUIDString()+" <"+from+"> invokes command "+message);
+        log.info(source.toUUIDString()+" <"+from+"> invokes command "+message);
         Map<String,String> params=new HashMap<>();
         String keyword=parseCommand(message,params);
         String response;
@@ -334,18 +333,18 @@ public class CnC extends Handler {
             if (response==null) { response=command.execute(); }
         }
         catch (Exception e) {
-            Log.warn(bot,"CnC Subcommand exceptioned:"+e.toString(),e);
+            log.log(WARNING,"CnC Subcommand exceptioned:"+e.toString(),e);
             response="Exception:"+e.toString();
         }
 
-        if (bot.quitting()) { Log.note(bot,"Not sending IM response due to shutdown: "+response); }
+        if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
         else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
     }
 
     @CmdHelp(description = "Causes the bot to reconnect to SL without quitting")
     public String restartCommand(CommandEvent command) {
         bot.forceReconnect();
-        warn("Restart command initiated");
+        log.warning("Restart command initiated");
         return "This IM reply probably will be lost due to the restart.";
     }
 
@@ -356,7 +355,7 @@ public class CnC extends Handler {
             @ParamHelp(description = "Message to send")
             String message) {
         bot.im(new LLUUID(uuid), message);
-        note("Sent IM to <"+uuid+"> "+bot.getUserName(new LLUUID(uuid))+" - "+message);
+        log.info("Sent IM to <"+uuid+"> "+bot.getUserName(new LLUUID(uuid))+" - "+message);
         return "IM sent";
     }
     
@@ -420,29 +419,29 @@ public class CnC extends Handler {
         if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) { // if at home
             if (homesickness!=null) {
                 homesickness=null;
-                Log.debug(this,"No longer homesick");
+                log.info("No longer homesick");
             }
             return;
         }
         // we are not at home oO
         // if our date thing is null this is the first time we've noticed ; set first TP home at now+60
         if (homesickness==null) {
-            Log.debug(this,"Bot not at home, beginning to feel home sick");
+            log.info("Bot not at home, beginning to feel home sick");
             homesickness=new Date(new Date().getTime()+60L*1000L);
             return;
         }
         // otherwise, go home
-        Log.debug(this,"Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in maintenance
+        log.info("Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in maintenance
         new CommandEvent(bot, bot.getRegional(), "home", new HashMap<>(), null).execute();
         try { Thread.sleep(1000L); } catch (InterruptedException e) {}
         if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
             // success 
-            Log.debug(this,"Bot has successfully cured its self of homesickness by going home, bot is no longer homesick");
+            log.info("Bot has successfully cured its self of homesickness by going home, bot is no longer homesick");
             homesickness=null;
             return;
         }        
         // failure, retry in 5
-        Log.debug(this,"Bot attempted to return home but had no luck, skulking for 5 minutes, bot remains homesick");
+        log.info("Bot attempted to return home but had no luck, skulking for 5 minutes, bot remains homesick");
         homesickness=new Date(new Date().getTime()+5L*60L*1000L);
     }
 

@@ -15,6 +15,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import static java.util.logging.Level.SEVERE;
+import java.util.logging.Logger;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.CloseCircuit;
 import net.coagulate.JSLBot.Packets.Messages.CompletePingCheck;
@@ -33,6 +36,7 @@ import net.coagulate.JSLBot.Packets.Types.*;
  * @author Iain Price
  */
 public final class Circuit extends Thread implements Closeable {
+    private Logger log;
     private int circuitsequence=0;
     // list of sent reliable packets we're waiting to hear an ack for
     private final Map<Packet,Date> inflight=new HashMap<>();
@@ -93,6 +97,7 @@ public final class Circuit extends Thread implements Closeable {
      * @throws IOException 
      */
     Circuit(JSLBot parent, String address, int port, Long passedregionhandle,String capsurl) throws IOException  {
+        log=parent.getLogger("Circuit."+address+":"+port);
         if (passedregionhandle==null) { throw new IllegalArgumentException("Null region handles are not allowed"); }
         circuitsequence=parent.getCircuitSequence();
         setDaemon(true);
@@ -117,15 +122,15 @@ public final class Circuit extends Thread implements Closeable {
         this.address=new InetSocketAddress(simip,simport);
         socket=new DatagramSocket();
         socket.connect(this.address);
-        if (Debug.CIRCUIT) { debug("Sending initial circuit code over socket to "+this.address); }
+        if (Debug.CIRCUIT) { log.finer("Sending initial circuit code over socket to "+this.address); }
         send(bot.useCircuitCode());
         this.setDaemon(true);
         this.start(); // launch the rx driver
         // wait for the 'outstanding acks' to be updated (meaning our reliable UseCircuitCode is acked)
         try { synchronized(inflight) { inflight.wait(5000); } } catch (InterruptedException ex) { throw new IOException("Failed to get UseCircuitCode Ack"); }
-        if (Debug.CIRCUIT) { debug("Outstanding ACKS: "+inflight.size()); }
+        if (Debug.CIRCUIT) { log.finer("Outstanding ACKS: "+inflight.size()); }
         if (!inflight.isEmpty()) { throw new IOException("Login completed, UseCircuitCode sent, and not acknowledged..."); }
-        info("Successfully connected circuit");
+        log.info("Successfully connected circuit");
         if (capsurl!=null) { caps=new CAPS(this,capsurl); caps.run(); }
     }
     
@@ -135,8 +140,8 @@ public final class Circuit extends Thread implements Closeable {
     @Override
     public void run() {
         this.setName("Circuit for "+bot.getUsername()+" to "+this.address);
-        if (!hasrunconnect) { crit("Must connect a new circuit"); return; }
-        if (Debug.CIRCUIT) { info("Starting background driver:"+this.getName()); }
+        if (!hasrunconnect) { log.severe("Must connect a new circuit"); return; }
+        if (Debug.CIRCUIT) { log.fine("Starting background driver:"+this.getName()); }
         try {
             DatagramPacket receive=new DatagramPacket(new byte[Constants.UDP_MAX_BUFFER], Constants.UDP_MAX_BUFFER);            
             // begin eternal damnation as a circuit driver.
@@ -154,13 +159,13 @@ public final class Circuit extends Thread implements Closeable {
                     for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
                     processPacket(p);
                 }
-                catch (SocketTimeoutException e) {if (Debug.ACK) { debug("Exiting receive without event"); } } // as requested, and we dont care
+                catch (SocketTimeoutException e) {if (Debug.ACK) { log.finer("Exiting receive without event"); } } // as requested, and we dont care
                 // timeout is just to make sure we get HERE \/ once in a while
                 if ((ackqueue.size()>0 && lastAck()>1000) || ackqueue.size()>32) {
-                    if (Debug.ACK) { debug("Manually sending ACKs"); }
+                    if (Debug.ACK) { log.finer("Manually sending ACKs"); }
                     sendAck();                    
                 } else {
-                    if (Debug.ACK) { debug("NOT sending any ACKs.  Q size is "+ackqueue.size()+" and lastAck is "+lastAck()+"ms"); }
+                    if (Debug.ACK) { log.finer("NOT sending any ACKs.  Q size is "+ackqueue.size()+" and lastAck is "+lastAck()+"ms"); }
                 }
                 if (lastMaintenance()>2500) { 
                     maintenance();
@@ -170,15 +175,15 @@ public final class Circuit extends Thread implements Closeable {
         catch (SocketException ex) {
             if (!bot().quitting()) // who cares if we're closing the bot
             { 
-                if (!disconnectlogged) { disconnectlogged=true; warn("Circuit to "+this.regionname+" has been closed, "+ex.toString()); }
+                if (!disconnectlogged) { disconnectlogged=true; log.warning("Circuit to "+this.regionname+" has been closed, "+ex.toString()); }
                 close();
             }
         }
         catch (RuntimeException|IOException e) {
-            if (!disconnectlogged) { disconnectlogged=true; crit("Circuit driver run() loop crashed : "+e.toString(),e); }
+            if (!disconnectlogged) { disconnectlogged=true; log.log(SEVERE,"Circuit driver run() loop crashed : "+e.toString(),e); }
             close();
         }
-        if (Debug.CIRCUIT) { debug("Deregistering circuit to "+regionname); }
+        if (Debug.CIRCUIT) { log.log(Level.FINE, "Deregistering circuit to {0}", regionname); }
         bot.deregisterCircuit(regionhandle,this);
     }
     /** When the last ack packet was sent, as an interval from now.
@@ -213,7 +218,7 @@ public final class Circuit extends Thread implements Closeable {
                 if (p.getSequence()==seqno) { match=p; }
             }
             if (match==null) { 
-                debug("Unexpected ACK "+seqno);
+                log.log(Level.FINE, "Unexpected ACK {0}", seqno);
                 return;
             }
             inflight.remove(match);
@@ -225,12 +230,12 @@ public final class Circuit extends Thread implements Closeable {
     private void maintenance() throws IOException {
         long interval=new Date().getTime()-lastpacket.getTime();
         if (interval>(Constants.CIRCUIT_PING*1000)) {
-            debug("Circuit silent for more than "+Constants.CIRCUIT_PING+" seconds, sending ping.");
+            log.log(Level.FINE, "Circuit silent for more than {0} seconds, sending ping.", Constants.CIRCUIT_PING);
             StartPingCheck ping=new StartPingCheck();
             send(ping,true);
         }        
         if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) {
-            disconnectlogged=true; crit("Circuit has received no packets in "+Constants.CIRCUIT_TIMEOUT+" seconds, closing.");
+            disconnectlogged=true; log.log(SEVERE, "Circuit has received no packets in {0} seconds, closing.", Constants.CIRCUIT_TIMEOUT);
             close();
             return;
         }
@@ -257,7 +262,7 @@ public final class Circuit extends Thread implements Closeable {
                 Date sent=inflight.get(p);
                 if (packetrate<5 && ((new Date().getTime())-(sent.getTime()))>Constants.ACK_TIMEOUT) {
                     //System.out.println("In retransmit with packetrate "+packetrate);
-                    debug("Retransmitting packet "+p.getSequence());
+                    log.finer("Retransmitting packet "+p.getSequence());
                     p.setResent(true);
                     send(p);
                     inflight.put(p,new Date());
@@ -289,14 +294,14 @@ public final class Circuit extends Thread implements Closeable {
         if (sending.size()>0) { acksize=(4*sending.size())+1; p.setAck(true);}
         // claim message+ack size
         ByteBuffer buffer=ByteBuffer.allocate(p.size()+acksize);
-        if (buffer.capacity()>1500) { note("Message size is "+buffer.capacity()+" which is quite large"); }
+        if (buffer.capacity()>1500) { log.log(Level.WARNING, "Message size is {0} which is quite large", buffer.capacity()); }
         // write message to the buffer
         p.write(this,buffer);
         byte[] transmit=buffer.array();
         if (p.getZeroCode()) { transmit=BotUtils.zeroEncode(transmit); }
         // final acks aren't zero coded
         String ackedlist="";
-        if (buffer.capacity()>1500) { note("Message size is "+sending.size()+" post ZeroCoding which is quite large"); }
+        if (buffer.capacity()>1500) { log.log(Level.WARNING, "Message size is {0} post ZeroCoding which is quite large", sending.size()); }
         // IF sending acks, append them now (AFTER zerocoding)
         if (sending.size()>0) {
             ByteBuffer append=ByteBuffer.allocate(transmit.length+(4*sending.size())+1);
@@ -311,10 +316,10 @@ public final class Circuit extends Thread implements Closeable {
             U8 count=new U8(sending.size());
             count.write(append);
             lastacks=new Date();
-            if (Debug.ACK) { debug("Appended ACKS:"+ackedlist); }
+            if (Debug.ACK) { log.log(Level.FINEST, "Appended ACKS:{0}", ackedlist); }
             transmit=append.array();
         }
-        if (Debug.PACKET) { debug("Sending packet: "+p.dump());
+        if (Debug.PACKET) { log.log(Level.FINEST, "Sending packet: {0}", p.dump());
             System.out.println();
             for (Byte b:transmit) {
                 System.out.print(b.toString()+" ");
@@ -326,11 +331,11 @@ public final class Circuit extends Thread implements Closeable {
             ByteBuffer decodeme=ByteBuffer.allocate(transmit.length);
             decodeme.put(transmit);
             decodeme.position(0);
-            debug("Reverse engineered: "+Packet.decode(decodeme).dump());
+            log.log(Level.FINEST, "Reverse engineered: {0}", Packet.decode(decodeme).dump());
         }           
         DatagramPacket packet=new DatagramPacket(transmit,transmit.length,address);
         try { socket.send(packet); }
-        catch (IOException e) { Log.error(this,"Error transmitting packet "+e.toString(),e); }
+        catch (IOException e) { log.log(SEVERE,"Error transmitting packet "+e.toString(),e); }
         packetrate++;
     }
 
@@ -357,7 +362,7 @@ public final class Circuit extends Thread implements Closeable {
         send(p);
         try { socket.close(); }
         catch (Exception e) { }//debug(owner,"Socket closure exceptioned - ",e); }
-        if (!disconnectlogged) { disconnectlogged=true; debug("We have requested closure of circuit to "+this.regionname); }
+        if (!disconnectlogged) { disconnectlogged=true; log.log(Level.FINE, "We have requested closure of circuit to {0}", this.regionname); }
         disconnected=true;
     }
     
@@ -379,7 +384,7 @@ public final class Circuit extends Thread implements Closeable {
             ack.bpackets.add(ackblock);
             acklist+=i+" ";
         }
-        if (Debug.ACK) { debug("Standalone acks: "+acklist); }
+        if (Debug.ACK) { log.log(Level.FINEST, "Standalone acks: {0}", acklist); }
         send(ack);
         lastacks=new Date();
     }
@@ -388,12 +393,12 @@ public final class Circuit extends Thread implements Closeable {
 
     /** Process a received packet */
     private void processPacket(Packet p) throws IOException {
-        if (Debug.PACKET) { debug("Received packet: "+p.dump()); }
+        if (Debug.PACKET) { log.log(Level.FINEST, "Received packet: {0}", p.dump()); }
         boolean alreadyseen=acked.containsKey(p.getSequence());
         if (p.getReliable()) {
             // reliable packets must be acked, otherwise the sim will spam us with them a few times
             // we also need to keep track of possible DUPs
-            if (Debug.ACK) { debug("Requested to acknowledge packet "+p.getSequence()); }
+            if (Debug.ACK) { log.log(Level.FINEST, "Requested to acknowledge packet {0}", p.getSequence()); }
             synchronized(ackqueue) {
                 ackqueue.add(p.getSequence());
             }
@@ -405,21 +410,21 @@ public final class Circuit extends Thread implements Closeable {
             // is it already known?
             if (alreadyseen) {
                 if (Debug.DUMPRETRANS) {
-                    debug("Received resent DUPLICATED packet:"+p.dump()); 
+                    log.log(Level.FINER, "Received resent DUPLICATED packet:{0}", p.dump()); 
                 } 
                 if (Debug.NOTERETRANS) {
-                    debug("Received resent DUPLICATED packet:"+p.getSequence()); 
+                    log.log(Level.FINER, "Received resent DUPLICATED packet:{0}", p.getSequence()); 
                 }
                 return; // already run it
             }
             if (Debug.DUMPRETRANS) {
-                debug("Received resent LOST packet:"+p.dump()); 
+                log.log(Level.FINE, "Received resent LOST packet:{0}", p.dump()); 
             }
             if (Debug.NOTERETRANS) {
-                debug("Received resent LOST packet:"+p.getSequence()); 
+                log.log(Level.FINE, "Received resent LOST packet:{0}", p.getSequence()); 
             }
         }
-        if (alreadyseen & (!p.getResent())) { warn("Re-seen packet that is not a retransmit, simulator/network bug?"); return; }
+        if (alreadyseen & (!p.getResent())) { log.warning("Re-seen packet that is not a retransmit, simulator/network bug?"); return; }
         boolean internal=false; // circuit control packets.  only for stuff that should never be propagated.  acks and pings basically.
         Message m=p.message();
         //System.out.println(m.getClass().getSimpleName());
@@ -450,13 +455,14 @@ public final class Circuit extends Thread implements Closeable {
             RegionHandshake r=(RegionHandshake)m;
             regionname=r.bregioninfo.vsimname.toString();
             this.setName("Circuit for "+bot.getUsername()+" to "+this.regionname);
+            log=bot.getLogger("Circuit."+regionname);
             if (regionhandle!=null) { Global.regionName(regionhandle, regionname); }
             boolean register=false; // most connections register at creation since we know where we're connecting to
             // the initial circuit maybe not so much
             regionuuid=r.bregioninfo2.vregionid;
-            if (Debug.REGIONHANDLES) { debug("RegionHandshake with UUID "+regionuuid.toUUIDString()); }
+            if (Debug.REGIONHANDLES) { log.log(Level.FINE, "RegionHandshake with UUID {0}", regionuuid.toUUIDString()); }
             if (firsthandshake) {
-                info("Handshake "+regionname+" cpu "+r.bregioninfo3.vcpuclassid.value+"/"+r.bregioninfo3.vcpuratio.value+" active as "+r.bregioninfo3.vproductname.toString()+"#"+r.bregioninfo3.vproductsku.toString()+" @ colocation "+r.bregioninfo3.vcoloname.toString());
+                log.log(Level.INFO, "Handshake {0} cpu {1}/{2} active as {3}#{4} @ colocation {5}", new Object[]{regionname, r.bregioninfo3.vcpuclassid.value, r.bregioninfo3.vcpuratio.value, r.bregioninfo3.vproductname.toString(), r.bregioninfo3.vproductsku.toString(), r.bregioninfo3.vcoloname.toString()});
                 firsthandshake=false;
             }
             RegionHandshakeReply reply=new RegionHandshakeReply();
@@ -471,13 +477,13 @@ public final class Circuit extends Thread implements Closeable {
             bot.agentUpdate();
         }
         if (m instanceof DisableSimulator) {
-            if (!disconnectlogged) { disconnectlogged=true; info("Circuit closure was requested from Simulator "+regionname+" via DisableSimulator"); }
+            if (!disconnectlogged) { disconnectlogged=true; log.log(Level.INFO, "Circuit closure was requested from Simulator {0} via DisableSimulator", regionname); }
             close();
             internal=true;
         }
         if (!internal) { 
             // if it wasn't a circuit related packet, hand it off to the bot
-            if (Debug.REGIONHANDLES && regionhandle==null) { System.out.println("Creating event with null RH :( "); }
+            if (Debug.REGIONHANDLES && regionhandle==null) { log.info("Creating event with null RH :( "); }
             Regional r=null;
             if (regionhandle!=null) { r=regional(); }
             new UDPEvent(bot, r, m, m.getName()).submit();
@@ -501,29 +507,21 @@ public final class Circuit extends Thread implements Closeable {
     public void connectCAPS(String newcapsurl) {
         if (caps!=null && caps.eventqueue().isAlive()) {
             if (capsurl.equals(newcapsurl)) {
-                if (Debug.EVENTQUEUE) { debug("Passed duplicate of existing CAPS url, not reconnecting anything"); return; }
+                if (Debug.EVENTQUEUE) { log.fine("Passed duplicate of existing CAPS url, not reconnecting anything"); return; }
             }
-            if (Debug.EVENTQUEUE) { debug("Passed DIFFERENT caps URL to existing CAPS url which is still alive?"); return; }
+            if (Debug.EVENTQUEUE) { log.info("Passed DIFFERENT caps URL to existing CAPS url which is still alive?"); return; }
         }
         capsurl=newcapsurl;
-        if (Debug.EVENTQUEUE) { debug("Establishing connection to CAPS for region "+getRegionName()); }
+        if (Debug.EVENTQUEUE) { log.log(Level.INFO, "Establishing connection to CAPS for region {0}", getRegionName()); }
         caps=new CAPS(this,newcapsurl);
         caps.start();
     }
 
     @Override
-    public String toString() { return bot().toString()+"/"+getRegionName()+"#"+circuitsequence; }
-    private void debug(String message) { debug(message,null); }
-    private void debug(String message, Throwable t) { Log.debug(this,message,t); }
-    private void info(String message) { info(message,null); }
-    private void info(String message, Throwable t) { Log.info(this,message,t); }
-    private void note(String message) { note(message,null); }
-    private void note(String message, Throwable t) { Log.note(this,message,t); }
-    private void warn(String message) { warn(message,null); }
-    private void warn(String message, Throwable t) { Log.warn(this,message,t); }
-    private void error(String message) { error(message,null); }
-    private void error(String message, Throwable t) { Log.error(this,message,t); }
-    private void crit(String message) { crit(message,null); }
-    private void crit(String message, Throwable t) { Log.crit(this,message,t); }
+    public String toString() { return getRegionName()+"#"+circuitsequence; }
+
+    public Logger getLogger(String subspace) {
+        return Logger.getLogger(log.getName()+"."+subspace);
+    }
 
 }

@@ -107,7 +107,7 @@ public abstract class BotUtils {
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
         XmlRpcClient client=new XmlRpcClient();
         client.setConfig(config);
-        HashMap<String,Object> params=new HashMap();
+        HashMap<String,Object> params=new HashMap<>();
         params.put("first",firstname);
         params.put("last",lastname);
         params.put("extended_errors",1);
@@ -147,7 +147,7 @@ public abstract class BotUtils {
                         printline+="["+clas+"] "+(output);
                     }
                 }
-                Log.debug(bot,printline);
+                bot.getLogger("Login").finer(printline);
             }
         }
         return result;

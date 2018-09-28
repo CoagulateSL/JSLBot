@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Handlers.Authorisation;
 
+import java.util.logging.Logger;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.JSLBot;
@@ -9,7 +10,10 @@ import net.coagulate.JSLBot.JSLBot;
  * @author Iain Price
  */
 public abstract class Authorisation {
-    public Authorisation(JSLBot bot,Configuration c){}
+    protected final Logger log;
+    public Authorisation(JSLBot bot,Configuration c){
+        log=bot.getLogger("Authorisation."+this.getClass().getSimpleName());
+    }
     /** Returns null if approved, otherwise some explanative text
      * @param event The CommandEvent to approve/reject
      * @return  Null if approved, otherwise a rejection reason.

@@ -237,14 +237,14 @@ public class Packet {
             Packet response;
             Message message;
             // fun with reflection =)
-            Class messageclass;
+            Class<?> messageclass;
             try {
                 messageclass=Class.forName("net.coagulate.JSLBot.Packets.Messages."+messagetype);
             }
             catch (ClassNotFoundException e) {
                 return null;
             }
-            Constructor messageconstructor=messageclass.getConstructor(new Class[0]);
+            Constructor<?> messageconstructor=messageclass.getConstructor(new Class[0]);
             message=(Message) messageconstructor.newInstance(new Object[0]);
             response=new Packet(message);
             response.flags=flags;

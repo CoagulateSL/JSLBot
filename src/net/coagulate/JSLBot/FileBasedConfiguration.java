@@ -17,8 +17,9 @@ import java.util.Set;
 public class FileBasedConfiguration extends Configuration {
 
     String filename="";
-    Map<String,String> kvstore=new HashMap();
+    Map<String,String> kvstore=new HashMap<>();
     
+    @SuppressWarnings("unchecked") // pretty stuck with this :)
     public FileBasedConfiguration(String filename) {
         this.filename=filename;
         try (FileInputStream fis = new FileInputStream(filename); ObjectInputStream ois = new ObjectInputStream(fis)) {

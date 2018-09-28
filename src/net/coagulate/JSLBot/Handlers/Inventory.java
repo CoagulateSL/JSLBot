@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import static java.util.logging.Level.SEVERE;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
@@ -19,7 +20,6 @@ import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
-import net.coagulate.JSLBot.Log;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /** Manage the inventory.
@@ -38,7 +38,7 @@ public class Inventory extends Handler implements Runnable {
         downloadqueue.add(bot.getInventoryRoot());
         Thread t=new Thread(this);
         t.setName("Inventory download thread");
-        Log.info(this,"Inventory download initiated.");
+        log.fine("Inventory download initiated.");
         t.start();
     }
     
@@ -55,11 +55,11 @@ public class Inventory extends Handler implements Runnable {
             Iterator<LLUUID> i=downloadqueue.iterator();
             download.addAll(downloadqueue); downloadqueue.clear();
             try { fetchInventory(download); }
-            catch (IOException e) { Log.error(this,"Inventory download gave IO exception",e); }
+            catch (IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
             int percent=Math.round((100*inventorytree.size())/(inventorytree.size()+downloadqueue.size()));
-            Log.debug(this,"Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory.size()+" elements)");
+            log.fine("Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory.size()+" elements)");
         }
-        Log.info(this,"Inventory download complete");
+        log.info("Inventory download complete");
         inventorycomplete=true;
     }
 

@@ -18,7 +18,7 @@ public class Health extends Handler {
     public void healthMessageUDPImmediate(UDPEvent event) {
         HealthMessage h=(HealthMessage) event.body();
         health=h.bhealthdata.vhealth.value;
-        if (verbose) { note(event,"Agent health is "+health); }
+        if (verbose) { log.info("Agent health is "+health); }
     }
 
 }

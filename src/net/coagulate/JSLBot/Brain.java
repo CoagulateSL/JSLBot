@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import static java.util.logging.Level.*;
+import java.util.logging.Logger;
 import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 
@@ -23,12 +26,14 @@ import net.coagulate.JSLBot.JSLBot.CmdHelp;
  * @author Iain Price
  */
 public class Brain {
+    private final Logger log;
     private Authorisation auth=null;    
     private final Set<Handler> brain;
     private final JSLBot bot;
     private boolean procrastinate=true;
 
     Brain(JSLBot bot) {
+        log=bot.getLogger("Brain");
         this.bot=bot;
         this.brain = new HashSet<>();
     }
@@ -67,7 +72,7 @@ public class Brain {
         } catch (InvocationTargetException ex) {
             Throwable t=ex;
             if (ex.getCause()!=null) { t=ex.getCause(); }
-            Log.error(bot,"Exception loading handler "+handlername,t);
+            log.log(Level.SEVERE,"Exception loading handler "+handlername,t);
         }
     }
      
@@ -85,14 +90,14 @@ public class Brain {
                     String commandname=m.getName().toLowerCase();
                     if (debug) { System.out.println(h.getClass().getName()+"."+m.getName()+" Entered into command bank as '"+commandname+"'"); }
                     if (commandmap.containsKey(commandname)) {
-                        Log.error(this,"Duplicate definition for command "+commandname);
+                        log.severe("Duplicate definition for command "+commandname);
                     } else {
                         if (commandname.endsWith("command")) {
                             if (CommandEvent.class==m.getParameters()[0].getType())
                             { commandmap.put(commandname,m); } else
-                            { Log.error(this,"Otherwise legitimate command "+commandname+" has incorrect first parameter - should be type CommandEvent"); }
+                            { log.severe("Otherwise legitimate command "+commandname+" has incorrect first parameter - should be type CommandEvent"); }
                         }
-                        else { Log.warn(this,"Annotated command "+commandname+" does not have 'command' suffix and is inaccessible"); }
+                        else { log.warning("Annotated command "+commandname+" does not have 'command' suffix and is inaccessible"); }
                     }
                 }
             }
@@ -125,9 +130,9 @@ public class Brain {
         try {
             String classname=name;
             if (!name.contains(".")) { classname="net.coagulate.JSLBot.Handlers."+name; }
-            Class c=Class.forName(classname);
+            Class<?> c=Class.forName(classname);
             Configuration subconfiguration=bot.config.subspace(name);
-            Constructor cons=c.getConstructor(JSLBot.class,Configuration.class);
+            Constructor<?> cons=c.getConstructor(JSLBot.class,Configuration.class);
             return (Handler) (cons.newInstance(bot,subconfiguration));
         } catch (SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
             throw new AssertionError("Handler "+name+" fails to meet programming contract",ex);
@@ -183,8 +188,8 @@ public class Brain {
             if (handler==null) { return "Unknown Command:"+method.toLowerCase(); }
             handlers.add(handler);
         }
-        if (Debug.TRACKCOMMANDS && event instanceof CommandEvent) { Log.debug(event,"Entering executor in "+(immediate?"immediate":"delayed")+" mode"); }
-        if (handlers==null) { Log.crit(this,"Found a null map for "+method+", but this should have been populated"); return""; }
+        if (Debug.TRACKCOMMANDS && event instanceof CommandEvent) { event.log(FINEST,"Entering executor in "+(immediate?"immediate":"delayed")+" mode"); }
+        if (handlers==null) { log.severe("Found a null map for "+method+", but this should have been populated"); return""; }
         for (Method handler:handlers) {
             try {
                 Object callon=findHandler(handler);
@@ -196,13 +201,13 @@ public class Brain {
                     cmd.response(response);
                 }
             } catch (IllegalAccessException ex) {
-                Log.warn(handler,"Method "+method+" has incorrect access modifier"); // impossible?
+                log.warning("Method "+method+" has incorrect access modifier"); // impossible?
             } catch (IllegalArgumentException ex) {
-                Log.warn(handler,"Method "+method+" has incorrect parameters"); // impossible?
+                log.warning("Method "+method+" has incorrect parameters"); // impossible?
             } catch (InvocationTargetException ex) {
                 Throwable t=ex;
                 if (t.getCause()!=null) { t=t.getCause(); }
-                Log.error(handler,"Method "+method+" threw an error:", t);
+                log.log(SEVERE,"Method "+method+" threw an error:", t);
             }
         }
         
@@ -215,7 +220,7 @@ public class Brain {
             if (!warned.contains(fen) &&
                     ( handlermap.get(fen+"Delayed")==null || handlermap.get(fen+"Delayed").isEmpty()) &&
                     ( handlermap.get(fen+"Immediate")==null || handlermap.get(fen+"Immediate").isEmpty()) ) {
-                Log.debug(this,"No handler for UDP/XML event "+fen);
+                log.log(FINE, "No handler for UDP/XML event {0}", fen);
                 warned.add(fen);
             }
         } 
@@ -265,7 +270,7 @@ public class Brain {
                 // this is OK and probably the default case, not every module implements everything.
             } catch (SecurityException ex) {
                 // this is less OK
-                Log.warn(handler,"Method "+fen+" is inaccessible, this is probably unintentional");
+                log.log(WARNING, "Method {0} is inaccessible, this is probably unintentional", fen);
             }
         }
         /*System.out.print("Populating for '"+fen+"' found: ");
@@ -305,13 +310,13 @@ public class Brain {
      */
     void loggedIn() {
         for (Handler h:brain) {
-            try { h.loggedIn(); } catch (Exception e) { Log.error(h,"Handler exceptioned handling login",e); }
+            try { h.loggedIn(); } catch (Exception e) { log.log(SEVERE,"Handler "+h.toString()+" exceptioned handling login",e); }
         }
     }
 
     private void callMaintenance() {
         for (Handler h:brain) {
-            try {h.maintenance();} catch (Exception e) { Log.error(h,"Handler exceptioned during maintenance",e); }
+            try {h.maintenance();} catch (Exception e) { log.log(SEVERE,"Handler "+h.toString()+" exceptioned during maintenance",e); }
         }
     }    
     
@@ -324,7 +329,7 @@ public class Brain {
         // if we have any null slots then we didn't even launch MAX times yet
         for (int i=0;i<launches.length;i++) {
             if (launches[i]==null) {
-                Log.info(bot,"Reconnection Safety: We have not yet launched 5 times");
+                log.info("Reconnection Safety: We have not yet launched 5 times");
                 launches[i]=new Date(); return;// use slot, return OK
             } 
         }
@@ -337,9 +342,9 @@ public class Brain {
         if (oldest==null) { throw new AssertionError("How is oldest null at this point?  if null we should have hit 'launched less than 5 times'"); }
         long ago=new Date().getTime()-oldest.getTime();
         int secondsago=(int)(ago/1000f);
-        Log.info(bot,"Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
+        log.info("Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
         if (ago<(Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS)) { 
-            Log.crit(bot,"Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");
+            log.severe("Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");
             loginLoopSafetyViolation();
             return; // if we get here.
         }
@@ -359,10 +364,10 @@ public class Brain {
         // sometimes the remainder of the application is more important and it should continue, and we should just sleep, which is what we do for now
         // no configuration here yet, hard coded 15 minute sleep, have fun with that.
         for (int i=15;i>0;i--) {
-            Log.crit(bot,"Reconnection Safety: RECONNECTION SAFETY HAS TRIPPED.  THREAD FORCE-SLEEPING FOR "+i+" MINUTES.");
+            log.severe("Reconnection Safety: RECONNECTION SAFETY HAS TRIPPED.  THREAD FORCE-SLEEPING FOR "+i+" MINUTES.");
             try { Thread.sleep(60000); } catch (InterruptedException e) {}
         }
-        Log.warn(bot,"Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
+        log.warning("Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
     }    
     
     /** Set the authorisation module.

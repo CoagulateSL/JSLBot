@@ -3,7 +3,6 @@ package net.coagulate.JSLBot.Handlers.Authorisation;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Log;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /**
@@ -24,11 +23,11 @@ public class OwnerOnly extends Authorisation {
         String owneruuidstr=c.get("owneruuid");
         owneruuid=null;
         if (owneruuidstr!=null) { owneruuid=new LLUUID(owneruuidstr); }
-        if (ownerusername==null && owneruuid==null) { Log.error(bot,"OwnerAuth configured but no owner uuid or name was found, essentially in DenyAll mode"); return; }
+        if (ownerusername==null && owneruuid==null) { log.warning("OwnerAuth configured but no owner uuid or name was found, essentially in DenyAll mode"); return; }
         String permitted="";
         if (ownerusername!=null) { permitted="'"+ownerusername+"'"; }
         if (owneruuid!=null) { if (!permitted.isEmpty()) { permitted+=" "; } permitted+=owneruuid.toUUIDString(); }
-        Log.info(bot,"OwnerOnly mode enabled, authorised for "+permitted);
+        log.config("OwnerOnly mode enabled, authorised for "+permitted);
     }
     /** Approves events if issued by the owner.
      * Rejects all if no uuid + username defined.

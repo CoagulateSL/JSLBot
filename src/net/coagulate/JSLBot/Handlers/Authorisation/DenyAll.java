@@ -3,7 +3,6 @@ package net.coagulate.JSLBot.Handlers.Authorisation;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Log;
 
 /** An implementation of Authorisation that denies everything.
  *
@@ -19,7 +18,7 @@ public class DenyAll extends Authorisation {
      */
     public DenyAll(JSLBot bot, Configuration c) {
         super(bot, c);
-        Log.note(bot,"Created a DenyAll authoriser, if engaged all remote commands will be denied.");
+        log.config("Created a DenyAll authoriser, if engaged all remote commands will be denied.");
     }
     @Override
     /** Denies everything.

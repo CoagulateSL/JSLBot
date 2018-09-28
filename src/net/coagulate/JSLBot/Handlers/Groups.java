@@ -60,7 +60,7 @@ public class Groups extends Handler {
         igrid.vroleid=role;
         igr.binvitedata.add(igrid);
         bot.send(igr,true);
-        note("Sent group invite to "+avatar.toUUIDString()+" to group "+group.toUUIDString()+" role "+role.toUUIDString());
+        log.info("Sent group invite to "+avatar.toUUIDString()+" to group "+group.toUUIDString()+" role "+role.toUUIDString());
         return "Invite sent";
     }
 
@@ -78,7 +78,7 @@ public class Groups extends Handler {
         egrid.vejecteeid=avatar;
         egr.bejectdata.add(egrid);
         bot.send(egr,true);
-        note("Ejected "+avatar.toUUIDString()+" from group "+group.toUUIDString());
+        log.info("Ejected "+avatar.toUUIDString()+" from group "+group.toUUIDString());
         return "Ejection request sent";
     }
     
@@ -124,8 +124,8 @@ public class Groups extends Handler {
             join.invokerUsername(m.bmessageblock.vfromagentname.toString());
             String reject=bot.brain().auth(join);
             byte num=35;
-            if (fee>0) { num=36; warn(event,"Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); }
-            if (num==35 && reject!=null) { note(event,"Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); num=36;}
+            if (fee>0) { num=36; log.warning("Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); }
+            if (num==35 && reject!=null) { log.info("Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); num=36;}
             ImprovedInstantMessage im=new ImprovedInstantMessage();
             im.bagentdata.vagentid=bot.getUUID();
             im.bagentdata.vsessionid=bot.getSession();
@@ -135,7 +135,7 @@ public class Groups extends Handler {
             im.bmessageblock.vid=m.bmessageblock.vid;
             im.bmessageblock.vdialog=new U8(num);
             bot.send(im,true);
-            note(event,"Sent accept response to group invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString());
+            log.info("Sent accept response to group invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString());
         }
     }
     
@@ -143,9 +143,9 @@ public class Groups extends Handler {
         JoinGroupReply jgr=(JoinGroupReply)event.body();
         String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
         if (jgr.bgroupdata.vsuccess.value!=0) {
-            note(event,"Joined group "+groupid);
+            log.info("Joined group "+groupid);
         } else {
-            warn(event,"Failed to join group "+groupid);
+            log.warning("Failed to join group "+groupid);
         }
     }
 

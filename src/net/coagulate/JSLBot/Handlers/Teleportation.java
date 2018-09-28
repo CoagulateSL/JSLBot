@@ -17,7 +17,6 @@ import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.Log;
 import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
 import net.coagulate.JSLBot.Packets.Messages.StartLure;
 import net.coagulate.JSLBot.Packets.Messages.StartLure_bTargetData;
@@ -49,17 +48,17 @@ public class Teleportation extends Handler {
     // nothing more than a status message
     public void teleportProgressUDPImmediate(UDPEvent event) {
         TeleportProgress tp=(TeleportProgress) event.body();
-        debug(event,"Teleport Progress: "+(tp).binfo.vmessage.toString());
+        log.fine("Teleport Progress: "+(tp).binfo.vmessage.toString());
     }
     // also just a status message
     public void teleportStartUDPImmediate(UDPEvent event) {
         TeleportStart tp=(TeleportStart) event.body();
-        info(event,"Teleportation has started (with flags "+tp.binfo.vteleportflags.value+")");
+        log.fine("Teleportation has started (with flags "+tp.binfo.vteleportflags.value+")");
     }
     // completion message, without any of the complexities of changing region
     public void teleportLocalUDPImmediate(UDPEvent event) {
         TeleportLocal tp=(TeleportLocal) event.body();
-        info(event,"Teleportation completed locally");
+        log.info("Teleportation completed locally");
         bot.completeAgentMovement();
         bot.forceAgentUpdate();
         teleporting=false;
@@ -85,9 +84,9 @@ public class Teleportation extends Handler {
         bot.forceAgentUpdate();
         if (code.equalsIgnoreCase("CouldntTPCloser")) {
             teleporting=false;
-            note(event,"Teleport couldn't get closer");
+            log.info("Teleport couldn't get closer");
         } else {
-            warn(event,"Teleport failed ["+code+"] - "+reason);
+            log.warning("Teleport failed ["+code+"] - "+reason);
         }
         synchronized(signal) { signal.notifyAll(); }
     }
@@ -101,7 +100,7 @@ public class Teleportation extends Handler {
         LLSDBinary simip=(LLSDBinary) tpinfo.get("SimIP");
         LLSDInteger simport=(LLSDInteger) tpinfo.get("SimPort");
         LLSDBinary regionhandle=(LLSDBinary) tpinfo.get("RegionHandle");
-        if (Debug.REGIONHANDLES) { debug(event,"TeleportFinish provided regionhandle "+Long.toUnsignedString(regionhandle.toLong())); }
+        if (Debug.REGIONHANDLES) { log.fine("TeleportFinish provided regionhandle "+Long.toUnsignedString(regionhandle.toLong())); }
         String targetaddress=simip.toIP();
         // create the circuit and transfer to it
         //System.out.println(event.body().toXML());
@@ -116,7 +115,7 @@ public class Teleportation extends Handler {
             teleporting=false;
             synchronized(signal) { signal.notifyAll(); }
         } catch (IOException e) {
-            crit(event,"Failed to create teleport finish circuit, we might be losing our connection");
+            log.severe("Failed to create teleport finish circuit, we might be losing our connection");
         }
 
     }
@@ -133,7 +132,7 @@ public class Teleportation extends Handler {
             check.invokerUUID(m.bagentdata.vagentid);
             String reject=bot.brain().auth(check);
             if (reject!=null) { return; } 
-            note(event,"Accepting Teleport Lure: "+messagetext);
+            log.info("Accepting Teleport Lure: "+messagetext);
             TeleportLureRequest req=new TeleportLureRequest();
             req.binfo.vagentid=bot.getUUID();
             req.binfo.vsessionid=bot.getSession();
@@ -143,10 +142,10 @@ public class Teleportation extends Handler {
             bot.send(req,true);
             synchronized(signal) { try { signal.wait(10000); } catch (InterruptedException e) {} }
             if (teleporting==true) {
-                crit(event,"Timer expired while teleporting, lost in transit?");
+                log.severe("Timer expired while teleporting, lost in transit?");
                 bot.im(m.bagentdata.vagentid,"Failed to accept teleport lure, lost in transit?");
             } else {
-                info(event,"Completed teleport intiated from lure");
+                log.info("Completed teleport intiated from lure");
                 bot.im(m.bagentdata.vagentid,"Accepted teleport lure and completed transit");
             }
         }
@@ -170,13 +169,13 @@ public class Teleportation extends Handler {
         Map<String,String> lookupparams=new HashMap<>();
         lookupparams.put("name",region);
         String regionhandle=new CommandEvent(bot, bot.getRegional(), "regionLookup", lookupparams, null).execute();
-        if (Debug.REGIONHANDLES) { Log.debug(r,"Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
+        if (Debug.REGIONHANDLES) { log.fine("Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
         try { tp.binfo.vregionhandle=new U64(regionhandle);  }
         catch (NumberFormatException e) { return "Failed to resolve region name "+region; }
         bot.send(tp,true);
         //bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
         boolean completed=waitTeleport();
-        note("Teleport "+(completed?"completed":"FAILED")+" to "+region+" "+x+","+y+","+z);
+        log.info("Teleport "+(completed?"completed":"FAILED")+" to "+region+" "+x+","+y+","+z);
         if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
     }
 
@@ -188,15 +187,16 @@ public class Teleportation extends Handler {
         req.binfo.vlandmarkid=new LLUUID();
         bot.send(req,true);
         boolean completed=waitTeleport();
-        note("Teleport home "+(completed?"completed":"FAILED"));
+        log.info("Teleport home "+(completed?"completed":"FAILED"));
         if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
         
     }
     
     private boolean waitTeleport() throws IOException {
         teleporting=true;
-        try { synchronized(signal) { signal.wait(10000); } } catch (InterruptedException e) {}
-        if (teleporting==true) { Log.crit(bot,"Timer expired while teleporting, lost in transit?"); } 
+        boolean expired=false;
+        try { synchronized(signal) { signal.wait(10000); expired=true; } } catch (InterruptedException e) {}
+        if (expired==true) { log.severe("Timer expired while teleporting, lost in transit?"); } 
         boolean completed=!teleporting;
         teleporting=false;
         bot.setMaxFOV();

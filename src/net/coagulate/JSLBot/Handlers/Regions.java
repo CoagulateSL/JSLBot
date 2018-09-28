@@ -80,7 +80,7 @@ public class Regions extends Handler {
                 handle.value=handle.value<<(32+8);
                 handle.value=handle.value | (data.vy.value<<8);
                 if (handle.value!=0) { Global.regionName(handle.value,data.vname.toString()); }
-                if (Debug.REGIONHANDLES) { debug(event,"Map Block Reply computed handle "+Long.toUnsignedString(handle.value)); }
+                if (Debug.REGIONHANDLES) { log.fine("Map Block Reply computed handle "+Long.toUnsignedString(handle.value)); }
                 Global.regionName(handle.value,data.vname.toString());
             }
         }

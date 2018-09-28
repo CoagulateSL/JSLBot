@@ -1,6 +1,8 @@
 package net.coagulate.JSLBot;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static net.coagulate.JSLBot.Event.EVENTTYPE.*;
 import static net.coagulate.JSLBot.Event.STATUS.*;
 
@@ -13,6 +15,10 @@ public abstract class Event {
 
     // locking the status field, command event monitors this
     final Object statusmonitor=new Object();
+    private Logger log;
+    void log(Level level,String message) {
+        log.log(level,message);
+    }
     /** Stages an event goes through */
     public enum STATUS {
         /** Freshly created unprocessed event. */
@@ -38,7 +44,7 @@ public abstract class Event {
     void status (STATUS status) {
         synchronized(statusmonitor) {
             this.status=status;
-            if (Debug.TRACKCOMMANDS && type==COMMAND) { Log.debug(r,"Command "+getName()+" entering status "+status); }
+            if (Debug.TRACKCOMMANDS && type==COMMAND) { log.log(Level.FINER, "Command {0} in region {1}entering status {2}", new Object[]{getName(), r.toString(), status}); }
             statusmonitor.notify();
         }
     }

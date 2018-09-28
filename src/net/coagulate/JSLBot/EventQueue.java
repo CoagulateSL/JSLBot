@@ -5,6 +5,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import static java.util.logging.Level.SEVERE;
+import java.util.logging.Logger;
 import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
@@ -18,10 +20,16 @@ import net.coagulate.JSLBot.LLSD.LLSDString;
  * @author Iain Price
  */
 public class EventQueue extends Thread {
+    private final Logger log;
     private final String eventqueue;
     private final CAPS caps;
     /** Create an event queue for the given CAPS, queue URL and region handle */
-    EventQueue(CAPS caps, String queue) { this.caps=caps; eventqueue=queue; setDaemon(true); }
+    EventQueue(CAPS caps, String queue) {
+        log=caps.getLogger("EventQueue");
+        this.caps=caps;
+        eventqueue=queue;
+        setDaemon(true);
+    }
     /** Get the owning CAPS
      * @return  The CAPS object that owns this event queue
      */
@@ -43,7 +51,7 @@ public class EventQueue extends Thread {
             runMain();
         }
         catch (Exception e) {
-            error("Event queue crashed: "+e.toString(),e);
+            log.log(SEVERE,"Event queue crashed: "+e.toString(),e);
         }
     }
     
@@ -72,11 +80,11 @@ public class EventQueue extends Thread {
             try (DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
                 wr.write( postdata );
             }
-            catch (Exception e) { warn("Error writing to event queue, sleeping"); try { Thread.sleep(5000); } catch (InterruptedException ee){}}
-            if (Debug.EVENTQUEUE) { debug("Entering event queue wait"); }
+            catch (Exception e) { log.warning("Error writing to event queue, sleeping"); try { Thread.sleep(5000); } catch (InterruptedException ee){}}
+            if (Debug.EVENTQUEUE) { log.finer("Entering event queue wait"); }
             int status=connection.getResponseCode();
             if (status==404) { 
-                info("EventQueue closed remotely");
+                log.info("EventQueue closed remotely");
                 return;
             }
             if (status!=502) {
@@ -87,7 +95,7 @@ public class EventQueue extends Thread {
                 try {
                     document=new LLSD(read);
                 }
-                catch (RuntimeException e) { error("Parse error loading LLSD document:"+e.toString()); System.out.println(read); }
+                catch (RuntimeException e) { log.log(SEVERE,"Parse error loading LLSD document:"+e.toString()); System.out.println(read); }
                 if (document!=null) {
                     try {
                         LLSDMap map=(LLSDMap) document.getFirst();
@@ -98,10 +106,10 @@ public class EventQueue extends Thread {
                         LLSDArray eventslist = (LLSDArray) outermap.get("events");
                         process(eventslist);
                     }
-                    catch (Exception e) { error("Exception processing event queue message",e); }
+                    catch (Exception e) { log.log(SEVERE,"Exception processing event queue message",e); }
                 }
             }
-            else { if (Debug.EVENTQUEUE) { debug("Event queue poller expired, repolling."); } }
+            else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired, repolling."); } }
         }
     }
     
@@ -121,18 +129,5 @@ public class EventQueue extends Thread {
     public String getRegionName() { return caps().circuit().getRegionName(); }
     @Override
     public String toString() { return caps().toString()+" / EventQueue"; }
-    private void debug(String message) { debug(message,null); }
-    private void debug(String message, Throwable t) { Log.debug(this,message,t); }
-    private void info(String message) { info(message,null); }
-    private void info(String message, Throwable t) { Log.info(this,message,t); }
-    private void note(String message) { note(message,null); }
-    private void note(String message, Throwable t) { Log.note(this,message,t); }
-    private void warn(String message) { warn(message,null); }
-    private void warn(String message, Throwable t) { Log.warn(this,message,t); }
-    private void error(String message) { error(message,null); }
-    private void error(String message, Throwable t) { Log.error(this,message,t); }
-    private void crit(String message) { crit(message,null); }
-    private void crit(String message, Throwable t) { Log.crit(this,message,t); }
-
-
+    
 }

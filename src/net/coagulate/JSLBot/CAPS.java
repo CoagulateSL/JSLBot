@@ -7,6 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import static java.util.logging.Level.SEVERE;
+import java.util.logging.Logger;
 import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSD;
 import net.coagulate.JSLBot.LLSD.LLSDArray;
@@ -20,6 +22,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  * @author Iain Price
  */
 public final class CAPS extends Thread {
+    private Logger log;
     // caps URL
     private final String caps;
     // retrieved capabilities
@@ -35,6 +38,7 @@ public final class CAPS extends Thread {
      * @param capsseed CAPS url
      */
     public CAPS(Circuit circuit,String capsseed) {
+        log=circuit.getLogger("CAPS");
         this.caps=capsseed;
         this.circuit=circuit;
     }
@@ -46,7 +50,7 @@ public final class CAPS extends Thread {
             initialise();
             launchEventQueue();
         } catch (IOException e) {
-            Log.error(this,"CAPS setup failed: "+e.toString(),e);
+            log.log(SEVERE,"CAPS setup failed: "+e.toString(),e);
         }
     }
     /** Initialise the CAPS - download the CAPS list from the server */
@@ -64,9 +68,9 @@ public final class CAPS extends Thread {
             eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString());
             eq.setDaemon(true);
             eq.start();
-            Log.info(this,"CAPS seed interrogated successfully; EventQueueGet driver launched");
+            log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");
         } else {
-            Log.error(this,"CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we are bound to the present sim.  This is neither normal or expected behaviour.");
+            log.severe("CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we are bound to the present sim.  This is neither normal or expected behaviour.");
         }
     }
     
@@ -152,4 +156,8 @@ public final class CAPS extends Thread {
     public String regionName() { return circuit.getRegionName(); }
     @Override
     public String toString() { return circuit.toString()+" / CAPS"; }
+
+    public Logger getLogger(String subspace) {
+        return Logger.getLogger(log.getName()+"."+subspace);
+    }
 }
