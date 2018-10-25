@@ -1,6 +1,7 @@
 package net.coagulate.JSLBot;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -49,9 +50,14 @@ public class EventQueue extends Thread {
         setName("Event queue driver for "+bot().getUsername()+" to "+circuit().getRegionName());
         try {
             runMain();
+            log.fine("Event queue closed");
         }
         catch (Exception e) {
             log.log(SEVERE,"Event queue crashed: "+e.toString(),e);
+        }
+        if (bot().primary.getCAPS().eventqueue()==this) { 
+            log.log(SEVERE,"CRITICAL FAILURE - primary caps circuit is closed, this is reason to reconnect");
+            bot().shutdown("Primary event queue CAPS failed.");
         }
     }
     
@@ -61,55 +67,64 @@ public class EventQueue extends Thread {
         // Either way we just keep doing this.  If we get a 404 then the URL has been invalidated and we can exit.
         int id=0;
         URL url=new URL(eventqueue);
+        int errorcount=0;
         while (1==1) { // we could stop on circuit exit or some other things, but it seems to work fine just waiting for the inevitable 404
-            // format request document
-            LLSDMap post=new LLSDMap();
-            post.put("ack",new LLSDInteger(id));
-            post.put("done",new LLSDBoolean(false));
-            LLSD postdoc=new LLSD(post);
-            byte[] postdata=(postdoc.toXML().getBytes(StandardCharsets.UTF_8));
-            // send it
-            HttpURLConnection connection=(HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type","application/llsd+xml");
-            connection.setRequestProperty("charset","utf-8");
-            connection.setRequestProperty("Content-Length",Integer.toString(postdata.length));
-            connection.setUseCaches(false);
-            // write document
-            try (DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
-                wr.write( postdata );
-            }
-            catch (Exception e) { log.warning("Error writing to event queue, sleeping"); try { Thread.sleep(5000); } catch (InterruptedException ee){}}
-            if (Debug.EVENTQUEUE) { log.finer("Entering event queue wait"); }
-            int status=connection.getResponseCode();
-            if (status==404) { 
-                log.info("EventQueue closed remotely");
-                return;
-            }
-            if (status!=502) {
-                Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
-                String read=s.next();
-                //System.out.println("Event queue:"+read);
-                LLSD document=null;
-                try {
-                    document=new LLSD(read);
+            try {
+                // format request document
+                LLSDMap post=new LLSDMap();
+                post.put("ack",new LLSDInteger(id));
+                post.put("done",new LLSDBoolean(false));
+                LLSD postdoc=new LLSD(post);
+                byte[] postdata=(postdoc.toXML().getBytes(StandardCharsets.UTF_8));
+                // send it
+                HttpURLConnection connection=(HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type","application/llsd+xml");
+                connection.setRequestProperty("charset","utf-8");
+                connection.setRequestProperty("Content-Length",Integer.toString(postdata.length));
+                connection.setUseCaches(false);
+                // write document
+                try (DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
+                    wr.write( postdata );
                 }
-                catch (RuntimeException e) { log.log(SEVERE,"Parse error loading LLSD document:"+e.toString()); System.out.println(read); }
-                if (document!=null) {
+                catch (Exception e) { log.warning("Error writing to event queue, sleeping"); try { Thread.sleep(5000); } catch (InterruptedException ee){}}
+                if (Debug.EVENTQUEUE) { log.finer("Entering event queue wait"); }
+                int status=connection.getResponseCode();
+                if (status==404) { 
+                    log.info("EventQueue closed remotely");
+                    return;
+                }
+                if (status!=502) {
+                    Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
+                    String read=s.next();
+                    //System.out.println("Event queue:"+read);
+                    LLSD document=null;
                     try {
-                        LLSDMap map=(LLSDMap) document.getFirst();
-                        LLSDInteger llsdid=(LLSDInteger) map.get("id");
-                        id=llsdid.get();
-                        //System.out.println("Eventqueue#"+id+":"+document.toXML());
-                        LLSDMap outermap=(LLSDMap) document.getFirst();
-                        LLSDArray eventslist = (LLSDArray) outermap.get("events");
-                        process(eventslist);
+                        document=new LLSD(read);
                     }
-                    catch (Exception e) { log.log(SEVERE,"Exception processing event queue message",e); }
+                    catch (RuntimeException e) { log.log(SEVERE,"Parse error loading LLSD document:"+e.toString()); System.out.println(read); }
+                    if (document!=null) {
+                        try {
+                            LLSDMap map=(LLSDMap) document.getFirst();
+                            LLSDInteger llsdid=(LLSDInteger) map.get("id");
+                            id=llsdid.get();
+                            //System.out.println("Eventqueue#"+id+":"+document.toXML());
+                            LLSDMap outermap=(LLSDMap) document.getFirst();
+                            LLSDArray eventslist = (LLSDArray) outermap.get("events");
+                            process(eventslist);
+                        }
+                        catch (Exception e) { log.log(SEVERE,"Exception processing event queue message",e); }
+                    }
                 }
+                else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired, repolling."); } }
+                errorcount=0;
             }
-            else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired, repolling."); } }
+            catch (IOException e) {
+                errorcount++;
+                if (errorcount>10) { log.log(SEVERE,"10 errors in a row polling event queue, closing event queue",e); return; }
+                log.fine("IOException during Event Queue poll, errorcount is "+errorcount+" / 10 : "+e.getLocalizedMessage());
+            }
         }
     }
     
