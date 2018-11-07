@@ -226,14 +226,18 @@ public final class Circuit extends Thread implements Closeable {
         }
     }
     int maintenancecounter=0;
+    private boolean pinged=false;
     /** Run maintenance tasks */
     private void maintenance() throws IOException {
         long interval=new Date().getTime()-lastpacket.getTime();
         if (interval>(Constants.CIRCUIT_PING*1000)) {
-            log.log(Level.FINE, "Circuit silent for more than {0} seconds, sending ping.", Constants.CIRCUIT_PING);
-            StartPingCheck ping=new StartPingCheck();
-            send(ping,true);
-        }        
+            if (!pinged) {
+                pinged=true; 
+                log.log(Level.FINE, "Circuit silent for more than {0} seconds, sending ping.", Constants.CIRCUIT_PING);
+                StartPingCheck ping=new StartPingCheck();
+                send(ping,true);
+            }
+        } else { pinged=false; } // ping when crossing threshold.  once.  reset threshold detection here.    
         if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) {
             disconnectlogged=true; log.log(SEVERE, "Circuit has received no packets in {0} seconds, closing.", Constants.CIRCUIT_TIMEOUT);
             close();
