@@ -1,7 +1,7 @@
 Todo
 ----
 Better rate limiter?
-BotInterface class
+BotInterface class (API)
 Group managment
 Parcel management
 Group moderation

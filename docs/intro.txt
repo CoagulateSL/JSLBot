@@ -12,12 +12,17 @@ Future developments will attempt to flesh out the implementations, particularly 
 
 The lower levels of the bot work quite well at this point, notably this means UDP circuits (multiple), XML message, event queues, teleporting and general infrastructure for communicating with the servers is mostly in place.  There are a few omissions perhaps in a few of the types, and some of the message formats require "sub-decoding".  There may be a few loose ends around recognising disconnected states and restarting the bot successfully.
 
-The middle layer is partially implemented; by this I mean the actual message processing to create a cohesive world state and allow interaction.  The bot understands some messages about parcels, regions, objects, instant/nearby chat messages and has a basic "IM" infrastructure for creating events, and a mechanism for external Java code to insert command events too.  That said there is a lot of functionality lacking, some intentionally (such as mesh / texture downloads, sound events, etc etc) where such things are felt not to be that useful to a bot, some simply because I've not reached the point of needing that.  Basic group/im/parcel functionality is available right now without having to code too much into JSLBot further.
+The middle layer is partially implemented; by this I mean the actual message processing to create a cohesive world state and allow interaction.  The bot understands some messages about parcels, regions, objects, instant/nearby chat messages and has a basic "IM" infrastructure for creating events, and a mechanism for other Java code to insert command events too.  That said there is a lot of functionality lacking, some intentionally (such as mesh / texture downloads, sound events, etc etc) where such things are felt not to be that useful to a bot, some simply because I've not reached the point of needing that.  Basic group/im/parcel functionality is available right now without having to code too much into JSLBot further.
 
 The higher layer is practically non existant ; by which I mean a reasonable user interface.  If you launch JSLBot out of the box it /should/ ask for some configuration data and connect to the server, and should be interactable from there by IM.  However the code currently lacks any way to configure it to accept messages from anywhere else or any "console" commands (i.e. interactivity, it's coded as a background service first and foremost and lacks a interactive user interface).  This is likely to be developed as a rudimentary addon to JSLBot, and a more web-orientated interface may be developed (though may be kept as a separate proprietary project / service).
 
 
 USAGE
+
+***NOTE***
+To avoid complicating standard use cases JSLBot modifies the SSL connection's implementation to use its own Certificate Checking.  It uses this to implement the in-house Linden Labs CA which is used on the SSL connections to e.g. the login service.  Not having this results in typical SSL / chain verification exceptions, and disabling this checking is bad (TM).
+If you are using the SSL context for anything else, this may cause you validation problems elsewhere.  You may call LLCATruster.doNotUse() before using JSLBot to disable this implementation, NOTE that if you do this you are responsible for including the Linden Labs Certificate Authority into the trusted root certificates via whatever appropriate means (keystore, system trust store, etc), otherwise the software will fail.
+***NOTE***
 
 The most basic way is to compile the JAR file using ANT and then launch it, as instructed by ANT, from the dist folder.
 

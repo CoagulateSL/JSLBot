@@ -1,0 +1,24 @@
+Licenced under the GPL version 3, see LICENCE - in addition to this you are required to attribute JSLBot and link to the source repository prominently near the top of your documentation and ANY sales related listings or material.  e.g.
+"Created using JSLBot (c) Iain Price : https://github.com/JSLBot"
+
+(c) Iain Price, 2016-
+
+Please consider that you have received this software for free.
+
+Preferentially speaking, I'm happy with the idea that people build on this foundation, provided they're not just exploiting the existing work without adding value.
+
+E.g., things that seem reasonable to profit from
+* Your time via support, configuration, documentation; documentation should ideally be GPLed and contributed back to the repository, otherwise the charges should be minimal for what ought to be light work.
+* Your time via module development, note that derivatives of JSLBot must also be under the GPL, and ideally you will contribte your work back to the repository.
+* Additional services - e.g. if you're selling a complex service where the bot only forms a minor function (e.g. a land rental service), or you're providing hosting.
+
+What I'm trying to avoid is:
+* The person who compiles a jar in 30 seconds, slams it on a web host, links it via a notecard with 5 lines of "how to" and sells it on the market place.
+The requirement to link back to the repository should help undermine such minimal efforts, as I can offer this service myself, for less, or free, depending on my muse at the time.
+
+Use, take, contribute.  Typical open source stuff.  Try not to be a jerk :)
+
+
+Open to discussing alternative licences if you wish to sell a proprietary product without having to GPL stuff (e.g. pets etc would be extensive modifications of JSLBot but still ultimately covered under the GPL).
+
+Bear in mind as I write this I don't even have a published repository, yet alone anyone else using this, yet alone anyone caring what the licence is.  I can always change it later if it needs to be more permissive; I don't see the need to make it more restrictive, this isn't a money making project for me, just returning the favour.
