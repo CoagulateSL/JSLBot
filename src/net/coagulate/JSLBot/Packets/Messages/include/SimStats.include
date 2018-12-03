@@ -1,8 +1,8 @@
-    public SimStats_bStat getStat(SimStat stat) {
+    public Float getStat(SimStat stat) {
         SimStat[] lookup = SimStat.values();
         for (SimStats_bStat astat:bstat) {
             if (lookup[astat.vstatid.value]==stat) {
-                return astat;
+                return astat.vstatvalue.value;
             }
         }
         return null;
