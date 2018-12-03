@@ -163,7 +163,10 @@ sub processblock {
 		if ($hassessionid==1) { print OUTPUT "\t\tbagentdata.vsessionid=bot.getSession();\n"; }
 		if ($hasagentid==1) { print OUTPUT "\t\tbagentdata.vagentid=bot.getUUID();\n"; }
 		print OUTPUT "\t}\n";
-	} 
+	}
+	if ( -r "include/$messagename.include") {
+		open INCLUDE,"include/$messagename.include"; while(<INCLUDE>) { print OUTPUT $_; } close INCLUDE;
+	}
 	print OUTPUT "}\n";
 	close OUTPUT;
 	print "\n";
