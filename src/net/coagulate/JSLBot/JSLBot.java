@@ -293,7 +293,7 @@ public class JSLBot extends Thread {
         p.bagentdata.vcameracenter=camera;
         p.bagentdata.vfar=new F32(drawdistance);
         // FIXME CHECK THIS
-        if (Math.random()>0.5) { p.bagentdata.vcontrolflags=new U32(1<<26); }
+        //if (Math.random()>0.5) { p.bagentdata.vcontrolflags=new U32(1<<26); }
         p.bagentdata.vbodyrotation.x=(float) (Math.random()*Math.PI*2);
         p.bagentdata.vbodyrotation.y=(float) (Math.random()*Math.PI*2);
         p.bagentdata.vbodyrotation.z=(float) (Math.random()*Math.PI*2);
