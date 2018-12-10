@@ -350,7 +350,7 @@ public final class Circuit extends Thread implements Closeable {
             Exception e=new Exception("Generate stack trace");
             e.printStackTrace(); // show me!
         }*/
-        System.out.println("Send packet of type "+p.getName());
+        //System.out.println("Send packet of type "+p.getName());
         try { socket.send(packet); }
         catch (IOException e) { log.log(SEVERE,"Error transmitting packet "+e.toString(),e); }
         packetrate++;

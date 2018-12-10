@@ -270,7 +270,7 @@ public class JSLBot extends Thread {
         send(p);
     }
     private Date lastagentupdate=null;
-    private float drawdistance=(float) 64.0;
+    private float drawdistance=(float) 16.0;
     /** Push an agent update */
     public void forceAgentUpdate() { agentUpdate(true); }
     /** Send an agent update if one has not been sent recently */
