@@ -157,6 +157,7 @@ public final class Circuit extends Thread implements Closeable {
                     Packet p;
                     p=Packet.decode(rx);
                     for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
+                    if (p.getAck()) { System.out.println("ACK REQUIRED IN:"+p.getName()); } 
                     processPacket(p);
                 }
                 catch (SocketTimeoutException e) {if (Debug.ACK) { log.finer("Exiting receive without event"); } } // as requested, and we dont care
