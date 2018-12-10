@@ -63,6 +63,7 @@ public class Objects extends Handler {
             od.fullid=obj.vfullid;
             od.clickaction=obj.vclickaction;
             od.parentid=obj.vparentid;
+            //if (od.name!=null) { System.out.println("Updating object "+od.name); } else { System.out.println("Updating who knows what"); }
             //System.out.println(obj.vnamevalue.toString());
             if (od.requested==false) {
                 RequestObjectPropertiesFamily reqobjs=new RequestObjectPropertiesFamily();
@@ -80,6 +81,10 @@ public class Objects extends Handler {
         KillObject killobject=(KillObject) event.body();
         List<KillObject_bObjectData> killlist = killobject.bobjectdata;
         for (KillObject_bObjectData kill:killlist) {
+
+            ObjectData object = event.region().getObject(kill.vid.value);
+            //if (object.name!=null) { System.out.println("Killing object "+object.name); } else { System.out.println("Killing who knows what"); }
+
             event.region().killObject(kill.vid.value);
         }
     }
@@ -110,7 +115,7 @@ public class Objects extends Handler {
             ByteBuffer buffer = ByteBuffer.wrap(data);
             U32 id=new U32(buffer);
             ObjectData object = event.region().getObject(id.value);
-            //if (object.name!=null) { System.out.println("Updating object "+object.name); } else { System.out.println("Updating who knows what"); }
+            //if (object.name!=null) { System.out.println("TerseUpdating object "+object.name); } else { System.out.println("TerseUpdating who knows what"); }
             U8 state=new U8(buffer);
             U8 notavatar=new U8(buffer);
             boolean avatar=notavatar.value!=0;

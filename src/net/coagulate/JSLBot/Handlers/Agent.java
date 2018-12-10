@@ -127,11 +127,22 @@ public class Agent extends Handler {
     @CmdHelp(description="Send agent update")
     public String updateCommand(CommandEvent command) throws IOException { bot.agentUpdate(); return "Sent"; }
     @CmdHelp(description = "Set agent's draw distance")
-    public String drawdistsanceCommand(CommandEvent command,
+    public String drawdistanceCommand(CommandEvent command,
             @ParamHelp(description="Meters draw distance")
             String set) throws IOException {
+        if (set==null || set.isEmpty()) { return "0 - Draw distance is "+bot.drawDistance(); }
         bot.drawDistance(Float.parseFloat(set));
-        return "Draw Distance Set";
+        return "0 - Draw Distance Set";
+    }
+    @CmdHelp(description="Attempt to blind the bot by setting camera out of scene")
+    public String blindCommand(CommandEvent command) {
+        bot.blind();
+        return "0 - Blinded";
+    }
+    @CmdHelp(description="Stop attempting to blind the bot")
+    public String unblindCommand(CommandEvent command) {
+        bot.unblind();
+        return "0 - Unblinded";
     }
     
     

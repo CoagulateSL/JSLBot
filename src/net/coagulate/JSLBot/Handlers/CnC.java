@@ -32,6 +32,8 @@ import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 import net.coagulate.JSLBot.LLSD.LLSDString;
+import net.coagulate.JSLBot.Packets.Messages.AgentPause;
+import net.coagulate.JSLBot.Packets.Messages.AgentResume;
 import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
 import net.coagulate.JSLBot.Packets.Messages.AlertMessage_bAlertInfo;
 import net.coagulate.JSLBot.Packets.Messages.ChatFromSimulator;
@@ -40,6 +42,7 @@ import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.S32;
+import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U8;
 import net.coagulate.JSLBot.Packets.Types.Variable2;
 import net.coagulate.JSLBot.Regional;
@@ -391,6 +394,21 @@ public class CnC extends Handler {
             }
         }
         return ret;
+    }
+    private int pauseserial=0;
+    @CmdHelp(description="Pause the agent")
+    public String pauseCommand(CommandEvent event) {
+        AgentPause p = new AgentPause(bot);
+        p.bagentdata.vserialnum=new U32(pauseserial++);
+        bot.send(p,true);
+        return "0 - Paused";
+    }
+    @CmdHelp(description="Unpause the agent")
+    public String unPauseCommand(CommandEvent event) {
+        AgentResume p = new AgentResume(bot);
+        p.bagentdata.vserialnum=new U32(pauseserial++);
+        bot.send(p,true);
+        return "0 - Paused";
     }
     
     @CmdHelp(description="Say a message in local chat")

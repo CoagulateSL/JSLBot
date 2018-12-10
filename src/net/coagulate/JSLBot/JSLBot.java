@@ -270,7 +270,7 @@ public class JSLBot extends Thread {
         send(p);
     }
     private Date lastagentupdate=null;
-    private float drawdistance=(float) 16.0;
+    private float drawdistance=(float) 0.001;
     /** Push an agent update */
     public void forceAgentUpdate() { agentUpdate(true); }
     /** Send an agent update if one has not been sent recently */
@@ -278,11 +278,21 @@ public class JSLBot extends Thread {
     /** Send this generally useful message down the primary UDP circuit
      * @param force If true, ignore the usual timer-based spam prevention
      */
+    private boolean blind=false;
+    public void blind() { blind=true; forceAgentUpdate(); }
+    public void unblind() { blind=false; forceAgentUpdate(); }
     public void agentUpdate(boolean force) {
-        if (quitting()) { return; }
+        boolean debug=true;
+        if (quitting()) { 
+            if (debug) { System.out.println("ABORT AGENT UPDATE BECAUSE QUITTING"); }
+            return;
+        }
         // dont spam too many of these
         if (!force && lastagentupdate!=null) {
-            if ((new Date().getTime())-lastagentupdate.getTime()<Constants.AGENT_UPDATE_FREQUENCY_MILLISECONDS) { return; }
+            if ((new Date().getTime())-lastagentupdate.getTime()<Constants.AGENT_UPDATE_FREQUENCY_MILLISECONDS) {
+                if (debug) { System.out.println("No agent update, too soon, not forced ("+force+")"); }
+                return;
+            }
         }
         lastagentupdate=new Date();
         AgentUpdate p=new AgentUpdate();
@@ -290,19 +300,33 @@ public class JSLBot extends Thread {
         p.bagentdata.vsessionid=getSession();
         LLVector3 camera = getPos();
         camera.z+=5;
-        p.bagentdata.vcameracenter=camera;
-        p.bagentdata.vfar=new F32(drawdistance);
+        if (blind) {
+            if (debug) { System.out.println(" BLIND UPDATE "); }
+            LLVector3 fake=new LLVector3(192,144,402);
+            p.bagentdata.vcameracenter=fake;
+            p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
+            p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
+            p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
+            p.bagentdata.vfar=new F32((float)0.001);
+        } else {
+            if (debug) { System.out.println("normal update draw distance "+drawdistance); }
+            p.bagentdata.vcameracenter=camera;
+            p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
+            p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
+            p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
+            p.bagentdata.vfar=new F32(drawdistance);
+        }
         // FIXME CHECK THIS
-        //if (Math.random()>0.5) { p.bagentdata.vcontrolflags=new U32(1<<26); }
+        /*if (Math.random()>0.5) { p.bagentdata.vcontrolflags=new U32(1<<26); }
         p.bagentdata.vbodyrotation.x=(float) (Math.random()*Math.PI*2);
         p.bagentdata.vbodyrotation.y=(float) (Math.random()*Math.PI*2);
         p.bagentdata.vbodyrotation.z=(float) (Math.random()*Math.PI*2);
         p.bagentdata.vheadrotation.x=(float) (Math.random()*Math.PI*2);
         p.bagentdata.vheadrotation.y=(float) (Math.random()*Math.PI*2);
-        p.bagentdata.vheadrotation.z=(float) (Math.random()*Math.PI*2);
+        p.bagentdata.vheadrotation.z=(float) (Math.random()*Math.PI*2); 
         p.bagentdata.vcameraataxis.x=1;
         p.bagentdata.vcameraleftaxis.y=1;
-        p.bagentdata.vcameraupaxis.z=y;
+        p.bagentdata.vcameraupaxis.z=y;*/
         send(p);
         //debug("Agent Updated");
     }
@@ -571,17 +595,19 @@ public class JSLBot extends Thread {
     public LLVector3 getLookAt() { return new LLVector3(lx,ly,lz); }
     public void setLookAt(float x,float y,float z) { lx=x; ly=y; lz=z; }
 
+    private int fovgen=0;
     public void setFOV(float angle) throws IOException {
         AgentFOV fov=new AgentFOV();
         fov.bagentdata.vagentid=getUUID();
         fov.bagentdata.vcircuitcode=new U32(getCircuitCode());
         fov.bagentdata.vsessionid=getSession();
-        fov.bfovblock.vgencounter=new U32(0);
+        fov.bfovblock.vgencounter=new U32(fovgen++);
         fov.bfovblock.vverticalangle=new F32(angle);
         send(fov,true);
     }
     public void setMaxFOV() throws IOException { setFOV((float) (Math.PI)); }
     public void setMinFOV() throws IOException { setFOV((float) 0.01); }
+    public float drawDistance() { return drawdistance; }
     public void drawDistance(float newdd) throws IOException {
         drawdistance=newdd;
         forceAgentUpdate();
