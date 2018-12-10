@@ -161,7 +161,7 @@ public final class Circuit extends Thread implements Closeable {
                 }
                 catch (SocketTimeoutException e) {if (Debug.ACK) { log.finer("Exiting receive without event"); } } // as requested, and we dont care
                 // timeout is just to make sure we get HERE \/ once in a while
-                if ((ackqueue.size()>0 && lastAck()>500) || ackqueue.size()>32) {
+                if ((ackqueue.size()>0 && lastAck()>5000) || ackqueue.size()>32) {
                     if (Debug.ACK) { log.finer("Manually sending ACKs"); }
                     sendAck();                    
                 } else {
