@@ -403,7 +403,7 @@ public class JSLBot extends Thread {
         performLogin(firstname,lastname,password,loginlocation);
         if (!quit) { brain.loggedIn(); }
         while (!quit) {
-            agentUpdate();
+            //agentUpdate();
             brain.think();
         }
         log.warning("Bot exited: "+quitreason);
