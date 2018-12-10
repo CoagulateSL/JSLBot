@@ -338,6 +338,7 @@ public final class Circuit extends Thread implements Closeable {
             log.log(Level.FINEST, "Reverse engineered: {0}", Packet.decode(decodeme).dump());
         }           
         DatagramPacket packet=new DatagramPacket(transmit,transmit.length,address);
+        System.out.println("Send packet of type "+packet.getClass().getSimpleName());
         try { socket.send(packet); }
         catch (IOException e) { log.log(SEVERE,"Error transmitting packet "+e.toString(),e); }
         packetrate++;
