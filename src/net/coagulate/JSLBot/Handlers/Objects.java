@@ -110,6 +110,7 @@ public class Objects extends Handler {
             ByteBuffer buffer = ByteBuffer.wrap(data);
             U32 id=new U32(buffer);
             ObjectData object = event.region().getObject(id.value);
+            if (object.name!=null) { System.out.println("Updating object "+object.name); } else { System.out.println("Updating who knows what"); }
             U8 state=new U8(buffer);
             U8 notavatar=new U8(buffer);
             boolean avatar=notavatar.value!=0;
