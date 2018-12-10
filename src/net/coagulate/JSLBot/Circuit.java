@@ -385,17 +385,19 @@ public final class Circuit extends Thread implements Closeable {
             for (Integer i:ackqueue) { sending.add(i); if (i>highestack) { highestack=i; }}
             ackqueue.clear();
         }
-        PacketAck ack=new PacketAck();
-        ack.bpackets=new ArrayList<>();
-        String acklist="";
-        for (Integer i:sending) {
-            PacketAck_bPackets ackblock = new PacketAck_bPackets();
-            ackblock.vid=new U32(i);
-            ack.bpackets.add(ackblock);
-            acklist+=i+" ";
+        if (!sending.isEmpty()) {
+            PacketAck ack=new PacketAck();
+            ack.bpackets=new ArrayList<>();
+            String acklist="";
+            for (Integer i:sending) {
+                PacketAck_bPackets ackblock = new PacketAck_bPackets();
+                ackblock.vid=new U32(i);
+                ack.bpackets.add(ackblock);
+                acklist+=i+" ";
+            }
+            if (Debug.ACK) { log.log(Level.FINEST, "Standalone acks: {0}", acklist); }
+            send(ack);
         }
-        if (Debug.ACK) { log.log(Level.FINEST, "Standalone acks: {0}", acklist); }
-        send(ack);
         lastacks=new Date();
     }
 
