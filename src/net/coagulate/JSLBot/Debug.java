@@ -10,7 +10,7 @@ public class Debug {
     public static final boolean AUTH=false;  // debug login
     public static final boolean CIRCUIT=false; // debug circuit setup+teardown
     public static final boolean PACKET=false; // per packet (UDP) debugging
-    public static final boolean ACK=true; // debug ACKs, ack queues, resents, etc etc
+    public static final boolean ACK=false; // debug ACKs, ack queues, resents, etc etc
     public static final boolean UNHANDLEDONCE=false; // dump unhandled messages the first time
     public static final boolean UNHANDLEDALL=false; // dump all unhandled messages
     public static final boolean DUMPXML=false; // dump XML parsing from the Event Queue
