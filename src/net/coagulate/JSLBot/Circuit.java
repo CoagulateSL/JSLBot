@@ -22,6 +22,7 @@ import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.CloseCircuit;
 import net.coagulate.JSLBot.Packets.Messages.CompletePingCheck;
 import net.coagulate.JSLBot.Packets.Messages.DisableSimulator;
+import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
 import net.coagulate.JSLBot.Packets.Messages.KickUser;
 import net.coagulate.JSLBot.Packets.Messages.LogoutRequest;
 import net.coagulate.JSLBot.Packets.Messages.PacketAck;
@@ -157,7 +158,13 @@ public final class Circuit extends Thread implements Closeable {
                     Packet p;
                     p=Packet.decode(rx);
                     for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
-                    if (p.getReliable()) { System.out.println("ACK REQUIRED IN:"+p.getName()); } 
+                    if (p.getReliable()) {
+                        System.out.println("ACK REQUIRED IN:"+p.getName());
+                        if (p.message() instanceof ImprovedTerseObjectUpdate) {
+                            ImprovedTerseObjectUpdate pp = (ImprovedTerseObjectUpdate)(p.message());
+                            System.out.println(pp.dump());
+                        }
+                    } 
                     processPacket(p);
                 }
                 catch (SocketTimeoutException e) {if (Debug.ACK) { log.finer("Exiting receive without event"); } } // as requested, and we dont care
