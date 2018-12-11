@@ -118,7 +118,13 @@ public class Agent extends Handler {
 
     @CmdHelp(description = "Returns some basic information about the logged in agent")
     public String statusCommand(CommandEvent command) {
-        return "Agent is "+firstname+" "+lastname+" ("+grouptitle+" of "+groupname+")\nPos: "+bot.getPos()+" Looking: "+bot.getLookAt()+"\nRegion: "+bot.getRegionName();
+        return "Agent is "+firstname+" "+lastname+"\n"
+                +"("+grouptitle+" of "+groupname+")\n"
+                + "Pos: "+bot.getPos()+"\n"
+                + "Looking: "+bot.getLookAt()+"\n"
+                + "Region: "+bot.getRegionName()+"\n"
+                + "Bytes IN: "+bot.bytesin.get()+"    OUT: "+bot.bytesout.get()+"\n"
+                + "BPS IN: "+(int)(((float)bot.bytesin.get())/((float)bot.getSecondsSinceStartup()))+"    OUT: "+(int)(((float)bot.bytesout.get())/((float)bot.getSecondsSinceStartup()));
     }
     @CmdHelp(description="Sets the FOV (field of view) to TWO_PI")
     public String fovMaxCommand(CommandEvent command) throws IOException { bot.setMaxFOV(); return "Set"; }

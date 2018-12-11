@@ -13,6 +13,8 @@ public abstract class Constants {
     public static final String VERSION_DATE="2018-09-29";
     public static final String COPYRIGHT_MESSAGE="(C) jslbot@predestined.net";
     
+    public static final boolean PACKET_ACCOUNTING=true;
+    
     public static String getVersionNumber() { return MAJOR_VERSION_NUMBER+"."+MINOR_VERSION_NUMBER+"."+BUGFIX_VERSION_NUMBER; }
     public static String getVersion() { return "JSLBot "+getVersionNumber()+" "+VERSION_DATE+" "+COPYRIGHT_MESSAGE; }
 

@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 import java.net.MalformedURLException;
 import java.security.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 import java.util.logging.Logger;
@@ -22,6 +23,14 @@ import org.apache.xmlrpc.XmlRpcException;
  * @author Iain Price
  */
 public class JSLBot extends Thread {
+    public final AtomicInteger bytesin=new AtomicInteger(0);
+    public final AtomicInteger bytesout=new AtomicInteger(0);
+    public final Integer startuptime=new Integer((int) Math.round(new Date().getTime()/1000.0));
+    public int getSecondsSinceStartup() {
+        int now=new Integer((int) Math.round(new Date().getTime()/1000.0));
+        return now-startuptime;
+    }
+    
     private final Logger log;
     // bot level data
     private String firstname;

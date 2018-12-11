@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -36,6 +37,8 @@ import net.coagulate.JSLBot.Packets.Types.*;
  * @author Iain Price
  */
 public final class Circuit extends Thread implements Closeable {
+    private AtomicInteger bytesin=new AtomicInteger(0);
+    private AtomicInteger bytesout=new AtomicInteger(0);
     private Logger log;
     private int circuitsequence=0;
     // list of sent reliable packets we're waiting to hear an ack for
@@ -154,6 +157,10 @@ public final class Circuit extends Thread implements Closeable {
                     ByteBuffer rx=ByteBuffer.allocate(receive.getLength());
                     rx.put(receive.getData(),0,receive.getLength());
                     rx.position(0);
+                    if (Constants.PACKET_ACCOUNTING) { 
+                        bytesin.getAndAdd(receive.getLength());
+                        bot.bytesin.getAndAdd(receive.getLength());
+                    }
                     Packet p;
                     p=Packet.decode(rx);
                     for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
@@ -345,6 +352,10 @@ public final class Circuit extends Thread implements Closeable {
             e.printStackTrace(); // show me!
         }*/
         //System.out.println("TX: "+p.getName());
+        if (Constants.PACKET_ACCOUNTING) {
+            bytesout.addAndGet(packet.getLength());
+            bot.bytesout.addAndGet(packet.getLength());
+        }
         try { socket.send(packet); }
         catch (IOException e) { log.log(SEVERE,"Error transmitting packet "+e.toString(),e); }
         packetrate++;
