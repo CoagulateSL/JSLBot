@@ -282,7 +282,7 @@ public class JSLBot extends Thread {
     public void blind() { blind=true; forceAgentUpdate(); }
     public void unblind() { blind=false; forceAgentUpdate(); }
     public void agentUpdate(boolean force) {
-        boolean debug=true;
+        boolean debug=false;
         if (quitting()) { 
             if (debug) { System.out.println("ABORT AGENT UPDATE BECAUSE QUITTING"); }
             return;
