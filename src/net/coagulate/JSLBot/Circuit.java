@@ -163,6 +163,9 @@ public final class Circuit extends Thread implements Closeable {
                     }
                     Packet p;
                     p=Packet.decode(rx);
+                    if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
+                        bot.accountMessageIn(p.message().getId(),receive.getLength());
+                    }
                     for (Integer rxack:p.appendedacks) { receivedAck(rxack); }
                     //if (p.getReliable()) { System.out.println("ACK REQUIRED IN:"+p.getName()); }
                     //System.out.println("RX: "+p.getName());
@@ -355,6 +358,9 @@ public final class Circuit extends Thread implements Closeable {
         if (Constants.PACKET_ACCOUNTING) {
             bytesout.addAndGet(packet.getLength());
             bot.bytesout.addAndGet(packet.getLength());
+        }
+        if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
+            bot.accountMessageOut(p.getId(), packet.getLength());
         }
         try { socket.send(packet); }
         catch (IOException e) { log.log(SEVERE,"Error transmitting packet "+e.toString(),e); }

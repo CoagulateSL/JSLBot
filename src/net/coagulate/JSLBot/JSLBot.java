@@ -25,11 +25,44 @@ import org.apache.xmlrpc.XmlRpcException;
 public class JSLBot extends Thread {
     public final AtomicInteger bytesin=new AtomicInteger(0);
     public final AtomicInteger bytesout=new AtomicInteger(0);
+    public final Map<Integer,Integer> messagebytesin=new HashMap<>();
+    public final Map<Integer,Integer> messagebytesout=new HashMap<>();
     public final Integer startuptime=new Integer((int) Math.round(new Date().getTime()/1000.0));
     public int getSecondsSinceStartup() {
         int now=new Integer((int) Math.round(new Date().getTime()/1000.0));
         return now-startuptime;
     }
+    public void dumpAccounting() {
+        System.out.println("DUMP ACCOUNTING FOR BOT "+this.getFullName());
+        synchronized(messagebytesin) {
+            for (int id:messagebytesin.keySet()) {
+                System.out.println("Message ID : "+id+" received "+messagebytesin.get(id));
+            }
+        }
+        synchronized(messagebytesout) {
+            for (int id:messagebytesout.keySet()) {
+                System.out.println("Message ID : "+id+" transmitted "+messagebytesout.get(id));
+            }
+        }
+    }
+    void accountMessageIn(int id, int length) {
+        synchronized(messagebytesin) {
+            int sum=0;
+            if (messagebytesin.containsKey(id)) { sum=messagebytesin.get(id); }
+            sum+=length;
+            messagebytesin.put(id,sum);
+        }
+    }
+    void accountMessageOut(int id, int length) {
+        synchronized(messagebytesout) {
+            int sum=0;
+            if (messagebytesout.containsKey(id)) { sum=messagebytesout.get(id); }
+            sum+=length;
+            messagebytesout.put(id,sum);
+        }
+    }
+
+
     
     private final Logger log;
     // bot level data

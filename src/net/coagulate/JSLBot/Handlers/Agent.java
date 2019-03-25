@@ -116,6 +116,12 @@ public class Agent extends Handler {
         log.log(Level.INFO, "Balance: {0}L$, Land: {1}m2/{2}m2 {3}", new Object[]{balance, sqmspent, sqmcredit, description});
     }
 
+    @CmdHelp(description = "Returns some detailed packet accounting to the console")
+    public String accountingCommand(CommandEvent command) {
+        command.bot().dumpAccounting();
+        return "0 - See console for output";
+    }
+        
     @CmdHelp(description = "Returns some basic information about the logged in agent")
     public String statusCommand(CommandEvent command) {
         return "Agent is "+firstname+" "+lastname+"\n"
