@@ -7,8 +7,8 @@ package net.coagulate.JSLBot;
 public abstract class Constants {
     
     public static final int MAJOR_VERSION_NUMBER=0;
-    public static final int MINOR_VERSION_NUMBER=7;
-    public static final int BUGFIX_VERSION_NUMBER=3;
+    public static final int MINOR_VERSION_NUMBER=8;
+    public static final int BUGFIX_VERSION_NUMBER=0;
     
     public static final String VERSION_DATE="2018-09-29";
     public static final String COPYRIGHT_MESSAGE="(C) jslbot@predestined.net";
