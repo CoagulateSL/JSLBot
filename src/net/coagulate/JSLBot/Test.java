@@ -26,9 +26,13 @@ public class Test {
         // 2) alternatively you can just make a configuration for each bot from scratch, each in its own store or file.
         // a lot depends on your backing store, the file provider can serve different files to different bots via instansiation, 
         // or separate namespaces of one file to separate bots, via recursive instansiation (see Configuration's constructors)
-        if (args.length<1) { System.out.println("Supply config file as parameter"); return; }
-        String CONFIGFILE=args[0];
-        if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
+        String CONFIGFILE=null;
+        if (args.length>0) { CONFIGFILE = args[0]; }
+        else {
+            Scanner in=new Scanner(System.in);
+            System.out.print("Name of config file: "); CONFIGFILE=in.nextLine();
+        }
+        if (CONFIGFILE==null || !(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
         Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
         JSLBot bot=new JSLBot(config);
@@ -39,10 +43,10 @@ public class Test {
     /** Builds a base configuration file */
     static void initConfig(String CONFIGFILE) {
         Map<String,String> m=new HashMap<>();
-        
+
         System.out.println("---- ALERT ----\nConfiguration file '"+CONFIGFILE+"' does not exist.\nIf you complete this process it will be created\n\n");
         Scanner in=new Scanner(System.in);
-        
+
         System.out.print("Bot's first name: "); String firstname=in.nextLine();
         System.out.print("Bot's last name: "); String lastname=in.nextLine();
         System.out.print("Bot's password: "); String password=in.nextLine();
