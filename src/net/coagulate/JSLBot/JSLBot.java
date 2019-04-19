@@ -27,9 +27,9 @@ public class JSLBot extends Thread {
     public final AtomicInteger bytesout=new AtomicInteger(0);
     public final Map<Integer,Integer> messagebytesin=new HashMap<>();
     public final Map<Integer,Integer> messagebytesout=new HashMap<>();
-    public final Integer startuptime=new Integer((int) Math.round(new Date().getTime()/1000.0));
+    public final Integer startuptime=((int) Math.round(new Date().getTime()/1000.0));
     public int getSecondsSinceStartup() {
-        int now=new Integer((int) Math.round(new Date().getTime()/1000.0));
+        int now= (int) Math.round(new Date().getTime() / 1000.0);
         return now-startuptime;
     }
     public void dumpAccounting() {
