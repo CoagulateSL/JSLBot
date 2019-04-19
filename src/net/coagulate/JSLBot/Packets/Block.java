@@ -1,6 +1,7 @@
 package net.coagulate.JSLBot.Packets;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -24,9 +25,9 @@ public abstract class Block {
         if (Block.class.isAssignableFrom(f.getType())) {
             try {
                 // its a block
-                Block b=(Block)(f.getType().newInstance());
+                Block b=(Block)(f.getType().getDeclaredConstructor().newInstance());
                 return b.size();
-            } catch (InstantiationException|IllegalAccessException ex) {
+            } catch (InvocationTargetException|NoSuchMethodException|InstantiationException|IllegalAccessException ex) {
                 throw new IllegalArgumentException("Unable to size supposed Block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),ex);
             }
         }
@@ -178,23 +179,23 @@ public abstract class Block {
                 for (int i=0;i<qty.value;i++) {
                     Class listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
                     if (debug) { System.out.println(listtype.getName()); }
-                    Block b=(Block) listtype.newInstance();
+                    Block b=(Block) listtype.getDeclaredConstructor().newInstance();
                     b.readBytes(in);
                     list.add(b);
                 }
                 f.set(this,list);
                 return;
-            } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {
+            } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
                 throw new IllegalArgumentException("Failed to read LIST type (variable block type) from class "+this.getClass().getName()+" field "+f.getName()+" type "+f.getType().getName()+" generic type "+f.getGenericType().getTypeName(),e);
             }
         }
 
         // else, a LL type?
         try {
-            Type value=(Type) f.getType().newInstance();
+            Type value=(Type) f.getType().getDeclaredConstructor().newInstance();
             value.read(in);
             f.set(this,value);
-        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {
+        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             throw new IllegalArgumentException("Failed to set class "+this.getClass().getName()+" field "+f.getName()+" type "+f.getType().getName(),e);
         }
     }
