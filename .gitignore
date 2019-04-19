@@ -4,3 +4,5 @@
 /dist/
 /out/
 *.class
+/build.xml
+/JSLBot.iml
