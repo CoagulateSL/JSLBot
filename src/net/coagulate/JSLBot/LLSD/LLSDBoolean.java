@@ -16,10 +16,10 @@ public class LLSDBoolean extends Atomic {
     LLSDBoolean(Node item) {
         // hmm
         String v=item.getTextContent();
-        if (v.equals("0")) { value=true; return; }
-        if (v.equalsIgnoreCase("true")) { value=true; return; }
-        if (v.equals("1")) { value=false; return; }
-        if (v.equalsIgnoreCase("false")) { value=false; return; }
+        if ("0".equals(v)) { value=true; return; }
+        if ("true".equalsIgnoreCase(v)) { value=true; return; }
+        if ("1".equals(v)) { value=false; return; }
+        if ("false".equalsIgnoreCase(v)) { value=false; return; }
         throw new AssertionError("Unexpected LLSDBoolean(Node) constructor argument '"+v+"'");
     }
 

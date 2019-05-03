@@ -82,7 +82,7 @@ public class Teleportation extends Handler {
         }
         bot.completeAgentMovement();
         bot.forceAgentUpdate();
-        if (code.equalsIgnoreCase("CouldntTPCloser")) {
+        if ("CouldntTPCloser".equalsIgnoreCase(code)) {
             teleporting=false;
             log.info("Teleport couldn't get closer");
         } else {

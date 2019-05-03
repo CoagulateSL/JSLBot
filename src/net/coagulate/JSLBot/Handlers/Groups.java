@@ -218,7 +218,7 @@ public class Groups extends Handler {
         } else {
             target=new LLUUID(uuid);
         }
-        if (target==null && name!=null && name.equals("NONE")) { target=new LLUUID(); }
+        if (target==null && name!=null && "NONE".equals(name)) { target=new LLUUID(); }
         if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
         ActivateGroup req=new ActivateGroup(bot);
         req.bagentdata.vgroupid=target;

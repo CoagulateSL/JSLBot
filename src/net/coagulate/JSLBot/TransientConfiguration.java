@@ -27,7 +27,7 @@ public class TransientConfiguration extends Configuration {
     public String dump() {
         String response="";
         for (String k:kv.keySet()) {
-            if (!response.equals("")) { response+="\n"; }
+            if (!"".equals(response)) { response+="\n"; }
             response+=k+"="+kv.get(k); 
         }
         return response;

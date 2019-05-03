@@ -37,16 +37,16 @@ public class LLSD extends Container {
             Document doc=builder.parse(new ByteArrayInputStream(read.getBytes("UTF-8")));
             // get top of the document (<llsd>...</llsd>)
             Element root=doc.getDocumentElement();
-            if (!root.getTagName().equals("llsd")) { throw new IOException("Response did not commence with LLSD element:"+read); }
+            if (!"llsd".equals(root.getTagName())) { throw new IOException("Response did not commence with LLSD element:"+read); }
             // should be full of (or has at least one, more may or may not be allowed :P) "array" or "map", as per 'container' types
             NodeList nl=root.getChildNodes();
             for (int node=0;node<nl.getLength();node++) {
                 Node n=nl.item(node);
                 String type=n.getNodeName();
                 boolean handled=false;
-                if (type.equals("array")) { contents.add(new LLSDArray(n.getChildNodes())); handled=true; }
-                if (type.equals("map")) { contents.add(new LLSDMap(n.getChildNodes())); handled=true; }
-                if (type.equals("undef")) { handled=true; }
+                if ("array".equals(type)) { contents.add(new LLSDArray(n.getChildNodes())); handled=true; }
+                if ("map".equals(type)) { contents.add(new LLSDMap(n.getChildNodes())); handled=true; }
+                if ("undef".equals(type)) { handled=true; }
                 if (!handled) { throw new AssertionError("Found container of type "+type+" which we don't know about.  Parse error most likely."); }
             }
         } catch (SAXException|ParserConfigurationException|IOException ex) {

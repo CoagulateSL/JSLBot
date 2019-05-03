@@ -96,7 +96,7 @@ public class CnC extends Handler {
             String infotype=info.vmessage.toString();
             boolean handled=false;
             if (infotype.toLowerCase().contains("home")) {handled=true;} // handled by agent
-            if (infotype.equals("RegionRestartMinutes") || infotype.equals("RegionRestartSeconds")) {
+            if ("RegionRestartMinutes".equals(infotype) || "RegionRestartSeconds".equals(infotype)) {
                 handled=true;
                 Date when=parseRegionRestart(info.vextraparams.toString());
                 int seconds=(int) ((when.getTime()-(new Date().getTime()))/1000);
@@ -243,10 +243,10 @@ public class CnC extends Handler {
         String keyword="";
         String parameter="";
         for (int i=index;i<parts.length;i++) {
-            if (keyword.equals("")) {
+            if ("".equals(keyword)) {
                 keyword=parts[i];
             } else {
-                if (!parameter.equals("")) { parameter+=" "; }
+                if (!"".equals(parameter)) { parameter+=" "; }
                 parameter+=parts[i];
                 if ((!parameter.startsWith("\"")) || (parameter.startsWith("\"") && parameter.endsWith("\""))) {
                     if (parameter.startsWith("\"")) {
@@ -341,7 +341,7 @@ public class CnC extends Handler {
         }
 
         if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
-        else { if (response!=null && !response.equals("")) { bot.im(source,">> "+response); } }
+        else { if (response!=null && !"".equals(response)) { bot.im(source,">> "+response); } }
     }
 
     @CmdHelp(description = "Causes the bot to reconnect to SL without quitting")
@@ -471,7 +471,7 @@ public class CnC extends Handler {
             if (bot.homeSickFor()==null || bot.homeSickFor().isEmpty()) { return "Bot has no longing for any home"; }
             return "Bot longs for its home of '"+bot.homeSickFor()+"'";
         }
-        if (region.equals("NONE")) { 
+        if ("NONE".equals(region)) {
             bot.homeSickFor(null);
             config.put("homesickfor","");
             return "Bot longing for home cleared";

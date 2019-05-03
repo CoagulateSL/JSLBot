@@ -123,7 +123,7 @@ public class JSLBot extends Thread {
         // load from config and call 'setup'
         config=conf; 
         String location=config.get("loginlocation");
-        if (location==null || location.equals("")) { location="home"; }  // default to home
+        if (location==null || "".equals(location)) { location="home"; }  // default to home
         //String potentialmaster=config.get("owner");
         
         String handlerlist=config.get("handlers","");
@@ -159,7 +159,7 @@ public class JSLBot extends Thread {
         // test that method names are preserved
         try {
             String argname=this.getClass().getDeclaredMethod("setup",String.class,String.class,String.class,String.class).getParameters()[0].getName();
-            if (argname.equals("arg0") || (!argname.equals("firstname"))) {
+            if ("arg0".equals(argname) || (!"firstname".equals(argname))) {
                 System.out.println("===== FATAL ERROR =====");
                 System.out.println("The name of the first method for setup() is "+argname);
                 System.out.println("In the source this is called 'firstname'");
@@ -255,7 +255,7 @@ public class JSLBot extends Thread {
     private void login(String firstname,String lastname,String password,String loginlocation) throws IOException, NoSuchAlgorithmException, XmlRpcException  {
         // authentication is performed over XMLRPC over HTTPS
         Map result=BotUtils.loginXMLRPC(this,firstname, lastname, password, loginlocation);
-        if (!(((String)result.get("login")).equalsIgnoreCase("true"))) {
+        if (!("true".equalsIgnoreCase((String)result.get("login")))) {
             throw new IOException("Server gave error: "+((String)result.get("message")));
         }
         String message=(String)result.get("message");
