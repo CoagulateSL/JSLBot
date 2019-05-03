@@ -48,7 +48,7 @@ public class FileBasedConfiguration extends Configuration {
     }
     
     
-    private void writeStore() throws FileNotFoundException, IOException {
+    private void writeStore() throws IOException {
         try (FileOutputStream fos = new FileOutputStream(filename); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(kvstore);
         }

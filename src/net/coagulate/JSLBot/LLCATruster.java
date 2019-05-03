@@ -25,7 +25,7 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
     private static Boolean initialised=false;
     /** Do not use the JSLBot LLCA Truster.  You will probably get SSL errors if you don't implement this yourself somehow. */
     public static void doNotUse() { initialised=true; }
-    public synchronized static void initialise() {
+    public static synchronized void initialise() {
         if (initialised) { return; }
         LLCATruster llcaTruster = new LLCATruster();
         HttpsURLConnection.setDefaultHostnameVerifier(llcaTruster);

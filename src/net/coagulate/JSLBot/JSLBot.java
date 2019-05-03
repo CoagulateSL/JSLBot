@@ -252,7 +252,7 @@ public class JSLBot extends Thread {
     // ********** LOGIN CODE / BOT PRIMITIVES **********
     
     // Perform a login attempt
-    private void login(String firstname,String lastname,String password,String loginlocation) throws MalformedURLException, IOException, NoSuchAlgorithmException, XmlRpcException  {
+    private void login(String firstname,String lastname,String password,String loginlocation) throws IOException, NoSuchAlgorithmException, XmlRpcException  {
         // authentication is performed over XMLRPC over HTTPS
         Map result=BotUtils.loginXMLRPC(this,firstname, lastname, password, loginlocation);
         if (!(((String)result.get("login")).equalsIgnoreCase("true"))) {
