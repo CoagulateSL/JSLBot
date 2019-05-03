@@ -50,8 +50,9 @@ public abstract class Event {
     }
     
     /** Supported event types */
-    public enum EVENTTYPE { UDP, XML, COMMAND };
-    private EVENTTYPE type;
+    public enum EVENTTYPE { UDP, XML, COMMAND }
+
+	private EVENTTYPE type;
     /** Get the events type
      * 
      * @return The EVENTTYPE of this event
