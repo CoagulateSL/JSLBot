@@ -210,7 +210,7 @@ public class Regional {
         public ParcelData(int id,Regional region) {
             this.id=id; this.region=region;
         }
-        public void populate() throws IOException { populate(false); }
+        public void populate() { populate(false); }
         public void populate(boolean force) {
             if (requested==true && force==false) { return; }
             requested=true;

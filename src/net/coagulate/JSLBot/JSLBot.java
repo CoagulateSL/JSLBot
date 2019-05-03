@@ -1,22 +1,18 @@
 package net.coagulate.JSLBot;
-import java.io.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.net.MalformedURLException;
-import java.security.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Level.WARNING;
-import java.util.logging.Logger;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Packet;
 import net.coagulate.JSLBot.Packets.Types.*;
 import org.apache.xmlrpc.XmlRpcException;
+
+import java.io.IOException;
+import java.lang.annotation.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
 
 /** Creates and runs a JSLBot.
  *
@@ -229,7 +225,7 @@ public class JSLBot extends Thread {
         Exception last=null;
         for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
             try { login(firstname,lastname,password,location); return; }
-            catch (RuntimeException | IOException | NoSuchAlgorithmException | XmlRpcException e) {
+            catch (RuntimeException | IOException | XmlRpcException e) {
                 last=e;
                 long delay = Constants.RETRY_INTERVAL*retries;
                 if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
@@ -252,7 +248,7 @@ public class JSLBot extends Thread {
     // ********** LOGIN CODE / BOT PRIMITIVES **********
     
     // Perform a login attempt
-    private void login(String firstname,String lastname,String password,String loginlocation) throws IOException, NoSuchAlgorithmException, XmlRpcException  {
+    private void login(String firstname,String lastname,String password,String loginlocation) throws IOException, XmlRpcException  {
         // authentication is performed over XMLRPC over HTTPS
         Map result=BotUtils.loginXMLRPC(this,firstname, lastname, password, loginlocation);
         if (!("true".equalsIgnoreCase((String)result.get("login")))) {
@@ -647,8 +643,8 @@ public class JSLBot extends Thread {
         fov.bfovblock.vverticalangle=new F32(angle);
         send(fov,true);
     }
-    public void setMaxFOV() throws IOException { setFOV((float) (Math.PI)); }
-    public void setMinFOV() throws IOException { setFOV((float) 0.01); }
+    public void setMaxFOV() { setFOV((float) (Math.PI)); }
+    public void setMinFOV() { setFOV((float) 0.01); }
     public float drawDistance() { return drawdistance; }
     public void drawDistance(float newdd) {
         drawdistance=newdd;

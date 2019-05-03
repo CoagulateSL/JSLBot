@@ -160,7 +160,7 @@ public class Teleportation extends Handler {
             @ParamHelp(description="Y Co-ordinate to request")
             String y,
             @ParamHelp(description="Z Co-ordinate to request")
-            String z) throws IOException {
+            String z) {
         Regional r=command.region();
         TeleportLocationRequest tp=new TeleportLocationRequest();
         tp.bagentdata.vagentid=bot.getUUID();
@@ -180,7 +180,7 @@ public class Teleportation extends Handler {
     }
 
     @CmdHelp(description = "Go home")
-    public String homeCommand(CommandEvent command) throws IOException {
+    public String homeCommand(CommandEvent command) {
         TeleportLandmarkRequest req=new TeleportLandmarkRequest();
         req.binfo.vagentid=bot.getUUID();
         req.binfo.vsessionid=bot.getSession();
@@ -192,7 +192,7 @@ public class Teleportation extends Handler {
         
     }
     
-    private boolean waitTeleport() throws IOException {
+    private boolean waitTeleport() {
         teleporting=true;
         boolean expired=false;
         try { synchronized(signal) { signal.wait(10000); expired=true; } } catch (InterruptedException e) {}

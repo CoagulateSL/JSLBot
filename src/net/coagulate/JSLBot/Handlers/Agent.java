@@ -1,38 +1,17 @@
 package net.coagulate.JSLBot.Handlers;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import net.coagulate.JSLBot.CommandEvent;
-import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Handler;
-import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.*;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.Packets.Messages.AgentDataUpdate;
-import net.coagulate.JSLBot.Packets.Messages.AgentMovementComplete;
-import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
-import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate;
-import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bAgentData;
-import net.coagulate.JSLBot.Packets.Messages.CoarseLocationUpdate_bLocation;
-import net.coagulate.JSLBot.Packets.Messages.MoneyBalanceReply;
-import net.coagulate.JSLBot.Packets.Messages.MoneyBalanceRequest;
-import net.coagulate.JSLBot.Packets.Messages.OfflineNotification;
-import net.coagulate.JSLBot.Packets.Messages.OfflineNotification_bAgentBlock;
-import net.coagulate.JSLBot.Packets.Messages.OnlineNotification;
-import net.coagulate.JSLBot.Packets.Messages.OnlineNotification_bAgentBlock;
-import net.coagulate.JSLBot.Packets.Messages.SetStartLocationRequest;
-import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
+import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Packets.Types.Variable1;
-import net.coagulate.JSLBot.UDPEvent;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
 
 /** Deal with messages about the Agent (and other agents).
  *
@@ -133,15 +112,15 @@ public class Agent extends Handler {
                 + "BPS IN: "+(int)(((float)bot.bytesin.get())/((float)bot.getSecondsSinceStartup()))+"    OUT: "+(int)(((float)bot.bytesout.get())/((float)bot.getSecondsSinceStartup()));
     }
     @CmdHelp(description="Sets the FOV (field of view) to TWO_PI")
-    public String fovMaxCommand(CommandEvent command) throws IOException { bot.setMaxFOV(); return "Set"; }
+    public String fovMaxCommand(CommandEvent command) { bot.setMaxFOV(); return "Set"; }
     @CmdHelp(description="Sets the FOV (field of view) to Zero")
-    public String fovMinCommand(CommandEvent command) throws IOException { bot.setMinFOV(); return "Set"; }    
+    public String fovMinCommand(CommandEvent command) { bot.setMinFOV(); return "Set"; }
     @CmdHelp(description="Send agent update")
     public String updateCommand(CommandEvent command) { bot.agentUpdate(); return "Sent"; }
     @CmdHelp(description = "Set agent's draw distance")
     public String drawdistanceCommand(CommandEvent command,
             @ParamHelp(description="Meters draw distance")
-            String set) throws IOException {
+            String set) {
         if (set==null || set.isEmpty()) { return "0 - Draw distance is "+bot.drawDistance(); }
         bot.drawDistance(Float.parseFloat(set));
         return "0 - Draw Distance Set";

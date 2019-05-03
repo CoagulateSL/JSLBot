@@ -420,7 +420,7 @@ public final class Circuit extends Thread implements Closeable {
     private boolean firsthandshake=true;
 
     /** Process a received packet */
-    private void processPacket(Packet p) throws IOException {
+    private void processPacket(Packet p) {
         if (Debug.PACKET) { log.log(Level.FINEST, "Received packet: {0}", p.dump()); }
         boolean alreadyseen=acked.containsKey(p.getSequence());
         if (p.getReliable()) {
