@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot.Handlers;
 
-import java.io.IOException;
 import java.util.Date;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;

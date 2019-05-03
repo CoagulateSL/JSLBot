@@ -9,7 +9,6 @@ import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Packets.Types.Variable1;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 

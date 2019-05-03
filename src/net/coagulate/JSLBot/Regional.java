@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
