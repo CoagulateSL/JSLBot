@@ -638,7 +638,7 @@ public class JSLBot extends Thread {
     public void setLookAt(float x,float y,float z) { lx=x; ly=y; lz=z; }
 
     private int fovgen=0;
-    public void setFOV(float angle) throws IOException {
+    public void setFOV(float angle) {
         AgentFOV fov=new AgentFOV();
         fov.bagentdata.vagentid=getUUID();
         fov.bagentdata.vcircuitcode=new U32(getCircuitCode());
@@ -650,7 +650,7 @@ public class JSLBot extends Thread {
     public void setMaxFOV() throws IOException { setFOV((float) (Math.PI)); }
     public void setMinFOV() throws IOException { setFOV((float) 0.01); }
     public float drawDistance() { return drawdistance; }
-    public void drawDistance(float newdd) throws IOException {
+    public void drawDistance(float newdd) {
         drawdistance=newdd;
         forceAgentUpdate();
     }

@@ -211,7 +211,7 @@ public class Regional {
             this.id=id; this.region=region;
         }
         public void populate() throws IOException { populate(false); }
-        public void populate(boolean force) throws IOException {
+        public void populate(boolean force) {
             if (requested==true && force==false) { return; }
             requested=true;
             ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();

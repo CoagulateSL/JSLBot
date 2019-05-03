@@ -128,7 +128,7 @@ public class EventQueue extends Thread {
         }
     }
     
-    private void process(LLSDArray events) throws Exception {
+    private void process(LLSDArray events) {
         for (Atomic a:events.get()) {
             //System.out.println("**************** ATOM:\n"+a.toXML());
             // this is so clunky

@@ -205,7 +205,7 @@ public class Teleportation extends Handler {
     }
     
     @CmdHelp(description = "Sends you a teleport lure")
-    public String lureMeCommand(CommandEvent command) throws IOException {
+    public String lureMeCommand(CommandEvent command) {
         LLUUID targetuuid=command.invokerUUID();
         if (targetuuid==null) { return "Failed to get target"; }
         StartLure req=new StartLure(bot);
@@ -221,7 +221,7 @@ public class Teleportation extends Handler {
     @CmdHelp(description = "Sends a teleport lure")
     public String lureCommand(CommandEvent command,
             @ParamHelp(description="UUID to lure")
-            String uuid) throws IOException {
+            String uuid) {
         LLUUID targetuuid=new LLUUID(uuid);
         if (targetuuid==null) { return "Failed to get target"; }
         StartLure req=new StartLure(bot);

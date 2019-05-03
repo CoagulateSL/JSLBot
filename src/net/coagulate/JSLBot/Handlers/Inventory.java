@@ -33,7 +33,7 @@ public class Inventory extends Handler implements Runnable {
     }
 
     @Override
-    public void loggedIn() throws Exception {
+    public void loggedIn() {
         inventorytree.clear(); inventory.clear(); inventorycomplete=false;
         downloadqueue.add(bot.getInventoryRoot());
         Thread t=new Thread(this);

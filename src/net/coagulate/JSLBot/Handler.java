@@ -20,14 +20,12 @@ public abstract class Handler {
     /** Name of the handler */
     public String toString() { return bot.toString()+"/"+this.getClass().getSimpleName(); }
     /** Hook for post login activities
-     * @throws java.lang.Exception Throw any error for logging
      */
-    public void loggedIn() throws Exception {}
+    public void loggedIn() {}
     
     /** Maintenance hook, called every few seconds if implemented
-     * 
-     * @throws Exception Any error during the maintenance.
+     *
      */
-    public void maintenance() throws Exception {}
+    public void maintenance() {}
     
 }

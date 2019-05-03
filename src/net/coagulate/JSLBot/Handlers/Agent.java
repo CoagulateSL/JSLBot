@@ -47,7 +47,7 @@ public class Agent extends Handler {
     private String lastname="";
     
     @Override
-    public void loggedIn() throws Exception {
+    public void loggedIn() {
         // get financials
         MoneyBalanceRequest req=new MoneyBalanceRequest();
         req.bagentdata.vagentid=bot.getUUID();
@@ -137,7 +137,7 @@ public class Agent extends Handler {
     @CmdHelp(description="Sets the FOV (field of view) to Zero")
     public String fovMinCommand(CommandEvent command) throws IOException { bot.setMinFOV(); return "Set"; }    
     @CmdHelp(description="Send agent update")
-    public String updateCommand(CommandEvent command) throws IOException { bot.agentUpdate(); return "Sent"; }
+    public String updateCommand(CommandEvent command) { bot.agentUpdate(); return "Sent"; }
     @CmdHelp(description = "Set agent's draw distance")
     public String drawdistanceCommand(CommandEvent command,
             @ParamHelp(description="Meters draw distance")

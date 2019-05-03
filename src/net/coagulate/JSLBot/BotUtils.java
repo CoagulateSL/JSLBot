@@ -96,13 +96,9 @@ public abstract class BotUtils {
      * @param location Login location
      * @return Map of KV pairs from login server
      * @throws MalformedURLException
-     * @throws UnknownHostException
-     * @throws SocketException
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
-     * @throws XmlRpcException 
+     * @throws XmlRpcException
      */
-    static Map loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, UnknownHostException, SocketException, NoSuchAlgorithmException, UnsupportedEncodingException, XmlRpcException {
+    static Map loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, XmlRpcException {
         XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
         XmlRpcClient client=new XmlRpcClient();

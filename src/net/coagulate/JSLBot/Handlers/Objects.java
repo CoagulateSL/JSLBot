@@ -252,7 +252,7 @@ public class Objects extends Handler {
     @CmdHelp(description="Lookup or request a prim by UUID")
     public String objectUUIDCommand(CommandEvent command,
             @ParamHelp(description="Prim UUID")
-            String uuid) throws IOException {
+            String uuid) {
         Regional region=command.region();
         LLUUID lluuid=new LLUUID(uuid);
         ObjectData od=region.getObject(lluuid);
@@ -264,7 +264,7 @@ public class Objects extends Handler {
     @CmdHelp(description="Lookup or request a prim by local id")
     public String objectGetCommand(CommandEvent command,
             @ParamHelp(description="Local prim id (32 bit int)")
-            String localid) throws IOException {
+            String localid) {
         Regional region=command.region();
         int id=Integer.parseInt(localid);
         if (region.hasObject(id)) { return "Exists as "+region.getObject(id).name; }
@@ -285,8 +285,7 @@ public class Objects extends Handler {
             @ParamHelp(description="UUID of prim to return")
             String primuuid,
             @ParamHelp(description = "LocalID of prim to return")
-            String localid) throws IOException
-    {
+            String localid) {
         Regional region=command.region();
         // One way or another we need the local ID
         int id=0;

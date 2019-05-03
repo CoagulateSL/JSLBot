@@ -45,8 +45,7 @@ public class Regions extends Handler {
     @CmdHelp(description = "Look up a region handle from a region name")
     public String regionLookupCommand(CommandEvent command,
             @ParamHelp(description="Name of region to lookup")
-            String name) throws IOException
-    {
+            String name) {
         if (name==null || name.equals("")) { return "No NAME parameter passed."; }
         // check cache
         Long cached=Global.regionHandle(name);
@@ -122,7 +121,7 @@ public class Regions extends Handler {
             @ParamHelp(description = "X co-ordinate within the parcel")
             String x,
             @ParamHelp(description = "Y co-ordinate within the parcel")
-            String y) throws IOException {
+            String y) {
         Regional region=command.region();
         int reqid=region.getRequestId();
         ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request

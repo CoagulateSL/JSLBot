@@ -97,9 +97,8 @@ public final class Circuit extends Thread implements Closeable {
      * @param port Target port
      * @param passedregionhandle Target region handle
      * @param capsurl Target CAPS url
-     * @throws IOException 
      */
-    Circuit(JSLBot parent, String address, int port, Long passedregionhandle,String capsurl) throws IOException  {
+    Circuit(JSLBot parent, String address, int port, Long passedregionhandle,String capsurl) {
         log=parent.getLogger("Circuit."+address+":"+port);
         if (passedregionhandle==null) { throw new IllegalArgumentException("Null region handles are not allowed"); }
         circuitsequence=parent.getCircuitSequence();
@@ -240,7 +239,7 @@ public final class Circuit extends Thread implements Closeable {
     int maintenancecounter=0;
     private boolean pinged=false;
     /** Run maintenance tasks */
-    private void maintenance() throws IOException {
+    private void maintenance() {
         long interval=new Date().getTime()-lastpacket.getTime();
         if (interval>(Constants.CIRCUIT_PING*1000)) {
             if (!pinged) {
@@ -395,8 +394,7 @@ public final class Circuit extends Thread implements Closeable {
     }
     
     /** Send a standalone ACK packet */
-    private void sendAck() throws IOException
-    {
+    private void sendAck() {
         //packet ack generator
         List<Integer> sending=new ArrayList<>();
         synchronized(ackqueue) {

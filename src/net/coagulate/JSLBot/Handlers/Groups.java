@@ -46,7 +46,7 @@ public class Groups extends Handler {
     }
 
     @CmdHelp(description = "Invite a user to a given group/role")
-    public String groupInviteCommand(CommandEvent command,String avataruuid,String groupuuid,String roleuuid) throws IOException {
+    public String groupInviteCommand(CommandEvent command,String avataruuid,String groupuuid,String roleuuid) {
         LLUUID avatar=new LLUUID(avataruuid);
         LLUUID group=new LLUUID(groupuuid);
         LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -65,7 +65,7 @@ public class Groups extends Handler {
     }
 
     @CmdHelp(description = "Eject a user from a given group/role")
-    public String groupEjectCommand(CommandEvent command,String avataruuid,String groupuuid) throws IOException {
+    public String groupEjectCommand(CommandEvent command,String avataruuid,String groupuuid) {
         LLUUID avatar=new LLUUID(avataruuid);
         LLUUID group=new LLUUID(groupuuid);
         //LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -83,7 +83,7 @@ public class Groups extends Handler {
     }
     
     @CmdHelp(description="List groups the logged in agent is a member of")
-    public String groupsListCommand(CommandEvent command) throws Exception {
+    public String groupsListCommand(CommandEvent command) {
         String resp="Groups:";
         synchronized(groups) {
             for(GroupData g:groups.values()) {
