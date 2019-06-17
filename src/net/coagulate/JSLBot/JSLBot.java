@@ -408,7 +408,10 @@ public class JSLBot extends Thread {
      *
      * @param p Packet to send
      */
-    public void send(Packet p) { primary.send(p); }
+    public void send(Packet p) {
+        if (primary==null) { throw new IOException("Primary circuit is not defined or connected"); }
+        primary.send(p);
+    }
 
     /** Send a Message, optionally reliably
      *
