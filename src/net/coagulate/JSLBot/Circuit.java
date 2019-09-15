@@ -1,37 +1,23 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Messages.*;
+import net.coagulate.JSLBot.Packets.Packet;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+import net.coagulate.JSLBot.Packets.Types.U32;
+import net.coagulate.JSLBot.Packets.Types.U32BE;
+import net.coagulate.JSLBot.Packets.Types.U8;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import net.coagulate.JSLBot.Packets.Message;
-import net.coagulate.JSLBot.Packets.Messages.CloseCircuit;
-import net.coagulate.JSLBot.Packets.Messages.CompletePingCheck;
-import net.coagulate.JSLBot.Packets.Messages.DisableSimulator;
-import net.coagulate.JSLBot.Packets.Messages.KickUser;
-import net.coagulate.JSLBot.Packets.Messages.LogoutRequest;
-import net.coagulate.JSLBot.Packets.Messages.PacketAck;
-import net.coagulate.JSLBot.Packets.Messages.PacketAck_bPackets;
-import net.coagulate.JSLBot.Packets.Messages.RegionHandshake;
-import net.coagulate.JSLBot.Packets.Messages.RegionHandshakeReply;
-import net.coagulate.JSLBot.Packets.Messages.StartPingCheck;
-import net.coagulate.JSLBot.Packets.Packet;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import static java.util.logging.Level.SEVERE;
 
 /** Handles a UDP circuit between us and a Simulator.
  * @author Iain Price
@@ -533,7 +519,7 @@ public final class Circuit extends Thread implements Closeable {
      * @param newcapsurl The new CAPS url
      */
     public void connectCAPS(String newcapsurl) {
-        if (caps!=null && caps.eventqueue().isAlive()) {
+        if (caps!=null && caps.eventqueue()!=null && caps.eventqueue().isAlive()) {
             if (capsurl.equals(newcapsurl)) {
                 if (Debug.EVENTQUEUE) { log.fine("Passed duplicate of existing CAPS url, not reconnecting anything"); return; }
             }

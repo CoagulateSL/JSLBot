@@ -1,20 +1,16 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.LLSD.*;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
-import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import net.coagulate.JSLBot.LLSD.Atomic;
-import net.coagulate.JSLBot.LLSD.LLSD;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDBoolean;
-import net.coagulate.JSLBot.LLSD.LLSDInteger;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
+
+import static java.util.logging.Level.SEVERE;
 
 /** Handles the EventQueueGet CAPS.
  *
@@ -107,12 +103,15 @@ public class EventQueue extends Thread {
                     if (document!=null) {
                         try {
                             LLSDMap map=(LLSDMap) document.getFirst();
-                            LLSDInteger llsdid=(LLSDInteger) map.get("id");
-                            id=llsdid.get();
-                            //System.out.println("Eventqueue#"+id+":"+document.toXML());
-                            LLSDMap outermap=(LLSDMap) document.getFirst();
-                            LLSDArray eventslist = (LLSDArray) outermap.get("events");
-                            process(eventslist);
+                            if (map==null) { log.log(SEVERE,"Loaded null LLSDMap from document "+read); }
+                            else {
+                                LLSDInteger llsdid = (LLSDInteger) map.get("id");
+                                id = llsdid.get();
+                                //System.out.println("Eventqueue#"+id+":"+document.toXML());
+                                LLSDMap outermap = (LLSDMap) document.getFirst();
+                                LLSDArray eventslist = (LLSDArray) outermap.get("events");
+                                process(eventslist);
+                            }
                         }
                         catch (Exception e) { log.log(SEVERE,"Exception processing event queue message",e); }
                     }
