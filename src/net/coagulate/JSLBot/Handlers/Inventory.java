@@ -1,26 +1,17 @@
 package net.coagulate.JSLBot.Handlers;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import static java.util.logging.Level.SEVERE;
 import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.Handler;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.LLSD.Atomic;
-import net.coagulate.JSLBot.LLSD.LLSD;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDBoolean;
-import net.coagulate.JSLBot.LLSD.LLSDInteger;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.LLSD.LLSDUUID;
+import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
+import java.io.IOException;
+import java.util.*;
+
+import static java.util.logging.Level.SEVERE;
 
 /** Manage the inventory.
  *
@@ -56,6 +47,7 @@ public class Inventory extends Handler implements Runnable {
             download.addAll(downloadqueue); downloadqueue.clear();
             try { fetchInventory(download); }
             catch (IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
+            if (inventorytree.size()==0) { log.fine("Inventory download complete - there is no inventory (?)"); break; }
             int percent=Math.round((100*inventorytree.size())/(inventorytree.size()+downloadqueue.size()));
             log.fine("Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory.size()+" elements)");
         }
