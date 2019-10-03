@@ -1,5 +1,8 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.LLSD.*;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -7,15 +10,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
-import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import net.coagulate.JSLBot.LLSD.Atomic;
-import net.coagulate.JSLBot.LLSD.LLSD;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.LLSD.LLSDUUID;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
+import static java.util.logging.Level.SEVERE;
 
 /** Handles a region's CAPabilitieS, a map of URLs and named endpoints.
  *
@@ -108,6 +105,7 @@ public final class CAPS extends Thread {
      */
     public LLSDMap invokeCAPS(String capname,String appendtocap,LLSD content) throws IOException
     {
+        if (capabilities==null) { throw new NullPointerException("CAPS not yet established"); }
         Atomic rawcap = capabilities.get(capname);
         if (rawcap==null) {
             //for (String cap:capabilities.keys()) { System.out.println("KNOWN CAP: "+cap); }
