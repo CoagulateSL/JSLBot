@@ -103,7 +103,9 @@ public class EventQueue extends Thread {
                     if (document!=null) {
                         try {
                             LLSDMap map=(LLSDMap) document.getFirst();
-                            if (map==null) { log.log(SEVERE,"Loaded null LLSDMap from document "+read); }
+                            if (map==null) { log.log(SEVERE,"Loaded null LLSDMap from document "+read+", throwing IOException");
+                                throw new IOException("Null LLSDMap response extracted from '"+read+"'");
+                            }
                             else {
                                 LLSDInteger llsdid = (LLSDInteger) map.get("id");
                                 id = llsdid.get();
@@ -121,7 +123,7 @@ public class EventQueue extends Thread {
             }
             catch (IOException e) {
                 errorcount++;
-                if (errorcount>10) { log.log(SEVERE,"10 errors in a row polling event queue, closing event queue",e); return; }
+                if (errorcount>10) { log.log(SEVERE,"10 errors in a row polling event queue, closing event queue",e); throw new IOException("Too many event queue IOExceptions occured, terminating EventQueue"); }
                 log.fine("IOException during Event Queue poll, errorcount is "+errorcount+" / 10 : "+e.getLocalizedMessage());
             }
         }
