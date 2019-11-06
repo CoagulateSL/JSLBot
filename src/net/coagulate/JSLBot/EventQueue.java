@@ -115,7 +115,7 @@ public class EventQueue extends Thread {
                                 process(eventslist);
                             }
                         }
-                        catch (Exception e) { log.log(SEVERE,"Exception processing event queue message",e); }
+                        catch (Exception e) { log.log(SEVERE,"Exception processing event queue message",e); throw new IOException(e); }
                     }
                 }
                 else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired, repolling."); } }
