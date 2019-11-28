@@ -1,39 +1,18 @@
 package net.coagulate.JSLBot.Handlers;
 
+import net.coagulate.JSLBot.*;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.LLSD.*;
+import net.coagulate.JSLBot.Packets.Messages.*;
+import net.coagulate.JSLBot.Packets.Types.*;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import net.coagulate.JSLBot.CommandEvent;
-import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Handler;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.LLSD.LLSD;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDBinary;
-import net.coagulate.JSLBot.LLSD.LLSDBoolean;
-import net.coagulate.JSLBot.LLSD.LLSDInteger;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.LLSD.LLSDUUID;
-import net.coagulate.JSLBot.Packets.Messages.ActivateGroup;
-import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest;
-import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest_bEjectData;
-import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
-import net.coagulate.JSLBot.Packets.Messages.InviteGroupRequest;
-import net.coagulate.JSLBot.Packets.Messages.InviteGroupRequest_bInviteData;
-import net.coagulate.JSLBot.Packets.Messages.JoinGroupReply;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.U32BE;
-import net.coagulate.JSLBot.Packets.Types.U8;
-import net.coagulate.JSLBot.Packets.Types.Variable1;
-import net.coagulate.JSLBot.Packets.Types.Variable2;
-import net.coagulate.JSLBot.UDPEvent;
-import net.coagulate.JSLBot.XMLEvent;
 
 /** Handle group related commands and messages.
  *
@@ -153,8 +132,9 @@ public class Groups extends Handler {
         LLSDMap body=event.map();
         LLSDArray groupslist=(LLSDArray) body.get("GroupData");
         synchronized(groups) {
-            for (Iterator it = groupslist.iterator(); it.hasNext();) {
-                LLSDMap group = (LLSDMap) it.next();
+            for (Iterator<Atomic> it = groupslist.iterator(); it.hasNext();) {
+                Atomic groupatom = it.next();
+                LLSDMap group=(LLSDMap)groupatom;
                 String groupname=((LLSDString)(group.get("GroupName"))).toString();
                 LLSDBinary grouppowers=(LLSDBinary) group.get("GroupPowers");
                 boolean listinprofile=((LLSDBoolean)group.get("ListInProfile",new LLSDBoolean(true))).get();

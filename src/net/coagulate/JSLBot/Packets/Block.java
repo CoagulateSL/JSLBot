@@ -1,16 +1,13 @@
 package net.coagulate.JSLBot.Packets;
 
+import net.coagulate.JSLBot.Packets.Types.Type;
+import net.coagulate.JSLBot.Packets.Types.U8;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import net.coagulate.JSLBot.Packets.Types.Type;
-import net.coagulate.JSLBot.Packets.Types.U8;
+import java.util.*;
 
 /** Generic Block - the pieces that build UDP messages.
  *
@@ -34,7 +31,7 @@ public abstract class Block {
         if (List.class.isAssignableFrom(f.getType())) {
             try {
                 List<Block> l=(List<Block>)(f.get(this));
-                Class listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
+                Class<?> listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
                 int size=0;
                 for (Block b:l) { size=size+b.size(); }
                 return size+(new U8().size());
@@ -177,7 +174,7 @@ public abstract class Block {
                 qty.read(in);
                 List<Block> list=new ArrayList<>();
                 for (int i=0;i<qty.value;i++) {
-                    Class listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
+                    Class<?> listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
                     if (debug) { System.out.println(listtype.getName()); }
                     Block b=(Block) listtype.getDeclaredConstructor().newInstance();
                     b.readBytes(in);

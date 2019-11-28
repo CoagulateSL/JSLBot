@@ -1,14 +1,15 @@
 package net.coagulate.JSLBot;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import net.coagulate.JSLBot.Handlers.ObjectData;
 import net.coagulate.JSLBot.Packets.Messages.ParcelPropertiesRequestByID;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.S32;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**  Class that holds per region mutable data.
  * A not very interesting mostly container class.
@@ -200,7 +201,7 @@ public class Regional {
         @Override
         public String toString() {
             String ret="";
-            ret+=region.getName()+"#"+(((int)id)&0xff);
+            ret+=region.getName()+"#"+(id &0xff);
             if (populated) {
                 ret+=" '"+name+"' ("+description+") prims:"+ownerprims+"/"+groupprims+"/"+otherprims+"="+primsused+" of "+maxprims+" (simmax:"+simwidetotalprims+") Privacy:"+(!seeavs)+" claimed "+new Date(((long)(claimdate))*1000).toString();            }
             return ret;
@@ -218,7 +219,7 @@ public class Regional {
             req.bagentdata.vsessionid=region.bot().getSession();
             req.bparceldata.vlocalid=new S32(id);
             req.bparceldata.vsequenceid=new S32();
-            req.bparceldata.vsequenceid.value=(0xff&((int)id));
+            req.bparceldata.vsequenceid.value=(0xff& id);
             region.circuit().send(req,true);
         }
         

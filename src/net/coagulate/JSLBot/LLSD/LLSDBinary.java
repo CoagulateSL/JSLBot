@@ -1,8 +1,9 @@
 package net.coagulate.JSLBot.LLSD;
 
+import org.w3c.dom.Node;
+
 import java.nio.ByteBuffer;
 import java.util.Base64;
-import org.w3c.dom.Node;
 
 /** Represent a binary object in LLSD format.
  * Uses BASE64 encoding.
@@ -32,7 +33,7 @@ public class LLSDBinary extends Atomic {
 
     public String toIP() {
         byte[] ipbyte=toByte();
-        String numericip=(int)(ipbyte[0]&0xff)+"."+(int)(ipbyte[1]&0xff)+"."+(int)(ipbyte[2]&0xff)+"."+(int)(ipbyte[3]&0xff);
+        String numericip= (ipbyte[0]&0xff) +"."+ (ipbyte[1]&0xff) +"."+ (ipbyte[2]&0xff) +"."+ (ipbyte[3]&0xff);
         return numericip;
     }
 

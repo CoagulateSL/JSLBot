@@ -1,5 +1,10 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.LLSD.LLSDArray;
+import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
@@ -8,15 +13,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import java.util.*;
 
 /** Some general purpose useful static functions.
  *
@@ -97,7 +94,7 @@ public abstract class BotUtils {
      * @throws MalformedURLException
      * @throws XmlRpcException
      */
-    static Map loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, XmlRpcException {
+    static Map<Object,Object> loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, XmlRpcException {
         XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
         XmlRpcClient client=new XmlRpcClient();
@@ -128,7 +125,8 @@ public abstract class BotUtils {
                 System.out.println(k+"="+params.get(k).toString());
             }
         }
-        HashMap result=(HashMap)(client.execute("login_to_simulator",new Object[]{params}));
+        Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
+        @SuppressWarnings("unchecked") HashMap<Object,Object> result=(HashMap)resultobject;
         if (Debug.AUTH) {
             // dump the result
             for(Object s:result.keySet()) {

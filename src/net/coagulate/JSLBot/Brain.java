@@ -1,20 +1,16 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
-import static java.util.logging.Level.*;
 import java.util.logging.Logger;
-import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
-import net.coagulate.JSLBot.JSLBot.CmdHelp;
+
+import static java.util.logging.Level.*;
 
 /** Bot's brain, performs event handling etc.
  * This used to be a Set of Handler's in JSLBot its self but it comes with a lot of polluting Reflection code so it got moved here.
@@ -233,7 +229,7 @@ public class Brain {
      * @return Handler that contains the method
      */
     private Object findHandler(Method method) {
-        Class c=method.getDeclaringClass();
+        Class<?> c=method.getDeclaringClass();
         for (Handler h:brain) {
             if (h.getClass().equals(c)) { return h; }
         }

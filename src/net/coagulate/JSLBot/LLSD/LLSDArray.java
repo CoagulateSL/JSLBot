@@ -1,16 +1,17 @@
 package net.coagulate.JSLBot.LLSD;
 
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /** Represents an Array in LLSD format
  *
  * @author Iain Price
  */
-public class LLSDArray extends Container implements Iterable {
+public class LLSDArray extends Container implements Iterable<Atomic> {
     private final List<Atomic> data = new ArrayList<>();
     
     public LLSDArray() {}
@@ -36,7 +37,7 @@ public class LLSDArray extends Container implements Iterable {
     }
 
     @Override
-    public Iterator iterator() {
+    public Iterator<Atomic> iterator() {
         return data.iterator();
     }
 }

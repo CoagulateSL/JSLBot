@@ -1,53 +1,22 @@
 package net.coagulate.JSLBot.Handlers;
 
+import net.coagulate.JSLBot.*;
+import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
+import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.LLSD.*;
+import net.coagulate.JSLBot.Packets.Messages.*;
+import net.coagulate.JSLBot.Packets.Types.*;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Level.WARNING;
-import net.coagulate.JSLBot.Circuit;
-import net.coagulate.JSLBot.CommandEvent;
-import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Global;
-import net.coagulate.JSLBot.Handler;
-import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
-import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.LLSD.LLSD;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDBinary;
-import net.coagulate.JSLBot.LLSD.LLSDInteger;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.Packets.Messages.AgentPause;
-import net.coagulate.JSLBot.Packets.Messages.AgentResume;
-import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
-import net.coagulate.JSLBot.Packets.Messages.AlertMessage_bAlertInfo;
-import net.coagulate.JSLBot.Packets.Messages.ChatFromSimulator;
-import net.coagulate.JSLBot.Packets.Messages.ChatFromViewer;
-import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.LLVector3;
-import net.coagulate.JSLBot.Packets.Types.S32;
-import net.coagulate.JSLBot.Packets.Types.U32;
-import net.coagulate.JSLBot.Packets.Types.U8;
-import net.coagulate.JSLBot.Packets.Types.Variable2;
-import net.coagulate.JSLBot.Regional;
-import net.coagulate.JSLBot.UDPEvent;
-import net.coagulate.JSLBot.XMLEvent;
+
+import static java.util.logging.Level.*;
 
 /**
  *
@@ -384,7 +353,7 @@ public class CnC extends Handler {
         Method m=bot.brain().getCommand(command);
         if (m==null) { throw new IllegalArgumentException("Could not find command"); }
         String ret="\nCommand: "+command;
-        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+((CmdHelp)(m.getAnnotation(CmdHelp.class))).description(); }
+        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+ m.getAnnotation(CmdHelp.class).description(); }
         for (Parameter param:m.getParameters()) {
             if (!param.getType().equals(Regional.class)) {
                 ret+="\n"+param.getName();
