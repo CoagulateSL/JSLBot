@@ -11,6 +11,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -74,11 +75,7 @@ public abstract class BotUtils {
             throw new AssertionError("MD5 hashing is not supported on this platform?");
         }
         byte[] digest;
-        try {
-            digest = md5.digest(password.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            throw new AssertionError("UTF-8 encoding is not supported on this platform (?!?)");
-        }
+        digest = md5.digest(password.getBytes(StandardCharsets.UTF_8));
         return "$1$" + hex(digest);
         //return hex(digest);
     }
@@ -130,11 +127,11 @@ public abstract class BotUtils {
         if (Debug.AUTH) {
             // dump the result
             for(Object s:result.keySet()) {
-                String printline=(((String)s)+" -> ");
+                String printline=(s +" -> ");
                 Object output=result.get(s);
-                if (output instanceof String) { printline+=("[String] "+(String)output); }
+                if (output instanceof String) { printline+=("[String] "+ output); }
                 else {
-                    if (output instanceof Integer) { printline+=("[Integer] "+(Integer)output); }
+                    if (output instanceof Integer) { printline+=("[Integer] "+ output); }
                     else {
                         String clas=result.get(s).getClass().getTypeName();
                         printline+="["+clas+"] "+(output);

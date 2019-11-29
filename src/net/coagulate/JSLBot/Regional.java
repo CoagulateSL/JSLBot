@@ -212,7 +212,7 @@ public class Regional {
         }
         public void populate() { populate(false); }
         public void populate(boolean force) {
-            if (requested==true && force==false) { return; }
+            if (requested && !force) { return; }
             requested=true;
             ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();
             req.bagentdata.vagentid=region.bot().getUUID();

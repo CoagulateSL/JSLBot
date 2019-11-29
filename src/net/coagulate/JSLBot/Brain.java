@@ -142,7 +142,7 @@ public class Brain {
      */
     private String formatEventName(Event event) {
         String method=event.getName();
-        char c[]=method.toCharArray();
+        char[] c =method.toCharArray();
         c[0]=Character.toLowerCase(c[0]);
         return new String(c);
     }
@@ -189,8 +189,8 @@ public class Brain {
         for (Method handler:handlers) {
             try {
                 Object callon=findHandler(handler);
-                if (event instanceof UDPEvent) { response=(String) handler.invoke(callon,(UDPEvent)event); }
-                if (event instanceof XMLEvent) { response=(String) handler.invoke(callon,(XMLEvent)event); }
+                if (event instanceof UDPEvent) { response=(String) handler.invoke(callon, event); }
+                if (event instanceof XMLEvent) { response=(String) handler.invoke(callon, event); }
                 if (event instanceof CommandEvent) {
                     CommandEvent cmd=(CommandEvent)event;
                     response=cmd.run(callon,handler);

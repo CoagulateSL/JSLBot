@@ -206,7 +206,7 @@ public class CnC extends Handler {
     }
 
     private String parseCommand(String message,Map<String,String> paramsout1) {
-        String parts[]=message.split(" ");
+        String[] parts =message.split(" ");
         int index=0;
         String command=parts[0]; index++;
         String keyword="";
@@ -267,11 +267,11 @@ public class CnC extends Handler {
     
     public void establishAgentCommunicationXMLDelayed(XMLEvent event) {
         LLSDMap body=event.map();
-        String simipandport=((LLSDString)(body.get("sim-ip-and-port"))).toString();
+        String simipandport= body.get("sim-ip-and-port").toString();
         for (Circuit c:bot.getCircuits()) {
             if (c.getSimIPAndPort().equalsIgnoreCase(simipandport)) {
                 if (Debug.EVENTQUEUE) { log.fine("Matched ip and port to circuit for region "+c.getRegionName()); }
-                String seedcaps = ((LLSDString)(body.get("seed-capability"))).toString();
+                String seedcaps = body.get("seed-capability").toString();
                 c.connectCAPS(seedcaps);
                 return;
             }

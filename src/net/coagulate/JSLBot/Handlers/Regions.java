@@ -152,12 +152,12 @@ public class Regions extends Handler {
         parcel.ownerprims=((LLSDInteger)data.get("OwnerPrims")).get();
         parcel.groupprims=((LLSDInteger)data.get("GroupPrims")).get();
         parcel.otherprims=((LLSDInteger)data.get("OtherPrims")).get();
-        parcel.musicurl=((LLSDString)data.get("MusicURL")).toString();
+        parcel.musicurl= data.get("MusicURL").toString();
         parcel.group=((LLSDUUID)data.get("GroupID")).toLLUUID();
-        parcel.name=((LLSDString)data.get("Name")).toString();
-        parcel.description=((LLSDString)data.get("Desc")).toString();
+        parcel.name= data.get("Name").toString();
+        parcel.description= data.get("Desc").toString();
         parcel.claimdate=((LLSDInteger)data.get("ClaimDate")).get();
-        parcel.mediaurl=((LLSDString)data.get("MediaURL")).toString();
+        parcel.mediaurl= data.get("MediaURL").toString();
         parcel.seeavs=((LLSDBoolean)data.get("SeeAVs")).get();
         parcel.area=((LLSDInteger)data.get("Area")).get();
         parcel.owner=((LLSDUUID)data.get("OwnerID")).toLLUUID();

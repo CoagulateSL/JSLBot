@@ -64,7 +64,7 @@ public class EventQueue extends Thread {
         int id=0;
         URL url=new URL(eventqueue);
         int errorcount=0;
-        while (1==1) { // we could stop on circuit exit or some other things, but it seems to work fine just waiting for the inevitable 404
+        while (true) { // we could stop on circuit exit or some other things, but it seems to work fine just waiting for the inevitable 404
             try {
                 // format request document
                 LLSDMap post=new LLSDMap();
@@ -135,7 +135,7 @@ public class EventQueue extends Thread {
             // this is so clunky
             // should be a map, "message" key and a "body" key, with which we can commence the decode
             LLSDMap eventmap=(LLSDMap) a;
-            String messagetype=((LLSDString)eventmap.get("message")).toString();
+            String messagetype= eventmap.get("message").toString();
             Atomic body=eventmap.get("body");
             if (Debug.DUMPXML) { System.out.println("Message type is "+messagetype+"\n"+body.toXML()); }
             XMLEvent event=new XMLEvent(bot(), circuit().regional(), body, messagetype);

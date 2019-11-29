@@ -135,7 +135,7 @@ public class Groups extends Handler {
             for (Iterator<Atomic> it = groupslist.iterator(); it.hasNext();) {
                 Atomic groupatom = it.next();
                 LLSDMap group=(LLSDMap)groupatom;
-                String groupname=((LLSDString)(group.get("GroupName"))).toString();
+                String groupname= group.get("GroupName").toString();
                 LLSDBinary grouppowers=(LLSDBinary) group.get("GroupPowers");
                 boolean listinprofile=((LLSDBoolean)group.get("ListInProfile",new LLSDBoolean(true))).get();
                 boolean acceptnotices=((LLSDBoolean)group.get("AcceptNotices",new LLSDBoolean(true))).get();

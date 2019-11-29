@@ -252,7 +252,7 @@ public class JSLBot extends Thread {
         // authentication is performed over XMLRPC over HTTPS
         Map<Object, Object> result = BotUtils.loginXMLRPC(this, firstname, lastname, password, loginlocation);
         if (!("true".equalsIgnoreCase((String)result.get("login")))) {
-            throw new IOException("Server gave error: "+((String)result.get("message")));
+            throw new IOException("Server gave error: "+ result.get("message"));
         }
         String message=(String)result.get("message");
         log.info("Login MOTD: "+message);

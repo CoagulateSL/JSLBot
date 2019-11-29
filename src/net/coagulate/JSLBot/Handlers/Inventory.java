@@ -149,11 +149,11 @@ public class Inventory extends Handler implements Runnable {
                 LLSDMap item=(LLSDMap)itemmap;
                 LLUUID item_id=((LLSDUUID)item.get("item_id")).toLLUUID();
                 LLUUID parent_id=((LLSDUUID)item.get("parent_id")).toLLUUID();
-                String name=((LLSDString)item.get("name")).toString();
+                String name= item.get("name").toString();
                 LLUUID asset_id=((LLSDUUID)item.get("asset_id")).toLLUUID();
                 int type=((LLSDInteger)(item.get("type"))).get();
                 int inv_type=((LLSDInteger)(item.get("inv_type"))).get();
-                String desc=((LLSDString)item.get("desc")).toString();
+                String desc= item.get("desc").toString();
                 processItem(item_id,parent_id,name,asset_id,type,inv_type,desc);
             }
             LLSDArray innercategories=(LLSDArray) innermap.get("categories");
@@ -168,7 +168,7 @@ public class Inventory extends Handler implements Runnable {
                 LLUUID agent_id=((LLSDUUID)(category.get("agent_id"))).toLLUUID();
                 LLUUID category_id=((LLSDUUID)(category.get("category_id"))).toLLUUID();
                 LLUUID parent_id=((LLSDUUID)(category.get("parent_id"))).toLLUUID();
-                String name=((LLSDString)(category.get("name"))).toString();
+                String name= category.get("name").toString();
                 int version=((LLSDInteger)(category.get("version"))).get();
                 processCategory(type_default, agent_id, category_id, parent_id, name, version);
             }
