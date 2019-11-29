@@ -1,9 +1,10 @@
 package net.coagulate.JSLBot.LLSD;
 
+import org.w3c.dom.NodeList;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.w3c.dom.NodeList;
 
 /** A Map container in LLSD.
  *
@@ -51,7 +52,7 @@ public class LLSDMap extends Container {
      * @param def Default atomic to return
      * @return The atomic from the map, or the default if not present.
      */
-    public Atomic get(String key,Atomic def) { if (data.containsKey(key)) { return data.get(key); } else { return def; } }
+    public Atomic get(String key,Atomic def) { return data.getOrDefault(key, def); }
 
     public void put(String ack, Atomic atom) {
         data.put(ack,atom);

@@ -109,7 +109,7 @@ public class Teleportation extends Handler {
         // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
 
         if (messagetype==22) {
-            CommandEvent check=new CommandEvent(bot, event.region(), "acceptLures", new HashMap<String,String>(), m.bagentdata.vagentid);
+            CommandEvent check=new CommandEvent(bot, event.region(), "acceptLures", new HashMap<>(), m.bagentdata.vagentid);
             check.invokerUUID(m.bagentdata.vagentid);
             String reject=bot.brain().auth(check);
             if (reject!=null) { return; } 
