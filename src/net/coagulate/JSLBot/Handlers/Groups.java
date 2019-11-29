@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /** Handle group related commands and messages.
@@ -132,28 +131,30 @@ public class Groups extends Handler {
         LLSDMap body=event.map();
         LLSDArray groupslist=(LLSDArray) body.get("GroupData");
         synchronized(groups) {
-            for (Iterator<Atomic> it = groupslist.iterator(); it.hasNext();) {
-                Atomic groupatom = it.next();
-                LLSDMap group=(LLSDMap)groupatom;
-                String groupname= group.get("GroupName").toString();
-                LLSDBinary grouppowers=(LLSDBinary) group.get("GroupPowers");
-                boolean listinprofile=((LLSDBoolean)group.get("ListInProfile",new LLSDBoolean(true))).get();
-                boolean acceptnotices=((LLSDBoolean)group.get("AcceptNotices",new LLSDBoolean(true))).get();
-                int contribution=((LLSDInteger)group.get("Contribution")).get();
-                LLUUID uuid=((LLSDUUID)group.get("GroupID")).toLLUUID();
-                GroupData g=null;
-                synchronized(groups) { 
-                    for(LLUUID compare:groups.keySet()) {
-                        if (compare.equals(uuid)) { g=groups.get(compare); uuid=compare; }
+            for (Atomic groupatom : groupslist) {
+                LLSDMap group = (LLSDMap) groupatom;
+                String groupname = group.get("GroupName").toString();
+                LLSDBinary grouppowers = (LLSDBinary) group.get("GroupPowers");
+                boolean listinprofile = ((LLSDBoolean) group.get("ListInProfile", new LLSDBoolean(true))).get();
+                boolean acceptnotices = ((LLSDBoolean) group.get("AcceptNotices", new LLSDBoolean(true))).get();
+                int contribution = ((LLSDInteger) group.get("Contribution")).get();
+                LLUUID uuid = ((LLSDUUID) group.get("GroupID")).toLLUUID();
+                GroupData g = null;
+                synchronized (groups) {
+                    for (LLUUID compare : groups.keySet()) {
+                        if (compare.equals(uuid)) {
+                            g = groups.get(compare);
+                            uuid = compare;
+                        }
                     }
-                    if (g==null) { g=new GroupData(); }
-                    g.groupname=groupname;
-                    g.grouppowers=grouppowers;
-                    g.listinprofile=listinprofile;
-                    g.acceptnotices=acceptnotices;
-                    g.contribution=contribution;
-                    g.uuid=uuid;
-                    groups.put(uuid,g);
+                    if (g == null) { g = new GroupData(); }
+                    g.groupname = groupname;
+                    g.grouppowers = grouppowers;
+                    g.listinprofile = listinprofile;
+                    g.acceptnotices = acceptnotices;
+                    g.contribution = contribution;
+                    g.uuid = uuid;
+                    groups.put(uuid, g);
                 }
             }
         }
