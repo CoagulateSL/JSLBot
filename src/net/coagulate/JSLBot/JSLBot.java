@@ -31,13 +31,13 @@ public class JSLBot extends Thread {
     public void dumpAccounting() {
         System.out.println("DUMP ACCOUNTING FOR BOT "+this.getFullName());
         synchronized(messagebytesin) {
-            for (int id:messagebytesin.keySet()) {
-                System.out.println("Message ID : "+id+" received "+messagebytesin.get(id));
+            for (Map.Entry<Integer, Integer> entry : messagebytesin.entrySet()) {
+                System.out.println("Message ID : "+ entry.getKey() +" received "+ entry.getValue());
             }
         }
         synchronized(messagebytesout) {
-            for (int id:messagebytesout.keySet()) {
-                System.out.println("Message ID : "+id+" transmitted "+messagebytesout.get(id));
+            for (Map.Entry<Integer, Integer> entry : messagebytesout.entrySet()) {
+                System.out.println("Message ID : "+ entry.getKey() +" transmitted "+ entry.getValue());
             }
         }
     }
@@ -272,11 +272,11 @@ public class JSLBot extends Thread {
         Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
         @SuppressWarnings("unchecked") // if it isn't, what do we do anyway?
         Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
-        for (String key:rootmap.keySet()) {
+        for (Map.Entry<String, String> entry : rootmap.entrySet()) {
             if (Debug.AUTH) {
-                log.finer("Inventory Root "+key+" = "+rootmap.get(key));
+                log.finer("Inventory Root "+ entry.getKey() +" = "+ entry.getValue());
             }
-            inventoryroot=new LLUUID(rootmap.get(key));
+            inventoryroot=new LLUUID(entry.getValue());
         }
         //System.out.println("inventoryroot type is "+inventoryroot.getClass().getName());
         // derive region handle
@@ -578,9 +578,9 @@ public class JSLBot extends Thread {
     public Set<Regional> getRegionals() {
         Set<Regional> regionalset=new HashSet<>();
         synchronized(circuits) {
-            for (Long handle:circuits.keySet()) {
+            for (Circuit circuit : circuits.values()) {
                 //System.out.println("Circuit "+handle);
-                regionalset.add(circuits.get(handle).regional());
+                regionalset.add(circuit.regional());
             }
         }
         return regionalset;

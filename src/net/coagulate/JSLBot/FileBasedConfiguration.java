@@ -56,9 +56,9 @@ public class FileBasedConfiguration extends Configuration {
     @Override
     public String dump() {
         String response="";
-        for (String k:kvstore.keySet()) {
+        for (Map.Entry<String, String> entry : kvstore.entrySet()) {
             if (!"".equals(response)) { response+="\n"; }
-            response+=k+"="+kvstore.get(k); 
+            response+= entry.getKey() +"="+ entry.getValue();
         }
         return response;
     }

@@ -117,22 +117,22 @@ public abstract class BotUtils {
         if (password.length()>16 && (!password.startsWith("$1$"))) { password=password.substring(0,16); }
         params.put("passwd",BotUtils.md5hash(password));
         if (Debug.AUTH) {
-            for (String k:params.keySet()) {
-                System.out.println(k+"="+params.get(k).toString());
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                System.out.println(entry.getKey() +"="+ entry.getValue().toString());
             }
         }
         Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
         @SuppressWarnings("unchecked") HashMap<Object,Object> result=(HashMap<Object,Object>)resultobject;
         if (Debug.AUTH) {
             // dump the result
-            for(Object s:result.keySet()) {
-                String printline=(s +" -> ");
-                Object output=result.get(s);
+            for(Map.Entry<Object, Object> entry : result.entrySet()) {
+                String printline=(entry.getKey() +" -> ");
+                Object output= entry.getValue();
                 if (output instanceof String) { printline+=("[String] "+ output); }
                 else {
                     if (output instanceof Integer) { printline+=("[Integer] "+ output); }
                     else {
-                        String clas=result.get(s).getClass().getTypeName();
+                        String clas= entry.getValue().getClass().getTypeName();
                         printline+="["+clas+"] "+(output);
                     }
                 }

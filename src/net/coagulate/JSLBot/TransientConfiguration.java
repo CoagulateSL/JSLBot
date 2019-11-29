@@ -26,9 +26,9 @@ public class TransientConfiguration extends Configuration {
     @Override
     public String dump() {
         String response="";
-        for (String k:kv.keySet()) {
+        for (Map.Entry<String, String> entry : kv.entrySet()) {
             if (!"".equals(response)) { response+="\n"; }
-            response+=k+"="+kv.get(k); 
+            response+= entry.getKey() +"="+ entry.getValue();
         }
         return response;
     }   

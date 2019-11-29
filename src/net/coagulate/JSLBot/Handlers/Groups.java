@@ -80,10 +80,10 @@ public class Groups extends Handler {
 
     private LLUUID findGroupUUID(String name) {
         synchronized(groups) {
-            for (LLUUID uuid:groups.keySet()) {
-                GroupData gd=groups.get(uuid);
+            for (Map.Entry<LLUUID, GroupData> entry : groups.entrySet()) {
+                GroupData gd= entry.getValue();
                 if (gd!=null) {
-                    if (gd.groupname.equalsIgnoreCase(name)) { return uuid; }
+                    if (gd.groupname.equalsIgnoreCase(name)) { return entry.getKey(); }
                 }
             }
         }
@@ -163,7 +163,7 @@ public class Groups extends Handler {
 
     final Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
     public LLSDMap getMembership(LLUUID uuid) {
-        for (LLUUID compare:groupmembership.keySet()) { if (compare.equals(uuid)) { return groupmembership.get(compare); } }
+        for (Map.Entry<LLUUID, LLSDMap> entry : groupmembership.entrySet()) { if (entry.getKey().equals(uuid)) { return entry.getValue(); } }
         return null;
     }
     @CmdHelp(description="Collect a group's roster")

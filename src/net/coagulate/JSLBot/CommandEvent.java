@@ -54,8 +54,8 @@ public class CommandEvent extends Event {
     @Override
     public String dump() {
         String ret="COMMAND: "+getName();
-        for (String k:parameters.keySet()) {
-            ret=ret+"\n"+k+"="+parameters.get(k);
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            ret=ret+"\n"+ entry.getKey() +"="+ entry.getValue();
         }
         return ret;
     }

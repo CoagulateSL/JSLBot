@@ -134,11 +134,11 @@ public class Regional {
         }
         int totalsize=0;
         String resp="";
-        for (byte id:sizes.keySet()) {
+        for (Map.Entry<Byte, Integer> entry : sizes.entrySet()) {
             resp+="\n";
-            resp+="#byeid#"+(((int)id)&0xff);
-            resp+=" "+sizes.get(id)+"m2";
-            totalsize+=sizes.get(id);
+            resp+="#byeid#"+(((int) (byte) entry.getKey())&0xff);
+            resp+=" "+ entry.getValue() +"m2";
+            totalsize+= entry.getValue();
         }
         return resp;
     }

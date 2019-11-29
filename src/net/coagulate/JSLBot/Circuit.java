@@ -245,9 +245,9 @@ public final class Circuit extends Thread implements Closeable {
             // trim the list of remember transmissions, if they didn't send after 60 seconds they're dead.
             synchronized(acked) {
                 Set<Integer> removeme=new HashSet<>();
-                for (int seq:acked.keySet()) {
-                    if (((new Date().getTime())-(acked.get(seq).getTime()))>60000) {
-                        removeme.add(seq); // can't remove while iterating, concurrent mod exception
+                for (Map.Entry<Integer, Date> entry : acked.entrySet()) {
+                    if (((new Date().getTime())-(entry.getValue().getTime()))>60000) {
+                        removeme.add(entry.getKey()); // can't remove while iterating, concurrent mod exception
                     }
                 }
                 for (int seq:removeme) {
@@ -256,9 +256,10 @@ public final class Circuit extends Thread implements Closeable {
             }
         }
         synchronized (inflight) {
-            for (Packet p:inflight.keySet()) {
+            for (Map.Entry<Packet, Date> entry : inflight.entrySet()) {
+                Packet p = entry.getKey();
                 // retransmit any packets that haven't been acked in a while
-                Date sent=inflight.get(p);
+                Date sent= entry.getValue();
                 if (packetrate<5 && ((new Date().getTime())-(sent.getTime()))>Constants.ACK_TIMEOUT) {
                     //System.out.println("In retransmit with packetrate "+packetrate);
                     log.finer("Retransmitting packet "+p.getSequence());

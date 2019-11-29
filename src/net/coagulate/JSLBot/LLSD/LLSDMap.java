@@ -32,9 +32,9 @@ public class LLSDMap extends Container {
     @Override
     public String toXML(String prefix) {
         String resp=prefix+"<map>\n";
-        for (String key:data.keySet()) {
-            resp+=prefix+"<key>"+key+"</key>\n";
-            resp+=data.get(key).toXML(prefix+"  ");
+        for (Map.Entry<String, Atomic> entry : data.entrySet()) {
+            resp+=prefix+"<key>"+ entry.getKey() +"</key>\n";
+            resp+= entry.getValue().toXML(prefix+"  ");
         }
         resp+=prefix+"</map>\n";
         return resp;
