@@ -213,7 +213,7 @@ public class JSLBot extends Thread {
         return Logger.getLogger(log.getName()+"."+subspace);
     }
 
-    private class ShutdownHook extends Thread {
+    private static class ShutdownHook extends Thread {
         final JSLBot bot;
         ShutdownHook(JSLBot bot) {this.bot=bot;}
         @Override

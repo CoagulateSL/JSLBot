@@ -107,7 +107,7 @@ public class Regional {
      * @return Parcel Data, freshly created if necessary.
      */
     public ParcelData getParcel(int get) {
-        if (!localparcelids.containsKey(get)) { localparcelids.put(get,new ParcelData(get,this)); }
+        if (!localparcelids.containsKey(get)) { localparcelids.put(get, new ParcelData(get, this)); }
         return localparcelids.get(get);
     }
     
@@ -171,7 +171,7 @@ public class Regional {
 
     
 
-    public class ParcelData {
+    public static class ParcelData {
 
         public boolean requested=false;
         public boolean populated=false;

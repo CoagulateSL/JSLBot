@@ -59,7 +59,7 @@ public class Inventory extends Handler implements Runnable {
     
     
     
-    public class InventoryAtom {}
+    public static class InventoryAtom {}
     public class InventoryItem extends InventoryAtom {
         final LLUUID id;
         final LLUUID parent;

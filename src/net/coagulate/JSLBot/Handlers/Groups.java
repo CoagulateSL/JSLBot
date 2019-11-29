@@ -176,7 +176,7 @@ public class Groups extends Handler {
         if (members==null) { throw new NullPointerException("Failed to extract members map"); }
         groupmembership.put(new LLUUID(uuid),members);
     }
-    public class GroupData {
+    public static class GroupData {
         String groupname=null;
         LLSDBinary grouppowers=null;
         boolean listinprofile=true;
