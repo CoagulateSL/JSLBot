@@ -612,9 +612,8 @@ public class JSLBot extends Thread {
         if (quit) { return; } // do not re-enter
         quit=true; quitreason=reason;
         log.warning("Shutdown requested: "+reason);
-        Set<Circuit> closeme=new HashSet<>();
         // because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
-        closeme.addAll(getCircuits());
+        Set<Circuit> closeme = new HashSet<>(getCircuits());
         for (Circuit c:closeme) {
             try { c.close(); } catch (Exception e) {}
         }

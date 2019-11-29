@@ -60,7 +60,7 @@ public class Inventory extends Handler implements Runnable {
     
     
     public static class InventoryAtom {}
-    public class InventoryItem extends InventoryAtom {
+    public static class InventoryItem extends InventoryAtom {
         final LLUUID id;
         final LLUUID parent;
         final String name;
@@ -78,7 +78,7 @@ public class Inventory extends Handler implements Runnable {
             this.invtype=invtype;
         }
     }
-    public class InventoryCategory extends InventoryAtom {
+    public static class InventoryCategory extends InventoryAtom {
         public final int type;
         public final LLUUID agentid;
         public final LLUUID id;
@@ -97,7 +97,7 @@ public class Inventory extends Handler implements Runnable {
     
     private void processCategory(int type,LLUUID agentid,LLUUID id,LLUUID parentid,String name,int version) {
         synchronized(inventory) {
-            inventory.put(id,new InventoryCategory(type, agentid, id, parentid, name, version));
+            inventory.put(id, new InventoryCategory(type, agentid, id, parentid, name, version));
         }
         addInventoryChild(parentid,id);
     }
@@ -113,7 +113,7 @@ public class Inventory extends Handler implements Runnable {
 
     private void processItem(LLUUID id, LLUUID parent, String name, LLUUID assetid, int type, int invtype, String desc) {
         synchronized(inventory) {
-            inventory.put(id,new InventoryItem(id,parent,name,desc,assetid,type,invtype));
+            inventory.put(id, new InventoryItem(id, parent, name, desc, assetid, type, invtype));
         }
         addInventoryChild(parent,id);
     }
