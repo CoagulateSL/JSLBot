@@ -42,9 +42,9 @@ public class Inventory extends Handler implements Runnable {
     /** Start the inventory downloader thread. */
     public void run() {
         while (!downloadqueue.isEmpty()) {
-            Set<LLUUID> download=new HashSet<>();
             Iterator<LLUUID> i=downloadqueue.iterator();
-            download.addAll(downloadqueue); downloadqueue.clear();
+            Set<LLUUID> download = new HashSet<>(downloadqueue);
+            downloadqueue.clear();
             try { fetchInventory(download); }
             catch (IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
             if (inventorytree.size()==0) { log.fine("Inventory download complete - there is no inventory (?)"); break; }

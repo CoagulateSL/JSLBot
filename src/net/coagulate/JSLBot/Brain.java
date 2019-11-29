@@ -112,8 +112,7 @@ public class Brain {
      * @return A set of the command names in the map.  Note these have the 'command' suffix.
      */
     public Set<String> getCommands() {
-        Set<String> ret=new HashSet<>();
-        ret.addAll(commandmap.keySet());
+        Set<String> ret = new HashSet<>(commandmap.keySet());
         return ret;
     }
     /** Instansiate a handler.

@@ -337,8 +337,7 @@ public class CnC extends Handler {
         if (command==null || command.isEmpty()) {
             String response="";
             Set<String> unsortedcommands = bot.brain().getCommands();
-            List<String> commands=new ArrayList<>();
-            commands.addAll(unsortedcommands);
+            List<String> commands = new ArrayList<>(unsortedcommands);
             Collections.sort(commands);
             for (String acommand:commands) {
                 if (!response.isEmpty()) { response+=", "; } else { response="\n"; }
