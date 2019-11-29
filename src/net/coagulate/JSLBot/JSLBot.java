@@ -600,8 +600,7 @@ public class JSLBot extends Thread {
      */
     public Set<Circuit> getCircuits() {
         synchronized(circuits) {
-            Set<Circuit> ret = new HashSet<>(circuits.values());
-            return ret;
+            return new HashSet<>(circuits.values());
         }
     }
 
