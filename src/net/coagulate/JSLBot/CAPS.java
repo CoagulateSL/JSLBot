@@ -19,7 +19,7 @@ import static java.util.logging.Level.SEVERE;
  * @author Iain Price
  */
 public final class CAPS extends Thread {
-    private Logger log;
+    private final Logger log;
     // caps URL
     private final String caps;
     // retrieved capabilities

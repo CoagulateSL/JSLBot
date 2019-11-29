@@ -214,7 +214,7 @@ public class JSLBot extends Thread {
     }
 
     private class ShutdownHook extends Thread {
-        JSLBot bot;
+        final JSLBot bot;
         ShutdownHook(JSLBot bot) {this.bot=bot;}
         @Override
         public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
@@ -340,8 +340,7 @@ public class JSLBot extends Thread {
         camera.z+=5;
         if (blind) {
             if (debug) { System.out.println(" BLIND UPDATE "); }
-            LLVector3 fake=new LLVector3(192,144,402);
-            p.bagentdata.vcameracenter=fake;
+            p.bagentdata.vcameracenter= new LLVector3(192,144,402);
             p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
             p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
             p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);

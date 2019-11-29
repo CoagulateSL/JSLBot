@@ -8,7 +8,7 @@ import java.util.logging.Logger;
  */
 public abstract class Handler {
     protected final Logger log;
-    protected JSLBot bot;    
+    protected final JSLBot bot;
     protected Configuration config;
     
     public Handler(JSLBot bot,Configuration config){

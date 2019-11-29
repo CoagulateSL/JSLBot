@@ -160,7 +160,7 @@ public class Groups extends Handler {
     }
         
 
-    Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
+    final Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
     public LLSDMap getMembership(LLUUID uuid) {
         for (LLUUID compare:groupmembership.keySet()) { if (compare.equals(uuid)) { return groupmembership.get(compare); } }
         return null;
@@ -198,7 +198,7 @@ public class Groups extends Handler {
         } else {
             target=new LLUUID(uuid);
         }
-        if (target==null && name!=null && "NONE".equals(name)) { target=new LLUUID(); }
+        if (target == null && "NONE".equals(name)) { target=new LLUUID(); }
         if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
         ActivateGroup req=new ActivateGroup(bot);
         req.bagentdata.vgroupid=target;

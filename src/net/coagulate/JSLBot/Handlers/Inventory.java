@@ -61,13 +61,13 @@ public class Inventory extends Handler implements Runnable {
     
     public class InventoryAtom {}
     public class InventoryItem extends InventoryAtom {
-        LLUUID id;
-        LLUUID parent;
-        String name;
-        String desc;
-        LLUUID assetid;
-        int type;
-        int invtype;
+        final LLUUID id;
+        final LLUUID parent;
+        final String name;
+        final String desc;
+        final LLUUID assetid;
+        final int type;
+        final int invtype;
         private InventoryItem(LLUUID id, LLUUID parent, String name, String desc, LLUUID assetid, int type, int invtype) {
             this.id=id;
             this.parent=parent;
@@ -79,12 +79,12 @@ public class Inventory extends Handler implements Runnable {
         }
     }
     public class InventoryCategory extends InventoryAtom {
-        public int type;
-        public LLUUID agentid;
-        public LLUUID id;
-        public LLUUID parentid;
-        public String name;
-        public int version;
+        public final int type;
+        public final LLUUID agentid;
+        public final LLUUID id;
+        public final LLUUID parentid;
+        public final String name;
+        public final int version;
         public InventoryCategory(int type,LLUUID agentid,LLUUID id,LLUUID parentid,String name,int version) {
             this.type=type;
             this.agentid=agentid;

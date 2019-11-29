@@ -23,8 +23,8 @@ import static java.util.logging.Level.SEVERE;
  * @author Iain Price
  */
 public final class Circuit extends Thread implements Closeable {
-    private AtomicInteger bytesin=new AtomicInteger(0);
-    private AtomicInteger bytesout=new AtomicInteger(0);
+    private final AtomicInteger bytesin=new AtomicInteger(0);
+    private final AtomicInteger bytesout=new AtomicInteger(0);
     private Logger log;
     private int circuitsequence=0;
     // list of sent reliable packets we're waiting to hear an ack for
@@ -187,16 +187,14 @@ public final class Circuit extends Thread implements Closeable {
      * @return How long ago last acks were sent, in milliseconds
      */
     private long lastAck() {
-        long result=new Date().getTime()-lastacks.getTime();
-        return result;
+        return new Date().getTime()-lastacks.getTime();
     }
     /** When maintenance last ran, as an interval from now
      * 
      * @return How long ago maintenance last ran, in milliseconds
      */
     private long lastMaintenance() {
-        long result=new Date().getTime()-lastmaintenance.getTime();
-        return result;
+        return new Date().getTime()-lastmaintenance.getTime();
     }
     /** Add a packet to the list to send ACKs for
      * @param p Packet to require ACK for

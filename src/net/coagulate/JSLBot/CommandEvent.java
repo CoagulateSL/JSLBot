@@ -17,7 +17,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  * @author Iain Price
  */
 public class CommandEvent extends Event {
-    private Logger log;
+    private final Logger log;
     // K=V style parameters, typeless
     private final Map<String,String> parameters;
     public Map<String,String> parameters() {return parameters;}

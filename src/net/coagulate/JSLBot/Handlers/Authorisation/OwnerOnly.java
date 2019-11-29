@@ -10,7 +10,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  * @author Iain Price
  */
 public class OwnerOnly extends Authorisation {
-    private String ownerusername;
+    private final String ownerusername;
     private LLUUID owneruuid;
     /** Create an owner only authoriser.
      * 

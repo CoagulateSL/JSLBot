@@ -23,7 +23,7 @@ public class Teleportation extends Handler {
 
     public Teleportation(JSLBot bot,Configuration c){super(bot,c); config=c;}
 
-    Object signal=new Object();
+    final Object signal=new Object();
     boolean teleporting=false;
 
     // nothing more than a status message

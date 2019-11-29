@@ -14,7 +14,6 @@ import net.coagulate.JSLBot.LLSD.LLSDBinary;
 import net.coagulate.JSLBot.LLSD.LLSDBoolean;
 import net.coagulate.JSLBot.LLSD.LLSDInteger;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
 import net.coagulate.JSLBot.LLSD.LLSDUUID;
 import net.coagulate.JSLBot.Packets.Messages.MapBlockReply;
 import net.coagulate.JSLBot.Packets.Messages.MapBlockReply_bData;

@@ -33,8 +33,7 @@ public class LLSDBinary extends Atomic {
 
     public String toIP() {
         byte[] ipbyte=toByte();
-        String numericip= (ipbyte[0]&0xff) +"."+ (ipbyte[1]&0xff) +"."+ (ipbyte[2]&0xff) +"."+ (ipbyte[3]&0xff);
-        return numericip;
+        return (ipbyte[0]&0xff) +"."+ (ipbyte[1]&0xff) +"."+ (ipbyte[2]&0xff) +"."+ (ipbyte[3]&0xff);
     }
 
     public long toLong() {

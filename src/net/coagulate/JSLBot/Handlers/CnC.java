@@ -51,8 +51,7 @@ public class CnC extends Handler {
         long shutdown=new Date().getTime();
         if (msg.containsKey("MINUTES")) { shutdown=shutdown+((Integer.parseInt(msg.get("MINUTES").toString()))*1000*60); }
         if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))*1000); }
-        Date when=new Date(shutdown);
-        return when;
+        return new Date(shutdown);
     }
 
     private Date evacby=null;
@@ -245,9 +244,9 @@ public class CnC extends Handler {
     }
     
     class CircuitLauncher extends Thread {
-        String numericip;
-        int port;
-        long handle;
+        final String numericip;
+        final int port;
+        final long handle;
         
         private CircuitLauncher(JSLBot bot,String numericip, int port, long handle) {
             this.numericip=numericip;

@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
  * @author Iain Price
  */
 public class LLSD extends Container {
-    List<Container> contents=new ArrayList<>();
+    final List<Container> contents=new ArrayList<>();
 
     /** Build an LLSD object around an existing container.
      * Typically a map, sometimes an array.
