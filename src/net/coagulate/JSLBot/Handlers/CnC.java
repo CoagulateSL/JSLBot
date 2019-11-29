@@ -27,7 +27,7 @@ public class CnC extends Handler {
     public CnC(JSLBot bot,Configuration c) {
         super(bot,c);
         String authoriser=c.get("authoriser", "OwnerOnly");
-        if (authoriser.indexOf(".")==-1) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
+        if (!authoriser.contains(".")) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
         Authorisation auth=null;
         try {
             auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));

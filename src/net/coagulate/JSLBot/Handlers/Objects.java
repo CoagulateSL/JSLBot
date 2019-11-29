@@ -143,7 +143,7 @@ public class Objects extends Handler {
             ObjectData check = region.getObject(id);
             if (check.parentid==null || check.parentid.value==0) {
                 if (check.name!=null) {
-                    if (check.name.toLowerCase().indexOf(name)>=0) { best=check; }
+                    if (check.name.toLowerCase().contains(name)) { best=check; }
                 }
             }
         }
