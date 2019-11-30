@@ -119,7 +119,8 @@ public final class Circuit extends Thread implements Closeable {
         if (Debug.CIRCUIT) { log.finer("Outstanding ACKS: "+inflight.size()); }
         if (!inflight.isEmpty()) { throw new IOException("Login completed, UseCircuitCode sent, and not acknowledged..."); }
         log.info("Successfully connected circuit");
-        if (capsurl!=null) { caps=new CAPS(this,capsurl); caps.run(); }
+        if (capsurl!=null) { caps=new CAPS(this,capsurl); //noinspection CallToThreadRun
+            caps.run(); }
     }
     
     /** Runs the UDP receiver thread.
