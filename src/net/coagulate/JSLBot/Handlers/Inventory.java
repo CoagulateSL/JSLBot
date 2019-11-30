@@ -48,7 +48,7 @@ public class Inventory extends Handler implements Runnable {
             try { fetchInventory(download); }
             catch (IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
             if (inventorytree.size()==0) { log.fine("Inventory download complete - there is no inventory (?)"); break; }
-            int percent=Math.round((100.0*inventorytree.size())/(inventorytree.size()+downloadqueue.size()));
+            int percent=(int)(Math.round((100.0*inventorytree.size())/(inventorytree.size()+downloadqueue.size())));
             log.fine("Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory.size()+" elements)");
         }
         log.info("Inventory download complete");
