@@ -228,6 +228,7 @@ public class Objects extends Handler {
         }
     }
     
+    @Nullable
     @CmdHelp(description="Lookup or request a prim by UUID")
     public String objectUUIDCommand(@Nonnull CommandEvent command,
                                     @ParamHelp(description="Prim UUID")

@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
  * @author Iain Price
  */
 public class OwnerOnly extends Authorisation {
+    @Nullable
     private final String ownerusername;
     @Nullable
     private LLUUID owneruuid;

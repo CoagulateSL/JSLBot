@@ -418,7 +418,7 @@ public class JSLBot extends Thread {
      *
      * @param p Packet to send
      */
-    public void send(Packet p) {
+    public void send(@Nonnull Packet p) {
         if (primary==null) { throw new IllegalStateException("Primary circuit is not defined or connected"); }
         primary.send(p);
     }
@@ -488,6 +488,7 @@ public class JSLBot extends Thread {
      * 
      * @return CAPS object for the avatar's region.
      */
+    @Nullable
     public CAPS getCAPS() { return primary.getCAPS(); }
     /** Resolve a UUID into a firstname, either via cache or via lookup
      * @param uuid UUID to look up
@@ -583,6 +584,7 @@ public class JSLBot extends Thread {
     /** Get the regional info for the primary region
      * @return  Primary region the avatar is present in
      */
+    @Nullable
     public Regional getRegional() {
         return primary.regional();
     }

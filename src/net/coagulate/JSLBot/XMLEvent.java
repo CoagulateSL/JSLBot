@@ -18,6 +18,7 @@ public class XMLEvent extends Event {
         this.content=content;
     }
 
+    @Nonnull
     @Override
     public String dump() {
         return body().toXML();

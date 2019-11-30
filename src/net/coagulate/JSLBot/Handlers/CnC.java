@@ -328,9 +328,9 @@ public class CnC extends Handler {
     @Nonnull
     @CmdHelp(description="Send an instant message")
     public String imCommand(CommandEvent command,
-            @ParamHelp(description = "UUID to message")
+                            @ParamHelp(description = "UUID to message")
             String uuid,
-            @ParamHelp(description = "Message to send")
+                            @Nonnull @ParamHelp(description = "Message to send")
             String message) {
         bot.im(new LLUUID(uuid), message);
         log.info("Sent IM to <"+uuid+"> "+bot.getUserName(new LLUUID(uuid))+" - "+message);

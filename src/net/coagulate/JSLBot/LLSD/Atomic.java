@@ -26,6 +26,8 @@ public abstract class Atomic {
         if ("undef".equals(type)) { return null; }
         throw new AssertionError("Unknown LLSD type "+type);
     }
+    @Nonnull
     public String toXML() { return toXML(""); }
+    @Nonnull
     public abstract String toXML(String lineprefix);
 }
