@@ -3,6 +3,8 @@ package net.coagulate.JSLBot;
 import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,12 +25,15 @@ import static java.util.logging.Level.*;
  */
 public class Brain {
     private final Logger log;
-    private Authorisation auth=null;    
+    @Nullable
+    private Authorisation auth=null;
+    @Nonnull
     private final Set<Handler> brain;
+    @Nonnull
     private final JSLBot bot;
     private boolean procrastinate=true;
 
-    Brain(JSLBot bot) {
+    Brain(@Nonnull JSLBot bot) {
         log=bot.getLogger("Brain");
         this.bot=bot;
         this.brain = new HashSet<>();
@@ -50,7 +55,7 @@ public class Brain {
      * Should be done before initialisation.
      * @param handlers Array of handler names, full class name if outside net.coagulate.JSLBot.Handlers
      */
-    void loadHandlers(String[] handlers) {
+    void loadHandlers(@Nonnull String[] handlers) {
         for (String handler:handlers) {
             loadHandler(handler);
         }
@@ -60,7 +65,7 @@ public class Brain {
      * 
      * @param handlername Class name, can be abbreviated if in core Handlers package
      */
-    private void loadHandler(String handlername){
+    private void loadHandler(@Nullable String handlername){
         if (handlername==null) { throw new NullPointerException("No handler specified"); }
         try {
             Handler h=createHandler(handlername);
@@ -107,6 +112,7 @@ public class Brain {
      * 
      * @return A set of the command names in the map.  Note these have the 'command' suffix.
      */
+    @Nonnull
     public Set<String> getCommands() {
         return new HashSet<>(commandmap.keySet());
     }
@@ -116,7 +122,8 @@ public class Brain {
      * @return The handler
      * @throws InvocationTargetException If the handler constructor throws an error.
      */
-    private Handler createHandler(String name) throws InvocationTargetException {
+    @Nonnull
+    private Handler createHandler(@Nonnull String name) throws InvocationTargetException {
         try {
             String classname=name;
             if (!name.contains(".")) { classname="net.coagulate.JSLBot.Handlers."+name; }
@@ -124,7 +131,7 @@ public class Brain {
             Configuration subconfiguration=bot.config.subspace(name);
             Constructor<?> cons=c.getConstructor(JSLBot.class,Configuration.class);
             return (Handler) (cons.newInstance(bot,subconfiguration));
-        } catch (SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
+        } catch (@Nonnull SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
             throw new AssertionError("Handler "+name+" fails to meet programming contract",ex);
         }
     }
@@ -134,7 +141,8 @@ public class Brain {
      * @param event Event to get the name of
      * @return Event name with first character in lower case
      */
-    private String formatEventName(Event event) {
+    @Nonnull
+    private String formatEventName(@Nonnull Event event) {
         String method=event.getName();
         char[] c =method.toCharArray();
         c[0]=Character.toLowerCase(c[0]);
@@ -147,7 +155,8 @@ public class Brain {
     private final List <Event> queue=new ArrayList<>();
 
     // what passes for an API :P
-    public String execute(Event event) { return execute(event,true); }
+    @Nullable
+    public String execute(@Nonnull Event event) { return execute(event,true); }
     public void queue(Event event) { synchronized(queue) { queue.add(event); queue.notifyAll(); } }
     
     private final Map<String,Method> commandmap=new HashMap<>();
@@ -161,7 +170,8 @@ public class Brain {
      * @param immediate Is this the immediate mode run?  If set, we will queue XML/UDP events for the 2nd delayed pass.
      * @return Response, if any, of the event, may be null.
      */
-    private String execute(Event event,boolean immediate) {
+    @Nullable
+    private String execute(@Nonnull Event event, boolean immediate) {
         String messageid=event.getPrefixedName();
         String fen=formatEventName(event);
         fen=fen+event.typeString();
@@ -222,7 +232,8 @@ public class Brain {
      * @param method Method
      * @return Handler that contains the method
      */
-    private Object findHandler(Method method) {
+    @Nonnull
+    private Object findHandler(@Nonnull Method method) {
         Class<?> c=method.getDeclaringClass();
         for (Handler h:brain) {
             if (h.getClass().equals(c)) { return h; }
@@ -246,7 +257,7 @@ public class Brain {
      * @param event Event to populate for
      * @param suffix Suffix to search for, e.g. Immediate or Delayed
      */
-    private void populateHandlerMap(Event event,String suffix) {
+    private void populateHandlerMap(@Nonnull Event event, String suffix) {
         // find all the handlers that have a method like this and accumulate them into a set =)
         String fen=formatEventName(event);
         fen=fen+event.typeString();
@@ -373,9 +384,11 @@ public class Brain {
      * @param event Event to check
      * @return null if approved, otherwise rejection reason
      */
+    @Nullable
     public String auth(CommandEvent event) {
         return auth.approve(event);
     }
+    @Nonnull
     @Override
     public String toString() { return bot.toString()+"/Brain"; }
 
@@ -384,6 +397,7 @@ public class Brain {
      * @param name Name of handler
      * @return Handler if found, otherwise exception.
      */
+    @Nonnull
     Handler getHandler(String name) {
         for (Handler h:brain) {
             if (h.getClass().getSimpleName().equals(name)) { return h; }

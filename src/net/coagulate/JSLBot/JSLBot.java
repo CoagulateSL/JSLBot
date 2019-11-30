@@ -5,6 +5,8 @@ import net.coagulate.JSLBot.Packets.Packet;
 import net.coagulate.JSLBot.Packets.Types.*;
 import org.apache.xmlrpc.XmlRpcException;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.annotation.*;
 import java.util.*;
@@ -65,7 +67,9 @@ public class JSLBot extends Thread {
     private String firstname;
     private String lastname;
     public boolean registershutdownhook=true;
+    @Nonnull
     public String getFullName() { return firstname+" "+lastname; }
+    @Nonnull
     public String getUsername() { return firstname+"."+lastname; }
 
     private String password;
@@ -75,7 +79,9 @@ public class JSLBot extends Thread {
     private LLUUID uuid; public LLUUID getUUID() { return uuid; }
     private int circuitcode; public int getCircuitCode() { return circuitcode; }
     
+    @Nonnull
     private final Brain brain;
+    @Nonnull
     public Brain brain(){return brain;}
     
     Configuration config=new TransientConfiguration();
@@ -92,10 +98,14 @@ public class JSLBot extends Thread {
      * @param regionname Name of region we have as home.  Bot will periodically teleport home if not in this region.
      */
     public void homeSickFor(String regionname) { log.info("Registered homesickness towards "+regionname); homesickfor=regionname; }
+    @Nullable
     private String homesickfor=null;
+    @Nullable
     public String homeSickFor() { return homesickfor; }
     
+    @Nullable
     private LLUUID inventoryroot=null;
+    @Nullable
     public LLUUID getInventoryRoot() { return inventoryroot; }
     
     /** Get the JSLInterface API object for this bot.
@@ -109,7 +119,7 @@ public class JSLBot extends Thread {
      * @param conf The configuration data object
      */
 
-    public JSLBot(Configuration conf) {
+    public JSLBot(@Nonnull Configuration conf) {
         log=Logger.getLogger("net.coagulate.JSLBot."+conf.get("firstname")+" "+conf.get("lastname"));
         brain=new Brain(this);
         loadConf(conf);
@@ -167,7 +177,7 @@ public class JSLBot extends Thread {
                 throw new AssertionError("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
             }
         }
-        catch (NoSuchMethodException|SecurityException ex) {
+        catch (@Nonnull NoSuchMethodException|SecurityException ex) {
             throw new AssertionError("Unable to read signature of setup method??",ex);
         }
         
@@ -181,6 +191,7 @@ public class JSLBot extends Thread {
     }
 
 
+    @Nonnull
     public Handler getHandler(String name) { return brain.getHandler(name); }
     
     /** Launch bot AI.
@@ -221,11 +232,11 @@ public class JSLBot extends Thread {
     }
     
     // Wrapper for logging in, implements retries and backoff.
-    private void performLogin(String firstname,String lastname,String password,String location) throws Exception {
+    private void performLogin(String firstname, String lastname, @Nonnull String password, String location) throws Exception {
         Exception last=null;
         for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
             try { login(firstname,lastname,password,location); return; }
-            catch (RuntimeException | IOException | XmlRpcException e) {
+            catch (@Nonnull RuntimeException | IOException | XmlRpcException e) {
                 last=e;
                 long delay = Constants.RETRY_INTERVAL*retries;
                 if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
@@ -248,7 +259,7 @@ public class JSLBot extends Thread {
     // ********** LOGIN CODE / BOT PRIMITIVES **********
     
     // Perform a login attempt
-    private void login(String firstname,String lastname,String password,String loginlocation) throws IOException, XmlRpcException  {
+    private void login(String firstname, String lastname, @Nonnull String password, String loginlocation) throws IOException, XmlRpcException  {
         // authentication is performed over XMLRPC over HTTPS
         Map<Object, Object> result = BotUtils.loginXMLRPC(this, firstname, lastname, password, loginlocation);
         if (!("true".equalsIgnoreCase((String)result.get("login")))) {
@@ -307,6 +318,7 @@ public class JSLBot extends Thread {
         p.bagentdata.vcircuitcode=new U32(getCircuitCode());
         send(p);
     }
+    @Nullable
     private Date lastagentupdate=null;
     private float drawdistance=(float) 0.001;
     /** Push an agent update */
@@ -365,6 +377,7 @@ public class JSLBot extends Thread {
     }
 
     /** Send this generally useful message down the primary UDP circuit */
+    @Nonnull
     Packet useCircuitCode() {
         UseCircuitCode cc=new UseCircuitCode();
         cc.bcircuitcode.vcode=new U32(getCircuitCode());
@@ -380,7 +393,7 @@ public class JSLBot extends Thread {
      * @param uuid UUID of agent to send message to
      * @param message Message to send
      */
-    public void im(LLUUID uuid,String message) {
+    public void im(LLUUID uuid, @Nonnull String message) {
         ImprovedInstantMessage reply=new ImprovedInstantMessage(this);
         reply.bmessageblock.vtoagentid=uuid;
         reply.bmessageblock.vmessage=new Variable2(message);
@@ -391,7 +404,9 @@ public class JSLBot extends Thread {
     
     // ********** TRANSMISSION PRIMITIVES **********
     /** Primary circuit, as in where the agent presence *is* */
-    Circuit primary=null;  Circuit circuit() { return primary; }
+    @Nullable
+    Circuit primary=null;  @Nullable
+	Circuit circuit() { return primary; }
     
     /** Get the name of the region the avatar is present in.
      *
@@ -440,7 +455,7 @@ public class JSLBot extends Thread {
          *
          * @return This command's description
          */
-        String description();
+        @Nonnull String description();
     }
 
     /** Describes an argument to a command. */
@@ -453,7 +468,7 @@ public class JSLBot extends Thread {
          *
          * @return This parameter's description.
          */
-        String description();
+        @Nonnull String description();
     }
 
 
@@ -478,7 +493,8 @@ public class JSLBot extends Thread {
      * @param uuid UUID to look up
      * @return  The first name
      */
-    public String getFirstName(LLUUID uuid) {
+    @Nullable
+    public String getFirstName(@Nonnull LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.firstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.firstName(uuid)==null) { Global.firstName(uuid,"???"); }
@@ -488,7 +504,8 @@ public class JSLBot extends Thread {
      * @param uuid UUID to look up
      * @return The last name
      */
-    public String getLastName(LLUUID uuid) {
+    @Nullable
+    public String getLastName(@Nonnull LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.lastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.lastName(uuid)==null) { Global.lastName(uuid,"???"); }
@@ -498,7 +515,8 @@ public class JSLBot extends Thread {
      * @param uuid UUID to look up
      * @return  User name
      */
-    public String getUserName(LLUUID uuid) {
+    @Nullable
+    public String getUserName(@Nonnull LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.userName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.userName(uuid)==null) { Global.userName(uuid,"???"); }
@@ -508,7 +526,8 @@ public class JSLBot extends Thread {
      * @param uuid UUID to look up
      * @return  Display name
      */
-    public String getDisplayName(LLUUID uuid) {
+    @Nullable
+    public String getDisplayName(@Nonnull LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
         if (Global.displayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.displayName(uuid)==null) { Global.displayName(uuid,"???"); }
@@ -571,6 +590,7 @@ public class JSLBot extends Thread {
     /** Get regional data for all connected circuit
      * @return  Get all connected regionals
      */
+    @Nonnull
     public Set<Regional> getRegionals() {
         Set<Regional> regionalset=new HashSet<>();
         synchronized(circuits) {
@@ -594,6 +614,7 @@ public class JSLBot extends Thread {
     /** Get all circuits
      * @return Set of all circuits
      */
+    @Nonnull
     public Set<Circuit> getCircuits() {
         synchronized(circuits) {
             return new HashSet<>(circuits.values());
@@ -616,14 +637,16 @@ public class JSLBot extends Thread {
         brain.stopProcrastinating();  // release the main thread
     }
     private float x=0; private float y=0; private float z=0;
+    @Nonnull
     public LLVector3 getPos() { return new LLVector3(x,y,z); }
     public void setPos(float x, float y, float z) { this.x=x; this.y=y; this.z=z; }
 
-    public void setPos(LLVector3 p) { x=p.x; y=p.y; z=p.z; }
+    public void setPos(@Nonnull LLVector3 p) { x=p.x; y=p.y; z=p.z; }
 
     private float lx=0; private float ly=0; private float lz=0;
-    public void setLookAt(LLVector3 l) {lx=l.x;ly=l.y;lz=l.z;}
+    public void setLookAt(@Nonnull LLVector3 l) {lx=l.x;ly=l.y;lz=l.z;}
 
+    @Nonnull
     public LLVector3 getLookAt() { return new LLVector3(lx,ly,lz); }
     public void setLookAt(float x,float y,float z) { lx=x; ly=y; lz=z; }
 
@@ -650,6 +673,7 @@ public class JSLBot extends Thread {
     private final Object circuitsequencelock=new Object();
     int getCircuitSequence() { synchronized(circuitsequencelock) { circuitsequence++; return circuitsequence; } }
 
+    @Nonnull
     @Override
     public String toString() { return this.getFullName(); }
 }

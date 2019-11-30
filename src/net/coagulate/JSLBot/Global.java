@@ -4,6 +4,7 @@ package net.coagulate.JSLBot;
 
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,8 @@ public final class Global {
     // this would be much better if we factoried the UUIDs and could just use == (i.e. "xxx.get(LLUUID)" directly
     // maybe we can, this fault was never well tested.
     /** Look up a display name ONLY in the cache */
-    static String displayName(LLUUID uuid) { 
+    @Nullable
+    static String displayName(LLUUID uuid) {
         synchronized(displaynames) {
             for (Map.Entry<LLUUID, String> entry : displaynames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
@@ -38,7 +40,8 @@ public final class Global {
         }
     }
     /** Look up a first name ONLY in the cache */
-    static String firstName(LLUUID uuid) { 
+    @Nullable
+    static String firstName(LLUUID uuid) {
         synchronized(firstnames) {
             for (Map.Entry<LLUUID, String> entry : firstnames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
@@ -47,7 +50,8 @@ public final class Global {
         }
     }
     /** Look up a last name ONLY in the cache */
-    static String lastName(LLUUID uuid) { 
+    @Nullable
+    static String lastName(LLUUID uuid) {
         synchronized(lastnames) { 
             for (Map.Entry<LLUUID, String> entry : lastnames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
@@ -56,7 +60,8 @@ public final class Global {
         }
     }
     /** Look up a user name ONLY in the cache */
-    static String userName(LLUUID uuid) { 
+    @Nullable
+    static String userName(LLUUID uuid) {
         synchronized(usernames) { 
             for (Map.Entry<LLUUID, String> entry : usernames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
@@ -75,12 +80,13 @@ public final class Global {
      * @param handle Long region handle to cache
      * @param name Region name for the handle
      */
-    public static void regionName(Long handle,String name) { if (handle!=null && name!=null && (!name.isEmpty())) { synchronized(regionnames) { regionnames.put(handle, name); } } }
+    public static void regionName(@Nullable Long handle, @Nullable String name) { if (handle!=null && name!=null && (!name.isEmpty())) { synchronized(regionnames) { regionnames.put(handle, name); } } }
     /** Look up a region handle in the cache
      * 
      * @param name Name of the region to look up
      * @return Long region handle
      */
+    @Nullable
     public static Long regionHandle(String name) {
         synchronized(regionnames) {
             for (Map.Entry<Long, String> entry : regionnames.entrySet()) {

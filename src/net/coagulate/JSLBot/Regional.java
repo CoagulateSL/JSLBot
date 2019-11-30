@@ -6,6 +6,8 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.S32;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +61,7 @@ public class Regional {
      * @param uuid The in world UUID of the object
      * @return The appropriate object data, or null if not found
      */
+    @Nullable
     public ObjectData getObject(LLUUID uuid) {
         synchronized (objects) {
             for (ObjectData od:objects.values()) {
@@ -73,7 +76,8 @@ public class Regional {
      * 
      * @return Set of LOCAL IDs
      */
-    public Set<Integer> getObjects() { return objects.keySet(); }    
+    @Nonnull
+    public Set<Integer> getObjects() { return objects.keySet(); }
     
     
     
@@ -121,6 +125,7 @@ public class Regional {
     private final byte[][] parcelgrid=new byte[64][64];
     public void setParcelMap(int sequence, byte b) { parcelgrid[sequence/64][sequence%64]=b; }
 
+    @Nonnull
     public String dumpParcels() {
         Map<Byte,Integer> sizes=new HashMap<>();
         for (int x=0;x<64;x++) {
@@ -151,7 +156,9 @@ public class Regional {
     public long getDayUSec() { return dayusec; }
     public void setDayUSec(long dayusec) { this.dayusec = dayusec; }
 
+    @Nullable
     private LLVector3 sundirection=null;
+    @Nullable
     public LLVector3 getSunDirection() { return sundirection; }
     public void setSunDirection(LLVector3 sundirection) { this.sundirection = sundirection; }
 
@@ -160,6 +167,7 @@ public class Regional {
     public void setSunPhase(float sunphase) { this.sunphase = sunphase; }
 
 
+    @Nonnull
     public String dump() {
         String d="";
         if (circuit==bot().primary) { d="[PRIMARY] "; }
@@ -176,18 +184,26 @@ public class Regional {
         public boolean requested=false;
         public boolean populated=false;
         public int id=0;
+        @Nullable
         public Regional region=null;
         public int ownerprims=-1;
         public int groupprims=-1;
         public int otherprims=-1;
+        @Nullable
         public String musicurl=null;
+        @Nullable
         public LLUUID group=null;
+        @Nullable
         public String name=null;
+        @Nullable
         public String description=null;
         public int claimdate=-1;
+        @Nullable
         public String mediaurl=null;
+        @Nullable
         public Boolean seeavs=null;
         public int area=-1;
+        @Nullable
         public LLUUID owner=null;
         public int primsused=-1;
         public int category=-1;
@@ -198,6 +214,7 @@ public class Regional {
         public int maxprims=-1;
         public int simwidetotalprims=-1;
         
+        @Nonnull
         @Override
         public String toString() {
             String ret="";
@@ -224,6 +241,7 @@ public class Regional {
         }
         
     }
+    @Nonnull
     @Override
     public String toString() { return circuit.toString()+"/Regional"; }
 }

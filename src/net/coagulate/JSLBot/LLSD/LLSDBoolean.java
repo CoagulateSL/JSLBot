@@ -2,6 +2,8 @@ package net.coagulate.JSLBot.LLSD;
 
 import org.w3c.dom.Node;
 
+import javax.annotation.Nonnull;
+
 /** Represent a boolean in LLSD format.
  *
  * @author Iain Price
@@ -13,7 +15,7 @@ public class LLSDBoolean extends Atomic {
         value=a;
     }
 
-    LLSDBoolean(Node item) {
+    LLSDBoolean(@Nonnull Node item) {
         // hmm
         String v=item.getTextContent();
         if ("0".equals(v)) { value=true; return; }
@@ -23,10 +25,12 @@ public class LLSDBoolean extends Atomic {
         throw new AssertionError("Unexpected LLSDBoolean(Node) constructor argument '"+v+"'");
     }
 
+    @Nonnull
     @Override
     public String toXML(String lineprefix) {
         return lineprefix+"<boolean>"+value+"</boolean>\n";
     }
+    @Nonnull
     @Override
     public String toString() { return ""+value; }
     

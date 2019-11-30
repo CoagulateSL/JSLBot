@@ -2,6 +2,7 @@ package net.coagulate.JSLBot;
 
 import net.coagulate.JSLBot.LLSD.*;
 
+import javax.annotation.Nonnull;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -19,9 +20,10 @@ import static java.util.logging.Level.SEVERE;
 public class EventQueue extends Thread {
     private final Logger log;
     private final String eventqueue;
+    @Nonnull
     private final CAPS caps;
     /** Create an event queue for the given CAPS, queue URL and region handle */
-    EventQueue(CAPS caps, String queue) {
+    EventQueue(@Nonnull CAPS caps, String queue) {
         log=caps.getLogger("EventQueue");
         this.caps=caps;
         eventqueue=queue;
@@ -30,10 +32,12 @@ public class EventQueue extends Thread {
     /** Get the owning CAPS
      * @return  The CAPS object that owns this event queue
      */
+    @Nonnull
     public CAPS caps() { return caps; }
     /** Get the owning circuit
      * @return  The circuit from the CAPS that owns this Event Queue
      */
+    @Nonnull
     public Circuit circuit() { return caps().circuit(); }
     /** Get the owning bot
      * @return  Bot from the CAPS from circuit that owns this Event Queue
@@ -129,7 +133,7 @@ public class EventQueue extends Thread {
         }
     }
     
-    private void process(LLSDArray events) {
+    private void process(@Nonnull LLSDArray events) {
         for (Atomic a:events.get()) {
             //System.out.println("**************** ATOM:\n"+a.toXML());
             // this is so clunky
@@ -143,6 +147,7 @@ public class EventQueue extends Thread {
         }
     }
     public String getRegionName() { return caps().circuit().getRegionName(); }
+    @Nonnull
     @Override
     public String toString() { return caps().toString()+" / EventQueue"; }
     

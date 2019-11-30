@@ -9,6 +9,8 @@ import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.DateFormat;
@@ -24,7 +26,7 @@ import static java.util.logging.Level.*;
  */
 public class CnC extends Handler {
 
-    public CnC(JSLBot bot,Configuration c) {
+    public CnC(@Nonnull JSLBot bot, @Nonnull Configuration c) {
         super(bot,c);
         String authoriser=c.get("authoriser", "OwnerOnly");
         if (!authoriser.contains(".")) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
@@ -43,7 +45,8 @@ public class CnC extends Handler {
         if (homesick!=null && !homesick.isEmpty()) { bot.homeSickFor(homesick); }
     }
     
-    private static Date parseRegionRestart(String m) {
+    @Nonnull
+    private static Date parseRegionRestart(@Nonnull String m) {
         if (m.split("\n").length<2) { throw new IllegalArgumentException("Expected at least 2 lines of input"); }
         String line=m.split("\n")[1];
         LLSDMap msg=(LLSDMap) new LLSD(line).getFirst();
@@ -54,10 +57,11 @@ public class CnC extends Handler {
         return new Date(shutdown);
     }
 
+    @Nullable
     private Date evacby=null;
     
     public static final DateFormat datetime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    public void alertMessageUDPDelayed(UDPEvent event) {
+    public void alertMessageUDPDelayed(@Nonnull UDPEvent event) {
         AlertMessage msg=(AlertMessage) event.body();
         log.warning("Simulator "+event.region().circuit()+" sends Alert, data message: "+msg.balertdata.vmessage.toString());
         for (AlertMessage_bAlertInfo info:msg.balertinfo) {
@@ -89,7 +93,7 @@ public class CnC extends Handler {
         }
     }
      
-    public void chatFromSimulatorUDPDelayed(UDPEvent event) {
+    public void chatFromSimulatorUDPDelayed(@Nonnull UDPEvent event) {
         ChatFromSimulator msg = (ChatFromSimulator) event.body();
         String from=msg.bchatdata.vfromname.toString();
         LLUUID source=msg.bchatdata.vsourceid;
@@ -138,7 +142,7 @@ public class CnC extends Handler {
         runCommands(from, source, message, prefix);
     }
     
-    public void improvedInstantMessageUDPDelayed(UDPEvent event) {
+    public void improvedInstantMessageUDPDelayed(@Nonnull UDPEvent event) {
         ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
         int messagetype=m.bmessageblock.vdialog.value;
         String messagetext="["+m.bmessageblock.vfromagentname.toString()+"] "+m.bmessageblock.vmessage.toString();
@@ -193,7 +197,7 @@ public class CnC extends Handler {
 
     }
     
-    public void processInstantMessage(UDPEvent event,ImprovedInstantMessage m) {
+    public void processInstantMessage(UDPEvent event, @Nonnull ImprovedInstantMessage m) {
         //System.out.println(m.dump());
         String from=m.bmessageblock.vfromagentname.toString();
         LLUUID source=m.bagentdata.vagentid;
@@ -204,7 +208,7 @@ public class CnC extends Handler {
         runCommands(from,source,message,prefix);
     }
 
-    private String parseCommand(String message,Map<String,String> paramsout1) {
+    private String parseCommand(@Nonnull String message, @Nonnull Map<String,String> paramsout1) {
         String[] parts =message.split(" ");
         int index=0;
         String command=parts[0]; index++;
@@ -229,7 +233,7 @@ public class CnC extends Handler {
     }
     
     
-    public void enableSimulatorXMLImmediate(XMLEvent event) {
+    public void enableSimulatorXMLImmediate(@Nonnull XMLEvent event) {
         LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap)event.body()).get("SimulatorInfo");
         for (Object m:simulatorinfos) {
             LLSDMap map=(LLSDMap)m;
@@ -264,7 +268,7 @@ public class CnC extends Handler {
     }
 
     
-    public void establishAgentCommunicationXMLDelayed(XMLEvent event) {
+    public void establishAgentCommunicationXMLDelayed(@Nonnull XMLEvent event) {
         LLSDMap body=event.map();
         String simipandport= body.get("sim-ip-and-port").toString();
         for (Circuit c:bot.getCircuits()) {
@@ -278,12 +282,13 @@ public class CnC extends Handler {
         log.severe("Did not find simipandport "+simipandport+" to bind the event queue to");
     }
 
+    @Nonnull
     @CmdHelp(description = "Request the bot shutdown")
     public String quitCommand(CommandEvent command) {
         bot.shutdown("Instant Message instructed us to quit");
         return "Shutting down as requested (this message will not be delivered)";
     }
-    private void runCommands(String from, LLUUID source, String message, String prefix) {
+    private void runCommands(String from, @Nonnull LLUUID source, @Nonnull String message, @Nullable String prefix) {
         boolean prefixok=false;
         if (prefix==null || prefix.isEmpty()) { prefixok=true; }
         if (!prefixok) { 
@@ -312,6 +317,7 @@ public class CnC extends Handler {
         else { if (response!=null && !"".equals(response)) { bot.im(source,">> "+response); } }
     }
 
+    @Nonnull
     @CmdHelp(description = "Causes the bot to reconnect to SL without quitting")
     public String restartCommand(CommandEvent command) {
         bot.forceReconnect();
@@ -319,6 +325,7 @@ public class CnC extends Handler {
         return "This IM reply probably will be lost due to the restart.";
     }
 
+    @Nonnull
     @CmdHelp(description="Send an instant message")
     public String imCommand(CommandEvent command,
             @ParamHelp(description = "UUID to message")
@@ -330,9 +337,10 @@ public class CnC extends Handler {
         return "IM sent";
     }
     
+    @Nonnull
     @CmdHelp(description="Get Help :)  If you see this you're doing it right")
     public String helpCommand(CommandEvent commandevent,
-            @ParamHelp(description="Optional command to get more info about")
+                              @Nullable @ParamHelp(description="Optional command to get more info about")
             String command) {
         if (command==null || command.isEmpty()) {
             StringBuilder response= new StringBuilder();
@@ -363,6 +371,7 @@ public class CnC extends Handler {
         return ret.toString();
     }
     private int pauseserial=0;
+    @Nonnull
     @CmdHelp(description="Pause the agent")
     public String pauseCommand(CommandEvent event) {
         AgentPause p = new AgentPause(bot);
@@ -370,6 +379,7 @@ public class CnC extends Handler {
         bot.send(p,true);
         return "0 - Paused";
     }
+    @Nonnull
     @CmdHelp(description="Unpause the agent")
     public String unPauseCommand(CommandEvent event) {
         AgentResume p = new AgentResume(bot);
@@ -378,15 +388,20 @@ public class CnC extends Handler {
         return "0 - Paused";
     }
     
+    @Nonnull
     @CmdHelp(description="Say a message in local chat")
-    public String sayCommand(CommandEvent event,String message) { return chat(1,message); }
+    public String sayCommand(CommandEvent event, @Nonnull String message) { return chat(1,message); }
+    @Nonnull
     @CmdHelp(description="Shout a message in local chat")
-    public String shoutCommand(CommandEvent event,String message) { return chat(2,message); }
+    public String shoutCommand(CommandEvent event, @Nonnull String message) { return chat(2,message); }
+    @Nonnull
     @CmdHelp(description="Whisper a message in local chat")
-    public String whisperCommand(CommandEvent event,String message) { return chat(0,message); }
+    public String whisperCommand(CommandEvent event, @Nonnull String message) { return chat(0,message); }
 
-    private String chat(int messagetype,String message) { return chat(messagetype,0,message); }
-    private String chat(int messagetype,int channel,String message) {
+    @Nonnull
+    private String chat(int messagetype, @Nonnull String message) { return chat(messagetype,0,message); }
+    @Nonnull
+    private String chat(int messagetype, int channel, @Nonnull String message) {
         ChatFromViewer req=new ChatFromViewer(bot);
         req.bchatdata.vtype=new U8(messagetype);
         req.bchatdata.vchannel=new S32(channel);
@@ -395,6 +410,7 @@ public class CnC extends Handler {
         return "0 - Sent";
     }
     
+    @Nullable
     private Date homesickness=null;
     @Override
     public void maintenance() {
@@ -430,9 +446,10 @@ public class CnC extends Handler {
         homesickness=new Date(new Date().getTime()+5L*60L*1000L);
     }
 
+    @Nonnull
     @CmdHelp(description="Manage the homesickness of this bot")
     public String homesickCommand(CommandEvent event,
-            @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear")
+                                  @Nullable @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear")
             String region) {
         if (region==null || region.isEmpty()) {
             if (bot.homeSickFor()==null || bot.homeSickFor().isEmpty()) { return "Bot has no longing for any home"; }

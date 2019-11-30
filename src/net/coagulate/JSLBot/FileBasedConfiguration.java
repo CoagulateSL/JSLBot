@@ -1,5 +1,7 @@
 package net.coagulate.JSLBot;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,19 +17,22 @@ import java.util.Set;
  */
 public class FileBasedConfiguration extends Configuration {
 
+    @Nonnull
     String filename="";
+    @Nonnull
     Map<String,String> kvstore=new HashMap<>();
     
     @SuppressWarnings("unchecked") // pretty stuck with this :)
-    public FileBasedConfiguration(String filename) {
+    public FileBasedConfiguration(@Nonnull String filename) {
         this.filename=filename;
         try (FileInputStream fis = new FileInputStream(filename); ObjectInputStream ois = new ObjectInputStream(fis)) {
             kvstore=(Map<String, String>)ois.readObject();
-        } catch (IOException|ClassNotFoundException e) {
+        } catch (@Nonnull IOException|ClassNotFoundException e) {
             throw new AssertionError("Could not load configuration file",e);
         }
     }
     
+    @Nullable
     @Override
     public String get(String key) {
         if (!kvstore.containsKey(key)) { put(key,null); return null; } // keep track of what was asked for...
@@ -53,6 +58,7 @@ public class FileBasedConfiguration extends Configuration {
         }
     }
     
+    @Nonnull
     @Override
     public String dump() {
         String response="";
@@ -63,6 +69,7 @@ public class FileBasedConfiguration extends Configuration {
         return response;
     }
 
+    @Nonnull
     @Override
     public Set<String> get() {
         return kvstore.keySet();

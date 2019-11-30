@@ -6,24 +6,38 @@ import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** Stores data we know about an object.
  * Do not expect all data to be present unless you've requested it previously.
  * @author Iain Price
  */
 
 public class ObjectData {
+    @Nullable
     public U32 id=null;
+    @Nullable
     public LLUUID fullid=null;
+    @Nullable
     public U8 clickaction=null;
+    @Nullable
     public LLVector3 scale=null;
+    @Nullable
     public U32 parentid=null;
+    @Nullable
     public String name=null;
     public boolean requested=false;
+    @Nullable
     public String description=null;
+    @Nullable
     public LLUUID owner=null;
+    @Nullable
     public LLUUID group=null;
+    @Nullable
     public LLUUID lastowner=null;
     public boolean agent=false;
+    @Nonnull
     public String floattext="";
     public final JSLBot bot;
     private float x=-1;
@@ -32,6 +46,7 @@ public class ObjectData {
     public int crc=0;
     public ObjectData(JSLBot bot,int id) { this.bot=bot; this.id=new U32(id); }
     public ObjectData(JSLBot bot,U32 id) { this.bot=bot; this.id=id; }
+    @Nullable
     public String toString() {
         String r="";
         if (id!=null) { r+="#"+id.value; } else { r+="id??"; }

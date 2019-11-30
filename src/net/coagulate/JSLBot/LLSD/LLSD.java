@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,7 +33,7 @@ public class LLSD extends Container {
      *
      * @param read The XML/LLSD document as a String
      */
-    public LLSD(String read) {
+    public LLSD(@Nonnull String read) {
         try {
             // blah blah parse it
             DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -50,7 +52,7 @@ public class LLSD extends Container {
                 if ("undef".equals(type)) { handled=true; }
                 if (!handled) { throw new AssertionError("Found container of type "+type+" which we don't know about.  Parse error most likely."); }
             }
-        } catch (SAXException|ParserConfigurationException|IOException ex) {
+        } catch (@Nonnull SAXException|ParserConfigurationException|IOException ex) {
             IllegalArgumentException f=new IllegalArgumentException(ex);
             f.initCause(ex);
             throw f;
@@ -62,6 +64,7 @@ public class LLSD extends Container {
      * @param lineprefix Spaces to append to the start of the lines (used for indenting)
      * @return XML Document as String
      */
+    @Nonnull
     @Override
     public String toXML(String lineprefix) {
         StringBuilder response= new StringBuilder(lineprefix + "<llsd>\n");
@@ -76,6 +79,7 @@ public class LLSD extends Container {
      * Mostly used internally for initial processing of the wrapped document.
      * @return The first entry, as a container
      */
+    @Nullable
     public Container getFirst() {
         if (contents.isEmpty()) { return null; }
         return contents.get(0);

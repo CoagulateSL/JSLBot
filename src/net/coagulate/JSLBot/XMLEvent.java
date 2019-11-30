@@ -3,6 +3,8 @@ package net.coagulate.JSLBot;
 import net.coagulate.JSLBot.LLSD.Atomic;
 import net.coagulate.JSLBot.LLSD.LLSDMap;
 
+import javax.annotation.Nonnull;
+
 /** Encapsulates an EventQueue XML document as an event.
  *
  * @author Iain Price
@@ -21,6 +23,7 @@ public class XMLEvent extends Event {
         return body().toXML();
     }
 
+    @Nonnull
     public LLSDMap map() { // "dangerous", assumes the body is a map, which it usually is.
         return (LLSDMap)body();
     }

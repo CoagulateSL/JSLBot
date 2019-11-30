@@ -2,6 +2,7 @@ package net.coagulate.JSLBot.LLSD;
 
 import org.w3c.dom.NodeList;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class LLSDMap extends Container {
      *
      * @param nodes NodeList contents of this map
      */
-    public LLSDMap(NodeList nodes) {
+    public LLSDMap(@Nonnull NodeList nodes) {
         for (int i=0;i<nodes.getLength();i+=2) {
             String key=nodes.item(i).getFirstChild().getNodeValue();
             Atomic a=Atomic.create(nodes.item(i+1));
@@ -29,6 +30,7 @@ public class LLSDMap extends Container {
     }
     
     
+    @Nonnull
     @Override
     public String toXML(String prefix) {
         StringBuilder resp= new StringBuilder(prefix + "<map>\n");
@@ -40,6 +42,7 @@ public class LLSDMap extends Container {
         return resp.toString();
     }
 
+    @Nonnull
     public Set<String> keys() { return data.keySet(); }
     public boolean containsKey(String key) {
         return data.containsKey(key);

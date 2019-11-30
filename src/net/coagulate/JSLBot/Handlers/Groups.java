@@ -7,6 +7,8 @@ import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -19,12 +21,13 @@ import java.util.Map;
  */
 public class Groups extends Handler {
 
-    public Groups(JSLBot bot,Configuration config) {
+    public Groups(@Nonnull JSLBot bot, Configuration config) {
         super(bot,config);
     }
 
+    @Nonnull
     @CmdHelp(description = "Invite a user to a given group/role")
-    public String groupInviteCommand(CommandEvent command,String avataruuid,String groupuuid,String roleuuid) {
+    public String groupInviteCommand(CommandEvent command, String avataruuid, String groupuuid, @Nullable String roleuuid) {
         LLUUID avatar=new LLUUID(avataruuid);
         LLUUID group=new LLUUID(groupuuid);
         LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -42,6 +45,7 @@ public class Groups extends Handler {
         return "Invite sent";
     }
 
+    @Nonnull
     @CmdHelp(description = "Eject a user from a given group/role")
     public String groupEjectCommand(CommandEvent command,String avataruuid,String groupuuid) {
         LLUUID avatar=new LLUUID(avataruuid);
@@ -60,6 +64,7 @@ public class Groups extends Handler {
         return "Ejection request sent";
     }
     
+    @Nonnull
     @CmdHelp(description="List groups the logged in agent is a member of")
     public String groupsListCommand(CommandEvent command) {
         StringBuilder resp= new StringBuilder("Groups:");
@@ -78,6 +83,7 @@ public class Groups extends Handler {
     
     private final Map<LLUUID,GroupData> groups=new HashMap<>();
 
+    @Nullable
     private LLUUID findGroupUUID(String name) {
         synchronized(groups) {
             for (Map.Entry<LLUUID, GroupData> entry : groups.entrySet()) {
@@ -90,7 +96,7 @@ public class Groups extends Handler {
         return null;
     }
     
-    public void improvedInstantMessageUDPImmediate(UDPEvent event) {
+    public void improvedInstantMessageUDPImmediate(@Nonnull UDPEvent event) {
         ImprovedInstantMessage m=(ImprovedInstantMessage)event.body();
         if (m.bmessageblock.vdialog.value==3) {
             U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
@@ -117,7 +123,7 @@ public class Groups extends Handler {
         }
     }
     
-    public void joinGroupReplyUDPImmediate(UDPEvent event) {
+    public void joinGroupReplyUDPImmediate(@Nonnull UDPEvent event) {
         JoinGroupReply jgr=(JoinGroupReply)event.body();
         String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
         if (jgr.bgroupdata.vsuccess.value!=0) {
@@ -127,7 +133,7 @@ public class Groups extends Handler {
         }
     }
 
-    public void agentGroupDataUpdateXMLDelayed(XMLEvent event) {
+    public void agentGroupDataUpdateXMLDelayed(@Nonnull XMLEvent event) {
         LLSDMap body=event.map();
         LLSDArray groupslist=(LLSDArray) body.get("GroupData");
         synchronized(groups) {
@@ -162,6 +168,7 @@ public class Groups extends Handler {
         
 
     final Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
+    @Nullable
     public LLSDMap getMembership(LLUUID uuid) {
         for (Map.Entry<LLUUID, LLSDMap> entry : groupmembership.entrySet()) { if (entry.getKey().equals(uuid)) { return entry.getValue(); } }
         return null;
@@ -177,19 +184,23 @@ public class Groups extends Handler {
         groupmembership.put(new LLUUID(uuid),members);
     }
     public static class GroupData {
+        @Nullable
         String groupname=null;
+        @Nullable
         LLSDBinary grouppowers=null;
         boolean listinprofile=true;
         boolean acceptnotices=true;
         int contribution=0;
+        @Nullable
         LLUUID uuid=null;
     }
     
+    @Nonnull
     @CmdHelp(description="Selects a group as active")
     public String activateGroupCommand(CommandEvent event,
-            @ParamHelp(description="Group UUID to activate (or zero UUID for none)")
+                                       @Nullable @ParamHelp(description="Group UUID to activate (or zero UUID for none)")
             String uuid,
-            @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)")
+                                       @Nullable @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)")
             String name)
     {
         if (uuid==null && name==null) { return "2 - You must supply a group uuid or name"; }
