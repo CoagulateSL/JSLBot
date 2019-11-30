@@ -64,12 +64,12 @@ public class LLSD extends Container {
      */
     @Override
     public String toXML(String lineprefix) {
-        String response=lineprefix+"<llsd>\n";
+        StringBuilder response= new StringBuilder(lineprefix + "<llsd>\n");
         for (Container c:contents) {
-            response+=c.toXML(lineprefix+"  ");
+            response.append(c.toXML(lineprefix + "  "));
         }
-        response+=lineprefix+"</llsd>\n";
-        return response;
+        response.append(lineprefix).append("</llsd>\n");
+        return response.toString();
     }
 
     /** Convenience method to get the first entry in this container.

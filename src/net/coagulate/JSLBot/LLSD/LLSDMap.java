@@ -31,13 +31,13 @@ public class LLSDMap extends Container {
     
     @Override
     public String toXML(String prefix) {
-        String resp=prefix+"<map>\n";
+        StringBuilder resp= new StringBuilder(prefix + "<map>\n");
         for (Map.Entry<String, Atomic> entry : data.entrySet()) {
-            resp+=prefix+"<key>"+ entry.getKey() +"</key>\n";
-            resp+= entry.getValue().toXML(prefix+"  ");
+            resp.append(prefix).append("<key>").append(entry.getKey()).append("</key>\n");
+            resp.append(entry.getValue().toXML(prefix + "  "));
         }
-        resp+=prefix+"</map>\n";
-        return resp;
+        resp.append(prefix).append("</map>\n");
+        return resp.toString();
     }
 
     public Set<String> keys() { return data.keySet(); }

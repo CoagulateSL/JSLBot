@@ -335,32 +335,32 @@ public class CnC extends Handler {
             @ParamHelp(description="Optional command to get more info about")
             String command) {
         if (command==null || command.isEmpty()) {
-            String response="";
+            StringBuilder response= new StringBuilder();
             Set<String> unsortedcommands = bot.brain().getCommands();
             List<String> commands = new ArrayList<>(unsortedcommands);
             Collections.sort(commands);
             for (String acommand:commands) {
-                if (!response.isEmpty()) { response+=", "; } else { response="\n"; }
+                if (response.length() > 0) { response.append(", "); } else { response = new StringBuilder("\n"); }
                 acommand=acommand.substring(0,acommand.length()-"command".length());
-                response+=acommand;
+                response.append(acommand);
             }
-            response+="\n\nUse 'help command <command>' for more information";
-            return response;
+            response.append("\n\nUse 'help command <command>' for more information");
+            return response.toString();
         }
         command=command.toLowerCase();
         Method m=bot.brain().getCommand(command);
         if (m==null) { throw new IllegalArgumentException("Could not find command"); }
-        String ret="\nCommand: "+command;
-        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+ m.getAnnotation(CmdHelp.class).description(); }
+        StringBuilder ret= new StringBuilder("\nCommand: " + command);
+        if (m.getAnnotation(CmdHelp.class)!=null) { ret.append("\n").append(m.getAnnotation(CmdHelp.class).description()); }
         for (Parameter param:m.getParameters()) {
             if (!param.getType().equals(Regional.class)) {
-                ret+="\n"+param.getName();
+                ret.append("\n").append(param.getName());
                 if (param.getAnnotation(ParamHelp.class)!=null) {
-                    ret+=" - "+param.getAnnotation(ParamHelp.class).description();
+                    ret.append(" - ").append(param.getAnnotation(ParamHelp.class).description());
                 }
             }
         }
-        return ret;
+        return ret.toString();
     }
     private int pauseserial=0;
     @CmdHelp(description="Pause the agent")

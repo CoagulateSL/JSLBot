@@ -31,10 +31,10 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
     
     @Override
     public String toXML(String prefix) {
-        String resp=prefix+"<array>\n";
-        for (Atomic a:data) { resp+=a.toXML(prefix+"  "); }
-        resp+=prefix+"</array>\n";
-        return resp;
+        StringBuilder resp= new StringBuilder(prefix + "<array>\n");
+        for (Atomic a:data) { resp.append(a.toXML(prefix + "  ")); }
+        resp.append(prefix).append("</array>\n");
+        return resp.toString();
     }
 
     @NotNull

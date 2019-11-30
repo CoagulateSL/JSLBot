@@ -53,11 +53,11 @@ public class CommandEvent extends Event {
     
     @Override
     public String dump() {
-        String ret="COMMAND: "+getName();
+        StringBuilder ret= new StringBuilder("COMMAND: " + getName());
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            ret=ret+"\n"+ entry.getKey() +"="+ entry.getValue();
+            ret.append("\n").append(entry.getKey()).append("=").append(entry.getValue());
         }
-        return ret;
+        return ret.toString();
     }
 
     /** Submits this command onto the queue for DELAYED processing by the AI thread.

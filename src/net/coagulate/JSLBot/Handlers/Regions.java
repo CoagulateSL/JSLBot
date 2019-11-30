@@ -191,10 +191,10 @@ public class Regions extends Handler {
 
     @CmdHelp(description="List regions currently known to the botz")
     public String regionListCommand(CommandEvent command) {
-        String response="\n";
+        StringBuilder response= new StringBuilder("\n");
         for (Regional regional:bot.getRegionals()) {
-            response+=Long.toUnsignedString(regional.handle())+": "+regional.dump()+"\n";
+            response.append(Long.toUnsignedString(regional.handle())).append(": ").append(regional.dump()).append("\n");
         }
-        return response;
+        return response.toString();
     }
 }

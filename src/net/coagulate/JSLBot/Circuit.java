@@ -300,7 +300,7 @@ public final class Circuit extends Thread implements Closeable {
         byte[] transmit=buffer.array();
         if (p.getZeroCode()) { transmit=BotUtils.zeroEncode(transmit); }
         // final acks aren't zero coded
-        String ackedlist="";
+        StringBuilder ackedlist= new StringBuilder();
         if (buffer.capacity()>1500) { log.log(Level.WARNING, "Message size is {0} post ZeroCoding which is quite large", sending.size()); }
         // IF sending acks, append them now (AFTER zerocoding)
         if (sending.size()>0) {
@@ -310,13 +310,13 @@ public final class Circuit extends Thread implements Closeable {
             for (Integer i:sending) {
                 U32BE acknumber=new U32BE(i); // yup, the appended ones are big endian.   but a PacketAck uses little endian in the body.  LL ;)
                 acknumber.write(append);
-                ackedlist+=i+" ";
+                ackedlist.append(i).append(" ");
             } // breaks if >256 acks :P
             // finally number of acks, apparently.
             U8 count=new U8(sending.size());
             count.write(append);
             lastacks=new Date();
-            if (Debug.ACK) { log.log(Level.FINEST, "Appended ACKS:{0}", ackedlist); }
+            if (Debug.ACK) { log.log(Level.FINEST, "Appended ACKS:{0}", ackedlist.toString()); }
             transmit=append.array();
         }
         if (Debug.PACKET) { log.log(Level.FINEST, "Sending packet: {0}", p.dump());
@@ -389,14 +389,14 @@ public final class Circuit extends Thread implements Closeable {
         if (!sending.isEmpty()) {
             PacketAck ack=new PacketAck();
             ack.bpackets=new ArrayList<>();
-            String acklist="";
+            StringBuilder acklist= new StringBuilder();
             for (Integer i:sending) {
                 PacketAck_bPackets ackblock = new PacketAck_bPackets();
                 ackblock.vid=new U32(i);
                 ack.bpackets.add(ackblock);
-                acklist+=i+" ";
+                acklist.append(i).append(" ");
             }
-            if (Debug.ACK) { log.log(Level.FINEST, "Standalone acks: {0}", acklist); }
+            if (Debug.ACK) { log.log(Level.FINEST, "Standalone acks: {0}", acklist.toString()); }
             send(ack);
         }
         lastacks=new Date();

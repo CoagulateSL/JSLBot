@@ -62,16 +62,16 @@ public class Groups extends Handler {
     
     @CmdHelp(description="List groups the logged in agent is a member of")
     public String groupsListCommand(CommandEvent command) {
-        String resp="Groups:";
+        StringBuilder resp= new StringBuilder("Groups:");
         synchronized(groups) {
             for(GroupData g:groups.values()) {
-                resp+="\n";
-                resp+=g.groupname+" ("+g.uuid.toUUIDString()+") ";
-                if (g.contribution!=0) { resp+="Contribution:"+g.contribution+" "; }
-                if (g.listinprofile) { resp+="Listed"; } else { resp+="Unlisted"; }
+                resp.append("\n");
+                resp.append(g.groupname).append(" (").append(g.uuid.toUUIDString()).append(") ");
+                if (g.contribution!=0) { resp.append("Contribution:").append(g.contribution).append(" "); }
+                if (g.listinprofile) { resp.append("Listed"); } else { resp.append("Unlisted"); }
             }
         }
-        return resp;
+        return resp.toString();
     }
         
 

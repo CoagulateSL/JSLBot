@@ -48,7 +48,7 @@ public class Inventory extends Handler implements Runnable {
             try { fetchInventory(download); }
             catch (IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
             if (inventorytree.size()==0) { log.fine("Inventory download complete - there is no inventory (?)"); break; }
-            int percent=Math.round((100*inventorytree.size())/(inventorytree.size()+downloadqueue.size()));
+            int percent=Math.round((100.0*inventorytree.size())/(inventorytree.size()+downloadqueue.size()));
             log.fine("Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory.size()+" elements)");
         }
         log.info("Inventory download complete");
@@ -192,22 +192,22 @@ public class Inventory extends Handler implements Runnable {
     }
     
     private String inventoryDump(LLUUID parent,String prefix) {
-        String ret="";
+        StringBuilder ret= new StringBuilder();
         Set<LLUUID> children = inventorytree.get(parent);
         if (children==null || children.isEmpty()) { return ""; }
         for (LLUUID item:children) {
-            ret=ret+prefix;
+            ret.append(prefix);
             InventoryAtom child=inventory.get(item);
             if (child instanceof InventoryCategory) {
                 InventoryCategory i = (InventoryCategory)child;
-                ret+=i.name+"\n";
-                ret+=inventoryDump(i.id,prefix+"  ");
+                ret.append(i.name).append("\n");
+                ret.append(inventoryDump(i.id, prefix + "  "));
             }
             if (child instanceof InventoryItem) {
                 InventoryItem i = (InventoryItem)child;
-                ret+="-"+i.name+" ["+i.desc+"]\n";
+                ret.append("-").append(i.name).append(" [").append(i.desc).append("]\n");
             }
         }
-        return ret;
+        return ret.toString();
     }
 }

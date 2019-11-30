@@ -133,14 +133,14 @@ public class Regional {
             }
         }
         int totalsize=0;
-        String resp="";
+        StringBuilder resp= new StringBuilder();
         for (Map.Entry<Byte, Integer> entry : sizes.entrySet()) {
-            resp+="\n";
-            resp+="#byeid#"+(((int) (byte) entry.getKey())&0xff);
-            resp+=" "+ entry.getValue() +"m2";
+            resp.append("\n");
+            resp.append("#byeid#").append(((int) (byte) entry.getKey()) & 0xff);
+            resp.append(" ").append(entry.getValue()).append("m2");
             totalsize+= entry.getValue();
         }
-        return resp;
+        return resp.toString();
     }
 
     public String getName() {

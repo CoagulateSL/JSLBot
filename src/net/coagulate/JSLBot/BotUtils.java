@@ -48,8 +48,7 @@ public abstract class BotUtils {
                 if (mac!=null) { stored=ni; }
             }
             if (mac == null){
-                if (stored==null) { throw new IllegalArgumentException("No network interfaces found"); }
-                throw new IllegalArgumentException("No MAC on network interface found for "+stored.toString());
+                throw new IllegalArgumentException("No network interfaces found");
             }
             //System.out.println("Using mac "+hex(mac)+" from "+stored.toString());
             return hex(mac);
@@ -109,7 +108,7 @@ public abstract class BotUtils {
         options.add("login-flags");
         params.put("options",options);
         String mac=BotUtils.getMac();
-        if (mac==null) { throw new IllegalArgumentException("Failed to get MAC address"); } else { params.put("mac",mac); }
+        params.put("mac",mac);
         // MD-5 =)
         // TURNS OUT SECOND LIFE ONLY USES THE FIRST 16 CHARS
         // but silently discards the rest in the user interface, so you can have >16 chars, but the rest dont do anything.
@@ -269,11 +268,11 @@ public abstract class BotUtils {
     }
 
     public static String unravel(Throwable t) {
-        String response="";
+        StringBuilder response= new StringBuilder();
         while (t!=null) {
-            response+= "\n["+t.getLocalizedMessage()+"]";
+            response.append("\n[").append(t.getLocalizedMessage()).append("]");
             t=t.getCause();
         }
-        return response;
+        return response.toString();
     }
 }
