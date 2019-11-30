@@ -45,7 +45,7 @@ public class ObjectData {
     private float z=-1;
     public int crc=0;
     public ObjectData(JSLBot bot,int id) { this.bot=bot; this.id=new U32(id); }
-    public ObjectData(JSLBot bot,U32 id) { this.bot=bot; this.id=id; }
+    public ObjectData(JSLBot bot, @Nullable U32 id) { this.bot=bot; this.id=id; }
     @Nullable
     public String toString() {
         String r="";

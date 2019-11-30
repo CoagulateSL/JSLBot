@@ -224,7 +224,7 @@ public class Regional {
             return ret;
         }
         
-        public ParcelData(int id,Regional region) {
+        public ParcelData(int id, @Nullable Regional region) {
             this.id=id; this.region=region;
         }
         public void populate() { populate(false); }

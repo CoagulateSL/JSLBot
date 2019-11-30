@@ -375,7 +375,7 @@ public class Brain {
      * 
      * @param auth New module
      */
-    public void setAuth(Authorisation auth) {
+    public void setAuth(@Nullable Authorisation auth) {
         this.auth=auth;
     }
     
