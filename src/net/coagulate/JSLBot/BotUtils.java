@@ -41,11 +41,9 @@ public abstract class BotUtils {
             // this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
             Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
             byte[] mac=null;
-            NetworkInterface stored=null;
             while (e.hasMoreElements() && mac==null) {
                 NetworkInterface ni = e.nextElement();
                 mac=ni.getHardwareAddress();
-                if (mac!=null) { stored=ni; }
             }
             if (mac == null){
                 throw new IllegalArgumentException("No network interfaces found");
