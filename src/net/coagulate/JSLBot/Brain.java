@@ -78,13 +78,9 @@ public class Brain {
     private void populateCommandMap() {
         final boolean debug=false;
         for (Handler h:brain) {
-            if (debug) { System.out.println(h.getClass().getName()); }
             for (Method m:h.getClass().getMethods()) {
-                if (debug) { System.out.println(h.getClass().getName()+"."+m.getName()); }
                 if (m.getAnnotation(CmdHelp.class)!=null) {
-                    if (debug) { System.out.println(h.getClass().getName()+"."+m.getName()+" IS ANNOTATED"); }
                     String commandname=m.getName().toLowerCase();
-                    if (debug) { System.out.println(h.getClass().getName()+"."+m.getName()+" Entered into command bank as '"+commandname+"'"); }
                     if (commandmap.containsKey(commandname)) {
                         log.severe("Duplicate definition for command "+commandname);
                     } else {

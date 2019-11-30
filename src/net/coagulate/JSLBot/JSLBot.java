@@ -321,14 +321,12 @@ public class JSLBot extends Thread {
     public void unblind() { blind=false; forceAgentUpdate(); }
     public void agentUpdate(boolean force) {
         boolean debug=false;
-        if (quitting()) { 
-            if (debug) { System.out.println("ABORT AGENT UPDATE BECAUSE QUITTING"); }
+        if (quitting()) {
             return;
         }
         // dont spam too many of these
         if (!force && lastagentupdate!=null) {
             if ((new Date().getTime())-lastagentupdate.getTime()<Constants.AGENT_UPDATE_FREQUENCY_MILLISECONDS) {
-                if (debug) { System.out.println("No agent update, too soon, not forced ("+force+")"); }
                 return;
             }
         }
@@ -339,14 +337,12 @@ public class JSLBot extends Thread {
         LLVector3 camera = getPos();
         camera.z+=5;
         if (blind) {
-            if (debug) { System.out.println(" BLIND UPDATE "); }
             p.bagentdata.vcameracenter= new LLVector3(192,144,402);
             p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
             p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
             p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
             p.bagentdata.vfar=new F32((float)0.001);
         } else {
-            if (debug) { System.out.println("normal update draw distance "+drawdistance); }
             p.bagentdata.vcameracenter=camera;
             p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
             p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
