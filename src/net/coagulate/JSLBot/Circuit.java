@@ -133,7 +133,7 @@ public final class Circuit extends Thread implements Closeable {
         try {
             DatagramPacket receive=new DatagramPacket(new byte[Constants.UDP_MAX_BUFFER], Constants.UDP_MAX_BUFFER);            
             // begin eternal damnation as a circuit driver.
-            while (!disconnected && !disconnected && !bot().quitting()) {
+            while (!disconnected && !bot().quitting()) {
                 try {
                     socket.setSoTimeout(250);
                     socket.receive(receive);
