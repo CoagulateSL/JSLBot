@@ -2,9 +2,10 @@
  */
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
 import java.util.HashMap;
 import java.util.Map;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 /**  Stuff that all bots can share, immutable data of Second Life.
  *
@@ -17,7 +18,7 @@ public final class Global {
     private static final Map<LLUUID,String> usernames=new HashMap<>();
     
     /** Cache a last name */
-    static void lastName(LLUUID uuid,String lastname) { synchronized(lastname) { lastnames.put(uuid,lastname); } }
+    static void lastName(LLUUID uuid,String lastname) { synchronized(lastnames) { lastnames.put(uuid,lastname); } }
     /** Cache a first name */
     static void firstName(LLUUID uuid,String firstname) { synchronized(firstnames) { firstnames.put(uuid,firstname); } }
     /** Cache a display name */
