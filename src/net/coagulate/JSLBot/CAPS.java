@@ -28,6 +28,12 @@ public final class CAPS extends Thread {
     @Nullable
     private LLSDMap capabilities;
     @Nonnull
+    private LLSDMap capabilities() {
+        if (capabilities==null) { throw new IllegalStateException("Accessing capabilities before it is ready"); }
+        return capabilities;
+    }
+
+    @Nonnull
     private final Circuit circuit;
     @Nullable
     private EventQueue eq=null; @Nullable
@@ -67,8 +73,8 @@ public final class CAPS extends Thread {
     private synchronized void launchEventQueue() {
         if (launched){return; }
         launched=true;
-        if (capabilities.containsKey("EventQueueGet")) {
-            eq=new EventQueue(this, capabilities.get("EventQueueGet").toString());
+        if (capabilities().containsKey("EventQueueGet")) {
+            eq=new EventQueue(this, capabilities().get("EventQueueGet").toString());
             eq.setDaemon(true);
             eq.start();
             log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");
@@ -85,6 +91,7 @@ public final class CAPS extends Thread {
      */
     void getNames(@Nonnull LLUUID agentid) throws MalformedURLException, IOException {
         LLSDMap map = invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
+        if (map==null) { throw new IOException("Unexpected null in map when extracting names"); }
         LLSDArray agents=(LLSDArray) map.get("agents");
         for (Object agento:agents) {
             LLSDMap agent=(LLSDMap) agento;
@@ -112,8 +119,7 @@ public final class CAPS extends Thread {
     @Nullable
     public LLSDMap invokeCAPS(String capname, String appendtocap, LLSD content) throws IOException
     {
-        if (capabilities==null) { throw new NullPointerException("CAPS not yet established"); }
-        Atomic rawcap = capabilities.get(capname);
+        Atomic rawcap = capabilities().get(capname);
         if (rawcap==null) {
             //for (String cap:capabilities.keys()) { System.out.println("KNOWN CAP: "+cap); }
             throw new IOException("Unknown CAPS "+capname);
@@ -168,4 +174,5 @@ public final class CAPS extends Thread {
     public Logger getLogger(String subspace) {
         return Logger.getLogger(log.getName()+"."+subspace);
     }
+
 }

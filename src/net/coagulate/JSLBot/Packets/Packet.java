@@ -7,6 +7,7 @@ import net.coagulate.JSLBot.Packets.Types.U16BE;
 import net.coagulate.JSLBot.Packets.Types.U32BE;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
@@ -147,6 +148,7 @@ public class Packet {
      * @param source ByteBuffer to decode
      * @return Constructed Packet object
      */
+    @Nonnull
     public static Packet decode(ByteBuffer source) {
         try {
             byte flags=source.get();

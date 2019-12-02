@@ -148,7 +148,6 @@ public class Agent extends Handler {
     
     public void coarseLocationUpdateUDPDelayed(@Nonnull UDPEvent event) {
         CoarseLocationUpdate up=(CoarseLocationUpdate) event.body();
-        if (event.region()==null) { log.info("Coarse location update for null region, discarding"); return; }
         List<CoarseLocationUpdate_bLocation> locations = up.blocation;
         List<CoarseLocationUpdate_bAgentData> agents = up.bagentdata;
         if (locations.size()!=agents.size()) { log.severe("Equal length co-ord/agent assumption violated"); return; }

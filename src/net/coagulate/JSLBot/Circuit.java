@@ -120,6 +120,7 @@ public final class Circuit extends Thread implements Closeable {
      * @throws IOException Failure to connect
      */
     public void connect() throws IOException {
+        if (simip==null || simport==0) { throw new IllegalStateException("Sim IP + port are not initialised when connect()ing"); }
         hasrunconnect=true;
         this.address=new InetSocketAddress(simip,simport);
         socket=new DatagramSocket();

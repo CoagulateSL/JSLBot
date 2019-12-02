@@ -1,6 +1,7 @@
 package net.coagulate.JSLBot;
 
 import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
+import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 
 import javax.annotation.Nonnull;
@@ -25,8 +26,8 @@ import static java.util.logging.Level.*;
  */
 public class Brain {
     private final Logger log;
-    @Nullable
-    private Authorisation auth=null;
+    @Nonnull
+    private Authorisation auth;
     @Nonnull
     private final Set<Handler> brain;
     @Nonnull
@@ -34,6 +35,7 @@ public class Brain {
     private boolean procrastinate=true;
 
     Brain(@Nonnull JSLBot bot) {
+        auth=new DenyAll(bot);
         log=bot.getLogger("Brain");
         this.bot=bot;
         this.brain = new HashSet<>();
@@ -376,7 +378,8 @@ public class Brain {
      * @param auth New module
      */
     public void setAuth(@Nullable Authorisation auth) {
-        this.auth=auth;
+        if (auth==null) { this.auth=new DenyAll(bot); }
+        else { this.auth=auth; }
     }
     
     /** Check authorisation for an event.

@@ -77,16 +77,22 @@ public abstract class Event {
     /** Region this event originated from, if applicable
      * @return Regional data for the originating region
      */
-    @Nullable
-    public Regional region() { return r; }
+    @Nonnull
+    public Regional region() {
+        if (r==null) { throw new IllegalStateException("Attempt to get event's region before it is set"); }
+        return r;
+    }
 
-    @Nullable
+    @Nonnull
     private final JSLBot bot;
     
-    @Nullable
-    public JSLBot bot() { return bot; }
+    @Nonnull
+    public JSLBot bot() {
+        if (bot==null) { throw new IllegalStateException("Attempt to invoke bot before bot exists"); }
+        return bot;
+    }
     
-    Event(@Nullable JSLBot bot, @Nullable Regional r, @Nullable String name) {
+    Event(@Nonnull JSLBot bot, @Nullable Regional r, @Nullable String name) {
         this.bot=bot; this.r=r; this.name=name; setType();
         if (bot==null) { throw new IllegalArgumentException("Bot is mandatory"); }
         if (name==null || name.isEmpty()) { throw new IllegalArgumentException("Event name is mandatory"); }
@@ -105,9 +111,9 @@ public abstract class Event {
     public String toString() {
         return r.toString()+"/"+getPrefixedName();
     }
-    @Nullable
+    @Nonnull
     private final String name;
-    @Nullable
+    @Nonnull
     public final String getName() { return name; }
     public abstract String dump();
     

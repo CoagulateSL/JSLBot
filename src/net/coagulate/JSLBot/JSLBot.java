@@ -112,7 +112,11 @@ public class JSLBot extends Thread {
      * 
      * @return JSLInterface for this bot
      */
-    public JSLInterface api() { return jslinterface; }
+    @Nonnull
+    public JSLInterface api() {
+        if (jslinterface==null) { throw new NullPointerException("JSLInterface not yet initialised"); }
+        return jslinterface;
+    }
 
     /** Create a bot based on configuration data.
      *

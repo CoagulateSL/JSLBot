@@ -12,6 +12,7 @@ import javax.annotation.Nonnull;
  */
 public class DenyAll extends Authorisation {
 
+    public DenyAll(@Nonnull JSLBot bot) { super(bot); }
     /** Create a DenyAll constructor.
      * Logged because this may be undesirable.
      *
