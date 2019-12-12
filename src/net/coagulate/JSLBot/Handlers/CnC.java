@@ -1,53 +1,22 @@
 package net.coagulate.JSLBot.Handlers;
 
+import net.coagulate.JSLBot.*;
+import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
+import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.LLSD.*;
+import net.coagulate.JSLBot.Packets.Messages.*;
+import net.coagulate.JSLBot.Packets.Types.*;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Level.WARNING;
-import net.coagulate.JSLBot.Circuit;
-import net.coagulate.JSLBot.CommandEvent;
-import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Global;
-import net.coagulate.JSLBot.Handler;
-import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
-import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.LLSD.LLSD;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDBinary;
-import net.coagulate.JSLBot.LLSD.LLSDInteger;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.Packets.Messages.AgentPause;
-import net.coagulate.JSLBot.Packets.Messages.AgentResume;
-import net.coagulate.JSLBot.Packets.Messages.AlertMessage;
-import net.coagulate.JSLBot.Packets.Messages.AlertMessage_bAlertInfo;
-import net.coagulate.JSLBot.Packets.Messages.ChatFromSimulator;
-import net.coagulate.JSLBot.Packets.Messages.ChatFromViewer;
-import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.LLVector3;
-import net.coagulate.JSLBot.Packets.Types.S32;
-import net.coagulate.JSLBot.Packets.Types.U32;
-import net.coagulate.JSLBot.Packets.Types.U8;
-import net.coagulate.JSLBot.Packets.Types.Variable2;
-import net.coagulate.JSLBot.Regional;
-import net.coagulate.JSLBot.UDPEvent;
-import net.coagulate.JSLBot.XMLEvent;
+
+import static java.util.logging.Level.*;
 
 /**
  *
@@ -58,7 +27,7 @@ public class CnC extends Handler {
     public CnC(JSLBot bot,Configuration c) {
         super(bot,c);
         String authoriser=c.get("authoriser", "OwnerOnly");
-        if (authoriser.indexOf(".")==-1) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
+        if (!authoriser.contains(".")) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
         Authorisation auth=null;
         try {
             auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
@@ -82,8 +51,7 @@ public class CnC extends Handler {
         long shutdown=new Date().getTime();
         if (msg.containsKey("MINUTES")) { shutdown=shutdown+((Integer.parseInt(msg.get("MINUTES").toString()))*1000*60); }
         if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))*1000); }
-        Date when=new Date(shutdown);
-        return when;
+        return new Date(shutdown);
     }
 
     private Date evacby=null;
@@ -237,7 +205,7 @@ public class CnC extends Handler {
     }
 
     private String parseCommand(String message,Map<String,String> paramsout1) {
-        String parts[]=message.split(" ");
+        String[] parts =message.split(" ");
         int index=0;
         String command=parts[0]; index++;
         String keyword="";
@@ -276,9 +244,9 @@ public class CnC extends Handler {
     }
     
     class CircuitLauncher extends Thread {
-        String numericip;
-        int port;
-        long handle;
+        final String numericip;
+        final int port;
+        final long handle;
         
         private CircuitLauncher(JSLBot bot,String numericip, int port, long handle) {
             this.numericip=numericip;
@@ -298,11 +266,11 @@ public class CnC extends Handler {
     
     public void establishAgentCommunicationXMLDelayed(XMLEvent event) {
         LLSDMap body=event.map();
-        String simipandport=((LLSDString)(body.get("sim-ip-and-port"))).toString();
+        String simipandport= body.get("sim-ip-and-port").toString();
         for (Circuit c:bot.getCircuits()) {
             if (c.getSimIPAndPort().equalsIgnoreCase(simipandport)) {
                 if (Debug.EVENTQUEUE) { log.fine("Matched ip and port to circuit for region "+c.getRegionName()); }
-                String seedcaps = ((LLSDString)(body.get("seed-capability"))).toString();
+                String seedcaps = body.get("seed-capability").toString();
                 c.connectCAPS(seedcaps);
                 return;
             }
@@ -369,8 +337,7 @@ public class CnC extends Handler {
         if (command==null || command.isEmpty()) {
             String response="";
             Set<String> unsortedcommands = bot.brain().getCommands();
-            List<String> commands=new ArrayList<>();
-            commands.addAll(unsortedcommands);
+            List<String> commands = new ArrayList<>(unsortedcommands);
             Collections.sort(commands);
             for (String acommand:commands) {
                 if (!response.isEmpty()) { response+=", "; } else { response="\n"; }
@@ -384,7 +351,7 @@ public class CnC extends Handler {
         Method m=bot.brain().getCommand(command);
         if (m==null) { throw new IllegalArgumentException("Could not find command"); }
         String ret="\nCommand: "+command;
-        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+((CmdHelp)(m.getAnnotation(CmdHelp.class))).description(); }
+        if (m.getAnnotation(CmdHelp.class)!=null) { ret+="\n"+ m.getAnnotation(CmdHelp.class).description(); }
         for (Parameter param:m.getParameters()) {
             if (!param.getType().equals(Regional.class)) {
                 ret+="\n"+param.getName();

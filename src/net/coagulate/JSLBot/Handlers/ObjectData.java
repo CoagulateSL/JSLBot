@@ -25,7 +25,7 @@ public class ObjectData {
     public LLUUID lastowner=null;
     public boolean agent=false;
     public String floattext="";
-    public JSLBot bot;
+    public final JSLBot bot;
     private float x=-1;
     private float y=-1;
     private float z=-1;

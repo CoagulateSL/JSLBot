@@ -1,5 +1,12 @@
 package net.coagulate.JSLBot.Packets;
 
+import net.coagulate.JSLBot.Circuit;
+import net.coagulate.JSLBot.Debug;
+import net.coagulate.JSLBot.Packets.Messages.Lookup;
+import net.coagulate.JSLBot.Packets.Types.U16BE;
+import net.coagulate.JSLBot.Packets.Types.U32BE;
+import net.coagulate.JSLBot.Packets.Types.U8;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
@@ -8,12 +15,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.coagulate.JSLBot.Circuit;
-import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Packets.Messages.Lookup;
-import net.coagulate.JSLBot.Packets.Types.U16BE;
-import net.coagulate.JSLBot.Packets.Types.U32BE;
-import net.coagulate.JSLBot.Packets.Types.U8;
 
 /** The layout of a Packet, which contains a Message of Blocks.
  * 
@@ -124,7 +125,7 @@ public class Packet {
             setResent(true);
         }
         out.order(ByteOrder.BIG_ENDIAN);  // so says the documentation :/
-        out.put((byte)flags);
+        out.put(flags);
         out.putInt(sequence); // sequence number
         out.put((byte)0); // extra  header byte count
         switch (getFrequency()) {
@@ -220,7 +221,7 @@ public class Packet {
             else
             {
                 codesize=1;
-                code=(int)codebyte & 0xff;
+                code= codebyte & 0xff;
             }
             if (Debug.PACKET) { System.out.println("Message is "+codebyte+" "+Integer.toHexString(code)+" (len:"+codesize+")");}
             String messagetype=Lookup.lookup(code);
@@ -244,7 +245,7 @@ public class Packet {
             catch (ClassNotFoundException e) {
                 return null;
             }
-            Constructor<?> messageconstructor=messageclass.getConstructor(new Class[0]);
+            Constructor<?> messageconstructor=messageclass.getConstructor();
             message=(Message) messageconstructor.newInstance(new Object[0]);
             response=new Packet(message);
             response.flags=flags;

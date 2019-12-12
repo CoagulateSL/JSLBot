@@ -1,20 +1,16 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
-import static java.util.logging.Level.*;
 import java.util.logging.Logger;
-import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
-import net.coagulate.JSLBot.JSLBot.CmdHelp;
+
+import static java.util.logging.Level.*;
 
 /** Bot's brain, performs event handling etc.
  * This used to be a Set of Handler's in JSLBot its self but it comes with a lot of polluting Reflection code so it got moved here.
@@ -116,9 +112,7 @@ public class Brain {
      * @return A set of the command names in the map.  Note these have the 'command' suffix.
      */
     public Set<String> getCommands() {
-        Set<String> ret=new HashSet<>();
-        ret.addAll(commandmap.keySet());
-        return ret;
+        return new HashSet<>(commandmap.keySet());
     }
     /** Instansiate a handler.
      * 
@@ -146,7 +140,7 @@ public class Brain {
      */
     private String formatEventName(Event event) {
         String method=event.getName();
-        char c[]=method.toCharArray();
+        char[] c =method.toCharArray();
         c[0]=Character.toLowerCase(c[0]);
         return new String(c);
     }
@@ -193,8 +187,8 @@ public class Brain {
         for (Method handler:handlers) {
             try {
                 Object callon=findHandler(handler);
-                if (event instanceof UDPEvent) { response=(String) handler.invoke(callon,(UDPEvent)event); }
-                if (event instanceof XMLEvent) { response=(String) handler.invoke(callon,(XMLEvent)event); }
+                if (event instanceof UDPEvent) { response=(String) handler.invoke(callon, event); }
+                if (event instanceof XMLEvent) { response=(String) handler.invoke(callon, event); }
                 if (event instanceof CommandEvent) {
                     CommandEvent cmd=(CommandEvent)event;
                     response=cmd.run(callon,handler);
@@ -233,7 +227,7 @@ public class Brain {
      * @return Handler that contains the method
      */
     private Object findHandler(Method method) {
-        Class c=method.getDeclaringClass();
+        Class<?> c=method.getDeclaringClass();
         for (Handler h:brain) {
             if (h.getClass().equals(c)) { return h; }
         }

@@ -37,6 +37,7 @@ public class Test {
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
         JSLBot bot=new JSLBot(config);
         bot.ALWAYS_RECONNECT=true; // likely this will be cleaned up, but for testing...
+        //noinspection CallToThreadRun
         bot.run(); // lose control to bot.  call start() to background the bot and continue execution here.
     }
     

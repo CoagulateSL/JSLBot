@@ -19,7 +19,7 @@ import static java.util.logging.Level.SEVERE;
  * @author Iain Price
  */
 public final class CAPS extends Thread {
-    private Logger log;
+    private final Logger log;
     // caps URL
     private final String caps;
     // retrieved capabilities
@@ -62,7 +62,7 @@ public final class CAPS extends Thread {
         if (launched){return; }
         launched=true;
         if (capabilities.containsKey("EventQueueGet")) {
-            eq=new EventQueue(this,((LLSDString)capabilities.get("EventQueueGet")).toString());
+            eq=new EventQueue(this, capabilities.get("EventQueueGet").toString());
             eq.setDaemon(true);
             eq.start();
             log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");

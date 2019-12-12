@@ -30,8 +30,8 @@ public final class Global {
     /** Look up a display name ONLY in the cache */
     static String displayName(LLUUID uuid) { 
         synchronized(displaynames) {
-            for (LLUUID search:displaynames.keySet()) {
-                if (search.equals(uuid)) { return displaynames.get(search); }
+            for (Map.Entry<LLUUID, String> entry : displaynames.entrySet()) {
+                if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
         }
@@ -39,8 +39,8 @@ public final class Global {
     /** Look up a first name ONLY in the cache */
     static String firstName(LLUUID uuid) { 
         synchronized(firstnames) {
-            for (LLUUID search:firstnames.keySet()) {
-                if (search.equals(uuid)) { return firstnames.get(search); }
+            for (Map.Entry<LLUUID, String> entry : firstnames.entrySet()) {
+                if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
         }
@@ -48,8 +48,8 @@ public final class Global {
     /** Look up a last name ONLY in the cache */
     static String lastName(LLUUID uuid) { 
         synchronized(lastnames) { 
-            for (LLUUID search:lastnames.keySet()) {
-                if (search.equals(uuid)) { return lastnames.get(search); }
+            for (Map.Entry<LLUUID, String> entry : lastnames.entrySet()) {
+                if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
         }
@@ -57,8 +57,8 @@ public final class Global {
     /** Look up a user name ONLY in the cache */
     static String userName(LLUUID uuid) { 
         synchronized(usernames) { 
-            for (LLUUID search:usernames.keySet()) {
-                if (search.equals(uuid)) { return usernames.get(search); }
+            for (Map.Entry<LLUUID, String> entry : usernames.entrySet()) {
+                if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
         }
@@ -82,8 +82,8 @@ public final class Global {
      */
     public static Long regionHandle(String name) {
         synchronized(regionnames) {
-            for (Long handle:regionnames.keySet()) {
-                if (regionnames.get(handle).equalsIgnoreCase(name)) { return handle; }
+            for (Map.Entry<Long, String> entry : regionnames.entrySet()) {
+                if (entry.getValue().equalsIgnoreCase(name)) { return entry.getKey(); }
             }
         }
         return null;

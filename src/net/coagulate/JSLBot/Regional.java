@@ -1,14 +1,15 @@
 package net.coagulate.JSLBot;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import net.coagulate.JSLBot.Handlers.ObjectData;
 import net.coagulate.JSLBot.Packets.Messages.ParcelPropertiesRequestByID;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.S32;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**  Class that holds per region mutable data.
  * A not very interesting mostly container class.
@@ -106,7 +107,7 @@ public class Regional {
      * @return Parcel Data, freshly created if necessary.
      */
     public ParcelData getParcel(int get) {
-        if (!localparcelids.containsKey(get)) { localparcelids.put(get,new ParcelData(get,this)); }
+        if (!localparcelids.containsKey(get)) { localparcelids.put(get, new ParcelData(get, this)); }
         return localparcelids.get(get);
     }
     
@@ -133,11 +134,11 @@ public class Regional {
         }
         int totalsize=0;
         String resp="";
-        for (byte id:sizes.keySet()) {
+        for (Map.Entry<Byte, Integer> entry : sizes.entrySet()) {
             resp+="\n";
-            resp+="#byeid#"+(((int)id)&0xff);
-            resp+=" "+sizes.get(id)+"m2";
-            totalsize+=sizes.get(id);
+            resp+="#byeid#"+(((int) (byte) entry.getKey())&0xff);
+            resp+=" "+ entry.getValue() +"m2";
+            totalsize+= entry.getValue();
         }
         return resp;
     }
@@ -170,7 +171,7 @@ public class Regional {
 
     
 
-    public class ParcelData {
+    public static class ParcelData {
 
         public boolean requested=false;
         public boolean populated=false;
@@ -200,7 +201,7 @@ public class Regional {
         @Override
         public String toString() {
             String ret="";
-            ret+=region.getName()+"#"+(((int)id)&0xff);
+            ret+=region.getName()+"#"+(id &0xff);
             if (populated) {
                 ret+=" '"+name+"' ("+description+") prims:"+ownerprims+"/"+groupprims+"/"+otherprims+"="+primsused+" of "+maxprims+" (simmax:"+simwidetotalprims+") Privacy:"+(!seeavs)+" claimed "+new Date(((long)(claimdate))*1000).toString();            }
             return ret;
@@ -211,14 +212,14 @@ public class Regional {
         }
         public void populate() { populate(false); }
         public void populate(boolean force) {
-            if (requested==true && force==false) { return; }
+            if (requested && !force) { return; }
             requested=true;
             ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();
             req.bagentdata.vagentid=region.bot().getUUID();
             req.bagentdata.vsessionid=region.bot().getSession();
             req.bparceldata.vlocalid=new S32(id);
             req.bparceldata.vsequenceid=new S32();
-            req.bparceldata.vsequenceid.value=(0xff&((int)id));
+            req.bparceldata.vsequenceid.value=(0xff& id);
             region.circuit().send(req,true);
         }
         

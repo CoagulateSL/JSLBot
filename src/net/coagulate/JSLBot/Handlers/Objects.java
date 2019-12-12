@@ -1,41 +1,16 @@
 package net.coagulate.JSLBot.Handlers;
 
+import net.coagulate.JSLBot.*;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.Packets.Messages.*;
+import net.coagulate.JSLBot.Packets.Types.*;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import net.coagulate.JSLBot.BotUtils;
-import net.coagulate.JSLBot.CommandEvent;
-import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Handler;
+
 import static net.coagulate.JSLBot.Handlers.Objects.CompressedFlags.*;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.Packets.Messages.DeRezObject;
-import net.coagulate.JSLBot.Packets.Messages.DeRezObject_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate;
-import net.coagulate.JSLBot.Packets.Messages.ImprovedTerseObjectUpdate_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.KillObject;
-import net.coagulate.JSLBot.Packets.Messages.KillObject_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.ObjectPropertiesFamily;
-import net.coagulate.JSLBot.Packets.Messages.ObjectUpdate;
-import net.coagulate.JSLBot.Packets.Messages.ObjectUpdateCached;
-import net.coagulate.JSLBot.Packets.Messages.ObjectUpdateCached_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.ObjectUpdateCompressed;
-import net.coagulate.JSLBot.Packets.Messages.ObjectUpdateCompressed_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.ObjectUpdate_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.RequestMultipleObjects;
-import net.coagulate.JSLBot.Packets.Messages.RequestMultipleObjects_bObjectData;
-import net.coagulate.JSLBot.Packets.Messages.RequestObjectPropertiesFamily;
-import net.coagulate.JSLBot.Packets.Types.F32;
-import net.coagulate.JSLBot.Packets.Types.LLQuaternion;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.LLVector3;
-import net.coagulate.JSLBot.Packets.Types.U32;
-import net.coagulate.JSLBot.Packets.Types.U8;
-import net.coagulate.JSLBot.Regional;
-import net.coagulate.JSLBot.UDPEvent;
 
 /** Processes messages and commands about objects within the world
  *
@@ -64,7 +39,7 @@ public class Objects extends Handler {
             od.parentid=obj.vparentid;
             //if (od.name!=null) { System.out.println("Updating object "+od.name); } else { System.out.println("Updating who knows what"); }
             //System.out.println(obj.vnamevalue.toString());
-            if (od.requested==false) {
+            if (!od.requested) {
                 RequestObjectPropertiesFamily reqobjs=new RequestObjectPropertiesFamily();
                 reqobjs.bagentdata.vagentid=bot.getUUID();
                 reqobjs.bagentdata.vsessionid=bot.getSession();
@@ -109,7 +84,7 @@ public class Objects extends Handler {
     public void improvedTerseObjectUpdateUDPImmediate(UDPEvent event) {
         ImprovedTerseObjectUpdate msg=(ImprovedTerseObjectUpdate) event.body();
         for (ImprovedTerseObjectUpdate_bObjectData obj:msg.bobjectdata) {
-            byte data[]=obj.vdata.value; // this is not well documented, but based on code...
+            byte[] data =obj.vdata.value; // this is not well documented, but based on code...
             //System.out.println("ITOU data length: "+data.length);
             ByteBuffer buffer = ByteBuffer.wrap(data);
             U32 id=new U32(buffer);
@@ -168,7 +143,7 @@ public class Objects extends Handler {
             ObjectData check = region.getObject(id);
             if (check.parentid==null || check.parentid.value==0) {
                 if (check.name!=null) {
-                    if (check.name.toLowerCase().indexOf(name)>=0) { best=check; }
+                    if (check.name.toLowerCase().contains(name)) { best=check; }
                 }
             }
         }

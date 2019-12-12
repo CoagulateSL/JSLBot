@@ -1,39 +1,17 @@
 package net.coagulate.JSLBot.Handlers;
 
+import net.coagulate.JSLBot.*;
+import net.coagulate.JSLBot.JSLBot.CmdHelp;
+import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.LLSD.*;
+import net.coagulate.JSLBot.Packets.Messages.*;
+import net.coagulate.JSLBot.Packets.Types.*;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import net.coagulate.JSLBot.CommandEvent;
-import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Handler;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.LLSD.LLSD;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDBinary;
-import net.coagulate.JSLBot.LLSD.LLSDBoolean;
-import net.coagulate.JSLBot.LLSD.LLSDInteger;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.LLSD.LLSDUUID;
-import net.coagulate.JSLBot.Packets.Messages.ActivateGroup;
-import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest;
-import net.coagulate.JSLBot.Packets.Messages.EjectGroupMemberRequest_bEjectData;
-import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
-import net.coagulate.JSLBot.Packets.Messages.InviteGroupRequest;
-import net.coagulate.JSLBot.Packets.Messages.InviteGroupRequest_bInviteData;
-import net.coagulate.JSLBot.Packets.Messages.JoinGroupReply;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
-import net.coagulate.JSLBot.Packets.Types.U32BE;
-import net.coagulate.JSLBot.Packets.Types.U8;
-import net.coagulate.JSLBot.Packets.Types.Variable1;
-import net.coagulate.JSLBot.Packets.Types.Variable2;
-import net.coagulate.JSLBot.UDPEvent;
-import net.coagulate.JSLBot.XMLEvent;
 
 /** Handle group related commands and messages.
  *
@@ -102,10 +80,10 @@ public class Groups extends Handler {
 
     private LLUUID findGroupUUID(String name) {
         synchronized(groups) {
-            for (LLUUID uuid:groups.keySet()) {
-                GroupData gd=groups.get(uuid);
+            for (Map.Entry<LLUUID, GroupData> entry : groups.entrySet()) {
+                GroupData gd= entry.getValue();
                 if (gd!=null) {
-                    if (gd.groupname.equalsIgnoreCase(name)) { return uuid; }
+                    if (gd.groupname.equalsIgnoreCase(name)) { return entry.getKey(); }
                 }
             }
         }
@@ -153,36 +131,39 @@ public class Groups extends Handler {
         LLSDMap body=event.map();
         LLSDArray groupslist=(LLSDArray) body.get("GroupData");
         synchronized(groups) {
-            for (Iterator it = groupslist.iterator(); it.hasNext();) {
-                LLSDMap group = (LLSDMap) it.next();
-                String groupname=((LLSDString)(group.get("GroupName"))).toString();
-                LLSDBinary grouppowers=(LLSDBinary) group.get("GroupPowers");
-                boolean listinprofile=((LLSDBoolean)group.get("ListInProfile",new LLSDBoolean(true))).get();
-                boolean acceptnotices=((LLSDBoolean)group.get("AcceptNotices",new LLSDBoolean(true))).get();
-                int contribution=((LLSDInteger)group.get("Contribution")).get();
-                LLUUID uuid=((LLSDUUID)group.get("GroupID")).toLLUUID();
-                GroupData g=null;
-                synchronized(groups) { 
-                    for(LLUUID compare:groups.keySet()) {
-                        if (compare.equals(uuid)) { g=groups.get(compare); uuid=compare; }
+            for (Atomic groupatom : groupslist) {
+                LLSDMap group = (LLSDMap) groupatom;
+                String groupname = group.get("GroupName").toString();
+                LLSDBinary grouppowers = (LLSDBinary) group.get("GroupPowers");
+                boolean listinprofile = ((LLSDBoolean) group.get("ListInProfile", new LLSDBoolean(true))).get();
+                boolean acceptnotices = ((LLSDBoolean) group.get("AcceptNotices", new LLSDBoolean(true))).get();
+                int contribution = ((LLSDInteger) group.get("Contribution")).get();
+                LLUUID uuid = ((LLSDUUID) group.get("GroupID")).toLLUUID();
+                GroupData g = null;
+                synchronized (groups) {
+                    for (LLUUID compare : groups.keySet()) {
+                        if (compare.equals(uuid)) {
+                            g = groups.get(compare);
+                            uuid = compare;
+                        }
                     }
-                    if (g==null) { g=new GroupData(); }
-                    g.groupname=groupname;
-                    g.grouppowers=grouppowers;
-                    g.listinprofile=listinprofile;
-                    g.acceptnotices=acceptnotices;
-                    g.contribution=contribution;
-                    g.uuid=uuid;
-                    groups.put(uuid,g);
+                    if (g == null) { g = new GroupData(); }
+                    g.groupname = groupname;
+                    g.grouppowers = grouppowers;
+                    g.listinprofile = listinprofile;
+                    g.acceptnotices = acceptnotices;
+                    g.contribution = contribution;
+                    g.uuid = uuid;
+                    groups.put(uuid, g);
                 }
             }
         }
     }
         
 
-    Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
+    final Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
     public LLSDMap getMembership(LLUUID uuid) {
-        for (LLUUID compare:groupmembership.keySet()) { if (compare.equals(uuid)) { return groupmembership.get(compare); } }
+        for (Map.Entry<LLUUID, LLSDMap> entry : groupmembership.entrySet()) { if (entry.getKey().equals(uuid)) { return entry.getValue(); } }
         return null;
     }
     @CmdHelp(description="Collect a group's roster")
@@ -195,7 +176,7 @@ public class Groups extends Handler {
         if (members==null) { throw new NullPointerException("Failed to extract members map"); }
         groupmembership.put(new LLUUID(uuid),members);
     }
-    public class GroupData {
+    public static class GroupData {
         String groupname=null;
         LLSDBinary grouppowers=null;
         boolean listinprofile=true;
@@ -218,7 +199,7 @@ public class Groups extends Handler {
         } else {
             target=new LLUUID(uuid);
         }
-        if (target==null && name!=null && "NONE".equals(name)) { target=new LLUUID(); }
+        if (target == null && "NONE".equals(name)) { target=new LLUUID(); }
         if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
         ActivateGroup req=new ActivateGroup(bot);
         req.bagentdata.vgroupid=target;

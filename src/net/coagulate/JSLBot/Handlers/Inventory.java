@@ -42,9 +42,9 @@ public class Inventory extends Handler implements Runnable {
     /** Start the inventory downloader thread. */
     public void run() {
         while (!downloadqueue.isEmpty()) {
-            Set<LLUUID> download=new HashSet<>();
             Iterator<LLUUID> i=downloadqueue.iterator();
-            download.addAll(downloadqueue); downloadqueue.clear();
+            Set<LLUUID> download = new HashSet<>(downloadqueue);
+            downloadqueue.clear();
             try { fetchInventory(download); }
             catch (IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
             if (inventorytree.size()==0) { log.fine("Inventory download complete - there is no inventory (?)"); break; }
@@ -59,15 +59,15 @@ public class Inventory extends Handler implements Runnable {
     
     
     
-    public class InventoryAtom {}
-    public class InventoryItem extends InventoryAtom {
-        LLUUID id;
-        LLUUID parent;
-        String name;
-        String desc;
-        LLUUID assetid;
-        int type;
-        int invtype;
+    public static class InventoryAtom {}
+    public static class InventoryItem extends InventoryAtom {
+        final LLUUID id;
+        final LLUUID parent;
+        final String name;
+        final String desc;
+        final LLUUID assetid;
+        final int type;
+        final int invtype;
         private InventoryItem(LLUUID id, LLUUID parent, String name, String desc, LLUUID assetid, int type, int invtype) {
             this.id=id;
             this.parent=parent;
@@ -78,13 +78,13 @@ public class Inventory extends Handler implements Runnable {
             this.invtype=invtype;
         }
     }
-    public class InventoryCategory extends InventoryAtom {
-        public int type;
-        public LLUUID agentid;
-        public LLUUID id;
-        public LLUUID parentid;
-        public String name;
-        public int version;
+    public static class InventoryCategory extends InventoryAtom {
+        public final int type;
+        public final LLUUID agentid;
+        public final LLUUID id;
+        public final LLUUID parentid;
+        public final String name;
+        public final int version;
         public InventoryCategory(int type,LLUUID agentid,LLUUID id,LLUUID parentid,String name,int version) {
             this.type=type;
             this.agentid=agentid;
@@ -97,7 +97,7 @@ public class Inventory extends Handler implements Runnable {
     
     private void processCategory(int type,LLUUID agentid,LLUUID id,LLUUID parentid,String name,int version) {
         synchronized(inventory) {
-            inventory.put(id,new InventoryCategory(type, agentid, id, parentid, name, version));
+            inventory.put(id, new InventoryCategory(type, agentid, id, parentid, name, version));
         }
         addInventoryChild(parentid,id);
     }
@@ -113,7 +113,7 @@ public class Inventory extends Handler implements Runnable {
 
     private void processItem(LLUUID id, LLUUID parent, String name, LLUUID assetid, int type, int invtype, String desc) {
         synchronized(inventory) {
-            inventory.put(id,new InventoryItem(id,parent,name,desc,assetid,type,invtype));
+            inventory.put(id, new InventoryItem(id, parent, name, desc, assetid, type, invtype));
         }
         addInventoryChild(parent,id);
     }
@@ -149,11 +149,11 @@ public class Inventory extends Handler implements Runnable {
                 LLSDMap item=(LLSDMap)itemmap;
                 LLUUID item_id=((LLSDUUID)item.get("item_id")).toLLUUID();
                 LLUUID parent_id=((LLSDUUID)item.get("parent_id")).toLLUUID();
-                String name=((LLSDString)item.get("name")).toString();
+                String name= item.get("name").toString();
                 LLUUID asset_id=((LLSDUUID)item.get("asset_id")).toLLUUID();
                 int type=((LLSDInteger)(item.get("type"))).get();
                 int inv_type=((LLSDInteger)(item.get("inv_type"))).get();
-                String desc=((LLSDString)item.get("desc")).toString();
+                String desc= item.get("desc").toString();
                 processItem(item_id,parent_id,name,asset_id,type,inv_type,desc);
             }
             LLSDArray innercategories=(LLSDArray) innermap.get("categories");
@@ -168,7 +168,7 @@ public class Inventory extends Handler implements Runnable {
                 LLUUID agent_id=((LLSDUUID)(category.get("agent_id"))).toLLUUID();
                 LLUUID category_id=((LLSDUUID)(category.get("category_id"))).toLLUUID();
                 LLUUID parent_id=((LLSDUUID)(category.get("parent_id"))).toLLUUID();
-                String name=((LLSDString)(category.get("name"))).toString();
+                String name= category.get("name").toString();
                 int version=((LLSDInteger)(category.get("version"))).get();
                 processCategory(type_default, agent_id, category_id, parent_id, name, version);
             }

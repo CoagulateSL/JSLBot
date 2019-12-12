@@ -8,8 +8,8 @@ import java.util.Set;
  */
 public class ConfigurationSubspace extends Configuration {
 
-    Configuration c;
-    String p;
+    final Configuration c;
+    final String p;
     public ConfigurationSubspace(Configuration c,String prefix) {
         this.c=c;
         p=prefix;

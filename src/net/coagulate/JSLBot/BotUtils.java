@@ -1,22 +1,19 @@
 package net.coagulate.JSLBot;
 
-import java.io.UnsupportedEncodingException;
+import net.coagulate.JSLBot.LLSD.LLSDArray;
+import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import java.util.*;
 
 /** Some general purpose useful static functions.
  *
@@ -77,11 +74,7 @@ public abstract class BotUtils {
             throw new AssertionError("MD5 hashing is not supported on this platform?");
         }
         byte[] digest;
-        try {
-            digest = md5.digest(password.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            throw new AssertionError("UTF-8 encoding is not supported on this platform (?!?)");
-        }
+        digest = md5.digest(password.getBytes(StandardCharsets.UTF_8));
         return "$1$" + hex(digest);
         //return hex(digest);
     }
@@ -97,7 +90,7 @@ public abstract class BotUtils {
      * @throws MalformedURLException
      * @throws XmlRpcException
      */
-    static Map loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, XmlRpcException {
+    static Map<Object,Object> loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, XmlRpcException {
         XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
         XmlRpcClient client=new XmlRpcClient();
@@ -124,21 +117,22 @@ public abstract class BotUtils {
         if (password.length()>16 && (!password.startsWith("$1$"))) { password=password.substring(0,16); }
         params.put("passwd",BotUtils.md5hash(password));
         if (Debug.AUTH) {
-            for (String k:params.keySet()) {
-                System.out.println(k+"="+params.get(k).toString());
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                System.out.println(entry.getKey() +"="+ entry.getValue().toString());
             }
         }
-        HashMap result=(HashMap)(client.execute("login_to_simulator",new Object[]{params}));
+        Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
+        @SuppressWarnings("unchecked") HashMap<Object,Object> result=(HashMap<Object,Object>)resultobject;
         if (Debug.AUTH) {
             // dump the result
-            for(Object s:result.keySet()) {
-                String printline=(((String)s)+" -> ");
-                Object output=result.get(s);
-                if (output instanceof String) { printline+=("[String] "+(String)output); }
+            for(Map.Entry<Object, Object> entry : result.entrySet()) {
+                String printline=(entry.getKey() +" -> ");
+                Object output= entry.getValue();
+                if (output instanceof String) { printline+=("[String] "+ output); }
                 else {
-                    if (output instanceof Integer) { printline+=("[Integer] "+(Integer)output); }
+                    if (output instanceof Integer) { printline+=("[Integer] "+ output); }
                     else {
-                        String clas=result.get(s).getClass().getTypeName();
+                        String clas= entry.getValue().getClass().getTypeName();
                         printline+="["+clas+"] "+(output);
                     }
                 }

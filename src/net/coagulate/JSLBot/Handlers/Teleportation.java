@@ -1,38 +1,19 @@
 package net.coagulate.JSLBot.Handlers;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import net.coagulate.JSLBot.Circuit;
-import net.coagulate.JSLBot.CommandEvent;
-import net.coagulate.JSLBot.Configuration;
-import net.coagulate.JSLBot.Debug;
-import net.coagulate.JSLBot.Handler;
-import net.coagulate.JSLBot.JSLBot;
+import net.coagulate.JSLBot.*;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.JSLBot.ParamHelp;
-import net.coagulate.JSLBot.LLSD.LLSDArray;
-import net.coagulate.JSLBot.LLSD.LLSDBinary;
-import net.coagulate.JSLBot.LLSD.LLSDInteger;
-import net.coagulate.JSLBot.LLSD.LLSDMap;
-import net.coagulate.JSLBot.LLSD.LLSDString;
-import net.coagulate.JSLBot.Packets.Messages.ImprovedInstantMessage;
-import net.coagulate.JSLBot.Packets.Messages.StartLure;
-import net.coagulate.JSLBot.Packets.Messages.StartLure_bTargetData;
-import net.coagulate.JSLBot.Packets.Messages.TeleportLandmarkRequest;
-import net.coagulate.JSLBot.Packets.Messages.TeleportLocal;
-import net.coagulate.JSLBot.Packets.Messages.TeleportLocationRequest;
-import net.coagulate.JSLBot.Packets.Messages.TeleportLureRequest;
-import net.coagulate.JSLBot.Packets.Messages.TeleportProgress;
-import net.coagulate.JSLBot.Packets.Messages.TeleportStart;
+import net.coagulate.JSLBot.LLSD.*;
+import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Packets.Types.Variable1;
-import net.coagulate.JSLBot.Regional;
-import net.coagulate.JSLBot.UDPEvent;
-import net.coagulate.JSLBot.XMLEvent;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Handles teleportation, requests, status, success, failure, going home, tp lures, etc.
  *
@@ -42,7 +23,7 @@ public class Teleportation extends Handler {
 
     public Teleportation(JSLBot bot,Configuration c){super(bot,c); config=c;}
 
-    Object signal=new Object();
+    final Object signal=new Object();
     boolean teleporting=false;
 
     // nothing more than a status message
@@ -73,12 +54,12 @@ public class Teleportation extends Handler {
         LLSDArray alertinfoarray = (LLSDArray) event.map().get("AlertInfo");
         if (alertinfoarray!=null) {
             LLSDMap inner=(LLSDMap) alertinfoarray.get().get(0);
-            code=((LLSDString)(inner.get("Message"))).toString();
+            code= inner.get("Message").toString();
         }
         LLSDArray infoarray=(LLSDArray) event.map().get("Info");
         if (infoarray!=null) {
             LLSDMap inner=(LLSDMap)infoarray.get().get(0);
-            reason=((LLSDString)(inner.get("Reason"))).toString();
+            reason= inner.get("Reason").toString();
         }
         bot.completeAgentMovement();
         bot.forceAgentUpdate();
@@ -128,7 +109,7 @@ public class Teleportation extends Handler {
         // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
 
         if (messagetype==22) {
-            CommandEvent check=new CommandEvent(bot, event.region(), "acceptLures", new HashMap<String,String>(), m.bagentdata.vagentid);
+            CommandEvent check=new CommandEvent(bot, event.region(), "acceptLures", new HashMap<>(), m.bagentdata.vagentid);
             check.invokerUUID(m.bagentdata.vagentid);
             String reject=bot.brain().auth(check);
             if (reject!=null) { return; } 
@@ -141,7 +122,7 @@ public class Teleportation extends Handler {
             teleporting=true;
             bot.send(req,true);
             synchronized(signal) { try { signal.wait(10000); } catch (InterruptedException e) {} }
-            if (teleporting==true) {
+            if (teleporting) {
                 log.severe("Timer expired while teleporting, lost in transit?");
                 bot.im(m.bagentdata.vagentid,"Failed to accept teleport lure, lost in transit?");
             } else {
@@ -196,7 +177,7 @@ public class Teleportation extends Handler {
         teleporting=true;
         boolean expired=false;
         try { synchronized(signal) { signal.wait(10000); expired=true; } } catch (InterruptedException e) {}
-        if (expired==true) { log.severe("Timer expired while teleporting, lost in transit?"); } 
+        if (expired) { log.severe("Timer expired while teleporting, lost in transit?"); }
         boolean completed=!teleporting;
         teleporting=false;
         bot.setMaxFOV();

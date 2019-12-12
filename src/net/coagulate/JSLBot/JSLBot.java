@@ -31,13 +31,13 @@ public class JSLBot extends Thread {
     public void dumpAccounting() {
         System.out.println("DUMP ACCOUNTING FOR BOT "+this.getFullName());
         synchronized(messagebytesin) {
-            for (int id:messagebytesin.keySet()) {
-                System.out.println("Message ID : "+id+" received "+messagebytesin.get(id));
+            for (Map.Entry<Integer, Integer> entry : messagebytesin.entrySet()) {
+                System.out.println("Message ID : "+ entry.getKey() +" received "+ entry.getValue());
             }
         }
         synchronized(messagebytesout) {
-            for (int id:messagebytesout.keySet()) {
-                System.out.println("Message ID : "+id+" transmitted "+messagebytesout.get(id));
+            for (Map.Entry<Integer, Integer> entry : messagebytesout.entrySet()) {
+                System.out.println("Message ID : "+ entry.getKey() +" transmitted "+ entry.getValue());
             }
         }
     }
@@ -213,8 +213,8 @@ public class JSLBot extends Thread {
         return Logger.getLogger(log.getName()+"."+subspace);
     }
 
-    private class ShutdownHook extends Thread {
-        JSLBot bot;
+    private static class ShutdownHook extends Thread {
+        final JSLBot bot;
         ShutdownHook(JSLBot bot) {this.bot=bot;}
         @Override
         public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
@@ -250,9 +250,9 @@ public class JSLBot extends Thread {
     // Perform a login attempt
     private void login(String firstname,String lastname,String password,String loginlocation) throws IOException, XmlRpcException  {
         // authentication is performed over XMLRPC over HTTPS
-        Map result=BotUtils.loginXMLRPC(this,firstname, lastname, password, loginlocation);
+        Map<Object, Object> result = BotUtils.loginXMLRPC(this, firstname, lastname, password, loginlocation);
         if (!("true".equalsIgnoreCase((String)result.get("login")))) {
-            throw new IOException("Server gave error: "+((String)result.get("message")));
+            throw new IOException("Server gave error: "+ result.get("message"));
         }
         String message=(String)result.get("message");
         log.info("Login MOTD: "+message);
@@ -272,11 +272,11 @@ public class JSLBot extends Thread {
         Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
         @SuppressWarnings("unchecked") // if it isn't, what do we do anyway?
         Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
-        for (String key:rootmap.keySet()) {
+        for (Map.Entry<String, String> entry : rootmap.entrySet()) {
             if (Debug.AUTH) {
-                log.finer("Inventory Root "+key+" = "+rootmap.get(key));
+                log.finer("Inventory Root "+ entry.getKey() +" = "+ entry.getValue());
             }
-            inventoryroot=new LLUUID(rootmap.get(key));
+            inventoryroot=new LLUUID(entry.getValue());
         }
         //System.out.println("inventoryroot type is "+inventoryroot.getClass().getName());
         // derive region handle
@@ -340,8 +340,7 @@ public class JSLBot extends Thread {
         camera.z+=5;
         if (blind) {
             if (debug) { System.out.println(" BLIND UPDATE "); }
-            LLVector3 fake=new LLVector3(192,144,402);
-            p.bagentdata.vcameracenter=fake;
+            p.bagentdata.vcameracenter= new LLVector3(192,144,402);
             p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
             p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
             p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
@@ -579,9 +578,9 @@ public class JSLBot extends Thread {
     public Set<Regional> getRegionals() {
         Set<Regional> regionalset=new HashSet<>();
         synchronized(circuits) {
-            for (Long handle:circuits.keySet()) {
+            for (Circuit circuit : circuits.values()) {
                 //System.out.println("Circuit "+handle);
-                regionalset.add(circuits.get(handle).regional());
+                regionalset.add(circuit.regional());
             }
         }
         return regionalset;
@@ -601,9 +600,7 @@ public class JSLBot extends Thread {
      */
     public Set<Circuit> getCircuits() {
         synchronized(circuits) {
-            Set<Circuit> ret=new HashSet<>();
-            ret.addAll(circuits.values());
-            return ret;
+            return new HashSet<>(circuits.values());
         }
     }
 
@@ -615,10 +612,8 @@ public class JSLBot extends Thread {
         if (quit) { return; } // do not re-enter
         quit=true; quitreason=reason;
         log.warning("Shutdown requested: "+reason);
-        Set<Circuit> closeme=new HashSet<>();
-        for (Circuit c:getCircuits()) {
-            closeme.add(c); // because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
-        }
+        // because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
+        Set<Circuit> closeme = new HashSet<>(getCircuits());
         for (Circuit c:closeme) {
             try { c.close(); } catch (Exception e) {}
         }

@@ -1,14 +1,16 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
-import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
+import static java.util.logging.Level.INFO;
 
 /** An event that represents an invoked command.
  * Note there are two execution types, submit (delayed mode) and execute (immediate mode).
@@ -17,7 +19,7 @@ import net.coagulate.JSLBot.Packets.Types.LLUUID;
  * @author Iain Price
  */
 public class CommandEvent extends Event {
-    private Logger log;
+    private final Logger log;
     // K=V style parameters, typeless
     private final Map<String,String> parameters;
     public Map<String,String> parameters() {return parameters;}
@@ -52,8 +54,8 @@ public class CommandEvent extends Event {
     @Override
     public String dump() {
         String ret="COMMAND: "+getName();
-        for (String k:parameters.keySet()) {
-            ret=ret+"\n"+k+"="+parameters.get(k);
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            ret=ret+"\n"+ entry.getKey() +"="+ entry.getValue();
         }
         return ret;
     }
@@ -112,8 +114,7 @@ public class CommandEvent extends Event {
             if (firstparam) { firstparam=false; }
             else {
                 String paramname=param.getName();
-                if (parameters().containsKey(paramname)) { params.add(parameters().get(paramname)); }
-                else { params.add(null); }
+                params.add(parameters().getOrDefault(paramname, null));
             }
         }
         return params;

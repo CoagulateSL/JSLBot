@@ -2,6 +2,7 @@ package net.coagulate.JSLBot.LLSD;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -18,7 +19,7 @@ import org.xml.sax.SAXException;
  * @author Iain Price
  */
 public class LLSD extends Container {
-    List<Container> contents=new ArrayList<>();
+    final List<Container> contents=new ArrayList<>();
 
     /** Build an LLSD object around an existing container.
      * Typically a map, sometimes an array.
@@ -34,7 +35,7 @@ public class LLSD extends Container {
         try {
             // blah blah parse it
             DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc=builder.parse(new ByteArrayInputStream(read.getBytes("UTF-8")));
+            Document doc=builder.parse(new ByteArrayInputStream(read.getBytes(StandardCharsets.UTF_8)));
             // get top of the document (<llsd>...</llsd>)
             Element root=doc.getDocumentElement();
             if (!"llsd".equals(root.getTagName())) { throw new IOException("Response did not commence with LLSD element:"+read); }

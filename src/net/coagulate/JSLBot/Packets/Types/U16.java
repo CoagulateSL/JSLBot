@@ -42,7 +42,7 @@ public class U16 extends Type {
     @Override
     public void write(ByteBuffer out) {
         out.order(byteorder);
-        out.putShort((short)value);
+        out.putShort(value);
     }
 
     @Override
