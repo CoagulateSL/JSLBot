@@ -69,7 +69,9 @@ public final class Circuit extends Thread implements Closeable {
     public String getSimIPAndPort() { return simip+":"+simport; }
     // how many packets sent
     private int packetrate=0;
-    
+
+    // clean this up
+
     // Have started a disconnect, so dont error so much
     private boolean disconnecting=false;
     // Have given a reason for the disconnect, so dont give any more
@@ -134,7 +136,7 @@ public final class Circuit extends Thread implements Closeable {
         try {
             DatagramPacket receive=new DatagramPacket(new byte[Constants.UDP_MAX_BUFFER], Constants.UDP_MAX_BUFFER);            
             // begin eternal damnation as a circuit driver.
-            while (!disconnected && !bot().quitting()) {
+            while (!disconnected && !disconnectlogged && !bot().quitting()) {
                 try {
                     socket.setSoTimeout(250);
                     socket.receive(receive);
