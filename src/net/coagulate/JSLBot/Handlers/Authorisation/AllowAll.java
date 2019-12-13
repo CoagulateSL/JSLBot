@@ -4,6 +4,9 @@ import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.JSLBot;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** Allow All implementation of Authorisation
  *
  * @author Iain Price
@@ -14,11 +17,12 @@ public class AllowAll extends Authorisation {
      * @param bot The creating bot
      * @param c Configuration (unused)
      */
-    public AllowAll(JSLBot bot,Configuration c) {
+    public AllowAll(@Nonnull JSLBot bot, Configuration c) {
         super(bot,c);
         log.warning("Creating AllowAll authoriser, if used, anyone may completely control this bot");
     }
     
+    @Nullable
     @Override
     /** Approve all events 
      * @param Event to approve

@@ -3,6 +3,8 @@ package net.coagulate.JSLBot.LLSD;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import org.w3c.dom.Node;
 
+import javax.annotation.Nonnull;
+
 /** Represent a UUID in LLSD.
  * Backed by the LLUUID class.
  * @author Iain Price
@@ -31,7 +33,7 @@ public class LLSDUUID extends Atomic {
      * @see LLUUID
      * @param item Item to extract the UUID contents of
      */
-    public LLSDUUID(Node item) {
+    public LLSDUUID(@Nonnull Node item) {
         value=new LLUUID(item.getTextContent());
     }
 
@@ -47,6 +49,7 @@ public class LLSDUUID extends Atomic {
      * @param lineprefix Indent
      * @return XML Format
      */
+    @Nonnull
     @Override
     public String toXML(String lineprefix) {
         return lineprefix+"<uuid>"+value.toUUIDString()+"</uuid>\n";

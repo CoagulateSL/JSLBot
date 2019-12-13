@@ -30,19 +30,22 @@ import net.coagulate.JSLBot.Regional.ParcelData;
 import net.coagulate.JSLBot.UDPEvent;
 import net.coagulate.JSLBot.XMLEvent;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** Process region queries.
  *
  * @author Iain Price
  */
 public class Regions extends Handler {
 
-    public Regions(JSLBot bot,Configuration conf) { super(bot,conf); }
+    public Regions(@Nonnull JSLBot bot, Configuration conf) { super(bot,conf); }
 
     /////////////////////////////// MAP BLOCK LOOKUP ( REGION HANDLE FROM REGION NAME )
     
     @CmdHelp(description = "Look up a region handle from a region name")
     public String regionLookupCommand(CommandEvent command,
-            @ParamHelp(description="Name of region to lookup")
+                                      @Nullable @ParamHelp(description="Name of region to lookup")
             String name) {
         if (name==null || "".equals(name)) { return "No NAME parameter passed."; }
         // check cache
@@ -67,7 +70,7 @@ public class Regions extends Handler {
      * Must be immediate mode so it can signal delayed mode handlers.
      * @param event Event
      */
-    public void mapBlockReplyUDPImmediate(UDPEvent event) {
+    public void mapBlockReplyUDPImmediate(@Nonnull UDPEvent event) {
         MapBlockReply p=(MapBlockReply) event.body();
         for (MapBlockReply_bData data:p.bdata) {
             // for some reason we get multiple replies, one has no access and 0 X/Y for a not found, not sure what this is about :)
@@ -92,7 +95,7 @@ public class Regions extends Handler {
     // I think it's used to locate parcels, which can be of any odd size essentially
     // note the "byte" id used here is not related to the parcel's local ID...
 
-    public void parcelOverlayUDPImmediate(UDPEvent event) {
+    public void parcelOverlayUDPImmediate(@Nonnull UDPEvent event) {
         ParcelOverlay parceloverlay=(ParcelOverlay) event.body();
         int quadrant=parceloverlay.bparceldata.vsequenceid.value;
         int sequence=quadrant*1024;
@@ -103,6 +106,7 @@ public class Regions extends Handler {
         }
     }
     
+    @Nonnull
     @CmdHelp(description="Attempt to compute parcels and their size based on the overlay map, which may or may not work")
     public String parcelListCommand(CommandEvent command) {
         return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
@@ -114,11 +118,12 @@ public class Regions extends Handler {
     /////////////////////// Parcel Properties
     // Getting info about a parcel
     
+    @Nonnull
     @CmdHelp(description="Get a parcel's LocalID from region-local x and y co-ordinates")
-    public String parcelIdCommand(CommandEvent command,
-            @ParamHelp(description = "X co-ordinate within the parcel")
+    public String parcelIdCommand(@Nonnull CommandEvent command,
+                                  @Nonnull @ParamHelp(description = "X co-ordinate within the parcel")
             String x,
-            @ParamHelp(description = "Y co-ordinate within the parcel")
+                                  @Nonnull @ParamHelp(description = "Y co-ordinate within the parcel")
             String y) {
         Regional region=command.region();
         int reqid=region.getRequestId();
@@ -138,7 +143,7 @@ public class Regions extends Handler {
     }
     // signal for incoming parcel properties
     private final Object parcelpropertiessignal=new Object();
-    public void parcelPropertiesXMLImmediate(XMLEvent event) {
+    public void parcelPropertiesXMLImmediate(@Nonnull XMLEvent event) {
         LLSDMap body=event.map();
         LLSDArray array=(LLSDArray)body.get("ParcelData");
         LLSDMap data=(LLSDMap)array.get().get(0);        
@@ -181,7 +186,7 @@ public class Regions extends Handler {
     
     ////////////////////// misc regional data
     
-    public void simulatorViewerTimeMessageUDPImmediate(UDPEvent event) {
+    public void simulatorViewerTimeMessageUDPImmediate(@Nonnull UDPEvent event) {
         Regional region = event.region();
         SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage) event.body();
         region.setDayUSec(time.btimeinfo.vusecsincestart.value);
@@ -189,6 +194,7 @@ public class Regions extends Handler {
         region.setSunPhase(time.btimeinfo.vsunphase.value);
     }
 
+    @Nonnull
     @CmdHelp(description="List regions currently known to the botz")
     public String regionListCommand(CommandEvent command) {
         StringBuilder response= new StringBuilder("\n");

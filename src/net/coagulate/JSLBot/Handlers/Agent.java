@@ -9,6 +9,8 @@ import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Packets.Types.Variable1;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -17,7 +19,7 @@ import java.util.logging.Level;
  * @author Iain Price
  */
 public class Agent extends Handler {
-    public Agent(JSLBot bot,Configuration c) {super(bot,c);}
+    public Agent(@Nonnull JSLBot bot, Configuration c) {super(bot,c);}
     
     private String grouptitle="";
     private String groupname="";
@@ -38,7 +40,7 @@ public class Agent extends Handler {
     private final Set<LLUUID> offline=new HashSet<>();
     private int balance=0;
    
-    public void agentDataUpdateUDPImmediate(UDPEvent event) {
+    public void agentDataUpdateUDPImmediate(@Nonnull UDPEvent event) {
         AgentDataUpdate adu=(AgentDataUpdate) event.body();
         firstname=adu.bagentdata.vfirstname.toString();
         lastname=adu.bagentdata.vlastname.toString();
@@ -47,7 +49,7 @@ public class Agent extends Handler {
 
     } 
 
-    public void onlineNotificationUDPImmediate(UDPEvent event) {
+    public void onlineNotificationUDPImmediate(@Nonnull UDPEvent event) {
         List<OnlineNotification_bAgentBlock> agents=((OnlineNotification)event.body()).bagentblock;
         for (OnlineNotification_bAgentBlock block:agents) {
             LLUUID uuid=block.vagentid;
@@ -60,7 +62,7 @@ public class Agent extends Handler {
             synchronized(offline) { offline.remove(uuid); }
         }
     }
-    public void offlineNotificationUDPImmediate(UDPEvent event) {
+    public void offlineNotificationUDPImmediate(@Nonnull UDPEvent event) {
         List<OfflineNotification_bAgentBlock> agents=((OfflineNotification)event.body()).bagentblock;
         for (OfflineNotification_bAgentBlock block:agents) {
             LLUUID uuid=block.vagentid;
@@ -73,19 +75,19 @@ public class Agent extends Handler {
             synchronized(online) { online.remove(uuid); }
         }
     }        
-    public void agentMovementCompleteUDPImmediate(UDPEvent event) {
+    public void agentMovementCompleteUDPImmediate(@Nonnull UDPEvent event) {
         AgentMovementComplete amc=(AgentMovementComplete) event.body();
         bot.setPos(amc.bdata.vposition);
         bot.setLookAt(amc.bdata.vlookat);
         U64 regionhandle = amc.bdata.vregionhandle;
         if (Debug.REGIONHANDLES) { log.fine("AgentMovementComplete discovers region handle "+Long.toUnsignedString(regionhandle.value)); }
     }
-    public void teleportLocalUDPImmediate(UDPEvent event) {
+    public void teleportLocalUDPImmediate(@Nonnull UDPEvent event) {
         TeleportLocal tp=(TeleportLocal)event.body();
         bot.setPos(tp.binfo.vposition);
         bot.setLookAt(tp.binfo.vlookat);
     }
-    public void moneyBalanceReplyUDPImmediate(UDPEvent event) {
+    public void moneyBalanceReplyUDPImmediate(@Nonnull UDPEvent event) {
         MoneyBalanceReply money = (MoneyBalanceReply)event.body();
         balance=money.bmoneydata.vmoneybalance.value;
         int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
@@ -94,12 +96,14 @@ public class Agent extends Handler {
         log.log(Level.INFO, "Balance: {0}L$, Land: {1}m2/{2}m2 {3}", new Object[]{balance, sqmspent, sqmcredit, description});
     }
 
+    @Nonnull
     @CmdHelp(description = "Returns some detailed packet accounting to the console")
-    public String accountingCommand(CommandEvent command) {
+    public String accountingCommand(@Nonnull CommandEvent command) {
         command.bot().dumpAccounting();
         return "0 - See console for output";
     }
         
+    @Nonnull
     @CmdHelp(description = "Returns some basic information about the logged in agent")
     public String statusCommand(CommandEvent command) {
         return "Agent is "+firstname+" "+lastname+"\n"
@@ -110,25 +114,31 @@ public class Agent extends Handler {
                 + "Bytes IN: "+bot.bytesin.get()+"    OUT: "+bot.bytesout.get()+"\n"
                 + "BPS IN: "+(int)(((float)bot.bytesin.get())/((float)bot.getSecondsSinceStartup()))+"    OUT: "+(int)(((float)bot.bytesout.get())/((float)bot.getSecondsSinceStartup()));
     }
+    @Nonnull
     @CmdHelp(description="Sets the FOV (field of view) to TWO_PI")
     public String fovMaxCommand(CommandEvent command) { bot.setMaxFOV(); return "Set"; }
+    @Nonnull
     @CmdHelp(description="Sets the FOV (field of view) to Zero")
     public String fovMinCommand(CommandEvent command) { bot.setMinFOV(); return "Set"; }
+    @Nonnull
     @CmdHelp(description="Send agent update")
     public String updateCommand(CommandEvent command) { bot.agentUpdate(); return "Sent"; }
+    @Nonnull
     @CmdHelp(description = "Set agent's draw distance")
     public String drawdistanceCommand(CommandEvent command,
-            @ParamHelp(description="Meters draw distance")
+                                      @Nullable @ParamHelp(description="Meters draw distance")
             String set) {
         if (set==null || set.isEmpty()) { return "0 - Draw distance is "+bot.drawDistance(); }
         bot.drawDistance(Float.parseFloat(set));
         return "0 - Draw Distance Set";
     }
+    @Nonnull
     @CmdHelp(description="Attempt to blind the bot by setting camera out of scene")
     public String blindCommand(CommandEvent command) {
         bot.blind();
         return "0 - Blinded";
     }
+    @Nonnull
     @CmdHelp(description="Stop attempting to blind the bot")
     public String unblindCommand(CommandEvent command) {
         bot.unblind();
@@ -136,9 +146,8 @@ public class Agent extends Handler {
     }
     
     
-    public void coarseLocationUpdateUDPDelayed(UDPEvent event) {
+    public void coarseLocationUpdateUDPDelayed(@Nonnull UDPEvent event) {
         CoarseLocationUpdate up=(CoarseLocationUpdate) event.body();
-        if (event.region()==null) { log.info("Coarse location update for null region, discarding"); return; }
         List<CoarseLocationUpdate_bLocation> locations = up.blocation;
         List<CoarseLocationUpdate_bAgentData> agents = up.bagentdata;
         if (locations.size()!=agents.size()) { log.severe("Equal length co-ord/agent assumption violated"); return; }
@@ -154,9 +163,11 @@ public class Agent extends Handler {
         event.region().setCoarseAgentLocations(locmap);
     }
 
+    @Nullable
     private LLUUID reporthometo=null;
+    @Nonnull
     @CmdHelp(description = "Set the agent's start location")
-    public String setHomeCommand(CommandEvent event) {
+    public String setHomeCommand(@Nonnull CommandEvent event) {
         reporthometo=event.respondTo();
         SetStartLocationRequest req=new SetStartLocationRequest(bot);
         req.bstartlocationdata.vsimname=new Variable1(bot.getRegionName());
@@ -167,7 +178,7 @@ public class Agent extends Handler {
         return "0 - Set Home request sent";
     }
 
-    public void alertMessageUDPDelayed(UDPEvent event) {
+    public void alertMessageUDPDelayed(@Nonnull UDPEvent event) {
         AlertMessage a=(AlertMessage) event.body();
         if (a.balertinfo.size()>0) {
             // this is a sweeping assumption, however, without knowing the full list of possibilities, i.e. the server code, this seems reasonable :|

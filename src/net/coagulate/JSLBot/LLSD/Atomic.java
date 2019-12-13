@@ -2,13 +2,17 @@ package net.coagulate.JSLBot.LLSD;
 
 import org.w3c.dom.Node;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** Superclass for data containers in LLSD.
  *
  * @author Iain Price
  */
 public abstract class Atomic {
 
-    static Atomic create(Node item) {
+    @Nullable
+    static Atomic create(@Nonnull Node item) {
         String type=item.getNodeName();
         if ("string".equals(type)) { return new LLSDString(item); }
         if ("map".equals(type)) { return new LLSDMap(item.getChildNodes()); }
@@ -22,6 +26,8 @@ public abstract class Atomic {
         if ("undef".equals(type)) { return null; }
         throw new AssertionError("Unknown LLSD type "+type);
     }
+    @Nonnull
     public String toXML() { return toXML(""); }
+    @Nonnull
     public abstract String toXML(String lineprefix);
 }

@@ -2,6 +2,8 @@ package net.coagulate.JSLBot;
 
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -27,7 +29,9 @@ public class CommandEvent extends Event {
     private final LLUUID respondto; public LLUUID respondTo() { return respondto; }
     public void respondTo(String response) { this.response=response; }
     // the response its self, for other threads to read.
+    @Nullable
     private String response=null;
+    @Nullable
     public String response() { return response; }
     void response(String response) { this.response=response; }
 
@@ -36,7 +40,7 @@ public class CommandEvent extends Event {
     private void immediate(boolean immediate) { this.immediate=immediate; }
     boolean immediate() { return immediate; }
     
-    public CommandEvent(JSLBot bot,Regional r,String name,Map<String,String> parameters,LLUUID respondto) {
+    public CommandEvent(@Nonnull JSLBot bot, Regional r, @Nonnull String name, Map<String,String> parameters, LLUUID respondto) {
         super(bot, r,name.toLowerCase());
         log=bot.getLogger("CommandEvent."+name);
         this.parameters=parameters;
@@ -44,13 +48,18 @@ public class CommandEvent extends Event {
     }
 
     // for evaluating the 'authorisation' of this command
+    @Nullable
     private String invokerusername=null;
+    @Nullable
     public String invokerUsername() { return invokerusername; }
     public void invokerUsername(String invoker) { this.invokerusername=invoker; }
+    @Nullable
     private LLUUID invokeruuid=null;
+    @Nullable
     public LLUUID invokerUUID() { return invokeruuid; }
     public void invokerUUID(LLUUID invokeruuid) { this.invokeruuid=invokeruuid; }
     
+    @Nonnull
     @Override
     public String dump() {
         StringBuilder ret= new StringBuilder("COMMAND: " + getName());
@@ -73,6 +82,7 @@ public class CommandEvent extends Event {
      * @param timeoutmillis Number of milliseconds before giving up waiting
      * @return Command response
      */
+    @Nullable
     public String submitAndWait(long timeoutmillis) {
         submit();
         waitFinish(timeoutmillis);
@@ -81,21 +91,24 @@ public class CommandEvent extends Event {
     /** Submits the command for Delayed processing and waits 10 seconds for it to complete
      * @return The final response from the command.
      */
+    @Nullable
     public String submitAndWait() { return submitAndWait(10000); }
     /** Submits the command for immediate execution, the thread calling this function will be hijacked to execute the command.
      * There are sometimes very good reasons for this, and sometimes its definitely the wrong thing to do.  If you're not sure, use submit().
      * @return Command response
      */
+    @Nullable
     public String execute() {
         immediate(true);
         return bot().brain().execute(this);
     }
 
-    String run(Object callon, Method handler) {
+    @Nonnull
+    String run(@Nonnull Object callon, @Nonnull Method handler) {
         if(Debug.TRACKCOMMANDS) { log.fine("Entering run() for "+handler.getName()+" in class "+callon.getClass().getSimpleName()); }
         try {
             return (String) handler.invoke(callon,getParameters(handler).toArray());
-        } catch (IllegalAccessException|IllegalArgumentException ex) {
+        } catch (@Nonnull IllegalAccessException|IllegalArgumentException ex) {
             throw new AssertionError("Error accessing "+handler.getName()+" in class "+callon.getClass().getName(),ex);
         } catch (InvocationTargetException ex) {
             Throwable t=ex;
@@ -106,7 +119,8 @@ public class CommandEvent extends Event {
     }
     
 
-    private List<Object> getParameters(Method method) {
+    @Nonnull
+    private List<Object> getParameters(@Nonnull Method method) {
         List<Object> params=new ArrayList<>();
         params.add(this); boolean firstparam=true;
         for (Parameter param:method.getParameters()) {

@@ -1,5 +1,7 @@
 package net.coagulate.JSLBot;
 
+import javax.annotation.Nonnull;
+
 /**  Some fairly arbitrary constants.
  *
  * @author Iain Price
@@ -16,7 +18,9 @@ public abstract class Constants {
     public static final boolean PACKET_ACCOUNTING=true;
     public static final boolean PACKET_ACCOUNTING_BY_MESSAGE=true;
     
+    @Nonnull
     public static String getVersionNumber() { return MAJOR_VERSION_NUMBER+"."+MINOR_VERSION_NUMBER+"."+BUGFIX_VERSION_NUMBER; }
+    @Nonnull
     public static String getVersion() { return "JSLBot "+getVersionNumber()+" "+VERSION_DATE+" "+COPYRIGHT_MESSAGE; }
 
     public static final int MAX_RETRIES = 10; // login attempts

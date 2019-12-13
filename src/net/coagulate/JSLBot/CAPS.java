@@ -3,6 +3,8 @@ package net.coagulate.JSLBot;
 import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -23,9 +25,19 @@ public final class CAPS extends Thread {
     // caps URL
     private final String caps;
     // retrieved capabilities
+    @Nullable
     private LLSDMap capabilities;
+    @Nonnull
+    private LLSDMap capabilities() {
+        if (capabilities==null) { throw new IllegalStateException("Accessing capabilities before it is ready"); }
+        return capabilities;
+    }
+
+    @Nonnull
     private final Circuit circuit;
-    private EventQueue eq=null; EventQueue eventqueue() { return eq; }
+    @Nullable
+    private EventQueue eq=null; @Nullable
+    EventQueue eventqueue() { return eq; }
     
     /** Create and interrogate CAPS.
      * Note: This just prepares the CAPS, you must complete the initialistion with either:
@@ -34,7 +46,7 @@ public final class CAPS extends Thread {
      * @param circuit Owning circuit
      * @param capsseed CAPS url
      */
-    public CAPS(Circuit circuit,String capsseed) {
+    public CAPS(@Nonnull Circuit circuit, String capsseed) {
         log=circuit.getLogger("CAPS");
         this.caps=capsseed;
         this.circuit=circuit;
@@ -61,8 +73,8 @@ public final class CAPS extends Thread {
     private synchronized void launchEventQueue() {
         if (launched){return; }
         launched=true;
-        if (capabilities.containsKey("EventQueueGet")) {
-            eq=new EventQueue(this, capabilities.get("EventQueueGet").toString());
+        if (capabilities().containsKey("EventQueueGet")) {
+            eq=new EventQueue(this, capabilities().get("EventQueueGet").toString());
             eq.setDaemon(true);
             eq.start();
             log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");
@@ -77,8 +89,9 @@ public final class CAPS extends Thread {
      * @throws MalformedURLException
      * @throws IOException 
      */
-    void getNames(LLUUID agentid) throws MalformedURLException, IOException {
+    void getNames(@Nonnull LLUUID agentid) throws MalformedURLException, IOException {
         LLSDMap map = invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
+        if (map==null) { throw new IOException("Unexpected null in map when extracting names"); }
         LLSDArray agents=(LLSDArray) map.get("agents");
         for (Object agento:agents) {
             LLSDMap agent=(LLSDMap) agento;
@@ -103,10 +116,10 @@ public final class CAPS extends Thread {
      * @return The LLSDMap response
      * @throws IOException If the CAP fails, or the CAP requested is not known to us
      */
-    public LLSDMap invokeCAPS(String capname,String appendtocap,LLSD content) throws IOException
+    @Nullable
+    public LLSDMap invokeCAPS(String capname, String appendtocap, LLSD content) throws IOException
     {
-        if (capabilities==null) { throw new NullPointerException("CAPS not yet established"); }
-        Atomic rawcap = capabilities.get(capname);
+        Atomic rawcap = capabilities().get(capname);
         if (rawcap==null) {
             //for (String cap:capabilities.keys()) { System.out.println("KNOWN CAP: "+cap); }
             throw new IOException("Unknown CAPS "+capname);
@@ -121,7 +134,8 @@ public final class CAPS extends Thread {
      * @return LLSDMap response
      * @throws IOException If there is a failure with the CAPS
      */
-    public LLSDMap invokeXML(String url,LLSD content) throws IOException {
+    @Nullable
+    public LLSDMap invokeXML(@Nullable String url, @Nullable LLSD content) throws IOException {
         if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
         HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
         byte[] postdata=new byte[0];
@@ -148,14 +162,17 @@ public final class CAPS extends Thread {
         return (LLSDMap) new LLSD(read).getFirst();
     }    
     
+    @Nonnull
     Circuit circuit() {
         return circuit;
     }
     public String regionName() { return circuit.getRegionName(); }
+    @Nonnull
     @Override
     public String toString() { return circuit.toString()+" / CAPS"; }
 
     public Logger getLogger(String subspace) {
         return Logger.getLogger(log.getName()+"."+subspace);
     }
+
 }

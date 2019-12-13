@@ -6,6 +6,8 @@ import net.coagulate.JSLBot.JSLBot.ParamHelp;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +27,9 @@ public class Objects extends Handler {
         public int getValue() { return id; }
     }
 
-    public Objects(JSLBot bot,Configuration c) { super(bot,c); }
+    public Objects(@Nonnull JSLBot bot, Configuration c) { super(bot,c); }
     
-    public void objectUpdateUDPImmediate(UDPEvent event) {
+    public void objectUpdateUDPImmediate(@Nonnull UDPEvent event) {
         ObjectUpdate data=(ObjectUpdate) event.body();
         // and request more info too
         //System.out.println(data.dump());
@@ -51,7 +53,7 @@ public class Objects extends Handler {
         }
     }
 
-    public void killObjectUDPImmediate(UDPEvent event) {
+    public void killObjectUDPImmediate(@Nonnull UDPEvent event) {
         KillObject killobject=(KillObject) event.body();
         List<KillObject_bObjectData> killlist = killobject.bobjectdata;
         for (KillObject_bObjectData kill:killlist) {
@@ -63,7 +65,7 @@ public class Objects extends Handler {
         }
     }
 
-    public void objectPropertiesFamilyUDPImmediate(UDPEvent event) {
+    public void objectPropertiesFamilyUDPImmediate(@Nonnull UDPEvent event) {
         ObjectPropertiesFamily object=(ObjectPropertiesFamily) event.body();
         int objectid=object.bobjectdata.vrequestflags.value;
         if (objectid==0) { log.warning("ObjectProperties request flags are zero, which should be the object id"); }
@@ -81,7 +83,7 @@ public class Objects extends Handler {
         
     }
 
-    public void improvedTerseObjectUpdateUDPImmediate(UDPEvent event) {
+    public void improvedTerseObjectUpdateUDPImmediate(@Nonnull UDPEvent event) {
         ImprovedTerseObjectUpdate msg=(ImprovedTerseObjectUpdate) event.body();
         for (ImprovedTerseObjectUpdate_bObjectData obj:msg.bobjectdata) {
             byte[] data =obj.vdata.value; // this is not well documented, but based on code...
@@ -110,16 +112,18 @@ public class Objects extends Handler {
         }
     }
 
+    @Nonnull
     @CmdHelp(description = "List all objects to the console (debugging only)")
-    public String objectListCommand(CommandEvent command) {
+    public String objectListCommand(@Nonnull CommandEvent command) {
         Regional region=command.region();
         for (Integer id:region.getObjects()) {
             System.out.println(region.getObject(id).toString());
         }
         return "Dumped to console because so many.";
     }
+    @Nonnull
     @CmdHelp(description = "List all unparented (root) objects to the console (debugging only)")
-    public String objectRootsCommand(CommandEvent command) {
+    public String objectRootsCommand(@Nonnull CommandEvent command) {
         Regional region=command.region();
         for (Integer id:region.getObjects()) {
             ObjectData o = region.getObject(id);
@@ -130,9 +134,10 @@ public class Objects extends Handler {
         return "Dumped to console because so many.";
     }
     
+    @Nonnull
     @CmdHelp(description="Find an object by a name fragment")
-    public String objectFindCommand(CommandEvent command,
-            @ParamHelp(description="Fragment of a name to search for")
+    public String objectFindCommand(@Nonnull CommandEvent command,
+                                    @Nullable @ParamHelp(description="Fragment of a name to search for")
             String name) {
         Regional region=command.region();
         ObjectData best=null;
@@ -151,7 +156,7 @@ public class Objects extends Handler {
         return name+"->"+best.toString();            
     }
 
-    public void objectUpdateCachedUDPImmediate(UDPEvent event) {
+    public void objectUpdateCachedUDPImmediate(@Nonnull UDPEvent event) {
         ObjectUpdateCached objectUpdateCached=(ObjectUpdateCached) event.body();
         RequestMultipleObjects request=new RequestMultipleObjects();
         request.bagentdata.vagentid=bot.getUUID();
@@ -171,7 +176,7 @@ public class Objects extends Handler {
         if (!request.bobjectdata.isEmpty()) { event.region().circuit().send(request,true); }
     }
  
-    public void objectUpdateCompressedUDPImmediate(UDPEvent event) {
+    public void objectUpdateCompressedUDPImmediate(@Nonnull UDPEvent event) {
         ObjectUpdateCompressed ouc=(ObjectUpdateCompressed) event.body();
         Regional region=event.region();
         for (ObjectUpdateCompressed_bObjectData data:ouc.bobjectdata) {
@@ -223,9 +228,10 @@ public class Objects extends Handler {
         }
     }
     
+    @Nullable
     @CmdHelp(description="Lookup or request a prim by UUID")
-    public String objectUUIDCommand(CommandEvent command,
-            @ParamHelp(description="Prim UUID")
+    public String objectUUIDCommand(@Nonnull CommandEvent command,
+                                    @ParamHelp(description="Prim UUID")
             String uuid) {
         Regional region=command.region();
         LLUUID lluuid=new LLUUID(uuid);
@@ -235,9 +241,10 @@ public class Objects extends Handler {
     }
     
     
+    @Nonnull
     @CmdHelp(description="Lookup or request a prim by local id")
-    public String objectGetCommand(CommandEvent command,
-            @ParamHelp(description="Local prim id (32 bit int)")
+    public String objectGetCommand(@Nonnull CommandEvent command,
+                                   @Nonnull @ParamHelp(description="Local prim id (32 bit int)")
             String localid) {
         Regional region=command.region();
         int id=Integer.parseInt(localid);
@@ -254,11 +261,12 @@ public class Objects extends Handler {
         return "Sent request to simulator";
     }
 
+    @Nonnull
     @CmdHelp(description="Return a prim by UUID or localid")
-    public String objectReturnCommand(CommandEvent command,
-            @ParamHelp(description="UUID of prim to return")
+    public String objectReturnCommand(@Nonnull CommandEvent command,
+                                      @Nullable @ParamHelp(description="UUID of prim to return")
             String primuuid,
-            @ParamHelp(description = "LocalID of prim to return")
+                                      @Nullable @ParamHelp(description = "LocalID of prim to return")
             String localid) {
         Regional region=command.region();
         // One way or another we need the local ID

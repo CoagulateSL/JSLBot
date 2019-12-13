@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,7 +19,7 @@ public class Test {
     /** Launch a singular bot using a config store and lose our thread to its AI thread.
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(@Nonnull String[] args) {
         System.out.println("JSLBot single-instance wrapper starting up");
         // as far as multiple bots go you have two options if you want to use this config system
         // 1) You can just "sub-space" the configuration namespace; make a new Config(Config,prefix) and write your login values as "prefix.firstname" etc
@@ -42,7 +43,7 @@ public class Test {
     }
     
     /** Builds a base configuration file */
-    static void initConfig(String CONFIGFILE) {
+    static void initConfig(@Nonnull String CONFIGFILE) {
         Map<String,String> m=new HashMap<>();
 
         System.out.println("---- ALERT ----\nConfiguration file '"+CONFIGFILE+"' does not exist.\nIf you complete this process it will be created\n\n");

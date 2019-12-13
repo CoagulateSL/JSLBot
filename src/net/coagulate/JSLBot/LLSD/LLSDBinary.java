@@ -2,6 +2,7 @@ package net.coagulate.JSLBot.LLSD;
 
 import org.w3c.dom.Node;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.util.Base64;
 
@@ -16,13 +17,14 @@ public class LLSDBinary extends Atomic {
         value=s;
     }
 
-    LLSDBinary(Node item) {
+    LLSDBinary(@Nonnull Node item) {
         value=item.getTextContent();
     }
     public LLSDBinary(int a) {
         value=Base64.getEncoder().encodeToString(ByteBuffer.allocate(4).putInt(a).array());
     }
 
+    @Nonnull
     @Override
     public String toXML(String lineprefix) {
         return lineprefix+"<binary encoding=\"base64\">"+value+"</binary>\n";
@@ -31,6 +33,7 @@ public class LLSDBinary extends Atomic {
     public String toString() { return value; }
     public byte[] toByte() { return Base64.getDecoder().decode(value); }
 
+    @Nonnull
     public String toIP() {
         byte[] ipbyte=toByte();
         return (ipbyte[0]&0xff) +"."+ (ipbyte[1]&0xff) +"."+ (ipbyte[2]&0xff) +"."+ (ipbyte[3]&0xff);

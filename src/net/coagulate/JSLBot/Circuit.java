@@ -8,6 +8,8 @@ import net.coagulate.JSLBot.Packets.Types.U32;
 import net.coagulate.JSLBot.Packets.Types.U32BE;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.*;
@@ -36,6 +38,7 @@ public final class Circuit extends Thread implements Closeable {
     // reference to the agent we're a circuit for
     private JSLBot bot;
     // the simulator's details
+    @Nullable
     private InetSocketAddress address;
     // our listening socket / endpoint
     private DatagramSocket socket;
@@ -44,28 +47,39 @@ public final class Circuit extends Thread implements Closeable {
     // list of outstanding outbound acks
     private final List<Integer> ackqueue=new ArrayList<>();
     // last time we sent any acks, used to force manual PacketAck 
+    @Nonnull
     private Date lastacks=new Date();
     // last housekeeping
+    @Nonnull
     private Date lastmaintenance=new Date();
     // name of the simulator
     private String regionname=""; public String getRegionName() { return regionname; }
     // handle of the simulator
+    @Nullable
     private LLUUID regionuuid=null;
     // last time we rxed anything
+    @Nonnull
     private Date lastpacket=new Date();
     // the primary all important region handle
+    @Nullable
     private Long regionhandle=null;
     // primary CAPS url
+    @Nullable
     private String capsurl=null;
     // primary CAPS object
+    @Nullable
     private CAPS caps=null;
     // Get the CAPS object attached to this circuit's region
+    @Nullable
     public CAPS getCAPS() { return caps; }
     // Region object for this circuit's region
+    @Nullable
     private Regional regional=null;
     // target address
+    @Nullable
     private String simip=null;
     private int simport=0;
+    @Nonnull
     public String getSimIPAndPort() { return simip+":"+simport; }
     // how many packets sent
     private int packetrate=0;
@@ -86,7 +100,7 @@ public final class Circuit extends Thread implements Closeable {
      * @param passedregionhandle Target region handle
      * @param capsurl Target CAPS url
      */
-    Circuit(JSLBot parent, String address, int port, Long passedregionhandle,String capsurl) {
+    Circuit(@Nonnull JSLBot parent, @Nullable String address, int port, @Nullable Long passedregionhandle, @Nullable String capsurl) {
         log=parent.getLogger("Circuit."+address+":"+port);
         if (passedregionhandle==null) { throw new IllegalArgumentException("Null region handles are not allowed"); }
         circuitsequence=parent.getCircuitSequence();
@@ -108,6 +122,7 @@ public final class Circuit extends Thread implements Closeable {
      * @throws IOException Failure to connect
      */
     public void connect() throws IOException {
+        if (simip==null || simport==0) { throw new IllegalStateException("Sim IP + port are not initialised when connect()ing"); }
         hasrunconnect=true;
         this.address=new InetSocketAddress(simip,simport);
         socket=new DatagramSocket();
@@ -121,8 +136,10 @@ public final class Circuit extends Thread implements Closeable {
         if (Debug.CIRCUIT) { log.finer("Outstanding ACKS: "+inflight.size()); }
         if (!inflight.isEmpty()) { throw new IOException("Login completed, UseCircuitCode sent, and not acknowledged..."); }
         log.info("Successfully connected circuit");
-        if (capsurl!=null) { caps=new CAPS(this,capsurl); //noinspection CallToThreadRun
-            caps.run(); }
+        if (capsurl!=null) { caps=new CAPS(this,capsurl);
+            //noinspection CallToThreadRun
+            caps.run();
+        }
     }
     
     /** Runs the UDP receiver thread.
@@ -179,7 +196,7 @@ public final class Circuit extends Thread implements Closeable {
                 close();
             }
         }
-        catch (RuntimeException|IOException e) {
+        catch (@Nonnull RuntimeException|IOException e) {
             if (!disconnectlogged) { disconnectlogged=true; log.log(SEVERE,"Circuit driver run() loop crashed : "+e.toString(),e); }
             close();
         }
@@ -281,7 +298,7 @@ public final class Circuit extends Thread implements Closeable {
     /* Send a message, unreliably */
     public void send(Message m) { send(m,false); }
     /* Send a packet */
-    public void send(Packet p) {
+    public void send(@Nonnull Packet p) {
         List<Integer> sending=new ArrayList<>(); // list of acks we'll append.
         // synchronise up around the ack queue, strip it , aka "claim it"... 
         synchronized(ackqueue) {
@@ -408,7 +425,7 @@ public final class Circuit extends Thread implements Closeable {
     private boolean firsthandshake=true;
 
     /** Process a received packet */
-    private void processPacket(Packet p) {
+    private void processPacket(@Nonnull Packet p) {
         if (Debug.PACKET) { log.log(Level.FINEST, "Received packet: {0}", p.dump()); }
         boolean alreadyseen=acked.containsKey(p.getSequence());
         if (p.getReliable()) {
@@ -514,6 +531,7 @@ public final class Circuit extends Thread implements Closeable {
         return bot;
     }
     
+    @Nullable
     public Regional regional() { return regional; }
 
     /** Fire up CAPS for this simulator.
@@ -533,6 +551,7 @@ public final class Circuit extends Thread implements Closeable {
         caps.start();
     }
 
+    @Nonnull
     @Override
     public String toString() { return getRegionName()+"#"+circuitsequence; }
 

@@ -8,6 +8,7 @@ import net.coagulate.JSLBot.JSLBot.CmdHelp;
 import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.*;
 
@@ -19,7 +20,7 @@ import static java.util.logging.Level.SEVERE;
  */
 public class Inventory extends Handler implements Runnable {
 
-    public Inventory(JSLBot bot, Configuration config) {
+    public Inventory(@Nonnull JSLBot bot, Configuration config) {
         super(bot, config);
     }
 
@@ -119,7 +120,7 @@ public class Inventory extends Handler implements Runnable {
     }
     
     private void fetchInventory(LLUUID uuid) throws IOException { Set<LLUUID> uuids=new HashSet<>(); uuids.add(uuid); fetchInventory(uuids); }
-    private void fetchInventory(Set<LLUUID> uuids) throws IOException {
+    private void fetchInventory(@Nonnull Set<LLUUID> uuids) throws IOException {
         final boolean debugqueries=false;
         LLSDMap outer=new LLSDMap();
         LLSD document=new LLSD(outer);
@@ -181,6 +182,7 @@ public class Inventory extends Handler implements Runnable {
         }
     }
  
+    @Nonnull
     @CmdHelp(description="Dump inventory map to the console")
     public String inventoryDumpCommand(CommandEvent event) {
         synchronized(inventorytree) {
@@ -191,7 +193,8 @@ public class Inventory extends Handler implements Runnable {
         }
     }
     
-    private String inventoryDump(LLUUID parent,String prefix) {
+    @Nonnull
+    private String inventoryDump(LLUUID parent, String prefix) {
         StringBuilder ret= new StringBuilder();
         Set<LLUUID> children = inventorytree.get(parent);
         if (children==null || children.isEmpty()) { return ""; }

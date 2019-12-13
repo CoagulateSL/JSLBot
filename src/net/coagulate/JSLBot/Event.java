@@ -1,5 +1,7 @@
 package net.coagulate.JSLBot;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,24 +64,35 @@ public abstract class Event {
      * 
      * @return The type of this event, UDP, XML or Command, as a string
      */
-    public String typeString() { 
+    @Nonnull
+    public String typeString() {
         if (type==UDP) { return "UDP"; }
         if (type==XML) { return "XML"; }
         if (type==COMMAND) { return "Command"; }
         throw new AssertionError("Unknown type.  How did you get here?  The constructor should have thrown this exception.");
     }
     
+    @Nullable
     private final Regional r;
     /** Region this event originated from, if applicable
      * @return Regional data for the originating region
      */
-    public Regional region() { return r; }
+    @Nonnull
+    public Regional region() {
+        if (r==null) { throw new IllegalStateException("Attempt to get event's region before it is set"); }
+        return r;
+    }
 
+    @Nonnull
     private final JSLBot bot;
     
-    public JSLBot bot() { return bot; }
+    @Nonnull
+    public JSLBot bot() {
+        if (bot==null) { throw new IllegalStateException("Attempt to invoke bot before bot exists"); }
+        return bot;
+    }
     
-    Event(JSLBot bot,Regional r,String name) {
+    Event(@Nonnull JSLBot bot, @Nullable Regional r, @Nullable String name) {
         this.bot=bot; this.r=r; this.name=name; setType();
         if (bot==null) { throw new IllegalArgumentException("Bot is mandatory"); }
         if (name==null || name.isEmpty()) { throw new IllegalArgumentException("Event name is mandatory"); }
@@ -93,14 +106,18 @@ public abstract class Event {
         throw new IllegalArgumentException("This class "+this.getClass().getName()+" is not assignable from the expected types");
     }
     
+    @Nonnull
     @Override
     public String toString() {
         return r.toString()+"/"+getPrefixedName();
     }
+    @Nonnull
     private final String name;
+    @Nonnull
     public final String getName() { return name; }
     public abstract String dump();
     
+    @Nullable
     public String getPrefixedName() {
         return typeString()+"/"+getName();
     }

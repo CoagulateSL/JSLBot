@@ -10,6 +10,7 @@ import net.coagulate.JSLBot.Packets.Types.LLVector3;
 import net.coagulate.JSLBot.Packets.Types.U64;
 import net.coagulate.JSLBot.Packets.Types.Variable1;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,23 +22,23 @@ import java.util.Map;
  */
 public class Teleportation extends Handler {
 
-    public Teleportation(JSLBot bot,Configuration c){super(bot,c); config=c;}
+    public Teleportation(@Nonnull JSLBot bot, Configuration c){super(bot,c); config=c;}
 
     final Object signal=new Object();
     boolean teleporting=false;
 
     // nothing more than a status message
-    public void teleportProgressUDPImmediate(UDPEvent event) {
+    public void teleportProgressUDPImmediate(@Nonnull UDPEvent event) {
         TeleportProgress tp=(TeleportProgress) event.body();
         log.fine("Teleport Progress: "+(tp).binfo.vmessage.toString());
     }
     // also just a status message
-    public void teleportStartUDPImmediate(UDPEvent event) {
+    public void teleportStartUDPImmediate(@Nonnull UDPEvent event) {
         TeleportStart tp=(TeleportStart) event.body();
         log.fine("Teleportation has started (with flags "+tp.binfo.vteleportflags.value+")");
     }
     // completion message, without any of the complexities of changing region
-    public void teleportLocalUDPImmediate(UDPEvent event) {
+    public void teleportLocalUDPImmediate(@Nonnull UDPEvent event) {
         TeleportLocal tp=(TeleportLocal) event.body();
         log.info("Teleportation completed locally");
         bot.completeAgentMovement();
@@ -47,7 +48,7 @@ public class Teleportation extends Handler {
     }
 
     // failure
-    public void teleportFailedXMLImmediate(XMLEvent event) {
+    public void teleportFailedXMLImmediate(@Nonnull XMLEvent event) {
         //System.out.println(event.map().toXML());
         String code="";
         String reason="";
@@ -72,7 +73,7 @@ public class Teleportation extends Handler {
         synchronized(signal) { signal.notifyAll(); }
     }
     // success, transfer to target circuit/caps
-    public void teleportFinishXMLImmediate(XMLEvent event) {
+    public void teleportFinishXMLImmediate(@Nonnull XMLEvent event) {
         // get the data for the new region
         LLSDMap body=event.map();
         //System.out.println(body.toXML());
@@ -101,7 +102,7 @@ public class Teleportation extends Handler {
 
     }
     // of TP lures
-    public void improvedInstantMessageUDPDelayed(UDPEvent event) {
+    public void improvedInstantMessageUDPDelayed(@Nonnull UDPEvent event) {
         ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
         int messagetype=m.bmessageblock.vdialog.value;
         String messagetext="["+m.bmessageblock.vfromagentname.toString()+"] "+m.bmessageblock.vmessage.toString();
@@ -132,15 +133,16 @@ public class Teleportation extends Handler {
         }
     }
     // request TP
+    @Nonnull
     @CmdHelp(description = "Initiate a teleport to a target location")
-    public String teleportCommand(CommandEvent command,
-            @ParamHelp(description="Name of region to teleport to")
+    public String teleportCommand(@Nonnull CommandEvent command,
+                                  @ParamHelp(description="Name of region to teleport to")
             String region,
-            @ParamHelp(description="X Co-ordinate to request")
+                                  @ParamHelp(description="X Co-ordinate to request")
             String x,
-            @ParamHelp(description="Y Co-ordinate to request")
+                                  @ParamHelp(description="Y Co-ordinate to request")
             String y,
-            @ParamHelp(description="Z Co-ordinate to request")
+                                  @ParamHelp(description="Z Co-ordinate to request")
             String z) {
         Regional r=command.region();
         TeleportLocationRequest tp=new TeleportLocationRequest();
@@ -160,6 +162,7 @@ public class Teleportation extends Handler {
         if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
     }
 
+    @Nonnull
     @CmdHelp(description = "Go home")
     public String homeCommand(CommandEvent command) {
         TeleportLandmarkRequest req=new TeleportLandmarkRequest();
@@ -185,8 +188,9 @@ public class Teleportation extends Handler {
         return completed;
     }
     
+    @Nonnull
     @CmdHelp(description = "Sends you a teleport lure")
-    public String lureMeCommand(CommandEvent command) {
+    public String lureMeCommand(@Nonnull CommandEvent command) {
         LLUUID targetuuid=command.invokerUUID();
         if (targetuuid==null) { return "Failed to get target"; }
         StartLure req=new StartLure(bot);
@@ -199,9 +203,10 @@ public class Teleportation extends Handler {
         return "0 - TP Lure Request Sent";
     }
     
+    @Nonnull
     @CmdHelp(description = "Sends a teleport lure")
-    public String lureCommand(CommandEvent command,
-            @ParamHelp(description="UUID to lure")
+    public String lureCommand(@Nonnull CommandEvent command,
+                              @ParamHelp(description="UUID to lure")
             String uuid) {
         LLUUID targetuuid=new LLUUID(uuid);
         if (targetuuid==null) { return "Failed to get target"; }

@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /** A configuration "subspace", basically just uses "." separators in the key name.
@@ -14,6 +15,7 @@ public class ConfigurationSubspace extends Configuration {
         this.c=c;
         p=prefix;
     }
+    @Nullable
     @Override
     public String get(String param) {
         return c.get(p+"."+param);

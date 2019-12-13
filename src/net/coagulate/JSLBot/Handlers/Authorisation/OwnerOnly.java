@@ -5,19 +5,24 @@ import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.JSLBot;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  *
  * @author Iain Price
  */
 public class OwnerOnly extends Authorisation {
+    @Nullable
     private final String ownerusername;
+    @Nullable
     private LLUUID owneruuid;
     /** Create an owner only authoriser.
      * 
      * @param bot The creating bot
      * @param c The configuration, from which "ownerusername" and "owneruuid" will be read.
      */
-    public OwnerOnly(JSLBot bot,Configuration c) {
+    public OwnerOnly(@Nonnull JSLBot bot, @Nonnull Configuration c) {
         super(bot,c);
         ownerusername=c.get("ownerusername");
         String owneruuidstr=c.get("owneruuid");
@@ -35,8 +40,9 @@ public class OwnerOnly extends Authorisation {
      * @param event The command event to inspect
      * @return Null if invoked by the owner and thus approved, otherwise a reason for rejection.
      */
+    @Nullable
     @Override
-    public String approve(CommandEvent event) {
+    public String approve(@Nonnull CommandEvent event) {
         if (owneruuid==null && ownerusername==null) { return "Owner authorisation configured but no owner set, essentially denying all"; }
         String invokerusername=event.invokerUsername();
         LLUUID invokeruuid=event.invokerUUID();

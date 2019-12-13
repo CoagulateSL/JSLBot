@@ -1,5 +1,7 @@
 package net.coagulate.JSLBot;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /** General abstract API for the configuration system, K=V style.
@@ -14,6 +16,7 @@ public abstract class Configuration {
      * @param prefix Prefix pre-pended to all future get/put requests.
      * @return A new "configuration" that is subspaced.
      */
+    @Nonnull
     public Configuration subspace(String prefix) {
         return new ConfigurationSubspace(this,prefix);
     }
@@ -23,7 +26,8 @@ public abstract class Configuration {
      * @param defaultvalue Value to return if not set in config
      * @return The value, or the defaultvalue if the value was null.  Only returns null if defaultvalue is null.
      */
-    public String get(String key,String defaultvalue) { 
+    @Nullable
+    public String get(String key, String defaultvalue) {
         String value=get(key);
         if (value==null) { return defaultvalue; }
         return value;
@@ -33,6 +37,7 @@ public abstract class Configuration {
      * @param param Key to get
      * @return Value, or null if not present.
      */
+    @Nullable
     public abstract String get(String param);
     /** Configuration services must have a 'put' command
      * 

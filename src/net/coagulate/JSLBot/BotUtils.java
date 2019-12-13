@@ -5,6 +5,8 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -24,7 +26,8 @@ public abstract class BotUtils {
      * @param in Byte array
      * @return Hex string representation.
      */
-    public static String hex(byte[] in) {
+    @Nonnull
+    public static String hex(@Nonnull byte[] in) {
         final StringBuilder builder = new StringBuilder();
         for(byte b : in) {
             builder.append(String.format("%02x", b));
@@ -36,6 +39,7 @@ public abstract class BotUtils {
      * 
      * @return Mac address in hex form.
      */
+    @Nonnull
     public static String getMac() {
         try {
             // this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
@@ -60,7 +64,8 @@ public abstract class BotUtils {
      * @param password Password, cleartext or MD5 with $1$ prefix
      * @return MD5 hex hash of the password, with $1$ prefix, as used in SL login protocol
      */
-    public static String md5hash(String password) {
+    @Nonnull
+    public static String md5hash(@Nonnull String password) {
         if (password.startsWith("$1$")) {
             return password; // already hashed, or you have a really unfortunate choice of password :P
         } 
@@ -87,7 +92,8 @@ public abstract class BotUtils {
      * @throws MalformedURLException
      * @throws XmlRpcException
      */
-    static Map<Object,Object> loginXMLRPC(JSLBot bot,String firstname,String lastname,String password,String location) throws MalformedURLException, XmlRpcException {
+    @Nonnull
+    static Map<Object,Object> loginXMLRPC(@Nonnull JSLBot bot, String firstname, String lastname, @Nonnull String password, String location) throws MalformedURLException, XmlRpcException {
         XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
         XmlRpcClient client=new XmlRpcClient();
@@ -143,6 +149,7 @@ public abstract class BotUtils {
      * 
      * @return Array of CAPS
      */
+    @Nonnull
     static LLSDArray getCAPSArray() {
         //Mostly here because its a giant horrible block of text
         LLSDArray req = new LLSDArray();
@@ -216,7 +223,8 @@ public abstract class BotUtils {
      * @param input raw byte array
      * @return ZeroCoded byte array
      */
-    public static byte[] zeroEncode(byte[] input) {
+    @Nonnull
+    public static byte[] zeroEncode(@Nonnull byte[] input) {
         List<Byte> output=new ArrayList<>();
         // first 5 bytes (header) are not encoded
         for (int i=0;i<6;i++) { output.add(input[i]); }
@@ -252,7 +260,8 @@ public abstract class BotUtils {
      * @param buffer Byte buffer containing a zero terminated string.
      * @return String read up to the zero byte.
      */
-    public static String readZeroTerminatedString(ByteBuffer buffer) {
+    @Nonnull
+    public static String readZeroTerminatedString(@Nonnull ByteBuffer buffer) {
         List<Byte> bytes=new ArrayList<>();
         byte b=-1;
         while (b!=0) {
@@ -265,7 +274,8 @@ public abstract class BotUtils {
         return new String(ba);
     }
 
-    public static String unravel(Throwable t) {
+    @Nonnull
+    public static String unravel(@Nullable Throwable t) {
         StringBuilder response= new StringBuilder();
         while (t!=null) {
             response.append("\n[").append(t.getLocalizedMessage()).append("]");

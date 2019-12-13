@@ -4,22 +4,26 @@ import net.coagulate.JSLBot.CommandEvent;
 import net.coagulate.JSLBot.Configuration;
 import net.coagulate.JSLBot.JSLBot;
 
+import javax.annotation.Nonnull;
+
 /** An implementation of Authorisation that denies everything.
  *
  * @author Iain Price
  */
 public class DenyAll extends Authorisation {
 
+    public DenyAll(@Nonnull JSLBot bot) { super(bot); }
     /** Create a DenyAll constructor.
      * Logged because this may be undesirable.
      *
      * @param bot The creating bot.
      * @param c The unused configuration
      */
-    public DenyAll(JSLBot bot, Configuration c) {
+    public DenyAll(@Nonnull JSLBot bot, Configuration c) {
         super(bot, c);
         log.config("Created a DenyAll authoriser, if engaged all remote commands will be denied.");
     }
+    @Nonnull
     @Override
     /** Denies everything.
      * 

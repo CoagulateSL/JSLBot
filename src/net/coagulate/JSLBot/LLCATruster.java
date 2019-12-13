@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import javax.annotation.Nonnull;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -22,6 +23,7 @@ import javax.net.ssl.X509TrustManager;
 public class LLCATruster implements X509TrustManager,HostnameVerifier {
     
     private static X509Certificate[] cas;
+    @Nonnull
     private static Boolean initialised=false;
     /** Do not use the JSLBot LLCA Truster.  You will probably get SSL errors if you don't implement this yourself somehow. */
     public static void doNotUse() { initialised=true; }
@@ -46,13 +48,13 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
             sc.init(null,new TrustManager[] {this}, new java.security.SecureRandom());
             // install
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (CertificateException|KeyManagementException|NoSuchAlgorithmException ex) {
+        } catch (@Nonnull CertificateException|KeyManagementException|NoSuchAlgorithmException ex) {
             throw new AssertionError("Error configuring SSL CA Trust",ex);
         }
     }
 
     @Override
-    public boolean verify(String string, SSLSession ssls) {
+    public boolean verify(String string, @Nonnull SSLSession ssls) {
         throw new AssertionError("Verify for "+string+" called with session "+ssls.toString());
         //return true;
     }
