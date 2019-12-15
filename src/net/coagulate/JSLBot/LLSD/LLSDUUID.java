@@ -18,14 +18,14 @@ public class LLSDUUID extends Atomic {
      * @see LLUUID
      * @param uuid the LLUUID
      */
-    public LLSDUUID(LLUUID uuid) { this.value=uuid; }
+    public LLSDUUID(final LLUUID uuid) { value =uuid; }
     
     /** Create a LSLUUID from a UUID string
      *
      * @see LLUUID
      * @param uuid UUID as a string
      */
-    public LLSDUUID(String uuid) {
+    public LLSDUUID(final String uuid) {
         value=new LLUUID(uuid);
     }
 
@@ -33,7 +33,7 @@ public class LLSDUUID extends Atomic {
      * @see LLUUID
      * @param item Item to extract the UUID contents of
      */
-    public LLSDUUID(@Nonnull Node item) {
+    public LLSDUUID(@Nonnull final Node item) {
         value=new LLUUID(item.getTextContent());
     }
 
@@ -51,7 +51,7 @@ public class LLSDUUID extends Atomic {
      */
     @Nonnull
     @Override
-    public String toXML(String lineprefix) {
+    public String toXML(final String lineprefix) {
         return lineprefix+"<uuid>"+value.toUUIDString()+"</uuid>\n";
     }
     @Override

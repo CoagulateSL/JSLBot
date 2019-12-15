@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 public abstract class Atomic {
 
     @Nullable
-    static Atomic create(@Nonnull Node item) {
-        String type=item.getNodeName();
+    static Atomic create(@Nonnull final Node item) {
+        final String type=item.getNodeName();
         if ("string".equals(type)) { return new LLSDString(item); }
         if ("map".equals(type)) { return new LLSDMap(item.getChildNodes()); }
         if ("integer".equals(type)) { return new LLSDInteger(item); }

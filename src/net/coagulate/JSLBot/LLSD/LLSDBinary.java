@@ -13,20 +13,20 @@ import java.util.Base64;
 public class LLSDBinary extends Atomic {
 
     String value="";
-    public LLSDBinary(String s) {
+    public LLSDBinary(final String s) {
         value=s;
     }
 
-    LLSDBinary(@Nonnull Node item) {
+    LLSDBinary(@Nonnull final Node item) {
         value=item.getTextContent();
     }
-    public LLSDBinary(int a) {
+    public LLSDBinary(final int a) {
         value=Base64.getEncoder().encodeToString(ByteBuffer.allocate(4).putInt(a).array());
     }
 
     @Nonnull
     @Override
-    public String toXML(String lineprefix) {
+    public String toXML(final String lineprefix) {
         return lineprefix+"<binary encoding=\"base64\">"+value+"</binary>\n";
     }
     @Override
@@ -35,12 +35,12 @@ public class LLSDBinary extends Atomic {
 
     @Nonnull
     public String toIP() {
-        byte[] ipbyte=toByte();
+        final byte[] ipbyte=toByte();
         return (ipbyte[0]&0xff) +"."+ (ipbyte[1]&0xff) +"."+ (ipbyte[2]&0xff) +"."+ (ipbyte[3]&0xff);
     }
 
     public long toLong() {
-        byte[] by=toByte();
+        final byte[] by=toByte();
         long longvalue = 0;
         for (int i = 0; i < by.length; i++)
         {

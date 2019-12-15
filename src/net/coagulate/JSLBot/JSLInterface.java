@@ -9,16 +9,16 @@ import java.util.Map;
  */
 public class JSLInterface {
     private final JSLBot bot;
-    JSLInterface(JSLBot bot) { this.bot=bot; }
+    JSLInterface(final JSLBot bot) { this.bot=bot; }
 
     /** Send and wait for an instant message to be sent.
      *
      * @param uuid User UUID to send message to
      * @param message Message to send
      */
-    public void instantMessage(String uuid, String message) {
+    public void instantMessage(final String uuid, final String message) {
         bot.waitConnection(15000);
-        Map<String,String> cmd=new HashMap<>();
+        final Map<String,String> cmd=new HashMap<>();
         cmd.put("uuid",uuid);
         cmd.put("message",message);
         new CommandEvent(bot, bot.getRegional(), "im", cmd, null).submitAndWait();
@@ -29,7 +29,7 @@ public class JSLInterface {
      * @param avataruuid UUID of avatar to invite
      * @param groupuuid UUID of group to invite to
      */
-    public void groupInvite(String avataruuid, String groupuuid) {
+    public void groupInvite(final String avataruuid, final String groupuuid) {
         bot.waitConnection(15000);
         groupInvite(avataruuid,groupuuid,null);
     }
@@ -40,9 +40,9 @@ public class JSLInterface {
      * @param groupuuid Group UUID to invite to
      * @param roleuuid  Role UUID to invite to
      */
-    public void groupInvite(String avataruuid, String groupuuid, String roleuuid) {
+    public void groupInvite(final String avataruuid, final String groupuuid, final String roleuuid) {
         bot.waitConnection(15000);
-        Map<String,String> cmd=new HashMap<>();
+        final Map<String,String> cmd=new HashMap<>();
         cmd.put("avataruuid",avataruuid);
         cmd.put("groupuuid",groupuuid);
         cmd.put("roleuuid",roleuuid);
@@ -54,9 +54,9 @@ public class JSLInterface {
      * @param avataruuid User UUID to eject from group
      * @param groupuuid Group UUID to eject from
      */
-    public void groupEject(String avataruuid, String groupuuid) {
+    public void groupEject(final String avataruuid, final String groupuuid) {
         bot.waitConnection(15000);
-        Map<String,String> cmd=new HashMap<>();
+        final Map<String,String> cmd=new HashMap<>();
         cmd.put("avataruuid",avataruuid);
         cmd.put("groupuuid",groupuuid);
         //cmd.put("roleuuid",roleuuid);
@@ -67,9 +67,9 @@ public class JSLInterface {
      * Results must be queried from the group module.
      * @param groupuuid Group UUID to retrieve.
      */
-    public void groupRoster(String groupuuid) {
+    public void groupRoster(final String groupuuid) {
         bot.waitConnection(15000);
-        Map<String,String> cmd=new HashMap<>();
+        final Map<String,String> cmd=new HashMap<>();
         cmd.put("uuid",groupuuid);
         new CommandEvent(bot,bot.getRegional(),"groupRoster",cmd,null).submitAndWait();
     }

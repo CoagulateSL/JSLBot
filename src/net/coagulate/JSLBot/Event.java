@@ -18,7 +18,7 @@ public abstract class Event {
     // locking the status field, command event monitors this
     final Object statusmonitor=new Object();
     private Logger log;
-    void log(Level level,String message) {
+    void log(final Level level, final String message) {
         log.log(level,message);
     }
     /** Stages an event goes through */
@@ -43,7 +43,7 @@ public abstract class Event {
      * 
      * @param status 
      */
-    void status (STATUS status) {
+    void status (final STATUS status) {
         synchronized(statusmonitor) {
             this.status=status;
             if (Debug.TRACKCOMMANDS && type==COMMAND) { log.log(Level.FINER, "Command {0} in region {1}entering status {2}", new Object[]{getName(), region().toString(), status}); }
@@ -90,7 +90,7 @@ public abstract class Event {
         return bot;
     }
     
-    Event(@Nonnull JSLBot bot, @Nonnull Regional r, @Nonnull String name) {
+    Event(@Nonnull final JSLBot bot, @Nonnull final Regional r, @Nonnull final String name) {
         this.bot=bot; this.r=r; this.name=name; setType();
     }
     
@@ -98,13 +98,13 @@ public abstract class Event {
         if (this instanceof UDPEvent) { type=UDP; return ;}
         if (this instanceof XMLEvent) { type=XML; return; }
         if (this instanceof CommandEvent) { type=COMMAND; return ;}
-        throw new IllegalArgumentException("This class "+this.getClass().getName()+" is not assignable from the expected types");
+        throw new IllegalArgumentException("This class "+ getClass().getName()+" is not assignable from the expected types");
     }
     
     @Nonnull
     @Override
     public String toString() {
-        return region().toString()+"/"+getPrefixedName();
+        return region() +"/"+getPrefixedName();
     }
     @Nonnull
     private final String name;
@@ -124,14 +124,14 @@ public abstract class Event {
         bot().brain().execute(this);
     }
 
-    public void waitFinish(long milliseconds) {
-        long expire=new Date().getTime()+milliseconds;
+    public void waitFinish(final long milliseconds) {
+        final long expire=new Date().getTime()+milliseconds;
         while ((new Date().getTime())<expire) {
             synchronized(statusmonitor) {
-                try { statusmonitor.wait(1000); } catch (InterruptedException e) { }
+                try { statusmonitor.wait(1000); } catch (final InterruptedException e) { }
             }
             if (status==COMPLETE) { return; }
         }
-        throw new IllegalStateException("Command timed out in status "+status().toString());
+        throw new IllegalStateException("Command timed out in status "+ status());
     }
 }

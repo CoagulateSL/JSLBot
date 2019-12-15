@@ -26,14 +26,14 @@ import static java.util.logging.Level.*;
  */
 public class CnC extends Handler {
 
-    public CnC(@Nonnull JSLBot bot, @Nonnull Configuration c) {
+    public CnC(@Nonnull final JSLBot bot, @Nonnull final Configuration c) {
         super(bot,c);
         String authoriser=c.get("authoriser", "OwnerOnly");
         if (!authoriser.contains(".")) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
         Authorisation auth=null;
         try {
             auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.log(SEVERE,"Unable to load authoriser "+authoriser, e);
         }
         if (auth==null) {
@@ -41,17 +41,17 @@ public class CnC extends Handler {
             auth=new DenyAll(bot,c.subspace("authorisation"));
         }
         bot.brain().setAuth(auth);
-        String homesick=c.get("homesickfor","");
+        final String homesick=c.get("homesickfor","");
         if (!homesick.isEmpty()) { bot.homeSickFor(homesick); }
     }
     
     @Nonnull
-    private static Date parseRegionRestart(@Nonnull String m) {
+    private static Date parseRegionRestart(@Nonnull final String m) {
         if (m.split("\n").length<2) { throw new IllegalArgumentException("Expected at least 2 lines of input"); }
-        String line=m.split("\n")[1];
-        LLSDMap msg=(LLSDMap) new LLSD(line).getFirst();
+        final String line=m.split("\n")[1];
+        final LLSDMap msg=(LLSDMap) new LLSD(line).getFirst();
         if (msg==null) { throw new IllegalArgumentException("Failed to parse LLSDMap from region restart message"); }
-        String region=msg.get("NAME").toString();
+        final String region=msg.get("NAME").toString();
         long shutdown=new Date().getTime();
         if (msg.containsKey("MINUTES")) { shutdown=shutdown+((Integer.parseInt(msg.get("MINUTES").toString()))*1000*60); }
         if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))*1000); }
@@ -59,51 +59,51 @@ public class CnC extends Handler {
     }
 
     @Nullable
-    private Date evacby=null;
+    private Date evacby;
     
     public static final DateFormat datetime=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    public void alertMessageUDPDelayed(@Nonnull UDPEvent event) {
-        AlertMessage msg=(AlertMessage) event.body();
-        log.warning("Simulator "+event.region().circuit()+" sends Alert, data message: "+msg.balertdata.vmessage.toString());
-        for (AlertMessage_bAlertInfo info:msg.balertinfo) {
-            String infotype=info.vmessage.toString();
+    public void alertMessageUDPDelayed(@Nonnull final UDPEvent event) {
+        final AlertMessage msg=(AlertMessage) event.body();
+        log.warning("Simulator "+event.region().circuit()+" sends Alert, data message: "+ msg.balertdata.vmessage);
+        for (final AlertMessage_bAlertInfo info:msg.balertinfo) {
+            final String infotype=info.vmessage.toString();
             boolean handled=false;
             if (infotype.toLowerCase().contains("home")) {handled=true;} // handled by agent
             if ("RegionRestartMinutes".equals(infotype) || "RegionRestartSeconds".equals(infotype)) {
                 handled=true;
-                Date when=parseRegionRestart(info.vextraparams.toString());
-                int seconds=(int) ((when.getTime()-(new Date().getTime()))/1000);
+                final Date when=parseRegionRestart(info.vextraparams.toString());
+                final int seconds=(int) ((when.getTime()-(new Date().getTime()))/1000);
                 Level level = INFO;
                 if (seconds<=180) { level=WARNING; }
                 if (seconds<=60) {
                     level=SEVERE;
                     if (evacby==null ||evacby.before(new Date())) { // if not evacuating or it was in the past
                         evacby=new Date(when.getTime()+30000); // set to 30 seconds post evacuation so we dont do this more than once
-                        Map<String,String> params=new HashMap<>();
+                        final Map<String,String> params=new HashMap<>();
                         params.put("when",""+((int)(when.getTime()/1000)));
-                        CommandEvent evacuate=new CommandEvent(bot, event.region(), "evacuate", params, null);
+                        final CommandEvent evacuate=new CommandEvent(bot, event.region(), "evacuate", params, null);
                         evacuate.submit();
                     }
                 }
-                String mins=Integer.toString(seconds/60);
+                final String mins=Integer.toString(seconds/60);
                 String secs=Integer.toString(seconds % 60);
                 if (secs.length()==1) { secs="0"+secs; }
                 log.log(level,"Simulator "+event.region().circuit()+" will shut down in "+mins+"m"+secs+"s at "+datetime.format(when));
             }
-            if (!handled) { log.warning("Unhandled warning from "+event.region().circuit()+" included info:"+info.vmessage.toString()+" / "+info.vextraparams.toString()); }
+            if (!handled) { log.warning("Unhandled warning from "+event.region().circuit()+" included info:"+ info.vmessage +" / "+ info.vextraparams); }
         }
     }
      
-    public void chatFromSimulatorUDPDelayed(@Nonnull UDPEvent event) {
-        ChatFromSimulator msg = (ChatFromSimulator) event.body();
-        String from=msg.bchatdata.vfromname.toString();
-        LLUUID source=msg.bchatdata.vsourceid;
-        LLUUID owner=msg.bchatdata.vownerid;
-        int sourcetypenum=msg.bchatdata.vsourcetype.integer();
-        int chattypenum=msg.bchatdata.vchattype.integer();
-        int audiblenum=msg.bchatdata.vaudible.integer();
-        LLVector3 pos=msg.bchatdata.vposition;
-        String message=msg.bchatdata.vmessage.toString();
+    public void chatFromSimulatorUDPDelayed(@Nonnull final UDPEvent event) {
+        final ChatFromSimulator msg = (ChatFromSimulator) event.body();
+        final String from=msg.bchatdata.vfromname.toString();
+        final LLUUID source=msg.bchatdata.vsourceid;
+        final LLUUID owner=msg.bchatdata.vownerid;
+        final int sourcetypenum=msg.bchatdata.vsourcetype.integer();
+        final int chattypenum=msg.bchatdata.vchattype.integer();
+        final int audiblenum=msg.bchatdata.vaudible.integer();
+        final LLVector3 pos=msg.bchatdata.vposition;
+        final String message=msg.bchatdata.vmessage.toString();
         String sourcetype="";
         switch (sourcetypenum) {
             case 0: sourcetype="SYSTEM"; break;
@@ -139,14 +139,14 @@ public class CnC extends Handler {
             if (audiblenum!=1) {  volume="vol:"+audible+" ";}
             log.fine("Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
         }
-        String prefix=config.get("publiccommandprefix","*");
+        final String prefix=config.get("publiccommandprefix","*");
         runCommands(from, source, message, prefix);
     }
     
-    public void improvedInstantMessageUDPDelayed(@Nonnull UDPEvent event) {
-        ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
-        int messagetype=m.bmessageblock.vdialog.value;
-        String messagetext="["+m.bmessageblock.vfromagentname.toString()+"] "+m.bmessageblock.vmessage.toString();
+    public void improvedInstantMessageUDPDelayed(@Nonnull final UDPEvent event) {
+        final ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
+        final int messagetype=m.bmessageblock.vdialog.value;
+        final String messagetext="["+ m.bmessageblock.vfromagentname +"] "+ m.bmessageblock.vmessage;
         // this is a HEAVILY overloaded conduit of information
         // http://wiki.secondlife.com/wiki/ImprovedInstantMessage
         switch (messagetype) {
@@ -198,21 +198,21 @@ public class CnC extends Handler {
 
     }
     
-    public void processInstantMessage(UDPEvent event, @Nonnull ImprovedInstantMessage m) {
+    public void processInstantMessage(final UDPEvent event, @Nonnull final ImprovedInstantMessage m) {
         //System.out.println(m.dump());
-        String from=m.bmessageblock.vfromagentname.toString();
-        LLUUID source=m.bagentdata.vagentid;
-        String message=m.bmessageblock.vmessage.toString();
+        final String from=m.bmessageblock.vfromagentname.toString();
+        final LLUUID source=m.bagentdata.vagentid;
+        final String message=m.bmessageblock.vmessage.toString();
         // extract and cut it all up
         log.info("CnC processing instant message <"+from+"> "+message);
-        String prefix=config.get("privatecommandprefix","*");
+        final String prefix=config.get("privatecommandprefix","*");
         runCommands(from,source,message,prefix);
     }
 
-    private String parseCommand(@Nonnull String message, @Nonnull Map<String,String> paramsout1) {
-        String[] parts =message.split(" ");
+    private String parseCommand(@Nonnull final String message, @Nonnull final Map<String,String> paramsout1) {
+        final String[] parts =message.split(" ");
         int index=0;
-        String command=parts[0]; index++;
+        final String command=parts[0]; index++;
         String keyword="";
         String parameter="";
         for (int i=index;i<parts.length;i++) {
@@ -234,15 +234,15 @@ public class CnC extends Handler {
     }
     
     
-    public void enableSimulatorXMLImmediate(@Nonnull XMLEvent event) {
-        LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap)event.body()).get("SimulatorInfo");
-        for (Object m:simulatorinfos) {
-            LLSDMap map=(LLSDMap)m;
-            LLSDBinary ip=(LLSDBinary) map.get("IP");
-            LLSDInteger port=(LLSDInteger) map.get("Port");
-            LLSDBinary handle=(LLSDBinary) map.get("Handle");
-            String numericip=ip.toIP();
-            byte[] handlebytes=handle.toByte();
+    public void enableSimulatorXMLImmediate(@Nonnull final XMLEvent event) {
+        final LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap)event.body()).get("SimulatorInfo");
+        for (final Object m:simulatorinfos) {
+            final LLSDMap map=(LLSDMap)m;
+            final LLSDBinary ip=(LLSDBinary) map.get("IP");
+            final LLSDInteger port=(LLSDInteger) map.get("Port");
+            final LLSDBinary handle=(LLSDBinary) map.get("Handle");
+            final String numericip=ip.toIP();
+            final byte[] handlebytes=handle.toByte();
             if (Debug.REGIONHANDLES) { log.fine("Asked to XML_EnableSimulator with handle "+Long.toUnsignedString(handle.toLong())); }
             new CircuitLauncher(bot,numericip,port.get(),handle.toLong()).start();
         }
@@ -253,7 +253,7 @@ public class CnC extends Handler {
         final int port;
         final long handle;
         
-        private CircuitLauncher(JSLBot bot,String numericip, int port, long handle) {
+        private CircuitLauncher(final JSLBot bot, final String numericip, final int port, final long handle) {
             this.numericip=numericip;
             this.port=port;
             this.handle=handle;
@@ -261,7 +261,7 @@ public class CnC extends Handler {
         public void run() {
             try {
                 bot.createCircuit(numericip,port,handle,null);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.severe("Failed to set up circuit to "+Global.regionName(handle)+" (#"+Long.toUnsignedString(handle)+")");
             }
             
@@ -269,13 +269,13 @@ public class CnC extends Handler {
     }
 
     
-    public void establishAgentCommunicationXMLDelayed(@Nonnull XMLEvent event) {
-        LLSDMap body=event.map();
-        String simipandport= body.get("sim-ip-and-port").toString();
-        for (Circuit c:bot.getCircuits()) {
+    public void establishAgentCommunicationXMLDelayed(@Nonnull final XMLEvent event) {
+        final LLSDMap body=event.map();
+        final String simipandport= body.get("sim-ip-and-port").toString();
+        for (final Circuit c:bot.getCircuits()) {
             if (c.getSimIPAndPort().equalsIgnoreCase(simipandport)) {
                 if (Debug.EVENTQUEUE) { log.fine("Matched ip and port to circuit for region "+c.getRegionName()); }
-                String seedcaps = body.get("seed-capability").toString();
+                final String seedcaps = body.get("seed-capability").toString();
                 c.connectCAPS(seedcaps);
                 return;
             }
@@ -285,11 +285,11 @@ public class CnC extends Handler {
 
     @Nonnull
     @CmdHelp(description = "Request the bot shutdown")
-    public String quitCommand(CommandEvent command) {
+    public String quitCommand(final CommandEvent command) {
         bot.shutdown("Instant Message instructed us to quit");
         return "Shutting down as requested (this message will not be delivered)";
     }
-    private void runCommands(String from, @Nonnull LLUUID source, @Nonnull String message, @Nullable String prefix) {
+    private void runCommands(final String from, @Nonnull final LLUUID source, @Nonnull String message, @Nullable final String prefix) {
         boolean prefixok=false;
         if (prefix==null || prefix.isEmpty()) { prefixok=true; }
         if (!prefixok) { 
@@ -300,18 +300,18 @@ public class CnC extends Handler {
         }
         if (!prefixok) { return; }
         log.info(source.toUUIDString()+" <"+from+"> invokes command "+message);
-        Map<String,String> params=new HashMap<>();
-        String keyword=parseCommand(message,params);
+        final Map<String,String> params=new HashMap<>();
+        final String keyword=parseCommand(message,params);
         String response;
         try {
-            CommandEvent command = new CommandEvent(bot, bot.getRegional(), keyword, params,source);
+            final CommandEvent command = new CommandEvent(bot, bot.getRegional(), keyword, params,source);
             command.invokerUsername(from); command.invokerUUID(source);
             response=bot.brain().auth(command);
             if (response==null) { response=command.execute(); }
         }
-        catch (Exception e) {
-            log.log(WARNING,"CnC Subcommand exceptioned:"+e.toString(),e);
-            response="Exception:"+e.toString();
+        catch (final Exception e) {
+            log.log(WARNING,"CnC Subcommand exceptioned:"+ e,e);
+            response="Exception:"+ e;
         }
 
         if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
@@ -320,7 +320,7 @@ public class CnC extends Handler {
 
     @Nonnull
     @CmdHelp(description = "Causes the bot to reconnect to SL without quitting")
-    public String restartCommand(CommandEvent command) {
+    public String restartCommand(final CommandEvent command) {
         bot.forceReconnect();
         log.warning("Restart command initiated");
         return "This IM reply probably will be lost due to the restart.";
@@ -328,11 +328,11 @@ public class CnC extends Handler {
 
     @Nonnull
     @CmdHelp(description="Send an instant message")
-    public String imCommand(CommandEvent command,
-                            @ParamHelp(description = "UUID to message")
-            String uuid,
-                            @Nonnull @ParamHelp(description = "Message to send")
-            String message) {
+    public String imCommand(final CommandEvent command,
+                            @ParamHelp(description = "UUID to message") final
+                            String uuid,
+                            @Nonnull @ParamHelp(description = "Message to send") final
+                                String message) {
         bot.im(new LLUUID(uuid), message);
         log.info("Sent IM to <"+uuid+"> "+bot.getUserName(new LLUUID(uuid))+" - "+message);
         return "IM sent";
@@ -340,13 +340,13 @@ public class CnC extends Handler {
     
     @Nonnull
     @CmdHelp(description="Get Help :)  If you see this you're doing it right")
-    public String helpCommand(CommandEvent commandevent,
+    public String helpCommand(final CommandEvent commandevent,
                               @Nullable @ParamHelp(description="Optional command to get more info about")
             String command) {
         if (command==null || command.isEmpty()) {
             StringBuilder response= new StringBuilder();
-            Set<String> unsortedcommands = bot.brain().getCommands();
-            List<String> commands = new ArrayList<>(unsortedcommands);
+            final Set<String> unsortedcommands = bot.brain().getCommands();
+            final List<String> commands = new ArrayList<>(unsortedcommands);
             Collections.sort(commands);
             for (String acommand:commands) {
                 if (response.length() > 0) { response.append(", "); } else { response = new StringBuilder("\n"); }
@@ -357,11 +357,11 @@ public class CnC extends Handler {
             return response.toString();
         }
         command=command.toLowerCase();
-        Method m=bot.brain().getCommand(command);
+        final Method m=bot.brain().getCommand(command);
         if (m==null) { throw new IllegalArgumentException("Could not find command"); }
-        StringBuilder ret= new StringBuilder("\nCommand: " + command);
+        final StringBuilder ret= new StringBuilder("\nCommand: " + command);
         if (m.getAnnotation(CmdHelp.class)!=null) { ret.append("\n").append(m.getAnnotation(CmdHelp.class).description()); }
-        for (Parameter param:m.getParameters()) {
+        for (final Parameter param:m.getParameters()) {
             if (!param.getType().equals(Regional.class)) {
                 ret.append("\n").append(param.getName());
                 if (param.getAnnotation(ParamHelp.class)!=null) {
@@ -371,19 +371,19 @@ public class CnC extends Handler {
         }
         return ret.toString();
     }
-    private int pauseserial=0;
+    private int pauseserial;
     @Nonnull
     @CmdHelp(description="Pause the agent")
-    public String pauseCommand(CommandEvent event) {
-        AgentPause p = new AgentPause(bot);
+    public String pauseCommand(final CommandEvent event) {
+        final AgentPause p = new AgentPause(bot);
         p.bagentdata.vserialnum=new U32(pauseserial++);
         bot.send(p,true);
         return "0 - Paused";
     }
     @Nonnull
     @CmdHelp(description="Unpause the agent")
-    public String unPauseCommand(CommandEvent event) {
-        AgentResume p = new AgentResume(bot);
+    public String unPauseCommand(final CommandEvent event) {
+        final AgentResume p = new AgentResume(bot);
         p.bagentdata.vserialnum=new U32(pauseserial++);
         bot.send(p,true);
         return "0 - Paused";
@@ -391,19 +391,19 @@ public class CnC extends Handler {
     
     @Nonnull
     @CmdHelp(description="Say a message in local chat")
-    public String sayCommand(CommandEvent event, @Nonnull String message) { return chat(1,message); }
+    public String sayCommand(final CommandEvent event, @Nonnull final String message) { return chat(1,message); }
     @Nonnull
     @CmdHelp(description="Shout a message in local chat")
-    public String shoutCommand(CommandEvent event, @Nonnull String message) { return chat(2,message); }
+    public String shoutCommand(final CommandEvent event, @Nonnull final String message) { return chat(2,message); }
     @Nonnull
     @CmdHelp(description="Whisper a message in local chat")
-    public String whisperCommand(CommandEvent event, @Nonnull String message) { return chat(0,message); }
+    public String whisperCommand(final CommandEvent event, @Nonnull final String message) { return chat(0,message); }
 
     @Nonnull
-    private String chat(int messagetype, @Nonnull String message) { return chat(messagetype,0,message); }
+    private String chat(final int messagetype, @Nonnull final String message) { return chat(messagetype,0,message); }
     @Nonnull
-    private String chat(int messagetype, int channel, @Nonnull String message) {
-        ChatFromViewer req=new ChatFromViewer(bot);
+    private String chat(final int messagetype, final int channel, @Nonnull final String message) {
+        final ChatFromViewer req=new ChatFromViewer(bot);
         req.bchatdata.vtype=new U8(messagetype);
         req.bchatdata.vchannel=new S32(channel);
         req.bchatdata.vmessage=new Variable2(message);
@@ -412,7 +412,7 @@ public class CnC extends Handler {
     }
     
     @Nullable
-    private Date homesickness=null;
+    private Date homesickness;
     @Override
     public void maintenance() {
         if (bot.homeSickFor()==null) { return; } // we dont get homesick
@@ -435,7 +435,7 @@ public class CnC extends Handler {
         // otherwise, go home
         log.info("Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in maintenance
         new CommandEvent(bot, bot.getRegional(), "home", new HashMap<>(), null).execute();
-        try { Thread.sleep(1000L); } catch (InterruptedException e) {}
+        try { Thread.sleep(1000L); } catch (final InterruptedException e) {}
         if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
             // success 
             log.info("Bot has successfully cured its self of homesickness by going home, bot is no longer homesick");
@@ -449,11 +449,11 @@ public class CnC extends Handler {
 
     @Nonnull
     @CmdHelp(description="Manage the homesickness of this bot")
-    public String homesickCommand(CommandEvent event,
-                                  @Nullable @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear")
-            String region) {
+    public String homesickCommand(final CommandEvent event,
+                                  @Nullable @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear") final
+                                  String region) {
         if (region==null || region.isEmpty()) {
-            String home = bot.homeSickFor();
+            final String home = bot.homeSickFor();
             if (home==null || home.isEmpty()) { return "Bot has no longing for any home"; }
             return "Bot longs for its home of '"+bot.homeSickFor()+"'";
         }

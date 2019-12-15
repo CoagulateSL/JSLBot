@@ -39,26 +39,26 @@ import javax.annotation.Nullable;
  */
 public class Regions extends Handler {
 
-    public Regions(@Nonnull JSLBot bot, Configuration conf) { super(bot,conf); }
+    public Regions(@Nonnull final JSLBot bot, final Configuration conf) { super(bot,conf); }
 
     /////////////////////////////// MAP BLOCK LOOKUP ( REGION HANDLE FROM REGION NAME )
     
     @CmdHelp(description = "Look up a region handle from a region name")
-    public String regionLookupCommand(CommandEvent command,
-                                      @Nullable @ParamHelp(description="Name of region to lookup")
-            String name) {
+    public String regionLookupCommand(final CommandEvent command,
+                                      @Nullable @ParamHelp(description="Name of region to lookup") final
+                                      String name) {
         if (name==null || "".equals(name)) { return "No NAME parameter passed."; }
         // check cache
         Long cached=Global.regionHandle(name);
         if (cached!=null) { return Long.toUnsignedString(cached); }
         // issue request
-        MapNameRequest request=new MapNameRequest(bot); 
+        final MapNameRequest request=new MapNameRequest(bot);
         request.bnamedata.vname=new Variable1(name);
         bot.send(request);
         // sleep on the signal, checking for a result when woken
-        Date now=new Date();
+        final Date now=new Date();
         while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
-            try { synchronized(mapblockreplysignal) { mapblockreplysignal.wait(1000); } } catch (InterruptedException e) {}
+            try { synchronized(mapblockreplysignal) { mapblockreplysignal.wait(1000); } } catch (final InterruptedException e) {}
         }
         cached=Global.regionHandle(name);
         if (cached!=null) { return Long.toUnsignedString(cached); }
@@ -70,12 +70,12 @@ public class Regions extends Handler {
      * Must be immediate mode so it can signal delayed mode handlers.
      * @param event Event
      */
-    public void mapBlockReplyUDPImmediate(@Nonnull UDPEvent event) {
-        MapBlockReply p=(MapBlockReply) event.body();
-        for (MapBlockReply_bData data:p.bdata) {
+    public void mapBlockReplyUDPImmediate(@Nonnull final UDPEvent event) {
+        final MapBlockReply p=(MapBlockReply) event.body();
+        for (final MapBlockReply_bData data:p.bdata) {
             // for some reason we get multiple replies, one has no access and 0 X/Y for a not found, not sure what this is about :)
             if (data.vaccess.value!=-1 && data.vx.value!=0 && data.vy.value!=0) {
-                U64 handle=new U64();
+                final U64 handle=new U64();
                 handle.value=data.vx.value;
                 handle.value=handle.value<<(32+8);
                 handle.value=handle.value | (data.vy.value<<8);
@@ -95,12 +95,12 @@ public class Regions extends Handler {
     // I think it's used to locate parcels, which can be of any odd size essentially
     // note the "byte" id used here is not related to the parcel's local ID...
 
-    public void parcelOverlayUDPImmediate(@Nonnull UDPEvent event) {
-        ParcelOverlay parceloverlay=(ParcelOverlay) event.body();
-        int quadrant=parceloverlay.bparceldata.vsequenceid.value;
+    public void parcelOverlayUDPImmediate(@Nonnull final UDPEvent event) {
+        final ParcelOverlay parceloverlay=(ParcelOverlay) event.body();
+        final int quadrant=parceloverlay.bparceldata.vsequenceid.value;
         int sequence=quadrant*1024;
         for (int i=0;i<1024;i++) {
-            byte id=parceloverlay.bparceldata.vdata.value[i];
+            final byte id=parceloverlay.bparceldata.vdata.value[i];
             event.region().setParcelMap(sequence,id);
             sequence++;
         }
@@ -108,7 +108,7 @@ public class Regions extends Handler {
     
     @Nonnull
     @CmdHelp(description="Attempt to compute parcels and their size based on the overlay map, which may or may not work")
-    public String parcelListCommand(CommandEvent command) {
+    public String parcelListCommand(final CommandEvent command) {
         return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
     }
     
@@ -120,38 +120,38 @@ public class Regions extends Handler {
     
     @Nonnull
     @CmdHelp(description="Get a parcel's LocalID from region-local x and y co-ordinates")
-    public String parcelIdCommand(@Nonnull CommandEvent command,
-                                  @Nonnull @ParamHelp(description = "X co-ordinate within the parcel")
-            String x,
-                                  @Nonnull @ParamHelp(description = "Y co-ordinate within the parcel")
-            String y) {
-        Regional region=command.region();
-        int reqid=region.getRequestId();
-        ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
+    public String parcelIdCommand(@Nonnull final CommandEvent command,
+                                  @Nonnull @ParamHelp(description = "X co-ordinate within the parcel") final
+                                  String x,
+                                  @Nonnull @ParamHelp(description = "Y co-ordinate within the parcel") final
+                                      String y) {
+        final Regional region=command.region();
+        final int reqid=region.getRequestId();
+        final ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
         prr.bparceldata.vsequenceid=new S32(reqid);
         prr.bparceldata.vnorth=new F32(Float.parseFloat(y));
         prr.bparceldata.vsouth=new F32(Float.parseFloat(y));
         prr.bparceldata.veast=new F32(Float.parseFloat(x));
         prr.bparceldata.vwest=new F32(Float.parseFloat(x));
         region.circuit().send(prr,true);
-        long expire=new Date().getTime()+5000; // sleep on the signal
+        final long expire=new Date().getTime()+5000; // sleep on the signal
         while (region.getResponse(reqid)==null && expire>(new Date().getTime())) {
-            synchronized(parcelpropertiessignal) { try { parcelpropertiessignal.wait(1000); }  catch (InterruptedException e) {}}
+            synchronized(parcelpropertiessignal) { try { parcelpropertiessignal.wait(1000); }  catch (final InterruptedException e) {}}
         }
         if (region.getResponse(reqid)!=null) { return region.getResponse(reqid)+""; }
         return "";
     }
     // signal for incoming parcel properties
     private final Object parcelpropertiessignal=new Object();
-    public void parcelPropertiesXMLImmediate(@Nonnull XMLEvent event) {
-        LLSDMap body=event.map();
-        LLSDArray array=(LLSDArray)body.get("ParcelData");
-        LLSDMap data=(LLSDMap)array.get().get(0);        
+    public void parcelPropertiesXMLImmediate(@Nonnull final XMLEvent event) {
+        final LLSDMap body=event.map();
+        final LLSDArray array=(LLSDArray)body.get("ParcelData");
+        final LLSDMap data=(LLSDMap)array.get().get(0);
         //System.out.println(data.toXML());
-        LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
+        final LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
         //System.out.println("Got parcel id "+parcelid.toString());
-        ParcelData parcel=event.region().getParcel(parcelid.get());
-        int sequenceid = ((LLSDInteger)data.get("SequenceID")).get();
+        final ParcelData parcel=event.region().getParcel(parcelid.get());
+        final int sequenceid = ((LLSDInteger)data.get("SequenceID")).get();
         event.region().requestResponse(sequenceid,parcelid.get());
         parcel.ownerprims=((LLSDInteger)data.get("OwnerPrims")).get();
         parcel.groupprims=((LLSDInteger)data.get("GroupPrims")).get();
@@ -186,9 +186,9 @@ public class Regions extends Handler {
     
     ////////////////////// misc regional data
     
-    public void simulatorViewerTimeMessageUDPImmediate(@Nonnull UDPEvent event) {
-        Regional region = event.region();
-        SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage) event.body();
+    public void simulatorViewerTimeMessageUDPImmediate(@Nonnull final UDPEvent event) {
+        final Regional region = event.region();
+        final SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage) event.body();
         region.setDayUSec(time.btimeinfo.vusecsincestart.value);
         region.setSunDirection(time.btimeinfo.vsundirection);
         region.setSunPhase(time.btimeinfo.vsunphase.value);
@@ -196,9 +196,9 @@ public class Regions extends Handler {
 
     @Nonnull
     @CmdHelp(description="List regions currently known to the botz")
-    public String regionListCommand(CommandEvent command) {
-        StringBuilder response= new StringBuilder("\n");
-        for (Regional regional:bot.getRegionals()) {
+    public String regionListCommand(final CommandEvent command) {
+        final StringBuilder response= new StringBuilder("\n");
+        for (final Regional regional:bot.getRegionals()) {
             response.append(Long.toUnsignedString(regional.handle())).append(": ").append(regional.dump()).append("\n");
         }
         return response.toString();

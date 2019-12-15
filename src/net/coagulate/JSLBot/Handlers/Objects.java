@@ -23,18 +23,18 @@ public class Objects extends Handler {
     public enum CompressedFlags {
         NONE(0x00), SCRACHPAD(0x01), TREE(0x02), TEXT(0x04), PARTICLES(0x08), SOUND(0x10), PARENT(0x20), TEXTUREANIM(0x40), ANGULARVEL(0x80), NAMEVALUE(0x100), MEDIAURL(0x200);
         private final int id;
-        CompressedFlags(int id) { this.id=id; }
+        CompressedFlags(final int id) { this.id=id; }
         public int getValue() { return id; }
     }
 
-    public Objects(@Nonnull JSLBot bot, Configuration c) { super(bot,c); }
+    public Objects(@Nonnull final JSLBot bot, final Configuration c) { super(bot,c); }
     
-    public void objectUpdateUDPImmediate(@Nonnull UDPEvent event) {
-        ObjectUpdate data=(ObjectUpdate) event.body();
+    public void objectUpdateUDPImmediate(@Nonnull final UDPEvent event) {
+        final ObjectUpdate data=(ObjectUpdate) event.body();
         // and request more info too
         //System.out.println(data.dump());
-        for (ObjectUpdate_bObjectData obj:data.bobjectdata) {            
-            ObjectData od=event.region().getObject(obj.vid.value);
+        for (final ObjectUpdate_bObjectData obj:data.bobjectdata) {
+            final ObjectData od=event.region().getObject(obj.vid.value);
             od.id=obj.vid;
             od.fullid=obj.vfullid;
             od.clickaction=obj.vclickaction;
@@ -42,7 +42,7 @@ public class Objects extends Handler {
             //if (od.name!=null) { System.out.println("Updating object "+od.name); } else { System.out.println("Updating who knows what"); }
             //System.out.println(obj.vnamevalue.toString());
             if (!od.requested) {
-                RequestObjectPropertiesFamily reqobjs=new RequestObjectPropertiesFamily();
+                final RequestObjectPropertiesFamily reqobjs=new RequestObjectPropertiesFamily();
                 reqobjs.bagentdata.vagentid=bot.getUUID();
                 reqobjs.bagentdata.vsessionid=bot.getSession();
                 reqobjs.bobjectdata.vobjectid=obj.vfullid;
@@ -53,26 +53,26 @@ public class Objects extends Handler {
         }
     }
 
-    public void killObjectUDPImmediate(@Nonnull UDPEvent event) {
-        KillObject killobject=(KillObject) event.body();
-        List<KillObject_bObjectData> killlist = killobject.bobjectdata;
-        for (KillObject_bObjectData kill:killlist) {
+    public void killObjectUDPImmediate(@Nonnull final UDPEvent event) {
+        final KillObject killobject=(KillObject) event.body();
+        final List<KillObject_bObjectData> killlist = killobject.bobjectdata;
+        for (final KillObject_bObjectData kill:killlist) {
 
-            ObjectData object = event.region().getObject(kill.vid.value);
+            final ObjectData object = event.region().getObject(kill.vid.value);
             //if (object.name!=null) { System.out.println("Killing object "+object.name); } else { System.out.println("Killing who knows what"); }
 
             event.region().killObject(kill.vid.value);
         }
     }
 
-    public void objectPropertiesFamilyUDPImmediate(@Nonnull UDPEvent event) {
-        ObjectPropertiesFamily object=(ObjectPropertiesFamily) event.body();
-        int objectid=object.bobjectdata.vrequestflags.value;
+    public void objectPropertiesFamilyUDPImmediate(@Nonnull final UDPEvent event) {
+        final ObjectPropertiesFamily object=(ObjectPropertiesFamily) event.body();
+        final int objectid=object.bobjectdata.vrequestflags.value;
         if (objectid==0) { log.warning("ObjectProperties request flags are zero, which should be the object id"); }
-        ObjectData ourobj = event.region().getObject(objectid);
+        final ObjectData ourobj = event.region().getObject(objectid);
         if (Debug.TRACKNEWOBJECTS) {
             if (ourobj.name==null || (!ourobj.name.equals(object.bobjectdata.vname.toString()))) {
-                log.finer("New object named "+object.bobjectdata.vname.toString()+" in region "+event.region().getName());
+                log.finer("New object named "+ object.bobjectdata.vname +" in region "+event.region().getName());
             }
         }
         ourobj.name=object.bobjectdata.vname.toString();
@@ -83,23 +83,23 @@ public class Objects extends Handler {
         
     }
 
-    public void improvedTerseObjectUpdateUDPImmediate(@Nonnull UDPEvent event) {
-        ImprovedTerseObjectUpdate msg=(ImprovedTerseObjectUpdate) event.body();
-        for (ImprovedTerseObjectUpdate_bObjectData obj:msg.bobjectdata) {
-            byte[] data =obj.vdata.value; // this is not well documented, but based on code...
+    public void improvedTerseObjectUpdateUDPImmediate(@Nonnull final UDPEvent event) {
+        final ImprovedTerseObjectUpdate msg=(ImprovedTerseObjectUpdate) event.body();
+        for (final ImprovedTerseObjectUpdate_bObjectData obj:msg.bobjectdata) {
+            final byte[] data =obj.vdata.value; // this is not well documented, but based on code...
             //System.out.println("ITOU data length: "+data.length);
-            ByteBuffer buffer = ByteBuffer.wrap(data);
-            U32 id=new U32(buffer);
-            ObjectData object = event.region().getObject(id.value);
+            final ByteBuffer buffer = ByteBuffer.wrap(data);
+            final U32 id=new U32(buffer);
+            final ObjectData object = event.region().getObject(id.value);
             //if (object.name!=null) { System.out.println("TerseUpdating object "+object.name); } else { System.out.println("TerseUpdating who knows what"); }
-            U8 state=new U8(buffer);
-            U8 notavatar=new U8(buffer);
-            boolean avatar=notavatar.value!=0;
+            final U8 state=new U8(buffer);
+            final U8 notavatar=new U8(buffer);
+            final boolean avatar=notavatar.value!=0;
             // collision plane here (?)
             if (avatar) { new U32(buffer);new U32(buffer);new U32(buffer);new U32(buffer); }
-            F32 x=new F32();  x.read(buffer);
-            F32 y=new F32();  y.read(buffer);
-            F32 z=new F32();  z.read(buffer);
+            final F32 x=new F32();  x.read(buffer);
+            final F32 y=new F32();  y.read(buffer);
+            final F32 z=new F32();  z.read(buffer);
             //System.out.println("ID:"+id.value+" - "+object.name+" - "+region.hasObject(id.value)+" "+x.value+","+y.value+","+z.value);
             // 3*16bit vel
             // 3*16bit acceleration
@@ -114,21 +114,21 @@ public class Objects extends Handler {
 
     @Nonnull
     @CmdHelp(description = "List all objects to the console (debugging only)")
-    public String objectListCommand(@Nonnull CommandEvent command) {
-        Regional region=command.region();
-        for (Integer id:region.getObjects()) {
-            System.out.println(region.getObject(id).toString());
+    public String objectListCommand(@Nonnull final CommandEvent command) {
+        final Regional region=command.region();
+        for (final Integer id:region.getObjects()) {
+            System.out.println(region.getObject(id));
         }
         return "Dumped to console because so many.";
     }
     @Nonnull
     @CmdHelp(description = "List all unparented (root) objects to the console (debugging only)")
-    public String objectRootsCommand(@Nonnull CommandEvent command) {
-        Regional region=command.region();
-        for (Integer id:region.getObjects()) {
-            ObjectData o = region.getObject(id);
+    public String objectRootsCommand(@Nonnull final CommandEvent command) {
+        final Regional region=command.region();
+        for (final Integer id:region.getObjects()) {
+            final ObjectData o = region.getObject(id);
             if (o.parentid==null || o.parentid.value==0) {
-                System.out.println(o.toString());
+                System.out.println(o);
             }
         }
         return "Dumped to console because so many.";
@@ -136,16 +136,16 @@ public class Objects extends Handler {
     
     @Nonnull
     @CmdHelp(description="Find an object by a name fragment")
-    public String objectFindCommand(@Nonnull CommandEvent command,
+    public String objectFindCommand(@Nonnull final CommandEvent command,
                                     @Nullable @ParamHelp(description="Fragment of a name to search for")
             String name) {
-        Regional region=command.region();
+        final Regional region=command.region();
         ObjectData best=null;
         if (region==null) { throw new NullPointerException("Null region passed to Objects.Find"); }
         if (name==null) { return "Must supply 'name <text>' parameter"; }
         name=name.toLowerCase();
-        for (Integer id:region.getObjects()) {
-            ObjectData check = region.getObject(id);
+        for (final Integer id:region.getObjects()) {
+            final ObjectData check = region.getObject(id);
             if (check.parentid==null || check.parentid.value==0) {
                 if (check.name!=null) {
                     if (check.name.toLowerCase().contains(name)) { best=check; }
@@ -153,21 +153,21 @@ public class Objects extends Handler {
             }
         }
         if (best==null) { return "No such object found"; }
-        return name+"->"+best.toString();            
+        return name+"->"+ best;
     }
 
-    public void objectUpdateCachedUDPImmediate(@Nonnull UDPEvent event) {
-        ObjectUpdateCached objectUpdateCached=(ObjectUpdateCached) event.body();
-        RequestMultipleObjects request=new RequestMultipleObjects();
+    public void objectUpdateCachedUDPImmediate(@Nonnull final UDPEvent event) {
+        final ObjectUpdateCached objectUpdateCached=(ObjectUpdateCached) event.body();
+        final RequestMultipleObjects request=new RequestMultipleObjects();
         request.bagentdata.vagentid=bot.getUUID();
         request.bagentdata.vsessionid=bot.getSession();
         request.bobjectdata=new ArrayList<>();
-        for (ObjectUpdateCached_bObjectData data:objectUpdateCached.bobjectdata) {
-            int id=data.vid.value;
-            int crc=data.vcrc.value;
+        for (final ObjectUpdateCached_bObjectData data:objectUpdateCached.bobjectdata) {
+            final int id=data.vid.value;
+            final int crc=data.vcrc.value;
             if (!event.region().hasObject(id)) {
                 if (Debug.TRACKNEWOBJECTS) { log.finer("Cached update to unknown object "+id+" in region "+event.region().getName()); }
-                RequestMultipleObjects_bObjectData reqod=new RequestMultipleObjects_bObjectData();
+                final RequestMultipleObjects_bObjectData reqod=new RequestMultipleObjects_bObjectData();
                 reqod.vcachemisstype=new U8(0);
                 reqod.vid=data.vid;
                 request.bobjectdata.add(reqod);
@@ -176,37 +176,37 @@ public class Objects extends Handler {
         if (!request.bobjectdata.isEmpty()) { event.region().circuit().send(request,true); }
     }
  
-    public void objectUpdateCompressedUDPImmediate(@Nonnull UDPEvent event) {
-        ObjectUpdateCompressed ouc=(ObjectUpdateCompressed) event.body();
-        Regional region=event.region();
-        for (ObjectUpdateCompressed_bObjectData data:ouc.bobjectdata) {
-            ByteBuffer buffer=ByteBuffer.wrap(data.vdata.value);
-            LLUUID uuid=new LLUUID(buffer);
-            int localid=new U32(buffer).value;
-            byte pcode=buffer.get();
-            boolean isnew=!(region.hasObject(localid));
-            ObjectData object=region.getObject(localid);
+    public void objectUpdateCompressedUDPImmediate(@Nonnull final UDPEvent event) {
+        final ObjectUpdateCompressed ouc=(ObjectUpdateCompressed) event.body();
+        final Regional region=event.region();
+        for (final ObjectUpdateCompressed_bObjectData data:ouc.bobjectdata) {
+            final ByteBuffer buffer=ByteBuffer.wrap(data.vdata.value);
+            final LLUUID uuid=new LLUUID(buffer);
+            final int localid=new U32(buffer).value;
+            final byte pcode=buffer.get();
+            final boolean isnew=!(region.hasObject(localid));
+            final ObjectData object=region.getObject(localid);
             object.fullid=uuid;
             
-            byte state=buffer.get();
+            final byte state=buffer.get();
             object.crc=new U32(buffer).value;
-            byte materia=buffer.get();
+            final byte materia=buffer.get();
             object.clickaction=new U8(buffer);
             object.scale=new LLVector3(buffer);
-            LLVector3 position=new LLVector3(buffer);
+            final LLVector3 position=new LLVector3(buffer);
             object.position(position.x, position.y, position.z);
-            LLQuaternion rotation=new LLQuaternion(buffer);
-            int compressedflags=new U32(buffer).value;
+            final LLQuaternion rotation=new LLQuaternion(buffer);
+            final int compressedflags=new U32(buffer).value;
             object.owner=new LLUUID(buffer);
-            if ((compressedflags & ANGULARVEL.getValue())==ANGULARVEL.getValue()) { LLQuaternion angularvel=new LLQuaternion(buffer); }
+            if ((compressedflags & ANGULARVEL.getValue())==ANGULARVEL.getValue()) { final LLQuaternion angularvel=new LLQuaternion(buffer); }
             if ((compressedflags & PARENT.getValue())==PARENT.getValue()) { object.parentid=new U32(buffer); }
-            if ((compressedflags & TREE.getValue())==TREE.getValue()) { byte treespecies=buffer.get(); } else
+            if ((compressedflags & TREE.getValue())==TREE.getValue()) { final byte treespecies=buffer.get(); } else
             {
-                if ((compressedflags & SCRACHPAD.getValue())==SCRACHPAD.getValue()) { String scratchpad=BotUtils.readZeroTerminatedString(buffer); }
+                if ((compressedflags & SCRACHPAD.getValue())==SCRACHPAD.getValue()) { final String scratchpad=BotUtils.readZeroTerminatedString(buffer); }
             }
             if ((compressedflags & TEXT.getValue())==TEXT.getValue()) {object.floattext=BotUtils.readZeroTerminatedString(buffer);}
-            if ((compressedflags & MEDIAURL.getValue())==MEDIAURL.getValue()) { String mediaurl=BotUtils.readZeroTerminatedString(buffer); }
-            if ((compressedflags & PARTICLES.getValue())==PARTICLES.getValue()) { byte[] particles=new byte[86]; buffer.get(particles); }
+            if ((compressedflags & MEDIAURL.getValue())==MEDIAURL.getValue()) { final String mediaurl=BotUtils.readZeroTerminatedString(buffer); }
+            if ((compressedflags & PARTICLES.getValue())==PARTICLES.getValue()) { final byte[] particles=new byte[86]; buffer.get(particles); }
             // extra parameters
             /*
             U8 extraparamcount=new U8(buffer);
@@ -230,12 +230,12 @@ public class Objects extends Handler {
     
     @Nullable
     @CmdHelp(description="Lookup or request a prim by UUID")
-    public String objectUUIDCommand(@Nonnull CommandEvent command,
-                                    @ParamHelp(description="Prim UUID")
-            String uuid) {
-        Regional region=command.region();
-        LLUUID lluuid=new LLUUID(uuid);
-        ObjectData od=region.getObject(lluuid);
+    public String objectUUIDCommand(@Nonnull final CommandEvent command,
+                                    @ParamHelp(description="Prim UUID") final
+                                    String uuid) {
+        final Regional region=command.region();
+        final LLUUID lluuid=new LLUUID(uuid);
+        final ObjectData od=region.getObject(lluuid);
         if (od==null) { return "Object not found by UUID"; }
         return od.toString();
     }
@@ -243,17 +243,17 @@ public class Objects extends Handler {
     
     @Nonnull
     @CmdHelp(description="Lookup or request a prim by local id")
-    public String objectGetCommand(@Nonnull CommandEvent command,
-                                   @Nonnull @ParamHelp(description="Local prim id (32 bit int)")
-            String localid) {
-        Regional region=command.region();
-        int id=Integer.parseInt(localid);
+    public String objectGetCommand(@Nonnull final CommandEvent command,
+                                   @Nonnull @ParamHelp(description="Local prim id (32 bit int)") final
+                                   String localid) {
+        final Regional region=command.region();
+        final int id=Integer.parseInt(localid);
         if (region.hasObject(id)) { return "Exists as "+region.getObject(id).name; }
-        RequestMultipleObjects request=new RequestMultipleObjects();
+        final RequestMultipleObjects request=new RequestMultipleObjects();
         request.bagentdata.vagentid=bot.getUUID();
         request.bagentdata.vsessionid=bot.getSession();
         request.bobjectdata=new ArrayList<>();
-        RequestMultipleObjects_bObjectData reqod=new RequestMultipleObjects_bObjectData();
+        final RequestMultipleObjects_bObjectData reqod=new RequestMultipleObjects_bObjectData();
         reqod.vcachemisstype=new U8(0);
         reqod.vid=new U32(id);
         request.bobjectdata.add(reqod);
@@ -263,28 +263,28 @@ public class Objects extends Handler {
 
     @Nonnull
     @CmdHelp(description="Return a prim by UUID or localid")
-    public String objectReturnCommand(@Nonnull CommandEvent command,
-                                      @Nullable @ParamHelp(description="UUID of prim to return")
-            String primuuid,
-                                      @Nullable @ParamHelp(description = "LocalID of prim to return")
-            String localid) {
-        Regional region=command.region();
+    public String objectReturnCommand(@Nonnull final CommandEvent command,
+                                      @Nullable @ParamHelp(description="UUID of prim to return") final
+                                      String primuuid,
+                                      @Nullable @ParamHelp(description = "LocalID of prim to return") final
+                                          String localid) {
+        final Regional region=command.region();
         // One way or another we need the local ID
         int id=0;
         if (localid!=null) { id=Integer.parseInt(localid); } else
         {
             if (primuuid==null) { return "9 - You must supply Prim UUID or Local simulator ID"; }
             // extract by primuuid
-            LLUUID uuid=new LLUUID(primuuid);
-            ObjectData od=region.getObject(uuid);
+            final LLUUID uuid=new LLUUID(primuuid);
+            final ObjectData od=region.getObject(uuid);
             if (od==null) { return "1 - Could not find object by UUID "+primuuid; }
             id=od.id.value;
         }
-        DeRezObject dro=new DeRezObject();
+        final DeRezObject dro=new DeRezObject();
         // conn into
         dro.bagentdata.vagentid=bot.getUUID(); dro.bagentdata.vsessionid=bot.getSession();
         // object to return
-        DeRezObject_bObjectData drood=new DeRezObject_bObjectData();
+        final DeRezObject_bObjectData drood=new DeRezObject_bObjectData();
         drood.vobjectlocalid=new U32(id);
         dro.bobjectdata=new ArrayList<>(); dro.bobjectdata.add(drood);
         // derez config - type 9 is return to owner, 10 to return to 'last owner'.  9 seems to work :P

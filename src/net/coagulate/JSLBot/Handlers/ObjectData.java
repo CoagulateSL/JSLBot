@@ -16,43 +16,43 @@ import javax.annotation.Nullable;
 
 public class ObjectData {
     @Nullable
-    public U32 id=null;
+    public U32 id;
     @Nullable
-    public LLUUID fullid=null;
+    public LLUUID fullid;
     @Nullable
-    public U8 clickaction=null;
+    public U8 clickaction;
     @Nullable
-    public LLVector3 scale=null;
+    public LLVector3 scale;
     @Nullable
-    public U32 parentid=null;
+    public U32 parentid;
     @Nullable
-    public String name=null;
-    public boolean requested=false;
+    public String name;
+    public boolean requested;
     @Nullable
-    public String description=null;
+    public String description;
     @Nullable
-    public LLUUID owner=null;
+    public LLUUID owner;
     @Nullable
-    public LLUUID group=null;
+    public LLUUID group;
     @Nullable
-    public LLUUID lastowner=null;
-    public boolean agent=false;
+    public LLUUID lastowner;
+    public boolean agent;
     @Nonnull
     public String floattext="";
     public final JSLBot bot;
     private float x=-1;
     private float y=-1;
     private float z=-1;
-    public int crc=0;
-    public ObjectData(JSLBot bot,int id) { this.bot=bot; this.id=new U32(id); }
-    public ObjectData(JSLBot bot, @Nullable U32 id) { this.bot=bot; this.id=id; }
+    public int crc;
+    public ObjectData(final JSLBot bot, final int id) { this.bot=bot; this.id=new U32(id); }
+    public ObjectData(final JSLBot bot, @Nullable final U32 id) { this.bot=bot; this.id=id; }
     @Nullable
     public String toString() {
         String r="";
         if (id!=null) { r+="#"+id.value; } else { r+="id??"; }
         r+="@<"+x+","+y+","+z+"> ";
         if (clickaction!=null) { r+=" onClick:"+clickaction; }
-        if (scale!=null) { r+=" Size:"+scale.toString(); }
+        if (scale!=null) { r+=" Size:"+ scale; }
         if (parentid!=null) { r+=" Parent:"+parentid.value; }
         if (name!=null) { r+=" '"+name+"'"; }
         if (description!=null) { r+=" ("+description+")"; }
@@ -62,7 +62,7 @@ public class ObjectData {
         return r;
     }
 
-    public void position(float newx,float newy,float newz) {
+    public void position(final float newx, final float newy, final float newz) {
         //System.out.println(newx+","+newy+","+newz);
         x=newx; y=newy; z=newz;
         if (fullid!=null && bot!=null && bot.getUUID()!=null) {

@@ -14,13 +14,13 @@ import javax.annotation.Nullable;
  */
 public abstract class Authorisation {
     protected Logger log;
-    public Authorisation(@Nonnull JSLBot bot, Configuration c){
+    public Authorisation(@Nonnull final JSLBot bot, final Configuration c){
         initLogger(bot);
     }
 
-	protected Authorisation(JSLBot bot) { initLogger(bot); }
+	protected Authorisation(final JSLBot bot) { initLogger(bot); }
 
-	private void initLogger(JSLBot bot) {log=bot.getLogger("Authorisation."+this.getClass().getSimpleName());}
+	private void initLogger(final JSLBot bot) {log=bot.getLogger("Authorisation."+ getClass().getSimpleName());}
 	/** Returns null if approved, otherwise some explanative text
      * @param event The CommandEvent to approve/reject
      * @return  Null if approved, otherwise a rejection reason.

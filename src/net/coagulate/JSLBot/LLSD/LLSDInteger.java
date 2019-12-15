@@ -10,20 +10,20 @@ import javax.annotation.Nonnull;
  */
 public class LLSDInteger extends Atomic {
 
-    int value=0;
-    public LLSDInteger(int a) {
+    int value;
+    public LLSDInteger(final int a) {
         value=a;
     }
 
-    LLSDInteger(@Nonnull Node item) {
-        String str=item.getTextContent();
+    LLSDInteger(@Nonnull final Node item) {
+        final String str=item.getTextContent();
         if (str.isEmpty()) { return; }
         value=Integer.parseInt(str);
     }
 
     @Nonnull
     @Override
-    public String toXML(String lineprefix) {
+    public String toXML(final String lineprefix) {
         return lineprefix+"<integer>"+value+"</integer>\n";
     }
     @Nonnull

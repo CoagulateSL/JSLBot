@@ -13,15 +13,15 @@ public abstract class Handler {
     protected final JSLBot bot;
     protected Configuration config;
     
-    public Handler(@Nonnull JSLBot bot, Configuration config){
+    public Handler(@Nonnull final JSLBot bot, final Configuration config){
         this.bot=bot;
         this.config=config;
-        this.log=bot.getLogger("Handler."+this.getClass().getSimpleName());
+        log =bot.getLogger("Handler."+ getClass().getSimpleName());
     }
     @Nonnull
     @Override
     /** Name of the handler */
-    public String toString() { return bot.toString()+"/"+this.getClass().getSimpleName(); }
+    public String toString() { return bot +"/"+ getClass().getSimpleName(); }
     /** Hook for post login activities
      */
     public void loggedIn() {}

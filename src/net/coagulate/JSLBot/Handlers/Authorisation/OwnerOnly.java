@@ -22,10 +22,10 @@ public class OwnerOnly extends Authorisation {
      * @param bot The creating bot
      * @param c The configuration, from which "ownerusername" and "owneruuid" will be read.
      */
-    public OwnerOnly(@Nonnull JSLBot bot, @Nonnull Configuration c) {
+    public OwnerOnly(@Nonnull final JSLBot bot, @Nonnull final Configuration c) {
         super(bot,c);
         ownerusername=c.get("ownerusername");
-        String owneruuidstr=c.get("owneruuid");
+        final String owneruuidstr=c.get("owneruuid");
         owneruuid=null;
         if (owneruuidstr!=null) { owneruuid=new LLUUID(owneruuidstr); }
         if (ownerusername==null && owneruuid==null) { log.warning("OwnerAuth configured but no owner uuid or name was found, essentially in DenyAll mode"); return; }
@@ -42,10 +42,10 @@ public class OwnerOnly extends Authorisation {
      */
     @Nullable
     @Override
-    public String approve(@Nonnull CommandEvent event) {
+    public String approve(@Nonnull final CommandEvent event) {
         if (owneruuid==null && ownerusername==null) { return "Owner authorisation configured but no owner set, essentially denying all"; }
-        String invokerusername=event.invokerUsername();
-        LLUUID invokeruuid=event.invokerUUID();
+        final String invokerusername=event.invokerUsername();
+        final LLUUID invokeruuid=event.invokerUUID();
         if (invokeruuid==null && invokerusername==null) { return "No invoker in supplied command event"; }
         if (invokeruuid!=null && invokeruuid.equals(owneruuid)) { return null; } // approve
         if (invokerusername!=null && invokerusername.equalsIgnoreCase(ownerusername)) { return null; }

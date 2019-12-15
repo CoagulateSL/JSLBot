@@ -34,11 +34,11 @@ public class Brain {
     private final JSLBot bot;
     private boolean procrastinate=true;
 
-    Brain(@Nonnull JSLBot bot) {
+    Brain(@Nonnull final JSLBot bot) {
         auth=new DenyAll(bot);
         log=bot.getLogger("Brain");
         this.bot=bot;
-        this.brain = new HashSet<>();
+        brain = new HashSet<>();
     }
     boolean isEmpty() {return brain.isEmpty();}
 
@@ -57,8 +57,8 @@ public class Brain {
      * Should be done before initialisation.
      * @param handlers Array of handler names, full class name if outside net.coagulate.JSLBot.Handlers
      */
-    void loadHandlers(@Nonnull String[] handlers) {
-        for (String handler:handlers) {
+    void loadHandlers(@Nonnull final String[] handlers) {
+        for (final String handler:handlers) {
             loadHandler(handler);
         }
     }
@@ -67,12 +67,12 @@ public class Brain {
      * 
      * @param handlername Class name, can be abbreviated if in core Handlers package
      */
-    private void loadHandler(@Nullable String handlername){
+    private void loadHandler(@Nullable final String handlername){
         if (handlername==null) { throw new NullPointerException("No handler specified"); }
         try {
-            Handler h=createHandler(handlername);
+            final Handler h=createHandler(handlername);
             brain.add(h);
-        } catch (InvocationTargetException ex) {
+        } catch (final InvocationTargetException ex) {
             Throwable t=ex;
             if (ex.getCause()!=null) { t=ex.getCause(); }
             log.log(Level.SEVERE,"Exception loading handler "+handlername,t);
@@ -84,10 +84,10 @@ public class Brain {
      */
     private void populateCommandMap() {
         final boolean debug=false;
-        for (Handler h:brain) {
-            for (Method m:h.getClass().getMethods()) {
+        for (final Handler h:brain) {
+            for (final Method m:h.getClass().getMethods()) {
                 if (m.getAnnotation(CmdHelp.class)!=null) {
-                    String commandname=m.getName().toLowerCase();
+                    final String commandname=m.getName().toLowerCase();
                     if (commandmap.containsKey(commandname)) {
                         log.severe("Duplicate definition for command "+commandname);
                     } else {
@@ -107,7 +107,7 @@ public class Brain {
      * @param name Command name (without suffix)
      * @return Command's implementing method
      */
-    public Method getCommand(String name) {
+    public Method getCommand(final String name) {
         return commandmap.get((name+"command").toLowerCase());
     }
     /** Get all commands.
@@ -125,15 +125,15 @@ public class Brain {
      * @throws InvocationTargetException If the handler constructor throws an error.
      */
     @Nonnull
-    private Handler createHandler(@Nonnull String name) throws InvocationTargetException {
+    private Handler createHandler(@Nonnull final String name) throws InvocationTargetException {
         try {
             String classname=name;
             if (!name.contains(".")) { classname="net.coagulate.JSLBot.Handlers."+name; }
-            Class<?> c=Class.forName(classname);
-            Configuration subconfiguration=bot.config.subspace(name);
-            Constructor<?> cons=c.getConstructor(JSLBot.class,Configuration.class);
+            final Class<?> c=Class.forName(classname);
+            final Configuration subconfiguration=bot.config.subspace(name);
+            final Constructor<?> cons=c.getConstructor(JSLBot.class,Configuration.class);
             return (Handler) (cons.newInstance(bot,subconfiguration));
-        } catch (@Nonnull SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
+        } catch (@Nonnull final SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
             throw new AssertionError("Handler "+name+" fails to meet programming contract",ex);
         }
     }
@@ -144,9 +144,9 @@ public class Brain {
      * @return Event name with first character in lower case
      */
     @Nonnull
-    private String formatEventName(@Nonnull Event event) {
-        String method=event.getName();
-        char[] c =method.toCharArray();
+    private String formatEventName(@Nonnull final Event event) {
+        final String method=event.getName();
+        final char[] c =method.toCharArray();
         c[0]=Character.toLowerCase(c[0]);
         return new String(c);
     }
@@ -158,8 +158,8 @@ public class Brain {
 
     // what passes for an API :P
     @Nullable
-    public String execute(@Nonnull Event event) { return execute(event,true); }
-    public void queue(Event event) { synchronized(queue) { queue.add(event); queue.notifyAll(); } }
+    public String execute(@Nonnull final Event event) { return execute(event,true); }
+    public void queue(final Event event) { synchronized(queue) { queue.add(event); queue.notifyAll(); } }
     
     private final Map<String,Method> commandmap=new HashMap<>();
     
@@ -173,8 +173,8 @@ public class Brain {
      * @return Response, if any, of the event, may be null.
      */
     @Nullable
-    private String execute(@Nonnull Event event, boolean immediate) {
-        String messageid=event.getPrefixedName();
+    private String execute(@Nonnull final Event event, final boolean immediate) {
+        final String messageid=event.getPrefixedName();
         String fen=formatEventName(event);
         fen=fen+event.typeString();
         String method=fen;
@@ -186,27 +186,27 @@ public class Brain {
         if (event instanceof UDPEvent || event instanceof XMLEvent) { handlers=handlermap.get(method); }
         if (event instanceof CommandEvent ) {
             handlers=new HashSet<>();
-            Method handler = commandmap.get(method.toLowerCase());
+            final Method handler = commandmap.get(method.toLowerCase());
             if (handler==null) { return "Unknown Command:"+method.toLowerCase(); }
             handlers.add(handler);
         }
         if (Debug.TRACKCOMMANDS && event instanceof CommandEvent) { event.log(FINEST,"Entering executor in "+(immediate?"immediate":"delayed")+" mode"); }
         if (handlers==null) { log.severe("Found a null map for "+method+", but this should have been populated"); return""; }
-        for (Method handler:handlers) {
+        for (final Method handler:handlers) {
             try {
-                Object callon=findHandler(handler);
+                final Object callon=findHandler(handler);
                 if (event instanceof UDPEvent) { response=(String) handler.invoke(callon, event); }
                 if (event instanceof XMLEvent) { response=(String) handler.invoke(callon, event); }
                 if (event instanceof CommandEvent) {
-                    CommandEvent cmd=(CommandEvent)event;
+                    final CommandEvent cmd=(CommandEvent)event;
                     response=cmd.run(callon,handler);
                     cmd.response(response);
                 }
-            } catch (IllegalAccessException ex) {
+            } catch (final IllegalAccessException ex) {
                 log.warning("Method "+method+" has incorrect access modifier"); // impossible?
-            } catch (IllegalArgumentException ex) {
+            } catch (final IllegalArgumentException ex) {
                 log.warning("Method "+method+" has incorrect parameters"); // impossible?
-            } catch (InvocationTargetException ex) {
+            } catch (final InvocationTargetException ex) {
                 Throwable t=ex;
                 if (t.getCause()!=null) { t=t.getCause(); }
                 log.log(SEVERE,"Method "+method+" threw an error:", t);
@@ -235,9 +235,9 @@ public class Brain {
      * @return Handler that contains the method
      */
     @Nonnull
-    private Object findHandler(@Nonnull Method method) {
-        Class<?> c=method.getDeclaringClass();
-        for (Handler h:brain) {
+    private Object findHandler(@Nonnull final Method method) {
+        final Class<?> c=method.getDeclaringClass();
+        for (final Handler h:brain) {
             if (h.getClass().equals(c)) { return h; }
         }
         throw new IllegalArgumentException("Could not find declaring class for "+method);
@@ -247,7 +247,7 @@ public class Brain {
      * Searches for Immediate and Delayed variations of UDP and XML events.
      * @param event Event to scan for
      */
-    private void populateHandlerMap(Event event) {
+    private void populateHandlerMap(final Event event) {
         if (event instanceof UDPEvent || event instanceof XMLEvent) {
             populateHandlerMap(event,"Immediate");
             populateHandlerMap(event,"Delayed");
@@ -259,19 +259,19 @@ public class Brain {
      * @param event Event to populate for
      * @param suffix Suffix to search for, e.g. Immediate or Delayed
      */
-    private void populateHandlerMap(@Nonnull Event event, String suffix) {
+    private void populateHandlerMap(@Nonnull final Event event, final String suffix) {
         // find all the handlers that have a method like this and accumulate them into a set =)
         String fen=formatEventName(event);
         fen=fen+event.typeString();
         fen=fen+suffix;
-        Set<Method> methods=new HashSet<>();
-        for (Handler handler:brain) {
+        final Set<Method> methods=new HashSet<>();
+        for (final Handler handler:brain) {
             try {
                 if (event instanceof UDPEvent) { methods.add(handler.getClass().getMethod(fen, UDPEvent.class)); }
                 if (event instanceof XMLEvent) { methods.add(handler.getClass().getMethod(fen, XMLEvent.class)); }
-            } catch (NoSuchMethodException ex) {
+            } catch (final NoSuchMethodException ex) {
                 // this is OK and probably the default case, not every module implements everything.
-            } catch (SecurityException ex) {
+            } catch (final SecurityException ex) {
                 // this is less OK
                 log.log(WARNING, "Method {0} is inaccessible, this is probably unintentional", fen);
             }
@@ -290,7 +290,7 @@ public class Brain {
     void think() {
         Event event=null;
         synchronized(queue) {
-            if (queue.isEmpty() && procrastinate) { Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating"); try { queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS); } catch (InterruptedException iex) {} }
+            if (queue.isEmpty() && procrastinate) { Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating"); try { queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS); } catch (final InterruptedException iex) {} }
             if (!queue.isEmpty()) { event=queue.remove(0); }
         }
         if (event!=null) { execute(event,false); }
@@ -312,14 +312,14 @@ public class Brain {
      * Some handlers will generate events such as "query balance" etc
      */
     void loggedIn() {
-        for (Handler h:brain) {
-            try { h.loggedIn(); } catch (Exception e) { log.log(SEVERE,"Handler "+h.toString()+" exceptioned handling login",e); }
+        for (final Handler h:brain) {
+            try { h.loggedIn(); } catch (final Exception e) { log.log(SEVERE,"Handler "+ h +" exceptioned handling login",e); }
         }
     }
 
     private void callMaintenance() {
-        for (Handler h:brain) {
-            try {h.maintenance();} catch (Exception e) { log.log(SEVERE,"Handler "+h.toString()+" exceptioned during maintenance",e); }
+        for (final Handler h:brain) {
+            try {h.maintenance();} catch (final Exception e) { log.log(SEVERE,"Handler "+ h +" exceptioned during maintenance",e); }
         }
     }    
     
@@ -338,13 +338,13 @@ public class Brain {
         }
         // not not any null slots, whats the oldest timer?
         Date oldest=null;
-        for (Date d:launches) {
+        for (final Date d:launches) {
             if (oldest==null) { oldest=d; } 
             else { if (d.before(oldest)) { oldest=d; } }
         }
         if (oldest==null) { throw new AssertionError("How is oldest null at this point?  if null we should have hit 'launched less than 5 times'"); }
-        long ago=new Date().getTime()-oldest.getTime();
-        int secondsago=(int)(ago/1000f);
+        final long ago=new Date().getTime()-oldest.getTime();
+        final int secondsago=(int)(ago/1000f);
         log.info("Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
         if (ago<(Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS)) { 
             log.severe("Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");
@@ -368,7 +368,7 @@ public class Brain {
         // no configuration here yet, hard coded 15 minute sleep, have fun with that.
         for (int i=15;i>0;i--) {
             log.severe("Reconnection Safety: RECONNECTION SAFETY HAS TRIPPED.  THREAD FORCE-SLEEPING FOR "+i+" MINUTES.");
-            try { Thread.sleep(60000); } catch (InterruptedException e) {}
+            try { Thread.sleep(60000); } catch (final InterruptedException e) {}
         }
         log.warning("Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
     }    
@@ -377,7 +377,7 @@ public class Brain {
      * 
      * @param auth New module
      */
-    public void setAuth(@Nullable Authorisation auth) {
+    public void setAuth(@Nullable final Authorisation auth) {
         if (auth==null) { this.auth=new DenyAll(bot); }
         else { this.auth=auth; }
     }
@@ -388,12 +388,12 @@ public class Brain {
      * @return null if approved, otherwise rejection reason
      */
     @Nullable
-    public String auth(CommandEvent event) {
+    public String auth(final CommandEvent event) {
         return auth.approve(event);
     }
     @Nonnull
     @Override
-    public String toString() { return bot.toString()+"/Brain"; }
+    public String toString() { return bot +"/Brain"; }
 
     /** Get a handler by name.
      * 
@@ -401,8 +401,8 @@ public class Brain {
      * @return Handler if found, otherwise exception.
      */
     @Nonnull
-    Handler getHandler(String name) {
-        for (Handler h:brain) {
+    Handler getHandler(final String name) {
+        for (final Handler h:brain) {
             if (h.getClass().getSimpleName().equals(name)) { return h; }
         }
         throw new IllegalArgumentException("No handler called '"+name+"' is loaded");

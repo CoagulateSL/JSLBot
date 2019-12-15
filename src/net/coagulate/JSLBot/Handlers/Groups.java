@@ -21,22 +21,22 @@ import java.util.Map;
  */
 public class Groups extends Handler {
 
-    public Groups(@Nonnull JSLBot bot, Configuration config) {
+    public Groups(@Nonnull final JSLBot bot, final Configuration config) {
         super(bot,config);
     }
 
     @Nonnull
     @CmdHelp(description = "Invite a user to a given group/role")
-    public String groupInviteCommand(CommandEvent command, String avataruuid, String groupuuid, @Nullable String roleuuid) {
-        LLUUID avatar=new LLUUID(avataruuid);
-        LLUUID group=new LLUUID(groupuuid);
+    public String groupInviteCommand(final CommandEvent command, final String avataruuid, final String groupuuid, @Nullable final String roleuuid) {
+        final LLUUID avatar=new LLUUID(avataruuid);
+        final LLUUID group=new LLUUID(groupuuid);
         LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
-        InviteGroupRequest igr=new InviteGroupRequest();
+        final InviteGroupRequest igr=new InviteGroupRequest();
         igr.bagentdata.vagentid=bot.getUUID();
         igr.bagentdata.vsessionid=bot.getSession();
         igr.bgroupdata.vgroupid=group;
         igr.binvitedata=new ArrayList<>();
-        InviteGroupRequest_bInviteData igrid=new InviteGroupRequest_bInviteData();
+        final InviteGroupRequest_bInviteData igrid=new InviteGroupRequest_bInviteData();
         igrid.vinviteeid=avatar;
         igrid.vroleid=role;
         igr.binvitedata.add(igrid);
@@ -47,16 +47,16 @@ public class Groups extends Handler {
 
     @Nonnull
     @CmdHelp(description = "Eject a user from a given group/role")
-    public String groupEjectCommand(CommandEvent command,String avataruuid,String groupuuid) {
-        LLUUID avatar=new LLUUID(avataruuid);
-        LLUUID group=new LLUUID(groupuuid);
+    public String groupEjectCommand(final CommandEvent command, final String avataruuid, final String groupuuid) {
+        final LLUUID avatar=new LLUUID(avataruuid);
+        final LLUUID group=new LLUUID(groupuuid);
         //LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
-        EjectGroupMemberRequest egr=new EjectGroupMemberRequest();
+        final EjectGroupMemberRequest egr=new EjectGroupMemberRequest();
         egr.bagentdata.vagentid=bot.getUUID();
         egr.bagentdata.vsessionid=bot.getSession();
         egr.bgroupdata.vgroupid=group;
         egr.bejectdata=new ArrayList<>();
-        EjectGroupMemberRequest_bEjectData egrid=new EjectGroupMemberRequest_bEjectData();
+        final EjectGroupMemberRequest_bEjectData egrid=new EjectGroupMemberRequest_bEjectData();
         egrid.vejecteeid=avatar;
         egr.bejectdata.add(egrid);
         bot.send(egr,true);
@@ -66,10 +66,10 @@ public class Groups extends Handler {
     
     @Nonnull
     @CmdHelp(description="List groups the logged in agent is a member of")
-    public String groupsListCommand(CommandEvent command) {
-        StringBuilder resp= new StringBuilder("Groups:");
+    public String groupsListCommand(final CommandEvent command) {
+        final StringBuilder resp= new StringBuilder("Groups:");
         synchronized(groups) {
-            for(GroupData g:groups.values()) {
+            for(final GroupData g:groups.values()) {
                 resp.append("\n");
                 resp.append(g.groupname).append(" (").append(g.uuid().toUUIDString()).append(") ");
                 if (g.contribution!=0) { resp.append("Contribution:").append(g.contribution).append(" "); }
@@ -84,10 +84,10 @@ public class Groups extends Handler {
     private final Map<LLUUID,GroupData> groups=new HashMap<>();
 
     @Nullable
-    private LLUUID findGroupUUID(String name) {
+    private LLUUID findGroupUUID(final String name) {
         synchronized(groups) {
-            for (Map.Entry<LLUUID, GroupData> entry : groups.entrySet()) {
-                GroupData gd= entry.getValue();
+            for (final Map.Entry<LLUUID, GroupData> entry : groups.entrySet()) {
+                final GroupData gd= entry.getValue();
                 if (gd!=null) {
                     if (name.equalsIgnoreCase(gd.groupname)) { return entry.getKey(); }
                 }
@@ -96,21 +96,21 @@ public class Groups extends Handler {
         return null;
     }
     
-    public void improvedInstantMessageUDPImmediate(@Nonnull UDPEvent event) {
-        ImprovedInstantMessage m=(ImprovedInstantMessage)event.body();
+    public void improvedInstantMessageUDPImmediate(@Nonnull final UDPEvent event) {
+        final ImprovedInstantMessage m=(ImprovedInstantMessage)event.body();
         if (m.bmessageblock.vdialog.value==3) {
-            U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
-            int fee=feeraw.value;
-            LLUUID groupid=m.bmessageblock.vid;
-            Map<String,String> param=new HashMap<>();
+            final U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
+            final int fee=feeraw.value;
+            final LLUUID groupid=m.bmessageblock.vid;
+            final Map<String,String> param=new HashMap<>();
             param.put("groupid",groupid.toString());
-            CommandEvent join=new CommandEvent(bot, event.region(), "acceptGroupInvites", param, null);
+            final CommandEvent join=new CommandEvent(bot, event.region(), "acceptGroupInvites", param, null);
             join.invokerUsername(m.bmessageblock.vfromagentname.toString());
-            String reject=bot.brain().auth(join);
+            final String reject=bot.brain().auth(join);
             byte num=35;
-            if (fee>0) { num=36; log.warning("Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); }
-            if (num==35 && reject!=null) { log.info("Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString()); num=36;}
-            ImprovedInstantMessage im=new ImprovedInstantMessage();
+            if (fee>0) { num=36; log.warning("Rejected charged (L$"+fee+") invite to join group "+groupid.toUUIDString()+" from "+ m.bmessageblock.vfromagentname); }
+            if (num==35 && reject!=null) { log.info("Rejected invite to join group "+groupid.toUUIDString()+" from "+ m.bmessageblock.vfromagentname); num=36;}
+            final ImprovedInstantMessage im=new ImprovedInstantMessage();
             im.bagentdata.vagentid=bot.getUUID();
             im.bagentdata.vsessionid=bot.getSession();
             im.bmessageblock.vfromagentname=new Variable1(bot.getUsername());
@@ -119,13 +119,13 @@ public class Groups extends Handler {
             im.bmessageblock.vid=m.bmessageblock.vid;
             im.bmessageblock.vdialog=new U8(num);
             bot.send(im,true);
-            log.info("Sent accept response to group invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname.toString());
+            log.info("Sent accept response to group invite to join group "+groupid.toUUIDString()+" from "+ m.bmessageblock.vfromagentname);
         }
     }
     
-    public void joinGroupReplyUDPImmediate(@Nonnull UDPEvent event) {
-        JoinGroupReply jgr=(JoinGroupReply)event.body();
-        String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
+    public void joinGroupReplyUDPImmediate(@Nonnull final UDPEvent event) {
+        final JoinGroupReply jgr=(JoinGroupReply)event.body();
+        final String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
         if (jgr.bgroupdata.vsuccess.value!=0) {
             log.info("Joined group "+groupid);
         } else {
@@ -133,21 +133,21 @@ public class Groups extends Handler {
         }
     }
 
-    public void agentGroupDataUpdateXMLDelayed(@Nonnull XMLEvent event) {
-        LLSDMap body=event.map();
-        LLSDArray groupslist=(LLSDArray) body.get("GroupData");
+    public void agentGroupDataUpdateXMLDelayed(@Nonnull final XMLEvent event) {
+        final LLSDMap body=event.map();
+        final LLSDArray groupslist=(LLSDArray) body.get("GroupData");
         synchronized(groups) {
-            for (Atomic groupatom : groupslist) {
-                LLSDMap group = (LLSDMap) groupatom;
-                String groupname = group.get("GroupName").toString();
-                LLSDBinary grouppowers = (LLSDBinary) group.get("GroupPowers");
-                boolean listinprofile = ((LLSDBoolean) group.get("ListInProfile", new LLSDBoolean(true))).get();
-                boolean acceptnotices = ((LLSDBoolean) group.get("AcceptNotices", new LLSDBoolean(true))).get();
-                int contribution = ((LLSDInteger) group.get("Contribution")).get();
+            for (final Atomic groupatom : groupslist) {
+                final LLSDMap group = (LLSDMap) groupatom;
+                final String groupname = group.get("GroupName").toString();
+                final LLSDBinary grouppowers = (LLSDBinary) group.get("GroupPowers");
+                final boolean listinprofile = ((LLSDBoolean) group.get("ListInProfile", new LLSDBoolean(true))).get();
+                final boolean acceptnotices = ((LLSDBoolean) group.get("AcceptNotices", new LLSDBoolean(true))).get();
+                final int contribution = ((LLSDInteger) group.get("Contribution")).get();
                 LLUUID uuid = ((LLSDUUID) group.get("GroupID")).toLLUUID();
                 GroupData g = null;
                 synchronized (groups) {
-                    for (LLUUID compare : groups.keySet()) {
+                    for (final LLUUID compare : groups.keySet()) {
                         if (compare.equals(uuid)) {
                             g = groups.get(compare);
                             uuid = compare;
@@ -169,30 +169,30 @@ public class Groups extends Handler {
 
     final Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
     @Nullable
-    public LLSDMap getMembership(LLUUID uuid) {
-        for (Map.Entry<LLUUID, LLSDMap> entry : groupmembership.entrySet()) { if (entry.getKey().equals(uuid)) { return entry.getValue(); } }
+    public LLSDMap getMembership(final LLUUID uuid) {
+        for (final Map.Entry<LLUUID, LLSDMap> entry : groupmembership.entrySet()) { if (entry.getKey().equals(uuid)) { return entry.getValue(); } }
         return null;
     }
     @CmdHelp(description="Collect a group's roster")
-    public void groupRosterCommand(CommandEvent command,String uuid) throws IOException {
-        LLSDMap req=new LLSDMap();
+    public void groupRosterCommand(final CommandEvent command, final String uuid) throws IOException {
+        final LLSDMap req=new LLSDMap();
         req.put("group_id",new LLSDUUID(uuid));
-        LLSD llsd=new LLSD(req);
-        LLSDMap response = bot.getCAPS().invokeCAPS("GroupMemberData", "", llsd);
-        LLSDMap members=(LLSDMap) response.get("members");
+        final LLSD llsd=new LLSD(req);
+        final LLSDMap response = bot.getCAPS().invokeCAPS("GroupMemberData", "", llsd);
+        final LLSDMap members=(LLSDMap) response.get("members");
         if (members==null) { throw new NullPointerException("Failed to extract members map"); }
         groupmembership.put(new LLUUID(uuid),members);
     }
     public static class GroupData {
         @Nullable
-        String groupname=null;
+        String groupname;
         @Nullable
-        LLSDBinary grouppowers=null;
+        LLSDBinary grouppowers;
         boolean listinprofile=true;
         boolean acceptnotices=true;
-        int contribution=0;
+        int contribution;
         @Nullable
-        LLUUID uuid=null;
+        LLUUID uuid;
         @Nonnull
         public LLUUID uuid() {
             if (uuid==null) { throw new IllegalArgumentException("Group data has no UUID?"); }
@@ -202,11 +202,11 @@ public class Groups extends Handler {
     
     @Nonnull
     @CmdHelp(description="Selects a group as active")
-    public String activateGroupCommand(CommandEvent event,
-                                       @Nullable @ParamHelp(description="Group UUID to activate (or zero UUID for none)")
-            String uuid,
-                                       @Nullable @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)")
-            String name)
+    public String activateGroupCommand(final CommandEvent event,
+                                       @Nullable @ParamHelp(description="Group UUID to activate (or zero UUID for none)") final
+                                       String uuid,
+                                       @Nullable @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final
+                                           String name)
     {
         if (uuid==null && name==null) { return "2 - You must supply a group uuid or name"; }
         LLUUID target;
@@ -217,7 +217,7 @@ public class Groups extends Handler {
         }
         if (target == null && "NONE".equals(name)) { target=new LLUUID(); }
         if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
-        ActivateGroup req=new ActivateGroup(bot);
+        final ActivateGroup req=new ActivateGroup(bot);
         req.bagentdata.vgroupid=target;
         bot.send(req,true);
         return "0 - Group activation requested";

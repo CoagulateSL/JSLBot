@@ -36,7 +36,7 @@ public final class CAPS extends Thread {
     @Nonnull
     private final Circuit circuit;
     @Nullable
-    private EventQueue eq=null; @Nullable
+    private EventQueue eq; @Nullable
     EventQueue eventqueue() { return eq; }
     
     /** Create and interrogate CAPS.
@@ -46,9 +46,9 @@ public final class CAPS extends Thread {
      * @param circuit Owning circuit
      * @param capsseed CAPS url
      */
-    public CAPS(@Nonnull Circuit circuit, String capsseed) {
+    public CAPS(@Nonnull final Circuit circuit, final String capsseed) {
         log=circuit.getLogger("CAPS");
-        this.caps=capsseed;
+        caps =capsseed;
         this.circuit=circuit;
     }
     
@@ -58,17 +58,17 @@ public final class CAPS extends Thread {
         try {
             initialise();
             launchEventQueue();
-        } catch (IOException e) {
-            log.log(SEVERE,"CAPS setup failed: "+e.toString(),e);
+        } catch (final IOException e) {
+            log.log(SEVERE,"CAPS setup failed: "+ e,e);
         }
     }
     /** Initialise the CAPS - download the CAPS list from the server */
     private void initialise() throws IOException {
-        LLSDArray req=BotUtils.getCAPSArray();
-        LLSD getcaps=new LLSD(req);
+        final LLSDArray req=BotUtils.getCAPSArray();
+        final LLSD getcaps=new LLSD(req);
         capabilities=invokeXML(caps,getcaps);
     }
-    private boolean launched=false;
+    private boolean launched;
     /** Launch the event queue driver, if the CAPS exists, which it should */
     private synchronized void launchEventQueue() {
         if (launched){return; }
@@ -89,17 +89,17 @@ public final class CAPS extends Thread {
      * @throws MalformedURLException
      * @throws IOException 
      */
-    void getNames(@Nonnull LLUUID agentid) throws MalformedURLException, IOException {
-        LLSDMap map = invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
-        LLSDArray agents=(LLSDArray) map.get("agents");
-        for (Object agento:agents) {
-            LLSDMap agent=(LLSDMap) agento;
+    void getNames(@Nonnull final LLUUID agentid) throws MalformedURLException, IOException {
+        final LLSDMap map = invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
+        final LLSDArray agents=(LLSDArray) map.get("agents");
+        for (final Object agento:agents) {
+            final LLSDMap agent=(LLSDMap) agento;
             //System.out.println(agent.toXML());
-            LLSDUUID describedagent=(LLSDUUID) agent.get("id");
-            LLSDString displayname=(LLSDString) agent.get("display_name");
-            LLSDString firstname=(LLSDString) agent.get("legacy_first_name");
-            LLSDString lastname=(LLSDString) agent.get("legacy_last_name");
-            LLSDString username=(LLSDString) agent.get("username");
+            final LLSDUUID describedagent=(LLSDUUID) agent.get("id");
+            final LLSDString displayname=(LLSDString) agent.get("display_name");
+            final LLSDString firstname=(LLSDString) agent.get("legacy_first_name");
+            final LLSDString lastname=(LLSDString) agent.get("legacy_last_name");
+            final LLSDString username=(LLSDString) agent.get("username");
             Global.displayName(describedagent.toLLUUID(), displayname.toString());
             Global.firstName(describedagent.toLLUUID(), firstname.toString());
             Global.lastName(describedagent.toLLUUID(), lastname.toString());
@@ -116,14 +116,14 @@ public final class CAPS extends Thread {
      * @throws IOException If the CAP fails, or the CAP requested is not known to us
      */
     @Nonnull
-    public LLSDMap invokeCAPS(String capname, String appendtocap, LLSD content) throws IOException
+    public LLSDMap invokeCAPS(final String capname, final String appendtocap, final LLSD content) throws IOException
     {
-        Atomic rawcap = capabilities().get(capname);
+        final Atomic rawcap = capabilities().get(capname);
         if (rawcap==null) {
             //for (String cap:capabilities.keys()) { System.out.println("KNOWN CAP: "+cap); }
             throw new IOException("Unknown CAPS "+capname);
         }
-        String cap=rawcap.toString();
+        final String cap=rawcap.toString();
         return invokeXML(cap+appendtocap,content);
     }
     /** Call a URL for an XML exchange
@@ -134,9 +134,9 @@ public final class CAPS extends Thread {
      * @throws IOException If there is a failure with the CAPS
      */
     @Nonnull
-    public LLSDMap invokeXML(@Nullable String url, @Nullable LLSD content) throws IOException {
+    public LLSDMap invokeXML(@Nullable final String url, @Nullable final LLSD content) throws IOException {
         if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
-        HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
+        final HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
         byte[] postdata=new byte[0];
         if (content==null) {
             connection.setRequestMethod("GET");
@@ -152,13 +152,13 @@ public final class CAPS extends Thread {
         connection.setRequestProperty("charset","utf-8");
         connection.setUseCaches(false);
         if (content!=null) {
-            try( DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
+            try(final DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
                 wr.write( postdata );
             }
         }
-        Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
-        String read=s.next();
-        LLSDMap ret= (LLSDMap) new LLSD(read).getFirst();
+        final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
+        final String read=s.next();
+        final LLSDMap ret= (LLSDMap) new LLSD(read).getFirst();
         if (ret==null) { throw new IOException("Map read was null"); }
         return ret;
     }    
@@ -170,9 +170,9 @@ public final class CAPS extends Thread {
     public String regionName() { return circuit.getRegionName(); }
     @Nonnull
     @Override
-    public String toString() { return circuit.toString()+" / CAPS"; }
+    public String toString() { return circuit +" / CAPS"; }
 
-    public Logger getLogger(String subspace) {
+    public Logger getLogger(final String subspace) {
         return Logger.getLogger(log.getName()+"."+subspace);
     }
 

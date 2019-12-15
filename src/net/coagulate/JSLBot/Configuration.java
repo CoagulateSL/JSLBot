@@ -17,7 +17,7 @@ public abstract class Configuration {
      * @return A new "configuration" that is subspaced.
      */
     @Nonnull
-    public Configuration subspace(String prefix) {
+    public Configuration subspace(final String prefix) {
         return new ConfigurationSubspace(this,prefix);
     }
     /** Get a configuration element, or its default value
@@ -27,8 +27,8 @@ public abstract class Configuration {
      * @return The value, or the defaultvalue if the value was null.
      */
     @Nonnull
-    public String get(String key,@Nonnull String defaultvalue) {
-        String value=get(key);
+    public String get(final String key, @Nonnull final String defaultvalue) {
+        final String value=get(key);
         if (value==null) { return defaultvalue; }
         return value;
     }

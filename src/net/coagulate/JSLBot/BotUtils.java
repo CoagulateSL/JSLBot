@@ -27,9 +27,9 @@ public abstract class BotUtils {
      * @return Hex string representation.
      */
     @Nonnull
-    public static String hex(@Nonnull byte[] in) {
+    public static String hex(@Nonnull final byte[] in) {
         final StringBuilder builder = new StringBuilder();
-        for(byte b : in) {
+        for(final byte b : in) {
             builder.append(String.format("%02x", b));
         }
         return builder.toString();
@@ -43,10 +43,10 @@ public abstract class BotUtils {
     public static String getMac() {
         try {
             // this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
-            Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
+            final Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
             byte[] mac=null;
             while (e.hasMoreElements() && mac==null) {
-                NetworkInterface ni = e.nextElement();
+                final NetworkInterface ni = e.nextElement();
                 mac=ni.getHardwareAddress();
             }
             if (mac == null){
@@ -54,7 +54,7 @@ public abstract class BotUtils {
             }
             //System.out.println("Using mac "+hex(mac)+" from "+stored.toString());
             return hex(mac);
-        } catch (SocketException ex) {
+        } catch (final SocketException ex) {
             throw new AssertionError("Unable to retrieve any network interfaces MAC addres; unsupported platform or no networking present???",ex);
         }
     }
@@ -65,17 +65,17 @@ public abstract class BotUtils {
      * @return MD5 hex hash of the password, with $1$ prefix, as used in SL login protocol
      */
     @Nonnull
-    public static String md5hash(@Nonnull String password) {
+    public static String md5hash(@Nonnull final String password) {
         if (password.startsWith("$1$")) {
             return password; // already hashed, or you have a really unfortunate choice of password :P
         } 
-        MessageDigest md5;
+        final MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (final NoSuchAlgorithmException ex) {
             throw new AssertionError("MD5 hashing is not supported on this platform?");
         }
-        byte[] digest;
+        final byte[] digest;
         digest = md5.digest(password.getBytes(StandardCharsets.UTF_8));
         return "$1$" + hex(digest);
         //return hex(digest);
@@ -93,25 +93,25 @@ public abstract class BotUtils {
      * @throws XmlRpcException
      */
     @Nonnull
-    static Map<Object,Object> loginXMLRPC(@Nonnull JSLBot bot, String firstname, String lastname, @Nonnull String password, String location) throws MalformedURLException, XmlRpcException {
-        XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
+    static Map<Object,Object> loginXMLRPC(@Nonnull final JSLBot bot, final String firstname, final String lastname, @Nonnull String password, final String location) throws MalformedURLException, XmlRpcException {
+        final XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
-        XmlRpcClient client=new XmlRpcClient();
+        final XmlRpcClient client=new XmlRpcClient();
         client.setConfig(config);
-        HashMap<String,Object> params=new HashMap<>();
+        final HashMap<String,Object> params=new HashMap<>();
         params.put("first",firstname);
         params.put("last",lastname);
         params.put("extended_errors",1);
         params.put("start",location);
         params.put("channel","JSLBot <Iain Maltz@Second Life>");
         params.put("platform","Lin");
-        List<String> options=new ArrayList<>();
+        final List<String> options=new ArrayList<>();
         options.add("inventory-root");
         options.add("adult-compliant");
         options.add("buddy-list");
         options.add("login-flags");
         params.put("options",options);
-        String mac=BotUtils.getMac();
+        final String mac=BotUtils.getMac();
         params.put("mac",mac);
         // MD-5 =)
         // TURNS OUT SECOND LIFE ONLY USES THE FIRST 16 CHARS
@@ -120,22 +120,22 @@ public abstract class BotUtils {
         if (password.length()>16 && (!password.startsWith("$1$"))) { password=password.substring(0,16); }
         params.put("passwd",BotUtils.md5hash(password));
         if (Debug.AUTH) {
-            for (Map.Entry<String, Object> entry : params.entrySet()) {
-                System.out.println(entry.getKey() +"="+ entry.getValue().toString());
+            for (final Map.Entry<String, Object> entry : params.entrySet()) {
+                System.out.println(entry.getKey() +"="+ entry.getValue());
             }
         }
-        Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
-        @SuppressWarnings("unchecked") HashMap<Object,Object> result=(HashMap<Object,Object>)resultobject;
+        final Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
+        @SuppressWarnings("unchecked") final HashMap<Object,Object> result=(HashMap<Object,Object>)resultobject;
         if (Debug.AUTH) {
             // dump the result
-            for(Map.Entry<Object, Object> entry : result.entrySet()) {
+            for(final Map.Entry<Object, Object> entry : result.entrySet()) {
                 String printline=(entry.getKey() +" -> ");
-                Object output= entry.getValue();
+                final Object output= entry.getValue();
                 if (output instanceof String) { printline+=("[String] "+ output); }
                 else {
                     if (output instanceof Integer) { printline+=("[Integer] "+ output); }
                     else {
-                        String clas= entry.getValue().getClass().getTypeName();
+                        final String clas= entry.getValue().getClass().getTypeName();
                         printline+="["+clas+"] "+(output);
                     }
                 }
@@ -152,7 +152,7 @@ public abstract class BotUtils {
     @Nonnull
     static LLSDArray getCAPSArray() {
         //Mostly here because its a giant horrible block of text
-        LLSDArray req = new LLSDArray();
+        final LLSDArray req = new LLSDArray();
         req.add("AttachmentResources");
         req.add("AvatarPickerSearch");
         req.add("ChatSessionRequest");
@@ -224,8 +224,8 @@ public abstract class BotUtils {
      * @return ZeroCoded byte array
      */
     @Nonnull
-    public static byte[] zeroEncode(@Nonnull byte[] input) {
-        List<Byte> output=new ArrayList<>();
+    public static byte[] zeroEncode(@Nonnull final byte[] input) {
+        final List<Byte> output=new ArrayList<>();
         // first 5 bytes (header) are not encoded
         for (int i=0;i<6;i++) { output.add(input[i]); }
         int zerocount=0;
@@ -246,10 +246,10 @@ public abstract class BotUtils {
             output.add((byte)0);
             output.add((byte)zerocount);
         }
-        byte[] outputbytes = new byte[output.size()];
+        final byte[] outputbytes = new byte[output.size()];
         int offset=0;
         // and put it back into the byte array :P
-        for (Byte b:output) {
+        for (final Byte b:output) {
             outputbytes[offset]=b; offset++;
         }    
         return outputbytes;
@@ -261,22 +261,22 @@ public abstract class BotUtils {
      * @return String read up to the zero byte.
      */
     @Nonnull
-    public static String readZeroTerminatedString(@Nonnull ByteBuffer buffer) {
-        List<Byte> bytes=new ArrayList<>();
+    public static String readZeroTerminatedString(@Nonnull final ByteBuffer buffer) {
+        final List<Byte> bytes=new ArrayList<>();
         byte b=-1;
         while (b!=0) {
             b=buffer.get();
             if (b>0) { bytes.add(b); }
         }
-        Byte[] bytesarray=bytes.toArray(new Byte[0]);
-        byte[] ba=new byte[bytesarray.length]; 
+        final Byte[] bytesarray=bytes.toArray(new Byte[0]);
+        final byte[] ba=new byte[bytesarray.length];
         for (int i=0;i<bytesarray.length;i++) { ba[i]=bytesarray[i]; }
         return new String(ba);
     }
 
     @Nonnull
     public static String unravel(@Nullable Throwable t) {
-        StringBuilder response= new StringBuilder();
+        final StringBuilder response= new StringBuilder();
         while (t!=null) {
             response.append("\n[").append(t.getLocalizedMessage()).append("]");
             t=t.getCause();

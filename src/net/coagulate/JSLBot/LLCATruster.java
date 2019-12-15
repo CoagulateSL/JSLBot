@@ -29,7 +29,7 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
     public static void doNotUse() { initialised=true; }
     public static synchronized void initialise() {
         if (initialised) { return; }
-        LLCATruster llcaTruster = new LLCATruster();
+        final LLCATruster llcaTruster = new LLCATruster();
         HttpsURLConnection.setDefaultHostnameVerifier(llcaTruster);
         initialised=true;
     }
@@ -40,32 +40,32 @@ public class LLCATruster implements X509TrustManager,HostnameVerifier {
             // rather than have the user repeatedly fudge around with updating the keystore every time java updates (i hate that)
             // we just use our own customised trust manager
             // long winded java way of faking reading the cert from a stream
-            InputStream stream = new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
-            X509Certificate ca=(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(stream);
+            final InputStream stream = new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
+            final X509Certificate ca=(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(stream);
             cas=new X509Certificate[]{ca};
             // we're a TLS handler
-            SSLContext sc=SSLContext.getInstance("TLS");
+            final SSLContext sc=SSLContext.getInstance("TLS");
             sc.init(null,new TrustManager[] {this}, new java.security.SecureRandom());
             // install
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (@Nonnull CertificateException|KeyManagementException|NoSuchAlgorithmException ex) {
+        } catch (@Nonnull final CertificateException|KeyManagementException|NoSuchAlgorithmException ex) {
             throw new AssertionError("Error configuring SSL CA Trust",ex);
         }
     }
 
     @Override
-    public boolean verify(String string, @Nonnull SSLSession ssls) {
-        throw new AssertionError("Verify for "+string+" called with session "+ssls.toString());
+    public boolean verify(final String string, @Nonnull final SSLSession ssls) {
+        throw new AssertionError("Verify for "+string+" called with session "+ ssls);
         //return true;
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] xcs, String string) {
+    public void checkClientTrusted(final X509Certificate[] xcs, final String string) {
         throw new AssertionError("CheckClientTrusted called in LLCATruster");
     }  
 
     @Override
-    public void checkServerTrusted(X509Certificate[] xcs, String string) {
+    public void checkServerTrusted(final X509Certificate[] xcs, final String string) {
         // FIXME
         //System.out.println("Cert len:"+xcs.length);
         //System.out.println("Random string:"+string);

@@ -25,20 +25,20 @@ public class Regional {
     private JSLBot bot() { return circuit.bot(); }
     public long handle() { return circuit.handle(); }
 
-    public Regional(Circuit c) {
+    public Regional(final Circuit c) {
         circuit=c;
     }
     
     // map of local object ids
     private final Map<Integer,ObjectData> objects=new HashMap<>();
-    public void killObject(int value) { synchronized(objects) { objects.remove(value); } }
+    public void killObject(final int value) { synchronized(objects) { objects.remove(value); } }
 
     /** Does an object exist by local ID?
      *
      * @param id The LOCAL ID of the object
      * @return True if it is known to us
      */
-    public boolean hasObject(Integer id) {
+    public boolean hasObject(final Integer id) {
         synchronized(objects) {
             return objects.containsKey(id);
         }
@@ -49,7 +49,7 @@ public class Regional {
      * @param id The LOCAL ID of the object
      * @return The appropriate object data, potentially new and blank.
      */
-    public ObjectData getObject(int id) {
+    public ObjectData getObject(final int id) {
         synchronized (objects) {
             if (!objects.containsKey(id)) { objects.put(id,new ObjectData(circuit.bot(),id)); }
             return objects.get(id);
@@ -62,9 +62,9 @@ public class Regional {
      * @return The appropriate object data, or null if not found
      */
     @Nullable
-    public ObjectData getObject(LLUUID uuid) {
+    public ObjectData getObject(final LLUUID uuid) {
         synchronized (objects) {
-            for (ObjectData od:objects.values()) {
+            for (final ObjectData od:objects.values()) {
                 if (od.fullid!=null && od.fullid.equals(uuid)) {
                     return od;
                 }
@@ -85,14 +85,14 @@ public class Regional {
 
     // map of local agents
     private Map<LLUUID, LLVector3> coarseagentlocationmap=new HashMap<>();
-    public void setCoarseAgentLocations(Map<LLUUID, LLVector3> locmap) { coarseagentlocationmap=locmap; }
+    public void setCoarseAgentLocations(final Map<LLUUID, LLVector3> locmap) { coarseagentlocationmap=locmap; }
 
 
 
 
     // store parcel related data
     // each parcel request gets a unique ID
-    private int parceldetailsrequestid=0;
+    private int parceldetailsrequestid;
     // which we allocate using this lock here
     private final Object requestidlock=new Object();
     /** Generate a unique ID for requests.
@@ -110,27 +110,27 @@ public class Regional {
      * @param get Parcel LOCAL ID
      * @return Parcel Data, freshly created if necessary.
      */
-    public ParcelData getParcel(int get) {
+    public ParcelData getParcel(final int get) {
         if (!localparcelids.containsKey(get)) { localparcelids.put(get, new ParcelData(get, this)); }
         return localparcelids.get(get);
     }
     
     
-    public Integer getResponse(int requestid) { return requestresponses.get(requestid); }
-    public void requestResponse(int sequenceid, int get) { requestresponses.put(sequenceid,get); }
+    public Integer getResponse(final int requestid) { return requestresponses.get(requestid); }
+    public void requestResponse(final int sequenceid, final int get) { requestresponses.put(sequenceid,get); }
 
         
 
     
     private final byte[][] parcelgrid=new byte[64][64];
-    public void setParcelMap(int sequence, byte b) { parcelgrid[sequence/64][sequence%64]=b; }
+    public void setParcelMap(final int sequence, final byte b) { parcelgrid[sequence/64][sequence%64]=b; }
 
     @Nonnull
     public String dumpParcels() {
-        Map<Byte,Integer> sizes=new HashMap<>();
+        final Map<Byte,Integer> sizes=new HashMap<>();
         for (int x=0;x<64;x++) {
             for (int y=0;y<64;y++) {
-                byte id=parcelgrid[x][y];
+                final byte id=parcelgrid[x][y];
                 if (!sizes.containsKey(id)) {
                     sizes.put(id,0);
                 }
@@ -138,8 +138,8 @@ public class Regional {
             }
         }
         int totalsize=0;
-        StringBuilder resp= new StringBuilder();
-        for (Map.Entry<Byte, Integer> entry : sizes.entrySet()) {
+        final StringBuilder resp= new StringBuilder();
+        for (final Map.Entry<Byte, Integer> entry : sizes.entrySet()) {
             resp.append("\n");
             resp.append("#byeid#").append(((int) (byte) entry.getKey()) & 0xff);
             resp.append(" ").append(entry.getValue()).append("m2");
@@ -152,19 +152,19 @@ public class Regional {
         return Global.regionName(handle());
     }
 
-    private long dayusec=0;
+    private long dayusec;
     public long getDayUSec() { return dayusec; }
-    public void setDayUSec(long dayusec) { this.dayusec = dayusec; }
+    public void setDayUSec(final long dayusec) { this.dayusec = dayusec; }
 
     @Nullable
-    private LLVector3 sundirection=null;
+    private LLVector3 sundirection;
     @Nullable
     public LLVector3 getSunDirection() { return sundirection; }
-    public void setSunDirection(LLVector3 sundirection) { this.sundirection = sundirection; }
+    public void setSunDirection(final LLVector3 sundirection) { this.sundirection = sundirection; }
 
-    private float sunphase=0;
+    private float sunphase;
     public float getSunPhase() { return sunphase; }
-    public void setSunPhase(float sunphase) { this.sunphase = sunphase; }
+    public void setSunPhase(final float sunphase) { this.sunphase = sunphase; }
 
 
     @Nonnull
@@ -181,30 +181,30 @@ public class Regional {
 
     public static class ParcelData {
 
-        public boolean requested=false;
-        public boolean populated=false;
-        public int id=0;
+        public boolean requested;
+        public boolean populated;
+        public int id;
         @Nullable
-        public Regional region=null;
+        public Regional region;
         public int ownerprims=-1;
         public int groupprims=-1;
         public int otherprims=-1;
         @Nullable
-        public String musicurl=null;
+        public String musicurl;
         @Nullable
-        public LLUUID group=null;
+        public LLUUID group;
         @Nullable
-        public String name=null;
+        public String name;
         @Nullable
-        public String description=null;
+        public String description;
         public int claimdate=-1;
         @Nullable
-        public String mediaurl=null;
+        public String mediaurl;
         @Nullable
-        public Boolean seeavs=null;
+        public Boolean seeavs;
         public int area=-1;
         @Nullable
-        public LLUUID owner=null;
+        public LLUUID owner;
         public int primsused=-1;
         public int category=-1;
         public int autoreturntime=-1;
@@ -220,18 +220,18 @@ public class Regional {
             String ret="";
             ret+=region.getName()+"#"+(id &0xff);
             if (populated) {
-                ret+=" '"+name+"' ("+description+") prims:"+ownerprims+"/"+groupprims+"/"+otherprims+"="+primsused+" of "+maxprims+" (simmax:"+simwidetotalprims+") Privacy:"+(!seeavs)+" claimed "+new Date(((long)(claimdate))*1000).toString();            }
+                ret+=" '"+name+"' ("+description+") prims:"+ownerprims+"/"+groupprims+"/"+otherprims+"="+primsused+" of "+maxprims+" (simmax:"+simwidetotalprims+") Privacy:"+(!seeavs)+" claimed "+ new Date(((long)(claimdate))*1000);            }
             return ret;
         }
         
-        public ParcelData(int id, @Nullable Regional region) {
+        public ParcelData(final int id, @Nullable final Regional region) {
             this.id=id; this.region=region;
         }
         public void populate() { populate(false); }
-        public void populate(boolean force) {
+        public void populate(final boolean force) {
             if (requested && !force) { return; }
             requested=true;
-            ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();
+            final ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();
             req.bagentdata.vagentid=region.bot().getUUID();
             req.bagentdata.vsessionid=region.bot().getSession();
             req.bparceldata.vlocalid=new S32(id);
@@ -243,5 +243,5 @@ public class Regional {
     }
     @Nonnull
     @Override
-    public String toString() { return circuit.toString()+"/Regional"; }
+    public String toString() { return circuit +"/Regional"; }
 }

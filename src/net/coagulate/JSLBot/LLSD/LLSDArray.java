@@ -18,31 +18,30 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
     
     public LLSDArray() {}
 
-    public LLSDArray(@Nonnull NodeList nodes) {
+    public LLSDArray(@Nonnull final NodeList nodes) {
         for (int i=0;i<nodes.getLength();i++) {
-            Node n=nodes.item(i);
-            Atomic atom=Atomic.create(n);
+            final Node n=nodes.item(i);
+            final Atomic atom=Atomic.create(n);
             if (atom!=null) { data.add(atom); }
         }
     }
     
-    public void add(String s) { data.add(new LLSDString(s)); }
-    public void add(Atomic a) { data.add(a); }
+    public void add(final String s) { data.add(new LLSDString(s)); }
+    public void add(final Atomic a) { data.add(a); }
     @Nonnull
     public List<Atomic> get() { return data; }
     
     @Nonnull
     @Override
-    public String toXML(String prefix) {
-        StringBuilder resp= new StringBuilder(prefix + "<array>\n");
-        for (Atomic a:data) { resp.append(a.toXML(prefix + "  ")); }
+    public String toXML(final String prefix) {
+        final StringBuilder resp= new StringBuilder(prefix + "<array>\n");
+        for (final Atomic a:data) { resp.append(a.toXML(prefix + "  ")); }
         resp.append(prefix).append("</array>\n");
         return resp.toString();
     }
 
-    @NotNull
     @Override
-    public Iterator<Atomic> iterator() {
+    public @NotNull Iterator<Atomic> iterator() {
         return data.iterator();
     }
 }

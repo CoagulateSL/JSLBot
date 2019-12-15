@@ -18,10 +18,10 @@ public class LLSDMap extends Container {
      *
      * @param nodes NodeList contents of this map
      */
-    public LLSDMap(@Nonnull NodeList nodes) {
+    public LLSDMap(@Nonnull final NodeList nodes) {
         for (int i=0;i<nodes.getLength();i+=2) {
-            String key=nodes.item(i).getFirstChild().getNodeValue();
-            Atomic a=Atomic.create(nodes.item(i+1));
+            final String key=nodes.item(i).getFirstChild().getNodeValue();
+            final Atomic a=Atomic.create(nodes.item(i+1));
             if (a!=null) { data.put(key, a); }
         }
     }
@@ -32,9 +32,9 @@ public class LLSDMap extends Container {
     
     @Nonnull
     @Override
-    public String toXML(String prefix) {
-        StringBuilder resp= new StringBuilder(prefix + "<map>\n");
-        for (Map.Entry<String, Atomic> entry : data.entrySet()) {
+    public String toXML(final String prefix) {
+        final StringBuilder resp= new StringBuilder(prefix + "<map>\n");
+        for (final Map.Entry<String, Atomic> entry : data.entrySet()) {
             resp.append(prefix).append("<key>").append(entry.getKey()).append("</key>\n");
             resp.append(entry.getValue().toXML(prefix + "  "));
         }
@@ -44,10 +44,10 @@ public class LLSDMap extends Container {
 
     @Nonnull
     public Set<String> keys() { return data.keySet(); }
-    public boolean containsKey(String key) {
+    public boolean containsKey(final String key) {
         return data.containsKey(key);
     }
-    public Atomic get(String key) { return data.get(key); }
+    public Atomic get(final String key) { return data.get(key); }
     
     /** Get a key, with a default value if not present.
      *
@@ -55,9 +55,9 @@ public class LLSDMap extends Container {
      * @param def Default atomic to return
      * @return The atomic from the map, or the default if not present.
      */
-    public Atomic get(String key,Atomic def) { return data.getOrDefault(key, def); }
+    public Atomic get(final String key, final Atomic def) { return data.getOrDefault(key, def); }
 
-    public void put(String ack, Atomic atom) {
+    public void put(final String ack, final Atomic atom) {
         data.put(ack,atom);
     }
 }

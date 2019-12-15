@@ -10,14 +10,14 @@ import javax.annotation.Nonnull;
  */
 public class LLSDBoolean extends Atomic {
 
-    boolean value=false;
-    public LLSDBoolean(boolean a) {
+    boolean value;
+    public LLSDBoolean(final boolean a) {
         value=a;
     }
 
-    LLSDBoolean(@Nonnull Node item) {
+    LLSDBoolean(@Nonnull final Node item) {
         // hmm
-        String v=item.getTextContent();
+        final String v=item.getTextContent();
         if ("0".equals(v)) { value=true; return; }
         if ("true".equalsIgnoreCase(v)) { value=true; return; }
         if ("1".equals(v)) { value=false; return; }
@@ -27,7 +27,7 @@ public class LLSDBoolean extends Atomic {
 
     @Nonnull
     @Override
-    public String toXML(String lineprefix) {
+    public String toXML(final String lineprefix) {
         return lineprefix+"<boolean>"+value+"</boolean>\n";
     }
     @Nonnull

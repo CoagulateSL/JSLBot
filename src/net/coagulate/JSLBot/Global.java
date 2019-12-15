@@ -19,21 +19,21 @@ public final class Global {
     private static final Map<LLUUID,String> usernames=new HashMap<>();
     
     /** Cache a last name */
-    static void lastName(LLUUID uuid,String lastname) { synchronized(lastnames) { lastnames.put(uuid,lastname); } }
+    static void lastName(final LLUUID uuid, final String lastname) { synchronized(lastnames) { lastnames.put(uuid,lastname); } }
     /** Cache a first name */
-    static void firstName(LLUUID uuid,String firstname) { synchronized(firstnames) { firstnames.put(uuid,firstname); } }
+    static void firstName(final LLUUID uuid, final String firstname) { synchronized(firstnames) { firstnames.put(uuid,firstname); } }
     /** Cache a display name */
-    static void displayName(LLUUID uuid,String displayname) { synchronized(displaynames) { displaynames.put(uuid,displayname); } }
+    static void displayName(final LLUUID uuid, final String displayname) { synchronized(displaynames) { displaynames.put(uuid,displayname); } }
     /** Cache a username */
-    static void userName(LLUUID uuid,String username) { synchronized(usernames) { usernames.put(uuid,username); } }
+    static void userName(final LLUUID uuid, final String username) { synchronized(usernames) { usernames.put(uuid,username); } }
 
     // this would be much better if we factoried the UUIDs and could just use == (i.e. "xxx.get(LLUUID)" directly
     // maybe we can, this fault was never well tested.
     /** Look up a display name ONLY in the cache */
     @Nullable
-    static String displayName(LLUUID uuid) {
+    static String displayName(final LLUUID uuid) {
         synchronized(displaynames) {
-            for (Map.Entry<LLUUID, String> entry : displaynames.entrySet()) {
+            for (final Map.Entry<LLUUID, String> entry : displaynames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
@@ -41,9 +41,9 @@ public final class Global {
     }
     /** Look up a first name ONLY in the cache */
     @Nullable
-    static String firstName(LLUUID uuid) {
+    static String firstName(final LLUUID uuid) {
         synchronized(firstnames) {
-            for (Map.Entry<LLUUID, String> entry : firstnames.entrySet()) {
+            for (final Map.Entry<LLUUID, String> entry : firstnames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
@@ -51,9 +51,9 @@ public final class Global {
     }
     /** Look up a last name ONLY in the cache */
     @Nullable
-    static String lastName(LLUUID uuid) {
+    static String lastName(final LLUUID uuid) {
         synchronized(lastnames) { 
-            for (Map.Entry<LLUUID, String> entry : lastnames.entrySet()) {
+            for (final Map.Entry<LLUUID, String> entry : lastnames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
@@ -61,9 +61,9 @@ public final class Global {
     }
     /** Look up a user name ONLY in the cache */
     @Nullable
-    static String userName(LLUUID uuid) {
+    static String userName(final LLUUID uuid) {
         synchronized(usernames) { 
-            for (Map.Entry<LLUUID, String> entry : usernames.entrySet()) {
+            for (final Map.Entry<LLUUID, String> entry : usernames.entrySet()) {
                 if (entry.getKey().equals(uuid)) { return entry.getValue(); }
             }
             return null;
@@ -75,21 +75,21 @@ public final class Global {
      * @param handle Long region handle to look up
      * @return The name of the region attached.
      */
-    public static String regionName(Long handle) { synchronized(regionnames) { return regionnames.get(handle); } } 
+    public static String regionName(final Long handle) { synchronized(regionnames) { return regionnames.get(handle); } }
     /** Set a region name in the cache
      * @param handle Long region handle to cache
      * @param name Region name for the handle
      */
-    public static void regionName(@Nullable Long handle, @Nullable String name) { if (handle!=null && name!=null && (!name.isEmpty())) { synchronized(regionnames) { regionnames.put(handle, name); } } }
+    public static void regionName(@Nullable final Long handle, @Nullable final String name) { if (handle!=null && name!=null && (!name.isEmpty())) { synchronized(regionnames) { regionnames.put(handle, name); } } }
     /** Look up a region handle in the cache
      * 
      * @param name Name of the region to look up
      * @return Long region handle
      */
     @Nullable
-    public static Long regionHandle(String name) {
+    public static Long regionHandle(final String name) {
         synchronized(regionnames) {
-            for (Map.Entry<Long, String> entry : regionnames.entrySet()) {
+            for (final Map.Entry<Long, String> entry : regionnames.entrySet()) {
                 if (entry.getValue().equalsIgnoreCase(name)) { return entry.getKey(); }
             }
         }

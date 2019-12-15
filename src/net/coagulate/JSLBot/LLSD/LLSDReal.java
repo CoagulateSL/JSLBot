@@ -10,18 +10,18 @@ import javax.annotation.Nonnull;
  */
 public class LLSDReal extends Atomic {
 
-    float value=0;
-    public LLSDReal(float a) {
+    float value;
+    public LLSDReal(final float a) {
         value=a;
     }
 
-    public LLSDReal(@Nonnull Node item) {
+    public LLSDReal(@Nonnull final Node item) {
         value=Float.parseFloat(item.getTextContent());
     }
 
     @Nonnull
     @Override
-    public String toXML(String lineprefix) {
+    public String toXML(final String lineprefix) {
         return lineprefix+"<real>"+value+"</real>\n";
     }
     @Nonnull

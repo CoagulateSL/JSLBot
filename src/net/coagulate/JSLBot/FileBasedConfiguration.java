@@ -23,37 +23,37 @@ public class FileBasedConfiguration extends Configuration {
     Map<String,String> kvstore=new HashMap<>();
     
     @SuppressWarnings("unchecked") // pretty stuck with this :)
-    public FileBasedConfiguration(@Nonnull String filename) {
+    public FileBasedConfiguration(@Nonnull final String filename) {
         this.filename=filename;
-        try (FileInputStream fis = new FileInputStream(filename); ObjectInputStream ois = new ObjectInputStream(fis)) {
+        try (final FileInputStream fis = new FileInputStream(filename); final ObjectInputStream ois = new ObjectInputStream(fis)) {
             kvstore=(Map<String, String>)ois.readObject();
-        } catch (@Nonnull IOException|ClassNotFoundException e) {
+        } catch (@Nonnull final IOException|ClassNotFoundException e) {
             throw new AssertionError("Could not load configuration file",e);
         }
     }
     
     @Nullable
     @Override
-    public String get(String key) {
+    public String get(final String key) {
         if (!kvstore.containsKey(key)) { put(key,null); return null; } // keep track of what was asked for...
         return kvstore.get(key);
     }
 
     @Override
     @SuppressWarnings("CallToPrintStackTrace")
-    public void put(String key, String value) {
+    public void put(final String key, final String value) {
         kvstore.put(key,value);
         try {
             writeStore();
-        } catch (IOException e) {
-            System.err.println("KVStore write failed, CONFIGURATION NOT SAVED : "+e.toString());
+        } catch (final IOException e) {
+            System.err.println("KVStore write failed, CONFIGURATION NOT SAVED : "+ e);
             e.printStackTrace();
         }
     }
     
     
     private void writeStore() throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filename); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+        try (final FileOutputStream fos = new FileOutputStream(filename); final ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(kvstore);
         }
     }
@@ -62,7 +62,7 @@ public class FileBasedConfiguration extends Configuration {
     @Override
     public String dump() {
         String response="";
-        for (Map.Entry<String, String> entry : kvstore.entrySet()) {
+        for (final Map.Entry<String, String> entry : kvstore.entrySet()) {
             if (!"".equals(response)) { response+="\n"; }
             response+= entry.getKey() +"="+ entry.getValue();
         }

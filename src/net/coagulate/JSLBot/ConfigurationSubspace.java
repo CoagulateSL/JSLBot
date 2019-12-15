@@ -11,18 +11,18 @@ public class ConfigurationSubspace extends Configuration {
 
     final Configuration c;
     final String p;
-    public ConfigurationSubspace(Configuration c,String prefix) {
+    public ConfigurationSubspace(final Configuration c, final String prefix) {
         this.c=c;
         p=prefix;
     }
     @Nullable
     @Override
-    public String get(String param) {
+    public String get(final String param) {
         return c.get(p+"."+param);
     }
 
     @Override
-    public void put(String param, String value) {
+    public void put(final String param, final String value) {
         c.put(p+"."+param,value);
     }
 

@@ -13,20 +13,20 @@ import javax.annotation.Nonnull;
  * @author Iain Price
  */
 public class Sink extends Handler {
-    public Sink(@Nonnull JSLBot bot, Configuration c) {super(bot,c);}
+    public Sink(@Nonnull final JSLBot bot, final Configuration c) {super(bot,c);}
     
-    public void simStatsUDPDelayed(UDPEvent event){}
-    public void avatarAppearanceUDPDelayed(UDPEvent event){}
-    public void attachedSoundUDPDelayed(UDPEvent event){}
-    public void viewerEffectUDPDelayed(UDPEvent event){}
-    public void attachedSoundGainChangeUDPDelayed(UDPEvent event){}
-    public void regionHandshakeUDPDelayed(UDPEvent event){}
-    public void soundTriggerUDPDelayed(UDPEvent event){}
-    public void preloadSoundUDPDelayed(UDPEvent event){}
-    public void layerDataUDPDelayed(UDPEvent event){}
-    public void cameraConstraintUDPDelayed(UDPEvent event){}
-    public void avatarAnimationUDPDelayed(UDPEvent event){}
-    public void agentStateUpdateUDPDelayed(UDPEvent event){}
-    public void agentStateUpdateXMLDelayed(XMLEvent event){}
+    public void simStatsUDPDelayed(final UDPEvent event){}
+    public void avatarAppearanceUDPDelayed(final UDPEvent event){}
+    public void attachedSoundUDPDelayed(final UDPEvent event){}
+    public void viewerEffectUDPDelayed(final UDPEvent event){}
+    public void attachedSoundGainChangeUDPDelayed(final UDPEvent event){}
+    public void regionHandshakeUDPDelayed(final UDPEvent event){}
+    public void soundTriggerUDPDelayed(final UDPEvent event){}
+    public void preloadSoundUDPDelayed(final UDPEvent event){}
+    public void layerDataUDPDelayed(final UDPEvent event){}
+    public void cameraConstraintUDPDelayed(final UDPEvent event){}
+    public void avatarAnimationUDPDelayed(final UDPEvent event){}
+    public void agentStateUpdateUDPDelayed(final UDPEvent event){}
+    public void agentStateUpdateXMLDelayed(final XMLEvent event){}
 
 }

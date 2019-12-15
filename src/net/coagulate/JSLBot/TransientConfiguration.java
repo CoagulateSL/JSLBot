@@ -16,13 +16,13 @@ public class TransientConfiguration extends Configuration {
 
     @Nullable
     @Override
-    public String get(String param) {
+    public String get(final String param) {
         if (kv.containsKey(param)) { return kv.get(param); }
         return null;
     }
 
     @Override
-    public void put(String param, String value) {
+    public void put(final String param, final String value) {
         kv.put(param,value);
     }
 
@@ -30,7 +30,7 @@ public class TransientConfiguration extends Configuration {
     @Override
     public String dump() {
         String response="";
-        for (Map.Entry<String, String> entry : kv.entrySet()) {
+        for (final Map.Entry<String, String> entry : kv.entrySet()) {
             if (!"".equals(response)) { response+="\n"; }
             response+= entry.getKey() +"="+ entry.getValue();
         }

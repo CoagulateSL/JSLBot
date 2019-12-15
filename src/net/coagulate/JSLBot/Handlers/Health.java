@@ -13,12 +13,13 @@ import javax.annotation.Nonnull;
  */
 public class Health extends Handler {
 
-    boolean verbose=false;
-    float health=0;
-    public Health(@Nonnull JSLBot bot, @Nonnull Configuration c) { super(bot,c); this.verbose=Boolean.parseBoolean(c.get("verbose","false")); }
+    boolean verbose;
+    float health;
+    public Health(@Nonnull final JSLBot bot, @Nonnull final Configuration c) { super(bot,c);
+	    verbose =Boolean.parseBoolean(c.get("verbose","false")); }
 
-    public void healthMessageUDPImmediate(@Nonnull UDPEvent event) {
-        HealthMessage h=(HealthMessage) event.body();
+    public void healthMessageUDPImmediate(@Nonnull final UDPEvent event) {
+        final HealthMessage h=(HealthMessage) event.body();
         health=h.bhealthdata.vhealth.value;
         if (verbose) { log.info("Agent health is "+health); }
     }

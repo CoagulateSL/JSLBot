@@ -11,7 +11,7 @@ public class UDPEvent extends Event {
     private final Message content;
     public Message body() { return content; }
 
-    public UDPEvent(JSLBot bot,Regional r,Message content,String name) {
+    public UDPEvent(final JSLBot bot, final Regional r, final Message content, final String name) {
         super(bot, r,name);
         this.content=content;
     }

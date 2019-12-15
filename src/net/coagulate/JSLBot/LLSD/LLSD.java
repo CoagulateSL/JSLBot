@@ -27,33 +27,33 @@ public class LLSD extends Container {
      * Typically a map, sometimes an array.
      * @param c The container to wrap the LLSD document around
      */
-    public LLSD(Container c) { this.contents.add(c); }
+    public LLSD(final Container c) { contents.add(c); }
 
     /** Convert a received document into Class form.
      *
      * @param read The XML/LLSD document as a String
      */
-    public LLSD(@Nonnull String read) {
+    public LLSD(@Nonnull final String read) {
         try {
             // blah blah parse it
-            DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc=builder.parse(new ByteArrayInputStream(read.getBytes(StandardCharsets.UTF_8)));
+            final DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            final Document doc=builder.parse(new ByteArrayInputStream(read.getBytes(StandardCharsets.UTF_8)));
             // get top of the document (<llsd>...</llsd>)
-            Element root=doc.getDocumentElement();
+            final Element root=doc.getDocumentElement();
             if (!"llsd".equals(root.getTagName())) { throw new IOException("Response did not commence with LLSD element:"+read); }
             // should be full of (or has at least one, more may or may not be allowed :P) "array" or "map", as per 'container' types
-            NodeList nl=root.getChildNodes();
+            final NodeList nl=root.getChildNodes();
             for (int node=0;node<nl.getLength();node++) {
-                Node n=nl.item(node);
-                String type=n.getNodeName();
+                final Node n=nl.item(node);
+                final String type=n.getNodeName();
                 boolean handled=false;
                 if ("array".equals(type)) { contents.add(new LLSDArray(n.getChildNodes())); handled=true; }
                 if ("map".equals(type)) { contents.add(new LLSDMap(n.getChildNodes())); handled=true; }
                 if ("undef".equals(type)) { handled=true; }
                 if (!handled) { throw new AssertionError("Found container of type "+type+" which we don't know about.  Parse error most likely."); }
             }
-        } catch (@Nonnull SAXException|ParserConfigurationException|IOException ex) {
-            IllegalArgumentException f=new IllegalArgumentException(ex);
+        } catch (@Nonnull final SAXException|ParserConfigurationException|IOException ex) {
+            final IllegalArgumentException f=new IllegalArgumentException(ex);
             f.initCause(ex);
             throw f;
         }
@@ -66,9 +66,9 @@ public class LLSD extends Container {
      */
     @Nonnull
     @Override
-    public String toXML(String lineprefix) {
-        StringBuilder response= new StringBuilder(lineprefix + "<llsd>\n");
-        for (Container c:contents) {
+    public String toXML(final String lineprefix) {
+        final StringBuilder response= new StringBuilder(lineprefix + "<llsd>\n");
+        for (final Container c:contents) {
             response.append(c.toXML(lineprefix + "  "));
         }
         response.append(lineprefix).append("</llsd>\n");
