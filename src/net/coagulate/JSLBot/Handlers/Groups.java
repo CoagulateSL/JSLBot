@@ -71,7 +71,7 @@ public class Groups extends Handler {
         synchronized(groups) {
             for(GroupData g:groups.values()) {
                 resp.append("\n");
-                resp.append(g.groupname).append(" (").append(g.uuid.toUUIDString()).append(") ");
+                resp.append(g.groupname).append(" (").append(g.uuid().toUUIDString()).append(") ");
                 if (g.contribution!=0) { resp.append("Contribution:").append(g.contribution).append(" "); }
                 if (g.listinprofile) { resp.append("Listed"); } else { resp.append("Unlisted"); }
             }
@@ -89,7 +89,7 @@ public class Groups extends Handler {
             for (Map.Entry<LLUUID, GroupData> entry : groups.entrySet()) {
                 GroupData gd= entry.getValue();
                 if (gd!=null) {
-                    if (gd.groupname.equalsIgnoreCase(name)) { return entry.getKey(); }
+                    if (name.equalsIgnoreCase(gd.groupname)) { return entry.getKey(); }
                 }
             }
         }
@@ -193,6 +193,11 @@ public class Groups extends Handler {
         int contribution=0;
         @Nullable
         LLUUID uuid=null;
+        @Nonnull
+        public LLUUID uuid() {
+            if (uuid==null) { throw new IllegalArgumentException("Group data has no UUID?"); }
+            return uuid;
+        }
     }
     
     @Nonnull

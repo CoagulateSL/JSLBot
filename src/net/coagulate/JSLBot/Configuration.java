@@ -23,11 +23,11 @@ public abstract class Configuration {
     /** Get a configuration element, or its default value
      * 
      * @param key Key to get
-     * @param defaultvalue Value to return if not set in config
-     * @return The value, or the defaultvalue if the value was null.  Only returns null if defaultvalue is null.
+     * @param defaultvalue Value to return if not set in config.  Not null.
+     * @return The value, or the defaultvalue if the value was null.
      */
-    @Nullable
-    public String get(String key, String defaultvalue) {
+    @Nonnull
+    public String get(String key,@Nonnull String defaultvalue) {
         String value=get(key);
         if (value==null) { return defaultvalue; }
         return value;

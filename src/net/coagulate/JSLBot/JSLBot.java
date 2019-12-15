@@ -409,8 +409,12 @@ public class JSLBot extends Thread {
     // ********** TRANSMISSION PRIMITIVES **********
     /** Primary circuit, as in where the agent presence *is* */
     @Nullable
-    Circuit primary=null;  @Nullable
-	Circuit circuit() { return primary; }
+    private Circuit primary=null;
+    @Nonnull
+	Circuit circuit() {
+        if (primary==null) { throw new IllegalStateException("Primary circuit is not yet set up"); }
+        return primary;
+    }
     
     /** Get the name of the region the avatar is present in.
      *
@@ -492,8 +496,8 @@ public class JSLBot extends Thread {
      * 
      * @return CAPS object for the avatar's region.
      */
-    @Nullable
-    public CAPS getCAPS() { return primary.getCAPS(); }
+    @Nonnull
+    public CAPS getCAPS() { return circuit().getCAPS(); }
     /** Resolve a UUID into a firstname, either via cache or via lookup
      * @param uuid UUID to look up
      * @return  The first name

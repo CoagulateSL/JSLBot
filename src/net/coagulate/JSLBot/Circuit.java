@@ -28,7 +28,7 @@ public final class Circuit extends Thread implements Closeable {
     private final AtomicInteger bytesin=new AtomicInteger(0);
     private final AtomicInteger bytesout=new AtomicInteger(0);
     private Logger log;
-    private int circuitsequence=0;
+    private int circuitsequence;
     // list of sent reliable packets we're waiting to hear an ack for
     private final Map<Packet,Date> inflight=new HashMap<>();
     // packets we have already acked and shouldn't reprocess, beyond re-acking
@@ -39,7 +39,11 @@ public final class Circuit extends Thread implements Closeable {
     private JSLBot bot;
     // the simulator's details
     @Nullable
-    private InetSocketAddress address;
+    private InetSocketAddress address=null;
+    private InetSocketAddress address() {
+        if (address==null) { throw new IllegalStateException("Attempting to get circuit socket address but it's null, weirdly"); }
+        return address;
+    }
     // our listening socket / endpoint
     private DatagramSocket socket;
     // biggest remote packet we acked or something.  comes up in UDP ping messages, but i dont think we even need it
@@ -61,24 +65,27 @@ public final class Circuit extends Thread implements Closeable {
     @Nonnull
     private Date lastpacket=new Date();
     // the primary all important region handle
-    @Nullable
-    private Long regionhandle=null;
+    @Nonnull
+    private Long regionhandle;
     // primary CAPS url
     @Nullable
-    private String capsurl=null;
+    private String capsurl;
     // primary CAPS object
     @Nullable
     private CAPS caps=null;
     // Get the CAPS object attached to this circuit's region
-    @Nullable
-    public CAPS getCAPS() { return caps; }
+    @Nonnull
+    public CAPS getCAPS() {
+        if (caps==null) { throw new IllegalStateException("CAPS is not currently configured for this circuit"); }
+        return caps;
+    }
     // Region object for this circuit's region
     @Nullable
-    private Regional regional=null;
+    private Regional regional;
     // target address
     @Nullable
-    private String simip=null;
-    private int simport=0;
+    private String simip;
+    private int simport;
     @Nonnull
     public String getSimIPAndPort() { return simip+":"+simport; }
     // how many packets sent
@@ -353,7 +360,7 @@ public final class Circuit extends Thread implements Closeable {
             decodeme.position(0);
             log.log(Level.FINEST, "Reverse engineered: {0}", Packet.decode(decodeme).dump());
         }           
-        DatagramPacket packet=new DatagramPacket(transmit,transmit.length,address);
+        DatagramPacket packet=new DatagramPacket(transmit,transmit.length,address());
         /*if (p.getName().equals("AgentUpdate")) { 
             Exception e=new Exception("Generate stack trace");
             e.printStackTrace(); // show me!
@@ -489,7 +496,7 @@ public final class Circuit extends Thread implements Closeable {
             regionname=r.bregioninfo.vsimname.toString();
             this.setName("Circuit for "+bot.getUsername()+" to "+this.regionname);
             log=bot.getLogger("Circuit."+regionname);
-            if (regionhandle!=null) { Global.regionName(regionhandle, regionname); }
+            Global.regionName(regionhandle, regionname);
             boolean register=false; // most connections register at creation since we know where we're connecting to
             // the initial circuit maybe not so much
             regionuuid=r.bregioninfo2.vregionid;
@@ -517,8 +524,8 @@ public final class Circuit extends Thread implements Closeable {
         if (!internal) { 
             // if it wasn't a circuit related packet, hand it off to the bot
             if (Debug.REGIONHANDLES && regionhandle==null) { log.info("Creating event with null RH :( "); }
-            Regional r=null;
-            if (regionhandle!=null) { r=regional(); }
+            Regional r;
+            r=regional();
             new UDPEvent(bot, r, m, m.getName()).submit();
         }
         
@@ -540,7 +547,7 @@ public final class Circuit extends Thread implements Closeable {
      */
     public void connectCAPS(String newcapsurl) {
         if (caps!=null && caps.eventqueue()!=null && caps.eventqueue().isAlive()) {
-            if (capsurl.equals(newcapsurl)) {
+            if (capsurl!=null && capsurl.equals(newcapsurl)) {
                 if (Debug.EVENTQUEUE) { log.fine("Passed duplicate of existing CAPS url, not reconnecting anything"); return; }
             }
             if (Debug.EVENTQUEUE) { log.info("Passed DIFFERENT caps URL to existing CAPS url which is still alive?"); return; }

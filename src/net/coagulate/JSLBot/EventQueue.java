@@ -55,7 +55,7 @@ public class EventQueue extends Thread {
         catch (Exception e) {
             log.log(SEVERE,"Event queue crashed: "+e.toString(),e);
         }
-        if (bot().primary.getCAPS().eventqueue()==this) { 
+        if (bot().circuit().getCAPS().eventqueue()==this) {
             log.log(SEVERE,"CRITICAL FAILURE - primary caps circuit is closed, this is reason to reconnect");
             bot().shutdown("Primary event queue CAPS failed.");
         }

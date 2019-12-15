@@ -42,7 +42,7 @@ public class CnC extends Handler {
         }
         bot.brain().setAuth(auth);
         String homesick=c.get("homesickfor","");
-        if (homesick!=null && !homesick.isEmpty()) { bot.homeSickFor(homesick); }
+        if (!homesick.isEmpty()) { bot.homeSickFor(homesick); }
     }
     
     @Nonnull
@@ -50,6 +50,7 @@ public class CnC extends Handler {
         if (m.split("\n").length<2) { throw new IllegalArgumentException("Expected at least 2 lines of input"); }
         String line=m.split("\n")[1];
         LLSDMap msg=(LLSDMap) new LLSD(line).getFirst();
+        if (msg==null) { throw new IllegalArgumentException("Failed to parse LLSDMap from region restart message"); }
         String region=msg.get("NAME").toString();
         long shutdown=new Date().getTime();
         if (msg.containsKey("MINUTES")) { shutdown=shutdown+((Integer.parseInt(msg.get("MINUTES").toString()))*1000*60); }
@@ -452,7 +453,8 @@ public class CnC extends Handler {
                                   @Nullable @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear")
             String region) {
         if (region==null || region.isEmpty()) {
-            if (bot.homeSickFor()==null || bot.homeSickFor().isEmpty()) { return "Bot has no longing for any home"; }
+            String home = bot.homeSickFor();
+            if (home==null || home.isEmpty()) { return "Bot has no longing for any home"; }
             return "Bot longs for its home of '"+bot.homeSickFor()+"'";
         }
         if ("NONE".equals(region)) {

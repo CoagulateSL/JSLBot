@@ -170,7 +170,7 @@ public class Regional {
     @Nonnull
     public String dump() {
         String d="";
-        if (circuit==bot().primary) { d="[PRIMARY] "; }
+        if (circuit==bot().circuit()) { d="[PRIMARY] "; }
         d+="("+Global.regionName(circuit.handle())+") ";
         d+=coarseagentlocationmap.size()+" agents, "+objects.size()+" objects";
         return d;

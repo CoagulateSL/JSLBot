@@ -29,9 +29,9 @@ public class CommandEvent extends Event {
     private final LLUUID respondto; public LLUUID respondTo() { return respondto; }
     public void respondTo(String response) { this.response=response; }
     // the response its self, for other threads to read.
-    @Nullable
-    private String response=null;
-    @Nullable
+    @Nonnull
+    private String response="";
+    @Nonnull
     public String response() { return response; }
     void response(String response) { this.response=response; }
 
@@ -82,7 +82,7 @@ public class CommandEvent extends Event {
      * @param timeoutmillis Number of milliseconds before giving up waiting
      * @return Command response
      */
-    @Nullable
+    @Nonnull
     public String submitAndWait(long timeoutmillis) {
         submit();
         waitFinish(timeoutmillis);

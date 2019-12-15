@@ -91,7 +91,6 @@ public final class CAPS extends Thread {
      */
     void getNames(@Nonnull LLUUID agentid) throws MalformedURLException, IOException {
         LLSDMap map = invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
-        if (map==null) { throw new IOException("Unexpected null in map when extracting names"); }
         LLSDArray agents=(LLSDArray) map.get("agents");
         for (Object agento:agents) {
             LLSDMap agent=(LLSDMap) agento;
@@ -116,7 +115,7 @@ public final class CAPS extends Thread {
      * @return The LLSDMap response
      * @throws IOException If the CAP fails, or the CAP requested is not known to us
      */
-    @Nullable
+    @Nonnull
     public LLSDMap invokeCAPS(String capname, String appendtocap, LLSD content) throws IOException
     {
         Atomic rawcap = capabilities().get(capname);
@@ -134,7 +133,7 @@ public final class CAPS extends Thread {
      * @return LLSDMap response
      * @throws IOException If there is a failure with the CAPS
      */
-    @Nullable
+    @Nonnull
     public LLSDMap invokeXML(@Nullable String url, @Nullable LLSD content) throws IOException {
         if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
         HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
@@ -159,7 +158,9 @@ public final class CAPS extends Thread {
         }
         Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
         String read=s.next();
-        return (LLSDMap) new LLSD(read).getFirst();
+        LLSDMap ret= (LLSDMap) new LLSD(read).getFirst();
+        if (ret==null) { throw new IOException("Map read was null"); }
+        return ret;
     }    
     
     @Nonnull

@@ -46,7 +46,7 @@ public abstract class Event {
     void status (STATUS status) {
         synchronized(statusmonitor) {
             this.status=status;
-            if (Debug.TRACKCOMMANDS && type==COMMAND) { log.log(Level.FINER, "Command {0} in region {1}entering status {2}", new Object[]{getName(), r.toString(), status}); }
+            if (Debug.TRACKCOMMANDS && type==COMMAND) { log.log(Level.FINER, "Command {0} in region {1}entering status {2}", new Object[]{getName(), region().toString(), status}); }
             statusmonitor.notify();
         }
     }
@@ -72,14 +72,13 @@ public abstract class Event {
         throw new AssertionError("Unknown type.  How did you get here?  The constructor should have thrown this exception.");
     }
     
-    @Nullable
+    @Nonnull
     private final Regional r;
     /** Region this event originated from, if applicable
      * @return Regional data for the originating region
      */
     @Nonnull
     public Regional region() {
-        if (r==null) { throw new IllegalStateException("Attempt to get event's region before it is set"); }
         return r;
     }
 
@@ -88,15 +87,11 @@ public abstract class Event {
     
     @Nonnull
     public JSLBot bot() {
-        if (bot==null) { throw new IllegalStateException("Attempt to invoke bot before bot exists"); }
         return bot;
     }
     
-    Event(@Nonnull JSLBot bot, @Nullable Regional r, @Nullable String name) {
+    Event(@Nonnull JSLBot bot, @Nonnull Regional r, @Nonnull String name) {
         this.bot=bot; this.r=r; this.name=name; setType();
-        if (bot==null) { throw new IllegalArgumentException("Bot is mandatory"); }
-        if (name==null || name.isEmpty()) { throw new IllegalArgumentException("Event name is mandatory"); }
-        if (r==null) { throw new IllegalArgumentException("Region argument is mandatory, use bot.getRegion() if necessary"); }
     }
     
     private void setType() {
@@ -109,7 +104,7 @@ public abstract class Event {
     @Nonnull
     @Override
     public String toString() {
-        return r.toString()+"/"+getPrefixedName();
+        return region().toString()+"/"+getPrefixedName();
     }
     @Nonnull
     private final String name;
