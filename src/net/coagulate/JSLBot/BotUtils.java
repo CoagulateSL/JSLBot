@@ -89,8 +89,8 @@ public abstract class BotUtils {
      * @param password Password, in clear text or MD5 hex string preceeded by $!$
      * @param location Login location
      * @return Map of KV pairs from login server
-     * @throws MalformedURLException
-     * @throws XmlRpcException
+     * @throws MalformedURLException Login URL is somehow invalid
+     * @throws XmlRpcException Failure to connect to or communicate with XML RPC service
      */
     @Nonnull
     static Map<Object,Object> loginXMLRPC(@Nonnull final JSLBot bot, final String firstname, final String lastname, @Nonnull String password, final String location) throws MalformedURLException, XmlRpcException {
