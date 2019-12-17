@@ -96,7 +96,7 @@ public class Teleportation extends Handler {
             // set flag, notify the waiting thread
             teleporting=false;
             synchronized(signal) { signal.notifyAll(); }
-        } catch (final IOException e) {
+        } catch (@Nonnull final IOException e) {
             log.severe("Failed to create teleport finish circuit, we might be losing our connection");
         }
 
@@ -122,7 +122,7 @@ public class Teleportation extends Handler {
             //System.out.println(m.dump());
             teleporting=true;
             bot.send(req,true);
-            synchronized(signal) { try { signal.wait(10000); } catch (final InterruptedException e) {} }
+            synchronized(signal) { try { signal.wait(10000); } catch (@Nonnull final InterruptedException e) {} }
             if (teleporting) {
                 log.severe("Timer expired while teleporting, lost in transit?");
                 bot.im(m.bagentdata.vagentid,"Failed to accept teleport lure, lost in transit?");
@@ -154,7 +154,7 @@ public class Teleportation extends Handler {
         final String regionhandle=new CommandEvent(bot, bot.getRegional(), "regionLookup", lookupparams, null).execute();
         if (Debug.REGIONHANDLES) { log.fine("Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
         try { tp.binfo.vregionhandle=new U64(regionhandle);  }
-        catch (final NumberFormatException e) { return "Failed to resolve region name "+region; }
+        catch (@Nonnull final NumberFormatException e) { return "Failed to resolve region name "+region; }
         bot.send(tp,true);
         //bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
         final boolean completed=waitTeleport();
@@ -179,7 +179,7 @@ public class Teleportation extends Handler {
     private boolean waitTeleport() {
         teleporting=true;
         boolean expired=false;
-        try { synchronized(signal) { signal.wait(10000); expired=true; } } catch (final InterruptedException e) {}
+        try { synchronized(signal) { signal.wait(10000); expired=true; } } catch (@Nonnull final InterruptedException e) {}
         if (expired) { log.severe("Timer expired while teleporting, lost in transit?"); }
         final boolean completed=!teleporting;
         teleporting=false;
@@ -206,12 +206,13 @@ public class Teleportation extends Handler {
     @Nonnull
     @CmdHelp(description = "Sends a teleport lure")
     public String lureCommand(@Nonnull final CommandEvent command,
-                              @ParamHelp(description="UUID to lure") final
-                              String uuid) {
+                              @Nonnull @ParamHelp(description = "UUID to lure") final String uuid) {
         final LLUUID targetuuid=new LLUUID(uuid);
-        if (targetuuid==null) { return "Failed to get target"; }
         final StartLure req=new StartLure(bot);
-        req.binfo.vmessage=new Variable1("Sending lure, as requested by "+command.invokerUsername()+" ["+command.invokerUUID().toUUIDString()+"]");
+        String invokeruuid="???";
+        final LLUUID invuuid = command.invokerUUID();
+        if (invuuid!=null) { invokeruuid=invuuid.toUUIDString(); }
+        req.binfo.vmessage=new Variable1("Sending lure, as requested by "+command.invokerUsername()+" ["+invokeruuid+"]");
         req.btargetdata=new ArrayList<>();
         final StartLure_bTargetData target=new StartLure_bTargetData();
         target.vtargetid=targetuuid;

@@ -137,12 +137,10 @@ public class Objects extends Handler {
     @Nonnull
     @CmdHelp(description="Find an object by a name fragment")
     public String objectFindCommand(@Nonnull final CommandEvent command,
-                                    @Nullable @ParamHelp(description="Fragment of a name to search for")
+                                    @Nonnull @ParamHelp(description="Fragment of a name to search for")
             String name) {
         final Regional region=command.region();
         ObjectData best=null;
-        if (region==null) { throw new NullPointerException("Null region passed to Objects.Find"); }
-        if (name==null) { return "Must supply 'name <text>' parameter"; }
         name=name.toLowerCase();
         for (final Integer id:region.getObjects()) {
             final ObjectData check = region.getObject(id);
@@ -270,7 +268,7 @@ public class Objects extends Handler {
                                           String localid) {
         final Regional region=command.region();
         // One way or another we need the local ID
-        int id=0;
+        final int id;
         if (localid!=null) { id=Integer.parseInt(localid); } else
         {
             if (primuuid==null) { return "9 - You must supply Prim UUID or Local simulator ID"; }

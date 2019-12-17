@@ -40,6 +40,7 @@ public final class Circuit extends Thread implements Closeable {
     // the simulator's details
     @Nullable
     private InetSocketAddress address;
+    @Nonnull
     private InetSocketAddress address() {
         if (address==null) { throw new IllegalStateException("Attempting to get circuit socket address but it's null, weirdly"); }
         return address;
@@ -139,7 +140,7 @@ public final class Circuit extends Thread implements Closeable {
         setDaemon(true);
         start(); // launch the rx driver
         // wait for the 'outstanding acks' to be updated (meaning our reliable UseCircuitCode is acked)
-        try { synchronized(inflight) { inflight.wait(5000); } } catch (final InterruptedException ex) { throw new IOException("Failed to get UseCircuitCode Ack"); }
+        try { synchronized(inflight) { inflight.wait(5000); } } catch (@Nonnull final InterruptedException ex) { throw new IOException("Failed to get UseCircuitCode Ack"); }
         if (Debug.CIRCUIT) { log.finer("Outstanding ACKS: "+inflight.size()); }
         if (!inflight.isEmpty()) { throw new IOException("Login completed, UseCircuitCode sent, and not acknowledged..."); }
         log.info("Successfully connected circuit");
@@ -183,7 +184,7 @@ public final class Circuit extends Thread implements Closeable {
                     //System.out.println("RX: "+p.getName());
                     processPacket(p);
                 }
-                catch (final SocketTimeoutException e) {if (Debug.ACK) { log.finer("Exiting receive without event"); } } // as requested, and we dont care
+                catch (@Nonnull final SocketTimeoutException e) {if (Debug.ACK) { log.finer("Exiting receive without event"); } } // as requested, and we dont care
                 // timeout is just to make sure we get HERE \/ once in a while
                 if ((ackqueue.size()>0 && lastAck()>2000) || ackqueue.size()>32) {
                     if (Debug.ACK) { log.finer("Manually sending ACKs"); }
@@ -196,7 +197,7 @@ public final class Circuit extends Thread implements Closeable {
                 }
             }
         }
-        catch (final SocketException ex) {
+        catch (@Nonnull final SocketException ex) {
             if (!bot().quitting()) // who cares if we're closing the bot
             { 
                 if (!disconnectlogged) { disconnectlogged=true; log.warning("Circuit to "+ regionname +" has been closed, "+ ex); }
@@ -374,7 +375,7 @@ public final class Circuit extends Thread implements Closeable {
             bot.accountMessageOut(p.getId(), packet.getLength());
         }
         try { socket.send(packet); }
-        catch (final IOException e) { log.log(SEVERE,"Error transmitting packet "+ e,e); }
+        catch (@Nonnull final IOException e) { log.log(SEVERE,"Error transmitting packet "+ e,e); }
         packetrate++;
     }
 
@@ -400,7 +401,7 @@ public final class Circuit extends Thread implements Closeable {
         final CloseCircuit p = new CloseCircuit(); //debug(owner,"Circuit Close message exceptioned - ",e); }
         send(p);
         try { socket.close(); }
-        catch (final Exception e) { }//debug(owner,"Socket closure exceptioned - ",e); }
+        catch (@Nonnull final Exception e) { }//debug(owner,"Socket closure exceptioned - ",e); }
         if (!disconnectlogged) { disconnectlogged=true; log.log(Level.FINE, "We have requested closure of circuit to {0}", regionname); }
         disconnected=true;
     }
@@ -538,8 +539,11 @@ public final class Circuit extends Thread implements Closeable {
         return bot;
     }
     
-    @Nullable
-    public Regional regional() { return regional; }
+    @Nonnull
+    public Regional regional() {
+        if (regional==null) { throw new NullPointerException("Regional information not established for this circuit yet"); }
+        return regional;
+    }
 
     /** Fire up CAPS for this simulator.
      * Avoid replacing existing caps with a duplicate, log if we're replacing a non duplicate...

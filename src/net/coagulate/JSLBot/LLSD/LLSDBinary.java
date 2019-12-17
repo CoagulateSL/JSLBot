@@ -12,7 +12,7 @@ import java.util.Base64;
  */
 public class LLSDBinary extends Atomic {
 
-    String value="";
+    final String value;
     public LLSDBinary(final String s) {
         value=s;
     }

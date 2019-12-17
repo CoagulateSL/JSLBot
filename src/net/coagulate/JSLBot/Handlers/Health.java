@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
  */
 public class Health extends Handler {
 
-    boolean verbose;
+    final boolean verbose;
     float health;
     public Health(@Nonnull final JSLBot bot, @Nonnull final Configuration c) { super(bot,c);
 	    verbose =Boolean.parseBoolean(c.get("verbose","false")); }

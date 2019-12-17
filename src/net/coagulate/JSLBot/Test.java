@@ -27,13 +27,14 @@ public class Test {
         // 2) alternatively you can just make a configuration for each bot from scratch, each in its own store or file.
         // a lot depends on your backing store, the file provider can serve different files to different bots via instansiation, 
         // or separate namespaces of one file to separate bots, via recursive instansiation (see Configuration's constructors)
-        String CONFIGFILE=null;
+        final String CONFIGFILE;
         if (args.length>0) { CONFIGFILE = args[0]; }
         else {
             final Scanner in=new Scanner(System.in);
             System.out.print("Name of config file: "); CONFIGFILE=in.nextLine();
         }
-        if (CONFIGFILE==null || !(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
+        if (CONFIGFILE==null) { throw new NullPointerException("You must supply a configuration file name"); }
+        if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
         final Configuration config=new FileBasedConfiguration(CONFIGFILE);
         //System.out.println("===== Configuration file loaded =====\n"+config.dump());
         final JSLBot bot=new JSLBot(config);
@@ -72,9 +73,9 @@ public class Test {
 
         try (final FileOutputStream fos = new FileOutputStream(CONFIGFILE); final ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(m);
-        } catch (final FileNotFoundException ex) {
+        } catch (@Nonnull final FileNotFoundException ex) {
             throw new AssertionError("File not found creating file (incorrect directory??");
-        } catch (final IOException ex) {
+        } catch (@Nonnull final IOException ex) {
             throw new AssertionError("Unable to write configuration file",ex);
         }
         

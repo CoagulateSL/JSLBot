@@ -128,7 +128,7 @@ public abstract class Event {
         final long expire=new Date().getTime()+milliseconds;
         while ((new Date().getTime())<expire) {
             synchronized(statusmonitor) {
-                try { statusmonitor.wait(1000); } catch (final InterruptedException e) { }
+                try { statusmonitor.wait(1000); } catch (@Nonnull final InterruptedException e) { }
             }
             if (status==COMPLETE) { return; }
         }

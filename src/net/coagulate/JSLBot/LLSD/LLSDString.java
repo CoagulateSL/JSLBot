@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  */
 public class LLSDString extends Atomic {
 
-    String value="";
+    final String value;
     public LLSDString(final String s) {
         value=s;
     }

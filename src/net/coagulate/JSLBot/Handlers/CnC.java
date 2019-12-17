@@ -33,7 +33,7 @@ public class CnC extends Handler {
         Authorisation auth=null;
         try {
             auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
-        } catch (final Exception e) {
+        } catch (@Nonnull final Exception e) {
             log.log(SEVERE,"Unable to load authoriser "+authoriser, e);
         }
         if (auth==null) {
@@ -104,21 +104,21 @@ public class CnC extends Handler {
         final int audiblenum=msg.bchatdata.vaudible.integer();
         final LLVector3 pos=msg.bchatdata.vposition;
         final String message=msg.bchatdata.vmessage.toString();
-        String sourcetype="";
+        final String sourcetype;
         switch (sourcetypenum) {
             case 0: sourcetype="SYSTEM"; break;
             case 1: sourcetype="Agent"; break;
             case 2: sourcetype="Object"; break;
             default: sourcetype="Unknown#"+sourcetypenum; break;
         }
-        String audible="";
+        final String audible;
         switch (audiblenum) {
             case -1: audible="Inaudible"; break;
             case 0: audible="Quiet"; break;
             case 1: audible="Normal"; break;
             default: audible="Unknown#"+audiblenum; break;
         }
-        String chattype="";
+        final String chattype;
         switch (chattypenum) {
             case 0: chattype="Whisper"; break;
             case 1: chattype="Normal"; break;
@@ -261,7 +261,7 @@ public class CnC extends Handler {
         public void run() {
             try {
                 bot.createCircuit(numericip,port,handle,null);
-            } catch (final Exception e) {
+            } catch (@Nonnull final Exception e) {
                 log.severe("Failed to set up circuit to "+Global.regionName(handle)+" (#"+Long.toUnsignedString(handle)+")");
             }
             
@@ -309,13 +309,13 @@ public class CnC extends Handler {
             response=bot.brain().auth(command);
             if (response==null) { response=command.execute(); }
         }
-        catch (final Exception e) {
+        catch (@Nonnull final Exception e) {
             log.log(WARNING,"CnC Subcommand exceptioned:"+ e,e);
             response="Exception:"+ e;
         }
 
         if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
-        else { if (response!=null && !"".equals(response)) { bot.im(source,">> "+response); } }
+        else { if (!"".equals(response)) { bot.im(source,">> "+response); } }
     }
 
     @Nonnull
@@ -435,7 +435,7 @@ public class CnC extends Handler {
         // otherwise, go home
         log.info("Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in maintenance
         new CommandEvent(bot, bot.getRegional(), "home", new HashMap<>(), null).execute();
-        try { Thread.sleep(1000L); } catch (final InterruptedException e) {}
+        try { Thread.sleep(1000L); } catch (@Nonnull final InterruptedException e) {}
         if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
             // success 
             log.info("Bot has successfully cured its self of homesickness by going home, bot is no longer homesick");

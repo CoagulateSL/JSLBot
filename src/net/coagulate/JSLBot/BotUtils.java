@@ -54,7 +54,7 @@ public abstract class BotUtils {
             }
             //System.out.println("Using mac "+hex(mac)+" from "+stored.toString());
             return hex(mac);
-        } catch (final SocketException ex) {
+        } catch (@Nonnull final SocketException ex) {
             throw new AssertionError("Unable to retrieve any network interfaces MAC addres; unsupported platform or no networking present???",ex);
         }
     }
@@ -72,7 +72,7 @@ public abstract class BotUtils {
         final MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
-        } catch (final NoSuchAlgorithmException ex) {
+        } catch (@Nonnull final NoSuchAlgorithmException ex) {
             throw new AssertionError("MD5 hashing is not supported on this platform?");
         }
         final byte[] digest;

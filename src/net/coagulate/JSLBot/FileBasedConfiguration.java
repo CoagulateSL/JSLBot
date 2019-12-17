@@ -2,12 +2,7 @@ package net.coagulate.JSLBot;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
+import java.io.*;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,9 +13,10 @@ import java.util.Set;
 public class FileBasedConfiguration extends Configuration {
 
     @Nonnull
-    String filename="";
+    final
+    String filename;
     @Nonnull
-    Map<String,String> kvstore=new HashMap<>();
+    Map<String,String> kvstore;
     
     @SuppressWarnings("unchecked") // pretty stuck with this :)
     public FileBasedConfiguration(@Nonnull final String filename) {
@@ -45,7 +41,7 @@ public class FileBasedConfiguration extends Configuration {
         kvstore.put(key,value);
         try {
             writeStore();
-        } catch (final IOException e) {
+        } catch (@Nonnull final IOException e) {
             System.err.println("KVStore write failed, CONFIGURATION NOT SAVED : "+ e);
             e.printStackTrace();
         }

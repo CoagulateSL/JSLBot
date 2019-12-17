@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
  */
 public class LLSDUUID extends Atomic {
 
-    private LLUUID value=new LLUUID();
+    private final LLUUID value;
 
     /** Create a LSLUUID from a LLUUID
      * 

@@ -47,7 +47,7 @@ public class Inventory extends Handler implements Runnable {
             final Set<LLUUID> download = new HashSet<>(downloadqueue);
             downloadqueue.clear();
             try { fetchInventory(download); }
-            catch (final IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
+            catch (@Nonnull final IOException e) { log.log(SEVERE,"Inventory download gave IO exception",e); }
             if (inventorytree.size()==0) { log.fine("Inventory download complete - there is no inventory (?)"); break; }
             final int percent=(int)(Math.round((100.0*inventorytree.size())/(inventorytree.size()+downloadqueue.size())));
             log.fine("Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory.size()+" elements)");
@@ -120,6 +120,7 @@ public class Inventory extends Handler implements Runnable {
     }
     
     private void fetchInventory(final LLUUID uuid) throws IOException { final Set<LLUUID> uuids=new HashSet<>(); uuids.add(uuid); fetchInventory(uuids); }
+    @SuppressWarnings("ConstantConditions")
     private void fetchInventory(@Nonnull final Set<LLUUID> uuids) throws IOException {
         final boolean debugqueries=false;
         final LLSDMap outer=new LLSDMap();

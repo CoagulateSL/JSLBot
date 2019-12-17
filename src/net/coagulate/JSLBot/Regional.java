@@ -183,9 +183,9 @@ public class Regional {
 
         public boolean requested;
         public boolean populated;
-        public int id;
-        @Nullable
-        public Regional region;
+        public final int id;
+        @Nonnull
+        public final Regional region;
         public int ownerprims=-1;
         public int groupprims=-1;
         public int otherprims=-1;
@@ -200,8 +200,7 @@ public class Regional {
         public int claimdate=-1;
         @Nullable
         public String mediaurl;
-        @Nullable
-        public Boolean seeavs;
+        public boolean seeavs=true;
         public int area=-1;
         @Nullable
         public LLUUID owner;
@@ -224,7 +223,7 @@ public class Regional {
             return ret;
         }
         
-        public ParcelData(final int id, @Nullable final Regional region) {
+        public ParcelData(final int id, @Nonnull final Regional region) {
             this.id=id; this.region=region;
         }
         public void populate() { populate(false); }

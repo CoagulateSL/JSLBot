@@ -58,7 +58,7 @@ public final class CAPS extends Thread {
         try {
             initialise();
             launchEventQueue();
-        } catch (final IOException e) {
+        } catch (@Nonnull final IOException e) {
             log.log(SEVERE,"CAPS setup failed: "+ e,e);
         }
     }

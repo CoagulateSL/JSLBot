@@ -72,7 +72,7 @@ public class Brain {
         try {
             final Handler h=createHandler(handlername);
             brain.add(h);
-        } catch (final InvocationTargetException ex) {
+        } catch (@Nonnull final InvocationTargetException ex) {
             Throwable t=ex;
             if (ex.getCause()!=null) { t=ex.getCause(); }
             log.log(Level.SEVERE,"Exception loading handler "+handlername,t);
@@ -202,11 +202,11 @@ public class Brain {
                     response=cmd.run(callon,handler);
                     cmd.response(response);
                 }
-            } catch (final IllegalAccessException ex) {
+            } catch (@Nonnull final IllegalAccessException ex) {
                 log.warning("Method "+method+" has incorrect access modifier"); // impossible?
-            } catch (final IllegalArgumentException ex) {
+            } catch (@Nonnull final IllegalArgumentException ex) {
                 log.warning("Method "+method+" has incorrect parameters"); // impossible?
-            } catch (final InvocationTargetException ex) {
+            } catch (@Nonnull final InvocationTargetException ex) {
                 Throwable t=ex;
                 if (t.getCause()!=null) { t=t.getCause(); }
                 log.log(SEVERE,"Method "+method+" threw an error:", t);
@@ -269,9 +269,9 @@ public class Brain {
             try {
                 if (event instanceof UDPEvent) { methods.add(handler.getClass().getMethod(fen, UDPEvent.class)); }
                 if (event instanceof XMLEvent) { methods.add(handler.getClass().getMethod(fen, XMLEvent.class)); }
-            } catch (final NoSuchMethodException ex) {
+            } catch (@Nonnull final NoSuchMethodException ex) {
                 // this is OK and probably the default case, not every module implements everything.
-            } catch (final SecurityException ex) {
+            } catch (@Nonnull final SecurityException ex) {
                 // this is less OK
                 log.log(WARNING, "Method {0} is inaccessible, this is probably unintentional", fen);
             }
@@ -290,7 +290,7 @@ public class Brain {
     void think() {
         Event event=null;
         synchronized(queue) {
-            if (queue.isEmpty() && procrastinate) { Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating"); try { queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS); } catch (final InterruptedException iex) {} }
+            if (queue.isEmpty() && procrastinate) { Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating"); try { queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS); } catch (@Nonnull final InterruptedException iex) {} }
             if (!queue.isEmpty()) { event=queue.remove(0); }
         }
         if (event!=null) { execute(event,false); }
@@ -313,13 +313,13 @@ public class Brain {
      */
     void loggedIn() {
         for (final Handler h:brain) {
-            try { h.loggedIn(); } catch (final Exception e) { log.log(SEVERE,"Handler "+ h +" exceptioned handling login",e); }
+            try { h.loggedIn(); } catch (@Nonnull final Exception e) { log.log(SEVERE,"Handler "+ h +" exceptioned handling login",e); }
         }
     }
 
     private void callMaintenance() {
         for (final Handler h:brain) {
-            try {h.maintenance();} catch (final Exception e) { log.log(SEVERE,"Handler "+ h +" exceptioned during maintenance",e); }
+            try {h.maintenance();} catch (@Nonnull final Exception e) { log.log(SEVERE,"Handler "+ h +" exceptioned during maintenance",e); }
         }
     }    
     
@@ -368,7 +368,7 @@ public class Brain {
         // no configuration here yet, hard coded 15 minute sleep, have fun with that.
         for (int i=15;i>0;i--) {
             log.severe("Reconnection Safety: RECONNECTION SAFETY HAS TRIPPED.  THREAD FORCE-SLEEPING FOR "+i+" MINUTES.");
-            try { Thread.sleep(60000); } catch (final InterruptedException e) {}
+            try { Thread.sleep(60000); } catch (@Nonnull final InterruptedException e) {}
         }
         log.warning("Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
     }    

@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  */
 public class LLSDReal extends Atomic {
 
-    float value;
+    final float value;
     public LLSDReal(final float a) {
         value=a;
     }

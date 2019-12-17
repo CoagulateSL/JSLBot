@@ -18,9 +18,9 @@ public abstract class Authorisation {
         initLogger(bot);
     }
 
-	protected Authorisation(final JSLBot bot) { initLogger(bot); }
+	protected Authorisation(@Nonnull final JSLBot bot) { initLogger(bot); }
 
-	private void initLogger(final JSLBot bot) {log=bot.getLogger("Authorisation."+ getClass().getSimpleName());}
+	private void initLogger(@Nonnull final JSLBot bot) {log=bot.getLogger("Authorisation."+ getClass().getSimpleName());}
 	/** Returns null if approved, otherwise some explanative text
      * @param event The CommandEvent to approve/reject
      * @return  Null if approved, otherwise a rejection reason.

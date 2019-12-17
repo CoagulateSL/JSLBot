@@ -13,7 +13,7 @@ public class XMLEvent extends Event {
     private final Atomic content;
     public Atomic body() { return content; }
 
-    public XMLEvent(final JSLBot bot, final Regional r, final Atomic content, final String name) {
+    public XMLEvent(@Nonnull final JSLBot bot, @Nonnull final Regional r, final Atomic content, @Nonnull final String name) {
         super(bot, r,name);
         this.content=content;
     }

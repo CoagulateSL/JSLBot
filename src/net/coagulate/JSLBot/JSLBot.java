@@ -160,7 +160,7 @@ public class JSLBot extends Thread {
         if (connected) { return; }
         try {
             synchronized(connectsignal) { connectsignal.wait(milliseconds); }                
-        } catch (final InterruptedException e) {}
+        } catch (@Nonnull final InterruptedException e) {}
         if (connected) { return; }
         throw new IllegalStateException("Still not connected after timeout");
     }
@@ -218,7 +218,7 @@ public class JSLBot extends Thread {
             circuits.clear();
             brain.prepare();
             try { mainLoop(); }
-            catch (final Exception e) { log.log(SEVERE,"Main bot loop crashed - "+ e,e); }
+            catch (@Nonnull final Exception e) { log.log(SEVERE,"Main bot loop crashed - "+ e,e); }
             connected=false; shutdown("Exited");
             brain.loginLoopSafety();
         }
@@ -246,7 +246,7 @@ public class JSLBot extends Thread {
                 if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
                 if (e instanceof NullPointerException) { log.log(SEVERE,"Unexpected null pointer exception during login",e); }
                 else { log.info("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getClass().getSimpleName()+":"+e.getMessage()); }
-                try { if (!quit) { Thread.sleep(delay); } } catch (final InterruptedException f) {}
+                try { if (!quit) { Thread.sleep(delay); } } catch (@Nonnull final InterruptedException f) {}
             }
             if (quit) { return; }
         }
@@ -505,7 +505,7 @@ public class JSLBot extends Thread {
     @Nullable
     public String getFirstName(@Nonnull final LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.firstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
+        if (Global.firstName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.firstName(uuid)==null) { Global.firstName(uuid,"???"); }
         return Global.firstName(uuid);
     }
@@ -516,7 +516,7 @@ public class JSLBot extends Thread {
     @Nullable
     public String getLastName(@Nonnull final LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.lastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
+        if (Global.lastName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.lastName(uuid)==null) { Global.lastName(uuid,"???"); }
         return Global.lastName(uuid);
     }
@@ -527,7 +527,7 @@ public class JSLBot extends Thread {
     @Nullable
     public String getUserName(@Nonnull final LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.userName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
+        if (Global.userName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.userName(uuid)==null) { Global.userName(uuid,"???"); }
         return Global.userName(uuid);
     }
@@ -538,7 +538,7 @@ public class JSLBot extends Thread {
     @Nullable
     public String getDisplayName(@Nonnull final LLUUID uuid) {
         if (uuid.equals(new LLUUID())) { return "NOUUID"; }
-        if (Global.displayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
+        if (Global.displayName(uuid)==null) { try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) { log.log(WARNING,"Failed to lookup agent names",e); } }
         if (Global.displayName(uuid)==null) { Global.displayName(uuid,"???"); }
         return Global.displayName(uuid);
     }
@@ -592,9 +592,9 @@ public class JSLBot extends Thread {
     /** Get the regional info for the primary region
      * @return  Primary region the avatar is present in
      */
-    @Nullable
+    @Nonnull
     public Regional getRegional() {
-        return primary.regional();
+        return circuit().regional();
     }
 
     /** Get regional data for all connected circuit
@@ -642,7 +642,7 @@ public class JSLBot extends Thread {
         // because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
         final Set<Circuit> closeme = new HashSet<>(getCircuits());
         for (final Circuit c:closeme) {
-            try { c.close(); } catch (final Exception e) {}
+            try { c.close(); } catch (@Nonnull final Exception e) {}
         }
         brain.stopProcrastinating();  // release the main thread
     }

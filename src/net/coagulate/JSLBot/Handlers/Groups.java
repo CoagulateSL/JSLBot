@@ -84,7 +84,7 @@ public class Groups extends Handler {
     private final Map<LLUUID,GroupData> groups=new HashMap<>();
 
     @Nullable
-    private LLUUID findGroupUUID(final String name) {
+    private LLUUID findGroupUUID(@Nonnull final String name) {
         synchronized(groups) {
             for (final Map.Entry<LLUUID, GroupData> entry : groups.entrySet()) {
                 final GroupData gd= entry.getValue();
@@ -205,10 +205,9 @@ public class Groups extends Handler {
     public String activateGroupCommand(final CommandEvent event,
                                        @Nullable @ParamHelp(description="Group UUID to activate (or zero UUID for none)") final
                                        String uuid,
-                                       @Nullable @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final
-                                           String name)
+                                       @Nonnull @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final
+                                       String name)
     {
-        if (uuid==null && name==null) { return "2 - You must supply a group uuid or name"; }
         LLUUID target;
         if (uuid==null || uuid.isEmpty()) {
             target=findGroupUUID(name);

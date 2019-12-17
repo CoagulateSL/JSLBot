@@ -27,20 +27,20 @@ public class CommandEvent extends Event {
     public Map<String,String> parameters() {return parameters;}
     // auto IM the response to
     private final LLUUID respondto; public LLUUID respondTo() { return respondto; }
-    public void respondTo(final String response) { this.response=response; }
+    public void respondTo(@Nonnull final String response) { this.response=response; }
     // the response its self, for other threads to read.
     @Nonnull
     private String response="";
     @Nonnull
     public String response() { return response; }
-    void response(final String response) { this.response=response; }
+    void response(@Nonnull final String response) { this.response=response; }
 
 
     private boolean immediate;
     private void immediate(final boolean immediate) { this.immediate=immediate; }
     boolean immediate() { return immediate; }
     
-    public CommandEvent(@Nonnull final JSLBot bot, final Regional r, @Nonnull final String name, final Map<String,String> parameters, final LLUUID respondto) {
+    public CommandEvent(@Nonnull final JSLBot bot, @Nonnull final Regional r, @Nonnull final String name, final Map<String,String> parameters, final LLUUID respondto) {
         super(bot, r,name.toLowerCase());
         log=bot.getLogger("CommandEvent."+name);
         this.parameters=parameters;
@@ -110,7 +110,7 @@ public class CommandEvent extends Event {
             return (String) handler.invoke(callon,getParameters(handler).toArray());
         } catch (@Nonnull final IllegalAccessException|IllegalArgumentException ex) {
             throw new AssertionError("Error accessing "+handler.getName()+" in class "+callon.getClass().getName(),ex);
-        } catch (final InvocationTargetException ex) {
+        } catch (@Nonnull final InvocationTargetException ex) {
             Throwable t=ex;
             if (t.getCause()!=null) { t=t.getCause(); }
             log.log(INFO,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+BotUtils.unravel(t),t);

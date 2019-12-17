@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
  */
 
 public class ObjectData {
-    @Nullable
+    @Nonnull
     public U32 id;
     @Nullable
     public LLUUID fullid;
@@ -45,11 +45,11 @@ public class ObjectData {
     private float z=-1;
     public int crc;
     public ObjectData(final JSLBot bot, final int id) { this.bot=bot; this.id=new U32(id); }
-    public ObjectData(final JSLBot bot, @Nullable final U32 id) { this.bot=bot; this.id=id; }
+    public ObjectData(final JSLBot bot, @Nonnull final U32 id) { this.bot=bot; this.id=id; }
     @Nullable
     public String toString() {
         String r="";
-        if (id!=null) { r+="#"+id.value; } else { r+="id??"; }
+        r+="#"+id.value;
         r+="@<"+x+","+y+","+z+"> ";
         if (clickaction!=null) { r+=" onClick:"+clickaction; }
         if (scale!=null) { r+=" Size:"+ scale; }
