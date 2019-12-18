@@ -8,20 +8,27 @@ import net.coagulate.JSLBot.UDPEvent;
 
 import javax.annotation.Nonnull;
 
-/**  Swallows health messages, and even stores the health.
+/**
+ * Swallows health messages, and even stores the health.
+ *
  * @author Iain Price
  */
 public class Health extends Handler {
 
-    final boolean verbose;
-    float health;
-    public Health(@Nonnull final JSLBot bot, @Nonnull final Configuration c) { super(bot,c);
-	    verbose =Boolean.parseBoolean(c.get("verbose","false")); }
+	final boolean verbose;
+	float health;
 
-    public void healthMessageUDPImmediate(@Nonnull final UDPEvent event) {
-        final HealthMessage h=(HealthMessage) event.body();
-        health=h.bhealthdata.vhealth.value;
-        if (verbose) { log.info("Agent health is "+health); }
-    }
+	public Health(@Nonnull final JSLBot bot,
+	              @Nonnull final Configuration c)
+	{
+		super(bot,c);
+		verbose=Boolean.parseBoolean(c.get("verbose","false"));
+	}
+
+	public void healthMessageUDPImmediate(@Nonnull final UDPEvent event) {
+		final HealthMessage h=(HealthMessage) event.body();
+		health=h.bhealthdata.vhealth.value;
+		if (verbose) { log.info("Agent health is "+health); }
+	}
 
 }

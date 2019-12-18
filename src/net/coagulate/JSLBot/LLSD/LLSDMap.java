@@ -7,57 +7,67 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/** A Map container in LLSD.
+/**
+ * A Map container in LLSD.
  *
  * @author Iain Price
  */
 public class LLSDMap extends Container {
-    private final Map<String,Atomic> data=new HashMap<>();
-    
-    /** Create an LLSD Map from a list of XML nodes.
-     *
-     * @param nodes NodeList contents of this map
-     */
-    public LLSDMap(@Nonnull final NodeList nodes) {
-        for (int i=0;i<nodes.getLength();i+=2) {
-            final String key=nodes.item(i).getFirstChild().getNodeValue();
-            final Atomic a=Atomic.create(nodes.item(i+1));
-            if (a!=null) { data.put(key, a); }
-        }
-    }
+	private final Map<String,Atomic> data=new HashMap<>();
 
-    public LLSDMap() {
-    }
-    
-    
-    @Nonnull
-    @Override
-    public String toXML(final String prefix) {
-        final StringBuilder resp= new StringBuilder(prefix + "<map>\n");
-        for (final Map.Entry<String, Atomic> entry : data.entrySet()) {
-            resp.append(prefix).append("<key>").append(entry.getKey()).append("</key>\n");
-            resp.append(entry.getValue().toXML(prefix + "  "));
-        }
-        resp.append(prefix).append("</map>\n");
-        return resp.toString();
-    }
+	/**
+	 * Create an LLSD Map from a list of XML nodes.
+	 *
+	 * @param nodes NodeList contents of this map
+	 */
+	public LLSDMap(@Nonnull final NodeList nodes) {
+		for (int i=0;i<nodes.getLength();i+=2) {
+			final String key=nodes.item(i).getFirstChild().getNodeValue();
+			final Atomic a=Atomic.create(nodes.item(i+1));
+			if (a!=null) { data.put(key,a); }
+		}
+	}
 
-    @Nonnull
-    public Set<String> keys() { return data.keySet(); }
-    public boolean containsKey(final String key) {
-        return data.containsKey(key);
-    }
-    public Atomic get(final String key) { return data.get(key); }
-    
-    /** Get a key, with a default value if not present.
-     *
-     * @param key Key to get
-     * @param def Default atomic to return
-     * @return The atomic from the map, or the default if not present.
-     */
-    public Atomic get(final String key, final Atomic def) { return data.getOrDefault(key, def); }
+	public LLSDMap() {
+	}
 
-    public void put(final String ack, final Atomic atom) {
-        data.put(ack,atom);
-    }
+
+	@Nonnull
+	@Override
+	public String toXML(final String prefix) {
+		final StringBuilder resp=new StringBuilder(prefix+"<map>\n");
+		for (final Map.Entry<String,Atomic> entry: data.entrySet()) {
+			resp.append(prefix).append("<key>").append(entry.getKey()).append("</key>\n");
+			resp.append(entry.getValue().toXML(prefix+"  "));
+		}
+		resp.append(prefix).append("</map>\n");
+		return resp.toString();
+	}
+
+	@Nonnull
+	public Set<String> keys() { return data.keySet(); }
+
+	public boolean containsKey(final String key) {
+		return data.containsKey(key);
+	}
+
+	public Atomic get(final String key) { return data.get(key); }
+
+	/**
+	 * Get a key, with a default value if not present.
+	 *
+	 * @param key Key to get
+	 * @param def Default atomic to return
+	 *
+	 * @return The atomic from the map, or the default if not present.
+	 */
+	public Atomic get(final String key,
+	                  final Atomic def)
+	{ return data.getOrDefault(key,def); }
+
+	public void put(final String ack,
+	                final Atomic atom)
+	{
+		data.put(ack,atom);
+	}
 }
