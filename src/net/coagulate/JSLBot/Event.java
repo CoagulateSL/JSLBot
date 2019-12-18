@@ -5,8 +5,10 @@ import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static net.coagulate.JSLBot.Event.EVENTTYPE.*;
-import static net.coagulate.JSLBot.Event.STATUS.*;
+import static net.coagulate.JSLBot.Event.STATUS.COMPLETE;
+import static net.coagulate.JSLBot.Event.STATUS.UNSUBMITTED;
 
 
 /**  Abstract superclass of different types of event we propagate.
@@ -28,30 +30,44 @@ public abstract class Event {
         /** Event running through the immediate handlers */
         IMMEDIATE, 
         /** Event queued for delayed handlers */
-        QUEUED, 
-        /** Event running in delayed handlers */
-        RUNNING, 
-        /** Event completed */
-        COMPLETE }
-    private STATUS status=UNSUBMITTED;
-    /** Get the event's current status
-     * 
+        QUEUED,
+        /**
+         * Event running in delayed handlers
+         */
+        RUNNING,
+        /**
+         * Event completed
+         */
+        COMPLETE
+    }
+
+    private STATUS status = UNSUBMITTED;
+
+    /**
+     * Get the event's current status
+     *
      * @return The STATUS of this event
      */
     public STATUS status() { return status; }
-    /** Set the event's current status
-     * 
-     * @param status 
+
+    /**
+     * Set the event's current status
+     *
+     * @param status the new status for this event
      */
-    void status (final STATUS status) {
-        synchronized(statusmonitor) {
-            this.status=status;
-            if (Debug.TRACKCOMMANDS && type==COMMAND) { log.log(Level.FINER, "Command {0} in region {1}entering status {2}", new Object[]{getName(), region().toString(), status}); }
+    void status(final STATUS status) {
+        synchronized (statusmonitor) {
+            this.status = status;
+            if (Debug.TRACKCOMMANDS && type == COMMAND) {
+                log.log(Level.FINER, "Command {0} in region {1}entering status {2}", new Object[]{getName(), region().toString(), status});
+            }
             statusmonitor.notify();
         }
     }
-    
-    /** Supported event types */
+
+    /**
+     * Supported event types
+     */
     public enum EVENTTYPE { UDP, XML, COMMAND }
 
 	private EVENTTYPE type;
@@ -127,8 +143,8 @@ public abstract class Event {
     public void waitFinish(final long milliseconds) {
         final long expire=new Date().getTime()+milliseconds;
         while ((new Date().getTime())<expire) {
-            synchronized(statusmonitor) {
-                try { statusmonitor.wait(1000); } catch (@Nonnull final InterruptedException e) { }
+            synchronized (statusmonitor) {
+                try { statusmonitor.wait(1000); } catch (@Nonnull final InterruptedException ignored) { }
             }
             if (status==COMPLETE) { return; }
         }
