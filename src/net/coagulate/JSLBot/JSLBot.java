@@ -155,7 +155,7 @@ public class JSLBot extends Thread {
      * @param milliseconds Maximum time to wait for
      * @throws IllegalStateException If we fail to connect due to timeout or being in a quit state. 
      */
-    public void waitConnection(final long milliseconds) throws IllegalStateException {
+    public void waitConnection(final long milliseconds) {
         if (quit) { throw new IllegalStateException("Quitting, can not wait on connection"); }
         if (connected) { return; }
         try {
