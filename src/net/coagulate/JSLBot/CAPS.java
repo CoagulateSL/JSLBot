@@ -85,9 +85,9 @@ public final class CAPS extends Thread {
     
     /** Run a CAPS getDisplayNames event for a given UUID.
      * Does /not/ use the cache, internal use only!
-     * @param agentid
-     * @throws MalformedURLException
-     * @throws IOException 
+     * @param agentid agent to lookup
+     * @throws MalformedURLException caps problem
+     * @throws IOException caps problem
      */
     void getNames(@Nonnull final LLUUID agentid) throws MalformedURLException, IOException {
         final LLSDMap map = invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
