@@ -15,8 +15,7 @@ public abstract class Handler {
 	protected Configuration config;
 
 	public Handler(@Nonnull final JSLBot bot,
-	               final Configuration config)
-	{
+	               final Configuration config) {
 		this.bot=bot;
 		this.config=config;
 		log=bot.getLogger("Handler."+getClass().getSimpleName());

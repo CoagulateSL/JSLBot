@@ -24,22 +24,19 @@ public final class Global {
 	 * Cache a last name
 	 */
 	static void lastName(final LLUUID uuid,
-	                     final String lastname)
-	{ synchronized (lastnames) { lastnames.put(uuid,lastname); } }
+	                     final String lastname) { synchronized (lastnames) { lastnames.put(uuid,lastname); } }
 
 	/**
 	 * Cache a first name
 	 */
 	static void firstName(final LLUUID uuid,
-	                      final String firstname)
-	{ synchronized (firstnames) { firstnames.put(uuid,firstname); } }
+	                      final String firstname) { synchronized (firstnames) { firstnames.put(uuid,firstname); } }
 
 	/**
 	 * Cache a display name
 	 */
 	static void displayName(final LLUUID uuid,
-	                        final String displayname)
-	{ synchronized (displaynames) { displaynames.put(uuid,displayname); } }
+	                        final String displayname) { synchronized (displaynames) { displaynames.put(uuid,displayname); } }
 
 	// this would be much better if we factoried the UUIDs and could just use == (i.e. "xxx.get(LLUUID)" directly
 	// maybe we can, this fault was never well tested.
@@ -48,8 +45,7 @@ public final class Global {
 	 * Cache a username
 	 */
 	static void userName(final LLUUID uuid,
-	                     final String username)
-	{ synchronized (usernames) { usernames.put(uuid,username); } }
+	                     final String username) { synchronized (usernames) { usernames.put(uuid,username); } }
 
 	/**
 	 * Look up a display name ONLY in the cache
@@ -123,8 +119,7 @@ public final class Global {
 	 * @param name   Region name for the handle
 	 */
 	public static void regionName(@Nullable final Long handle,
-	                              @Nullable final String name)
-	{
+	                              @Nullable final String name) {
 		if (handle!=null && name!=null && (!name.isEmpty())) {
 			synchronized (regionnames) { regionnames.put(handle,name); }
 		}

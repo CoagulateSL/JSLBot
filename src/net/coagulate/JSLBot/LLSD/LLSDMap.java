@@ -62,12 +62,10 @@ public class LLSDMap extends Container {
 	 * @return The atomic from the map, or the default if not present.
 	 */
 	public Atomic get(final String key,
-	                  final Atomic def)
-	{ return data.getOrDefault(key,def); }
+	                  final Atomic def) { return data.getOrDefault(key,def); }
 
 	public void put(final String ack,
-	                final Atomic atom)
-	{
+	                final Atomic atom) {
 		data.put(ack,atom);
 	}
 }

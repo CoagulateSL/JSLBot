@@ -23,8 +23,7 @@ public class DenyAll extends Authorisation {
 	 * @param c   The unused configuration
 	 */
 	public DenyAll(@Nonnull final JSLBot bot,
-	               final Configuration c)
-	{
+	               final Configuration c) {
 		super(bot,c);
 		log.config("Created a DenyAll authoriser, if engaged all remote commands will be denied.");
 	}

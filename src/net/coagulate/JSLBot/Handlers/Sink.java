@@ -12,8 +12,7 @@ import javax.annotation.Nonnull;
  */
 public class Sink extends Handler {
 	public Sink(@Nonnull final JSLBot bot,
-	            final Configuration c)
-	{super(bot,c);}
+	            final Configuration c) {super(bot,c);}
 
 	public void simStatsUDPDelayed(final UDPEvent event) {}
 

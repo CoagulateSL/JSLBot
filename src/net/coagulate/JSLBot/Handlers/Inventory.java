@@ -28,8 +28,7 @@ public class Inventory extends Handler implements Runnable {
 
 
 	public Inventory(@Nonnull final JSLBot bot,
-	                 final Configuration config)
-	{
+	                 final Configuration config) {
 		super(bot,config);
 	}
 
@@ -54,7 +53,8 @@ public class Inventory extends Handler implements Runnable {
 			final Iterator<LLUUID> i=downloadqueue.iterator();
 			final Set<LLUUID> download=new HashSet<>(downloadqueue);
 			downloadqueue.clear();
-			try { fetchInventory(download); } catch (@Nonnull final IOException e) {
+			try { fetchInventory(download); }
+			catch (@Nonnull final IOException e) {
 				log.log(SEVERE,"Inventory download gave IO exception",e);
 			}
 			if (inventorytree.size()==0) {
@@ -62,8 +62,7 @@ public class Inventory extends Handler implements Runnable {
 				break;
 			}
 			final int percent=(int) (Math.round((100.0*inventorytree.size())/(inventorytree.size()+downloadqueue.size())));
-			log.fine("Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory
-					.size()+" elements)");
+			log.fine("Inventory download: ["+percent+"%] "+inventorytree.size()+" branches complete, "+downloadqueue.size()+" to go ("+inventory.size()+" elements)");
 		}
 		log.info("Inventory download complete");
 		inventorycomplete=true;
@@ -74,8 +73,7 @@ public class Inventory extends Handler implements Runnable {
 	                             final LLUUID id,
 	                             final LLUUID parentid,
 	                             final String name,
-	                             final int version)
-	{
+	                             final int version) {
 		synchronized (inventory) {
 			inventory.put(id,new InventoryCategory(type,agentid,id,parentid,name,version));
 		}
@@ -83,8 +81,7 @@ public class Inventory extends Handler implements Runnable {
 	}
 
 	private void addInventoryChild(final LLUUID parentid,
-	                               final LLUUID id)
-	{
+	                               final LLUUID id) {
 		synchronized (inventorytree) {
 			Set<LLUUID> children=inventorytree.get(parentid);
 			if (children==null) { children=new HashSet<>(); }
@@ -99,8 +96,7 @@ public class Inventory extends Handler implements Runnable {
 	                         final LLUUID assetid,
 	                         final int type,
 	                         final int invtype,
-	                         final String desc)
-	{
+	                         final String desc) {
 		synchronized (inventory) {
 			inventory.put(id,new InventoryItem(id,parent,name,desc,assetid,type,invtype));
 		}
@@ -170,7 +166,8 @@ public class Inventory extends Handler implements Runnable {
 		}
 		if (query.isEmpty()) {
 			if (debugqueries) { System.out.println("No new queries to generate"); }
-		} else {
+		}
+		else {
 			if (debugqueries) { System.out.println("Generated new queries:"+query.size()); }
 			downloadqueue.addAll(query);
 		}
@@ -189,8 +186,7 @@ public class Inventory extends Handler implements Runnable {
 
 	@Nonnull
 	private String inventoryDump(final LLUUID parent,
-	                             final String prefix)
-	{
+	                             final String prefix) {
 		final StringBuilder ret=new StringBuilder();
 		final Set<LLUUID> children=inventorytree.get(parent);
 		if (children==null || children.isEmpty()) { return ""; }
@@ -210,8 +206,7 @@ public class Inventory extends Handler implements Runnable {
 		return ret.toString();
 	}
 
-	public static class InventoryAtom {
-	}
+	public static class InventoryAtom {}
 
 	public static class InventoryItem extends InventoryAtom {
 		final LLUUID id;
@@ -228,8 +223,7 @@ public class Inventory extends Handler implements Runnable {
 		                      final String desc,
 		                      final LLUUID assetid,
 		                      final int type,
-		                      final int invtype)
-		{
+		                      final int invtype) {
 			this.id=id;
 			this.parent=parent;
 			this.name=name;
@@ -253,8 +247,7 @@ public class Inventory extends Handler implements Runnable {
 		                         final LLUUID id,
 		                         final LLUUID parentid,
 		                         final String name,
-		                         final int version)
-		{
+		                         final int version) {
 			this.type=type;
 			this.agentid=agentid;
 			this.id=id;

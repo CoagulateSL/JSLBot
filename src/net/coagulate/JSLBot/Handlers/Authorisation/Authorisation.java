@@ -17,8 +17,7 @@ public abstract class Authorisation {
 	protected Logger log;
 
 	public Authorisation(@Nonnull final JSLBot bot,
-	                     final Configuration c)
-	{
+	                     final Configuration c) {
 		initLogger(bot);
 	}
 

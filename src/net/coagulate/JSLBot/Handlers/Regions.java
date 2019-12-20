@@ -30,13 +30,11 @@ public class Regions extends Handler {
 	private final Object parcelpropertiessignal=new Object();
 
 	public Regions(@Nonnull final JSLBot bot,
-	               final Configuration conf)
-	{ super(bot,conf); }
+	               final Configuration conf) { super(bot,conf); }
 
 	@CmdHelp(description="Look up a region handle from a region name")
 	public String regionLookupCommand(final CommandEvent command,
-	                                  @Nullable @ParamHelp(description="Name of region to lookup") final String name)
-	{
+	                                  @Nullable @ParamHelp(description="Name of region to lookup") final String name) {
 		if (name==null || "".equals(name)) { return "No NAME parameter passed."; }
 		// check cache
 		Long cached=Global.regionHandle(name);
@@ -50,7 +48,8 @@ public class Regions extends Handler {
 		while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
 			try {
 				synchronized (mapblockreplysignal) { mapblockreplysignal.wait(1000); }
-			} catch (@Nonnull final InterruptedException e) {}
+			}
+			catch (@Nonnull final InterruptedException e) {}
 		}
 		cached=Global.regionHandle(name);
 		if (cached!=null) { return Long.toUnsignedString(cached); }
@@ -115,8 +114,7 @@ public class Regions extends Handler {
 	@CmdHelp(description="Get a parcel's LocalID from region-local x and y co-ordinates")
 	public String parcelIdCommand(@Nonnull final CommandEvent command,
 	                              @Nonnull @ParamHelp(description="X co-ordinate within the parcel") final String x,
-	                              @Nonnull @ParamHelp(description="Y co-ordinate within the parcel") final String y)
-	{
+	                              @Nonnull @ParamHelp(description="Y co-ordinate within the parcel") final String y) {
 		final Regional region=command.region();
 		final int reqid=region.getRequestId();
 		final ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request

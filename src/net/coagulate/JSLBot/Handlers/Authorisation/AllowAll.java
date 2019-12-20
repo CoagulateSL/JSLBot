@@ -21,8 +21,7 @@ public class AllowAll extends Authorisation {
 	 * @param c   Configuration (unused)
 	 */
 	public AllowAll(@Nonnull final JSLBot bot,
-	                final Configuration c)
-	{
+	                final Configuration c) {
 		super(bot,c);
 		log.warning("Creating AllowAll authoriser, if used, anyone may completely control this bot");
 	}

@@ -16,8 +16,7 @@ public class XMLEvent extends Event {
 	public XMLEvent(@Nonnull final JSLBot bot,
 	                @Nonnull final Regional r,
 	                final Atomic content,
-	                @Nonnull final String name)
-	{
+	                @Nonnull final String name) {
 		super(bot,r,name);
 		this.content=content;
 	}

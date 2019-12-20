@@ -41,8 +41,7 @@ public class CommandEvent extends Event {
 	                    @Nonnull final Regional r,
 	                    @Nonnull final String name,
 	                    final Map<String,String> parameters,
-	                    final LLUUID respondto)
-	{
+	                    final LLUUID respondto) {
 		super(bot,r,name.toLowerCase());
 		log=bot.getLogger("CommandEvent."+name);
 		this.parameters=parameters;
@@ -130,24 +129,20 @@ public class CommandEvent extends Event {
 
 	@Nonnull
 	String run(@Nonnull final Object callon,
-	           @Nonnull final Method handler)
-	{
+	           @Nonnull final Method handler) {
 		if (Debug.TRACKCOMMANDS) {
 			log.fine("Entering run() for "+handler.getName()+" in class "+callon.getClass().getSimpleName());
 		}
 		try {
 			return (String) handler.invoke(callon,getParameters(handler).toArray());
-		} catch (@Nonnull final IllegalAccessException|IllegalArgumentException ex) {
+		}
+		catch (@Nonnull final IllegalAccessException|IllegalArgumentException ex) {
 			throw new AssertionError("Error accessing "+handler.getName()+" in class "+callon.getClass().getName(),ex);
-		} catch (@Nonnull final InvocationTargetException ex) {
+		}
+		catch (@Nonnull final InvocationTargetException ex) {
 			Throwable t=ex;
 			if (t.getCause()!=null) { t=t.getCause(); }
-			log.log(INFO,
-			        "Handler "+handler.getName()+" in class "+callon.getClass()
-			                                                        .getSimpleName()+" threw exception "+BotUtils.unravel(
-					        t),
-			        t
-			       );
+			log.log(INFO,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+BotUtils.unravel(t),t);
 			return "Exception inside handler "+handler.getName()+BotUtils.unravel(t);
 		}
 	}
@@ -160,7 +155,8 @@ public class CommandEvent extends Event {
 		boolean firstparam=true;
 		for (final Parameter param: method.getParameters()) {
 			//System.out.println(param.toString());
-			if (firstparam) { firstparam=false; } else {
+			if (firstparam) { firstparam=false; }
+			else {
 				final String paramname=param.getName();
 				params.add(parameters().getOrDefault(paramname,null));
 			}

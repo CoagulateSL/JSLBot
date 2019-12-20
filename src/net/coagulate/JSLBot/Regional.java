@@ -138,12 +138,10 @@ public class Regional {
 	public Integer getResponse(final int requestid) { return requestresponses.get(requestid); }
 
 	public void requestResponse(final int sequenceid,
-	                            final int get)
-	{ requestresponses.put(sequenceid,get); }
+	                            final int get) { requestresponses.put(sequenceid,get); }
 
 	public void setParcelMap(final int sequence,
-	                         final byte b)
-	{ parcelgrid[sequence/64][sequence%64]=b; }
+	                         final byte b) { parcelgrid[sequence/64][sequence%64]=b; }
 
 	@Nonnull
 	public String dumpParcels() {
@@ -234,8 +232,7 @@ public class Regional {
 		public int simwidetotalprims=-1;
 
 		public ParcelData(final int id,
-		                  @Nonnull final Regional region)
-		{
+		                  @Nonnull final Regional region) {
 			this.id=id;
 			this.region=region;
 		}

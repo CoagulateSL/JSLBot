@@ -48,15 +48,13 @@ public class ObjectData {
 	private float z=-1;
 
 	public ObjectData(final JSLBot bot,
-	                  final int id)
-	{
+	                  final int id) {
 		this.bot=bot;
 		this.id=new U32(id);
 	}
 
 	public ObjectData(final JSLBot bot,
-	                  @Nonnull final U32 id)
-	{
+	                  @Nonnull final U32 id) {
 		this.bot=bot;
 		this.id=id;
 	}
@@ -79,8 +77,7 @@ public class ObjectData {
 
 	public void position(final float newx,
 	                     final float newy,
-	                     final float newz)
-	{
+	                     final float newz) {
 		//System.out.println(newx+","+newy+","+newz);
 		x=newx;
 		y=newy;

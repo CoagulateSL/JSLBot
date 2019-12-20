@@ -24,8 +24,7 @@ public class TransientConfiguration extends Configuration {
 
 	@Override
 	public void put(final String param,
-	                final String value)
-	{
+	                final String value) {
 		kv.put(param,value);
 	}
 

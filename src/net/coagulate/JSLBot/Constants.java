@@ -28,7 +28,8 @@ public abstract class Constants {
 	public static final int MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS=600; // in this many seconds.  if we do, just force quit.
 	public static final long ACK_TIMEOUT=3000; // how long for an unacked packet before retransmit kicks in
 	public static final int UDP_MAX_BUFFER=16384; // 16kb UDP packet.  arbitary number, probably very excessive for SL
-	public static final long BRAIN_PROCRASTINATES_FOR_MILLISECONDS=1000; // how long to sleep the thread on the event queue before releasing the thread for maintenance tasks etc
+	public static final long BRAIN_PROCRASTINATES_FOR_MILLISECONDS=1000; // how long to sleep the thread on the event queue before releasing the thread for maintenance
+	// tasks etc
 
 	@Nonnull
 	public static String getVersionNumber() { return MAJOR_VERSION_NUMBER+"."+MINOR_VERSION_NUMBER+"."+BUGFIX_VERSION_NUMBER; }

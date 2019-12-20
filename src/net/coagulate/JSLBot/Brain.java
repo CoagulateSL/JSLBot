@@ -85,7 +85,8 @@ public class Brain {
 		try {
 			final Handler h=createHandler(handlername);
 			brain.add(h);
-		} catch (@Nonnull final InvocationTargetException ex) {
+		}
+		catch (@Nonnull final InvocationTargetException ex) {
 			Throwable t=ex;
 			if (ex.getCause()!=null) { t=ex.getCause(); }
 			log.log(Level.SEVERE,"Exception loading handler "+handlername,t);
@@ -104,14 +105,17 @@ public class Brain {
 					final String commandname=m.getName().toLowerCase();
 					if (commandmap.containsKey(commandname)) {
 						log.severe("Duplicate definition for command "+commandname);
-					} else {
+					}
+					else {
 						if (commandname.endsWith("command")) {
 							if (CommandEvent.class==m.getParameters()[0].getType()) {
 								commandmap.put(commandname,m);
-							} else {
+							}
+							else {
 								log.severe("Otherwise legitimate command "+commandname+" has incorrect first parameter - should be type CommandEvent");
 							}
-						} else {
+						}
+						else {
 							log.warning("Annotated command "+commandname+" does not have 'command' suffix and is inaccessible");
 						}
 					}
@@ -159,7 +163,8 @@ public class Brain {
 			final Configuration subconfiguration=bot.config.subspace(name);
 			final Constructor<?> cons=c.getConstructor(JSLBot.class,Configuration.class);
 			return (Handler) (cons.newInstance(bot,subconfiguration));
-		} catch (@Nonnull final SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
+		}
+		catch (@Nonnull final SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
 			throw new AssertionError("Handler "+name+" fails to meet programming contract",ex);
 		}
 	}
@@ -203,15 +208,15 @@ public class Brain {
 	 */
 	@Nullable
 	private String execute(@Nonnull final Event event,
-	                       final boolean immediate)
-	{
+	                       final boolean immediate) {
 		final String messageid=event.getPrefixedName();
 		String fen=formatEventName(event);
 		fen=fen+event.typeString();
 		String method=fen;
 		if (event instanceof UDPEvent || event instanceof XMLEvent) { method+=(immediate?"Immediate":"Delayed"); }
 		String response=null;
-		if (immediate) { event.status(Event.STATUS.IMMEDIATE); } else { event.status(Event.STATUS.RUNNING); }
+		if (immediate) { event.status(Event.STATUS.IMMEDIATE); }
+		else { event.status(Event.STATUS.RUNNING); }
 		if (!handlermap.containsKey(method)) { populateHandlerMap(event); }
 		Set<Method> handlers=null;
 		if (event instanceof UDPEvent || event instanceof XMLEvent) { handlers=handlermap.get(method); }
@@ -238,11 +243,14 @@ public class Brain {
 					response=cmd.run(callon,handler);
 					cmd.response(response);
 				}
-			} catch (@Nonnull final IllegalAccessException ex) {
+			}
+			catch (@Nonnull final IllegalAccessException ex) {
 				log.warning("Method "+method+" has incorrect access modifier"); // impossible?
-			} catch (@Nonnull final IllegalArgumentException ex) {
+			}
+			catch (@Nonnull final IllegalArgumentException ex) {
 				log.warning("Method "+method+" has incorrect parameters"); // impossible?
-			} catch (@Nonnull final InvocationTargetException ex) {
+			}
+			catch (@Nonnull final InvocationTargetException ex) {
 				Throwable t=ex;
 				if (t.getCause()!=null) { t=t.getCause(); }
 				log.log(SEVERE,"Method "+method+" threw an error:",t);
@@ -256,9 +264,8 @@ public class Brain {
 				return response;
 			}
 			if (!warned.contains(fen) && (handlermap.get(fen+"Delayed")==null || handlermap.get(fen+"Delayed")
-			                                                                               .isEmpty()) && (handlermap.get(
-					fen+"Immediate")==null || handlermap.get(fen+"Immediate").isEmpty()))
-			{
+			                                                                               .isEmpty()) && (handlermap.get(fen+"Immediate")==null || handlermap.get(fen+"Immediate")
+			                                                                                                                                                  .isEmpty())) {
 				log.log(FINE,"No handler for UDP/XML event {0}",fen);
 				warned.add(fen);
 			}
@@ -304,8 +311,7 @@ public class Brain {
 	 * @param suffix Suffix to search for, e.g. Immediate or Delayed
 	 */
 	private void populateHandlerMap(@Nonnull final Event event,
-	                                final String suffix)
-	{
+	                                final String suffix) {
 		// find all the handlers that have a method like this and accumulate them into a set =)
 		String fen=formatEventName(event);
 		fen=fen+event.typeString();
@@ -315,9 +321,11 @@ public class Brain {
 			try {
 				if (event instanceof UDPEvent) { methods.add(handler.getClass().getMethod(fen,UDPEvent.class)); }
 				if (event instanceof XMLEvent) { methods.add(handler.getClass().getMethod(fen,XMLEvent.class)); }
-			} catch (@Nonnull final NoSuchMethodException ex) {
+			}
+			catch (@Nonnull final NoSuchMethodException ex) {
 				// this is OK and probably the default case, not every module implements everything.
-			} catch (@Nonnull final SecurityException ex) {
+			}
+			catch (@Nonnull final SecurityException ex) {
 				// this is less OK
 				log.log(WARNING,"Method {0} is inaccessible, this is probably unintentional",fen);
 			}
@@ -341,7 +349,8 @@ public class Brain {
 				Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating");
 				try {
 					queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS);
-				} catch (@Nonnull final InterruptedException iex) {}
+				}
+				catch (@Nonnull final InterruptedException iex) {}
 			}
 			if (!queue.isEmpty()) { event=queue.remove(0); }
 		}
@@ -367,7 +376,8 @@ public class Brain {
 	 */
 	void loggedIn() {
 		for (final Handler h: brain) {
-			try { h.loggedIn(); } catch (@Nonnull final Exception e) {
+			try { h.loggedIn(); }
+			catch (@Nonnull final Exception e) {
 				log.log(SEVERE,"Handler "+h+" exceptioned handling login",e);
 			}
 		}
@@ -375,7 +385,8 @@ public class Brain {
 
 	private void callMaintenance() {
 		for (final Handler h: brain) {
-			try {h.maintenance();} catch (@Nonnull final Exception e) {
+			try {h.maintenance();}
+			catch (@Nonnull final Exception e) {
 				log.log(SEVERE,"Handler "+h+" exceptioned during maintenance",e);
 			}
 		}
@@ -397,11 +408,11 @@ public class Brain {
 		// not not any null slots, whats the oldest timer?
 		Date oldest=null;
 		for (final Date d: launches) {
-			if (oldest==null) { oldest=d; } else { if (d.before(oldest)) { oldest=d; } }
+			if (oldest==null) { oldest=d; }
+			else { if (d.before(oldest)) { oldest=d; } }
 		}
 		if (oldest==null) {
-			throw new AssertionError(
-					"How is oldest null at this point?  if null we should have hit 'launched less than 5 times'");
+			throw new AssertionError("How is oldest null at this point?  if null we should have hit 'launched less than 5 times'");
 		}
 		final long ago=new Date().getTime()-oldest.getTime();
 		final int secondsago=(int) (ago/1000f);
@@ -419,8 +430,7 @@ public class Brain {
 			}
 		}
 		// should never get here
-		throw new AssertionError(
-				"An oldest launch time was found in pass #1, but could not be found to be replaced in pass #2");
+		throw new AssertionError("An oldest launch time was found in pass #1, but could not be found to be replaced in pass #2");
 	}
 
 	/**
@@ -436,8 +446,7 @@ public class Brain {
 			log.severe("Reconnection Safety: RECONNECTION SAFETY HAS TRIPPED.  THREAD FORCE-SLEEPING FOR "+i+" MINUTES.");
 			try { Thread.sleep(60000); } catch (@Nonnull final InterruptedException e) {}
 		}
-		log.warning(
-				"Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
+		log.warning("Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
 	}
 
 	/**
@@ -446,7 +455,8 @@ public class Brain {
 	 * @param auth New module
 	 */
 	public void setAuth(@Nullable final Authorisation auth) {
-		if (auth==null) { this.auth=new DenyAll(bot); } else { this.auth=auth; }
+		if (auth==null) { this.auth=new DenyAll(bot); }
+		else { this.auth=auth; }
 	}
 
 	/**

@@ -26,8 +26,7 @@ public class Groups extends Handler {
 	private final Map<LLUUID,GroupData> groups=new HashMap<>();
 
 	public Groups(@Nonnull final JSLBot bot,
-	              final Configuration config)
-	{
+	              final Configuration config) {
 		super(bot,config);
 	}
 
@@ -36,8 +35,7 @@ public class Groups extends Handler {
 	public String groupInviteCommand(final CommandEvent command,
 	                                 final String avataruuid,
 	                                 final String groupuuid,
-	                                 @Nullable final String roleuuid)
-	{
+	                                 @Nullable final String roleuuid) {
 		final LLUUID avatar=new LLUUID(avataruuid);
 		final LLUUID group=new LLUUID(groupuuid);
 		LLUUID role=new LLUUID();
@@ -60,8 +58,7 @@ public class Groups extends Handler {
 	@CmdHelp(description="Eject a user from a given group/role")
 	public String groupEjectCommand(final CommandEvent command,
 	                                final String avataruuid,
-	                                final String groupuuid)
-	{
+	                                final String groupuuid) {
 		final LLUUID avatar=new LLUUID(avataruuid);
 		final LLUUID group=new LLUUID(groupuuid);
 		//LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
@@ -87,7 +84,8 @@ public class Groups extends Handler {
 				resp.append("\n");
 				resp.append(g.groupname).append(" (").append(g.uuid().toUUIDString()).append(") ");
 				if (g.contribution!=0) { resp.append("Contribution:").append(g.contribution).append(" "); }
-				if (g.listinprofile) { resp.append("Listed"); } else { resp.append("Unlisted"); }
+				if (g.listinprofile) { resp.append("Listed"); }
+				else { resp.append("Unlisted"); }
 			}
 		}
 		return resp.toString();
@@ -144,7 +142,8 @@ public class Groups extends Handler {
 		final String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
 		if (jgr.bgroupdata.vsuccess.value!=0) {
 			log.info("Joined group "+groupid);
-		} else {
+		}
+		else {
 			log.warning("Failed to join group "+groupid);
 		}
 	}
@@ -192,8 +191,7 @@ public class Groups extends Handler {
 
 	@CmdHelp(description="Collect a group's roster")
 	public void groupRosterCommand(final CommandEvent command,
-	                               final String uuid) throws IOException
-	{
+	                               final String uuid) throws IOException {
 		final LLSDMap req=new LLSDMap();
 		req.put("group_id",new LLSDUUID(uuid));
 		final LLSD llsd=new LLSD(req);
@@ -208,12 +206,12 @@ public class Groups extends Handler {
 	@CmdHelp(description="Selects a group as active")
 	public String activateGroupCommand(final CommandEvent event,
 	                                   @Nullable @ParamHelp(description="Group UUID to activate (or zero UUID for none)") final String uuid,
-	                                   @Nonnull @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final String name)
-	{
+	                                   @Nonnull @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final String name) {
 		LLUUID target;
 		if (uuid==null || uuid.isEmpty()) {
 			target=findGroupUUID(name);
-		} else {
+		}
+		else {
 			target=new LLUUID(uuid);
 		}
 		if (target==null && "NONE".equals(name)) { target=new LLUUID(); }

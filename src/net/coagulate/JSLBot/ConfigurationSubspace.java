@@ -14,8 +14,7 @@ public class ConfigurationSubspace extends Configuration {
 	final String p;
 
 	public ConfigurationSubspace(final Configuration c,
-	                             final String prefix)
-	{
+	                             final String prefix) {
 		this.c=c;
 		p=prefix;
 	}
@@ -28,8 +27,7 @@ public class ConfigurationSubspace extends Configuration {
 
 	@Override
 	public void put(final String param,
-	                final String value)
-	{
+	                final String value) {
 		c.put(p+"."+param,value);
 	}
 

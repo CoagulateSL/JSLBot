@@ -20,8 +20,7 @@ public class JSLInterface {
 	 * @param message Message to send
 	 */
 	public void instantMessage(final String uuid,
-	                           final String message)
-	{
+	                           final String message) {
 		bot.waitConnection(15000);
 		final Map<String,String> cmd=new HashMap<>();
 		cmd.put("uuid",uuid);
@@ -36,8 +35,7 @@ public class JSLInterface {
 	 * @param groupuuid  UUID of group to invite to
 	 */
 	public void groupInvite(final String avataruuid,
-	                        final String groupuuid)
-	{
+	                        final String groupuuid) {
 		bot.waitConnection(15000);
 		groupInvite(avataruuid,groupuuid,null);
 	}
@@ -51,8 +49,7 @@ public class JSLInterface {
 	 */
 	public void groupInvite(final String avataruuid,
 	                        final String groupuuid,
-	                        final String roleuuid)
-	{
+	                        final String roleuuid) {
 		bot.waitConnection(15000);
 		final Map<String,String> cmd=new HashMap<>();
 		cmd.put("avataruuid",avataruuid);
@@ -68,8 +65,7 @@ public class JSLInterface {
 	 * @param groupuuid  Group UUID to eject from
 	 */
 	public void groupEject(final String avataruuid,
-	                       final String groupuuid)
-	{
+	                       final String groupuuid) {
 		bot.waitConnection(15000);
 		final Map<String,String> cmd=new HashMap<>();
 		cmd.put("avataruuid",avataruuid);

@@ -31,8 +31,7 @@ public class Agent extends Handler {
 	private LLUUID reporthometo;
 
 	public Agent(@Nonnull final JSLBot bot,
-	             final Configuration c)
-	{super(bot,c);}
+	             final Configuration c) {super(bot,c);}
 
 	@Override
 	public void loggedIn() {
@@ -59,10 +58,7 @@ public class Agent extends Handler {
 			final LLUUID uuid=block.vagentid;
 			synchronized (online) {
 				if (!online.contains(uuid)) {
-					log.log(Level.INFO,
-					        "Friend ONLINE: {0} ({1}) [{2}]",
-					        new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()}
-					       );
+					log.log(Level.INFO,"Friend ONLINE: {0} ({1}) [{2}]",new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
 					online.add(uuid);
 				}
 			}
@@ -76,10 +72,7 @@ public class Agent extends Handler {
 			final LLUUID uuid=block.vagentid;
 			synchronized (offline) {
 				if (!offline.contains(uuid)) {
-					log.log(Level.INFO,
-					        "Friend offline: {0} ({1}) [{2}]",
-					        new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()}
-					       );
+					log.log(Level.INFO,"Friend offline: {0} ({1}) [{2}]",new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
 					offline.add(uuid);
 				}
 			}
@@ -109,10 +102,7 @@ public class Agent extends Handler {
 		final int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
 		final int sqmspent=money.bmoneydata.vsquaremeterscommitted.value;
 		final String description=money.bmoneydata.vdescription.toString();
-		log.log(Level.INFO,
-		        "Balance: {0}L$, Land: {1}m2/{2}m2 {3}",
-		        new Object[]{balance,sqmspent,sqmcredit,description}
-		       );
+		log.log(Level.INFO,"Balance: {0}L$, Land: {1}m2/{2}m2 {3}",new Object[]{balance,sqmspent,sqmcredit,description});
 	}
 
 	@Nonnull
@@ -125,9 +115,8 @@ public class Agent extends Handler {
 	@Nonnull
 	@CmdHelp(description="Returns some basic information about the logged in agent")
 	public String statusCommand(final CommandEvent command) {
-		return "Agent is "+firstname+" "+lastname+"\n"+"("+grouptitle+" of "+groupname+")\n"+"Pos: "+bot.getPos()+"\n"+"Looking: "+bot
-				.getLookAt()+"\n"+"Region: "+bot.getRegionName()+"\n"+"Bytes IN: "+bot.bytesin.get()+"    OUT: "+bot.bytesout
-				.get()+"\n"+"BPS IN: "+(int) (((float) bot.bytesin.get())/((float) bot.getSecondsSinceStartup()))+"    OUT: "+(int) (((float) bot.bytesout
+		return "Agent is "+firstname+" "+lastname+"\n"+"("+grouptitle+" of "+groupname+")\n"+"Pos: "+bot.getPos()+"\n"+"Looking: "+bot.getLookAt()+"\n"+"Region: "+bot.getRegionName()+"\n"+"Bytes IN: "+bot.bytesin
+				.get()+"    OUT: "+bot.bytesout.get()+"\n"+"BPS IN: "+(int) (((float) bot.bytesin.get())/((float) bot.getSecondsSinceStartup()))+"    OUT: "+(int) (((float) bot.bytesout
 				.get())/((float) bot.getSecondsSinceStartup()));
 	}
 
@@ -155,8 +144,7 @@ public class Agent extends Handler {
 	@Nonnull
 	@CmdHelp(description="Set agent's draw distance")
 	public String drawdistanceCommand(final CommandEvent command,
-	                                  @Nullable @ParamHelp(description="Meters draw distance") final String set)
-	{
+	                                  @Nullable @ParamHelp(description="Meters draw distance") final String set) {
 		if (set==null || set.isEmpty()) { return "0 - Draw distance is "+bot.drawDistance(); }
 		bot.drawDistance(Float.parseFloat(set));
 		return "0 - Draw Distance Set";

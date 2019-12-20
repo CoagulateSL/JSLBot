@@ -68,7 +68,8 @@ public class LLSD extends Container {
 					throw new AssertionError("Found container of type "+type+" which we don't know about.  Parse error most likely.");
 				}
 			}
-		} catch (@Nonnull final SAXException|ParserConfigurationException|IOException ex) {
+		}
+		catch (@Nonnull final SAXException|ParserConfigurationException|IOException ex) {
 			final IllegalArgumentException f=new IllegalArgumentException(ex);
 			f.initCause(ex);
 			throw f;

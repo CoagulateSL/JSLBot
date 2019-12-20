@@ -27,8 +27,7 @@ public class Teleportation extends Handler {
 	boolean teleporting;
 
 	public Teleportation(@Nonnull final JSLBot bot,
-	                     final Configuration c)
-	{
+	                     final Configuration c) {
 		super(bot,c);
 		config=c;
 	}
@@ -75,7 +74,8 @@ public class Teleportation extends Handler {
 		if ("CouldntTPCloser".equalsIgnoreCase(code)) {
 			teleporting=false;
 			log.info("Teleport couldn't get closer");
-		} else {
+		}
+		else {
 			log.warning("Teleport failed ["+code+"] - "+reason);
 		}
 		synchronized (signal) { signal.notifyAll(); }
@@ -107,7 +107,8 @@ public class Teleportation extends Handler {
 			// set flag, notify the waiting thread
 			teleporting=false;
 			synchronized (signal) { signal.notifyAll(); }
-		} catch (@Nonnull final IOException e) {
+		}
+		catch (@Nonnull final IOException e) {
 			log.severe("Failed to create teleport finish circuit, we might be losing our connection");
 		}
 
@@ -122,12 +123,7 @@ public class Teleportation extends Handler {
 		// http://wiki.secondlife.com/wiki/ImprovedInstantMessage
 
 		if (messagetype==22) {
-			final CommandEvent check=new CommandEvent(bot,
-			                                          event.region(),
-			                                          "acceptLures",
-			                                          new HashMap<>(),
-			                                          m.bagentdata.vagentid
-			);
+			final CommandEvent check=new CommandEvent(bot,event.region(),"acceptLures",new HashMap<>(),m.bagentdata.vagentid);
 			check.invokerUUID(m.bagentdata.vagentid);
 			final String reject=bot.brain().auth(check);
 			if (reject!=null) { return; }
@@ -145,7 +141,8 @@ public class Teleportation extends Handler {
 			if (teleporting) {
 				log.severe("Timer expired while teleporting, lost in transit?");
 				bot.im(m.bagentdata.vagentid,"Failed to accept teleport lure, lost in transit?");
-			} else {
+			}
+			else {
 				log.info("Completed teleport intiated from lure");
 				bot.im(m.bagentdata.vagentid,"Accepted teleport lure and completed transit");
 			}
@@ -159,8 +156,7 @@ public class Teleportation extends Handler {
 	                              @ParamHelp(description="Name of region to teleport to") final String region,
 	                              @ParamHelp(description="X Co-ordinate to request") final String x,
 	                              @ParamHelp(description="Y Co-ordinate to request") final String y,
-	                              @ParamHelp(description="Z Co-ordinate to request") final String z)
-	{
+	                              @ParamHelp(description="Z Co-ordinate to request") final String z) {
 		final Regional r=command.region();
 		final TeleportLocationRequest tp=new TeleportLocationRequest();
 		tp.bagentdata.vagentid=bot.getUUID();
@@ -170,14 +166,16 @@ public class Teleportation extends Handler {
 		lookupparams.put("name",region);
 		final String regionhandle=new CommandEvent(bot,bot.getRegional(),"regionLookup",lookupparams,null).execute();
 		if (Debug.REGIONHANDLES) { log.fine("Region lookup for "+region+" gave handle "+new U64(regionhandle)); }
-		try { tp.binfo.vregionhandle=new U64(regionhandle); } catch (@Nonnull final NumberFormatException e) {
+		try { tp.binfo.vregionhandle=new U64(regionhandle); }
+		catch (@Nonnull final NumberFormatException e) {
 			return "Failed to resolve region name "+region;
 		}
 		bot.send(tp,true);
 		//bot.clearUnhandled(); // this just causes us to spew "unhandled packet" alerts from scratch, for debugging at some point
 		final boolean completed=waitTeleport();
 		log.info("Teleport "+(completed?"completed":"FAILED")+" to "+region+" "+x+","+y+","+z);
-		if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
+		if (completed) { return "1 - TP Sequence Completed"; }
+		else { return "0 - TP Sequence failed"; }
 	}
 
 	@Nonnull
@@ -190,7 +188,8 @@ public class Teleportation extends Handler {
 		bot.send(req,true);
 		final boolean completed=waitTeleport();
 		log.info("Teleport home "+(completed?"completed":"FAILED"));
-		if (completed) { return "1 - TP Sequence Completed"; } else { return "0 - TP Sequence failed"; }
+		if (completed) { return "1 - TP Sequence Completed"; }
+		else { return "0 - TP Sequence failed"; }
 
 	}
 
@@ -202,7 +201,8 @@ public class Teleportation extends Handler {
 				signal.wait(10000);
 				expired=true;
 			}
-		} catch (@Nonnull final InterruptedException e) {}
+		}
+		catch (@Nonnull final InterruptedException e) {}
 		if (expired) { log.severe("Timer expired while teleporting, lost in transit?"); }
 		final boolean completed=!teleporting;
 		teleporting=false;
@@ -229,8 +229,7 @@ public class Teleportation extends Handler {
 	@Nonnull
 	@CmdHelp(description="Sends a teleport lure")
 	public String lureCommand(@Nonnull final CommandEvent command,
-	                          @Nonnull @ParamHelp(description="UUID to lure") final String uuid)
-	{
+	                          @Nonnull @ParamHelp(description="UUID to lure") final String uuid) {
 		final LLUUID targetuuid=new LLUUID(uuid);
 		final StartLure req=new StartLure(bot);
 		String invokeruuid="???";

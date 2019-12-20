@@ -22,11 +22,10 @@ public class FileBasedConfiguration extends Configuration {
 	@SuppressWarnings("unchecked") // pretty stuck with this :)
 	public FileBasedConfiguration(@Nonnull final String filename) {
 		this.filename=filename;
-		try (final FileInputStream fis=new FileInputStream(filename);final ObjectInputStream ois=new ObjectInputStream(
-				fis))
-		{
+		try (final FileInputStream fis=new FileInputStream(filename);final ObjectInputStream ois=new ObjectInputStream(fis)) {
 			kvstore=(Map<String,String>) ois.readObject();
-		} catch (@Nonnull final IOException|ClassNotFoundException e) {
+		}
+		catch (@Nonnull final IOException|ClassNotFoundException e) {
 			throw new AssertionError("Could not load configuration file",e);
 		}
 	}
@@ -44,12 +43,12 @@ public class FileBasedConfiguration extends Configuration {
 	@Override
 	@SuppressWarnings("CallToPrintStackTrace")
 	public void put(final String key,
-	                final String value)
-	{
+	                final String value) {
 		kvstore.put(key,value);
 		try {
 			writeStore();
-		} catch (@Nonnull final IOException e) {
+		}
+		catch (@Nonnull final IOException e) {
 			System.err.println("KVStore write failed, CONFIGURATION NOT SAVED : "+e);
 			e.printStackTrace();
 		}
@@ -57,9 +56,7 @@ public class FileBasedConfiguration extends Configuration {
 
 
 	private void writeStore() throws IOException {
-		try (final FileOutputStream fos=new FileOutputStream(filename);final ObjectOutputStream oos=new ObjectOutputStream(
-				fos))
-		{
+		try (final FileOutputStream fos=new FileOutputStream(filename);final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
 			oos.writeObject(kvstore);
 		}
 	}

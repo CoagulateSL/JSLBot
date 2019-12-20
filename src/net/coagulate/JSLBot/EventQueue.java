@@ -28,8 +28,7 @@ public class EventQueue extends Thread {
 	 * Create an event queue for the given CAPS, queue URL and region handle
 	 */
 	EventQueue(@Nonnull final CAPS caps,
-	           final String queue)
-	{
+	           final String queue) {
 		log=caps.getLogger("EventQueue");
 		this.caps=caps;
 		eventqueue=queue;
@@ -68,7 +67,8 @@ public class EventQueue extends Thread {
 		try {
 			runMain();
 			log.fine("Event queue closed");
-		} catch (@Nonnull final Exception e) {
+		}
+		catch (@Nonnull final Exception e) {
 			log.log(SEVERE,"Event queue crashed: "+e,e);
 		}
 		if (bot().circuit().getCAPS().eventqueue()==this) {
@@ -103,7 +103,8 @@ public class EventQueue extends Thread {
 				// write document
 				try (final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
 					wr.write(postdata);
-				} catch (@Nonnull final Exception e) {
+				}
+				catch (@Nonnull final Exception e) {
 					log.warning("Error writing to event queue, sleeping");
 					try { Thread.sleep(5000); } catch (@Nonnull final InterruptedException ee) {}
 				}
@@ -120,7 +121,8 @@ public class EventQueue extends Thread {
 					LLSD document=null;
 					try {
 						document=new LLSD(read);
-					} catch (@Nonnull final RuntimeException e) {
+					}
+					catch (@Nonnull final RuntimeException e) {
 						log.log(SEVERE,"Parse error loading LLSD document:"+e);
 						System.out.println(read);
 					}
@@ -130,7 +132,8 @@ public class EventQueue extends Thread {
 							if (map==null) {
 								log.log(SEVERE,"Loaded null LLSDMap from document "+read+", throwing IOException");
 								throw new IOException("Null LLSDMap response extracted from '"+read+"'");
-							} else {
+							}
+							else {
 								final LLSDInteger llsdid=(LLSDInteger) map.get("id");
 								id=llsdid.get();
 								//System.out.println("Eventqueue#"+id+":"+document.toXML());
@@ -138,14 +141,17 @@ public class EventQueue extends Thread {
 								final LLSDArray eventslist=(LLSDArray) outermap.get("events");
 								process(eventslist);
 							}
-						} catch (@Nonnull final Exception e) {
+						}
+						catch (@Nonnull final Exception e) {
 							log.log(SEVERE,"Exception processing event queue message",e);
 							throw new IOException(e);
 						}
 					}
-				} else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired, repolling."); } }
+				}
+				else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired, repolling."); } }
 				errorcount=0;
-			} catch (@Nonnull final IOException e) {
+			}
+			catch (@Nonnull final IOException e) {
 				errorcount++;
 				if (errorcount>10) {
 					log.log(SEVERE,"10 errors in a row polling event queue, closing event queue",e);

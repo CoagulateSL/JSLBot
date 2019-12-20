@@ -44,8 +44,7 @@ public final class CAPS extends Thread {
 	 * @param capsseed CAPS url
 	 */
 	public CAPS(@Nonnull final Circuit circuit,
-	            final String capsseed)
-	{
+	            final String capsseed) {
 		log=circuit.getLogger("CAPS");
 		caps=capsseed;
 		this.circuit=circuit;
@@ -68,7 +67,8 @@ public final class CAPS extends Thread {
 		try {
 			initialise();
 			launchEventQueue();
-		} catch (@Nonnull final IOException e) {
+		}
+		catch (@Nonnull final IOException e) {
 			log.log(SEVERE,"CAPS setup failed: "+e,e);
 		}
 	}
@@ -93,9 +93,10 @@ public final class CAPS extends Thread {
 			eq.setDaemon(true);
 			eq.start();
 			log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");
-		} else {
-			log.severe(
-					"CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we are bound to the present sim.  This is neither normal or expected behaviour.");
+		}
+		else {
+			log.severe("CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we "
+					           +"are"+" bound to the present sim.  This is neither normal or expected behaviour.");
 		}
 	}
 
@@ -142,8 +143,7 @@ public final class CAPS extends Thread {
 	@Nullable
 	public LLSDMap invokeCAPS(final String capname,
 	                          final String appendtocap,
-	                          final LLSD content) throws IOException
-	{
+	                          final LLSD content) throws IOException {
 		final Atomic rawcap=capabilities().get(capname);
 		if (rawcap==null) {
 			//for (String cap:capabilities.keys()) { System.out.println("KNOWN CAP: "+cap); }
@@ -165,15 +165,15 @@ public final class CAPS extends Thread {
 	 */
 	@Nullable
 	public LLSDMap invokeXML(@Nullable final String url,
-	                         @Nullable final LLSD content) throws IOException
-	{
+	                         @Nullable final LLSD content) throws IOException {
 		if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
 		final HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
 		byte[] postdata=new byte[0];
 		if (content==null) {
 			connection.setRequestMethod("GET");
 			connection.setDoOutput(false);
-		} else {
+		}
+		else {
 			postdata=(content.toXML()).getBytes(StandardCharsets.UTF_8);
 			connection.setRequestProperty("Content-Length",Integer.toString(postdata.length));
 			connection.setRequestMethod("POST");

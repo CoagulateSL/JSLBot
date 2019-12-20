@@ -107,8 +107,7 @@ public final class Circuit extends Thread implements Closeable {
 	        @Nullable final String address,
 	        final int port,
 	        @Nullable final Long passedregionhandle,
-	        @Nullable final String capsurl)
-	{
+	        @Nullable final String capsurl) {
 		log=parent.getLogger("Circuit."+address+":"+port);
 		if (passedregionhandle==null) { throw new IllegalArgumentException("Null region handles are not allowed"); }
 		circuitsequence=parent.getCircuitSequence();
@@ -163,7 +162,8 @@ public final class Circuit extends Thread implements Closeable {
 		setDaemon(true);
 		start(); // launch the rx driver
 		// wait for the 'outstanding acks' to be updated (meaning our reliable UseCircuitCode is acked)
-		try { synchronized (inflight) { inflight.wait(5000); } } catch (@Nonnull final InterruptedException ex) {
+		try { synchronized (inflight) { inflight.wait(5000); } }
+		catch (@Nonnull final InterruptedException ex) {
 			throw new IOException("Failed to get UseCircuitCode Ack");
 		}
 		if (Debug.CIRCUIT) { log.finer("Outstanding ACKS: "+inflight.size()); }
@@ -191,9 +191,7 @@ public final class Circuit extends Thread implements Closeable {
 		}
 		if (Debug.CIRCUIT) { log.fine("Starting background driver:"+getName()); }
 		try {
-			final DatagramPacket receive=new DatagramPacket(new byte[Constants.UDP_MAX_BUFFER],
-			                                                Constants.UDP_MAX_BUFFER
-			);
+			final DatagramPacket receive=new DatagramPacket(new byte[Constants.UDP_MAX_BUFFER],Constants.UDP_MAX_BUFFER);
 			// begin eternal damnation as a circuit driver.
 			while (!disconnected && !disconnectlogged && !bot().quitting()) {
 				try {
@@ -217,14 +215,16 @@ public final class Circuit extends Thread implements Closeable {
 					//if (p.getReliable()) { System.out.println("ACK REQUIRED IN:"+p.getName()); }
 					//System.out.println("RX: "+p.getName());
 					processPacket(p);
-				} catch (@Nonnull final SocketTimeoutException e) {
+				}
+				catch (@Nonnull final SocketTimeoutException e) {
 					if (Debug.ACK) { log.finer("Exiting receive without event"); }
 				} // as requested, and we dont care
 				// timeout is just to make sure we get HERE \/ once in a while
 				if ((ackqueue.size()>0 && lastAck()>2000) || ackqueue.size()>32) {
 					if (Debug.ACK) { log.finer("Manually sending ACKs"); }
 					sendAck();
-				} else {
+				}
+				else {
 					if (Debug.ACK) {
 						log.finer("NOT sending any ACKs.  Q size is "+ackqueue.size()+" and lastAck is "+lastAck()+"ms");
 					}
@@ -233,7 +233,8 @@ public final class Circuit extends Thread implements Closeable {
 					maintenance();
 				}
 			}
-		} catch (@Nonnull final SocketException ex) {
+		}
+		catch (@Nonnull final SocketException ex) {
 			if (!bot().quitting()) // who cares if we're closing the bot
 			{
 				if (!disconnectlogged) {
@@ -242,7 +243,8 @@ public final class Circuit extends Thread implements Closeable {
 				}
 				close();
 			}
-		} catch (@Nonnull final RuntimeException|IOException e) {
+		}
+		catch (@Nonnull final RuntimeException|IOException e) {
 			if (!disconnectlogged) {
 				disconnectlogged=true;
 				log.log(SEVERE,"Circuit driver run() loop crashed : "+e,e);
@@ -312,7 +314,8 @@ public final class Circuit extends Thread implements Closeable {
 				final StartPingCheck ping=new StartPingCheck();
 				send(ping,true);
 			}
-		} else { pinged=false; } // ping when crossing threshold.  once.  reset threshold detection here.
+		}
+		else { pinged=false; } // ping when crossing threshold.  once.  reset threshold detection here.
 		if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) {
 			disconnectlogged=true;
 			log.log(SEVERE,"Circuit has received no packets in {0} seconds, closing.",Constants.CIRCUIT_TIMEOUT);
@@ -359,8 +362,7 @@ public final class Circuit extends Thread implements Closeable {
 	 * @param reliable Send as reliable/require ACKs
 	 */
 	public void send(final Message m,
-	                 final boolean reliable)
-	{
+	                 final boolean reliable) {
 		final Packet p=new Packet(m);
 		p.setReliable(reliable);
 		send(p);
@@ -447,7 +449,8 @@ public final class Circuit extends Thread implements Closeable {
 		if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
 			bot.accountMessageOut(p.getId(),packet.getLength());
 		}
-		try { socket.send(packet); } catch (@Nonnull final IOException e) {
+		try { socket.send(packet); }
+		catch (@Nonnull final IOException e) {
 			log.log(SEVERE,"Error transmitting packet "+e,e);
 		}
 		packetrate++;
@@ -479,7 +482,8 @@ public final class Circuit extends Thread implements Closeable {
 		send(p);
 		try {
 			socket.close();
-		} catch (@Nonnull final Exception e) { }//debug(owner,"Socket closure exceptioned - ",e); }
+		}
+		catch (@Nonnull final Exception e) { }//debug(owner,"Socket closure exceptioned - ",e); }
 		if (!disconnectlogged) {
 			disconnectlogged=true;
 			log.log(Level.FINE,"We have requested closure of circuit to {0}",regionname);
@@ -594,7 +598,12 @@ public final class Circuit extends Thread implements Closeable {
 			if (firsthandshake) {
 				log.log(Level.INFO,
 				        "Handshake {0} cpu {1}/{2} active as {3}#{4} @ colocation {5}",
-				        new Object[]{regionname,r.bregioninfo3.vcpuclassid.value,r.bregioninfo3.vcpuratio.value,r.bregioninfo3.vproductname.toString(),r.bregioninfo3.vproductsku.toString(),r.bregioninfo3.vcoloname.toString()}
+				        new Object[]{regionname,
+				                     r.bregioninfo3.vcpuclassid.value,
+				                     r.bregioninfo3.vcpuratio.value,
+				                     r.bregioninfo3.vproductname.toString(),
+				                     r.bregioninfo3.vproductsku.toString(),
+				                     r.bregioninfo3.vcoloname.toString()}
 				       );
 				firsthandshake=false;
 			}

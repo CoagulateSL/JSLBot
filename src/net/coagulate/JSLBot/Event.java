@@ -32,8 +32,7 @@ public abstract class Event {
 
 	Event(@Nonnull final JSLBot bot,
 	      @Nonnull final Regional r,
-	      @Nonnull final String name)
-	{
+	      @Nonnull final String name) {
 		this.bot=bot;
 		this.r=r;
 		this.name=name;
@@ -41,8 +40,7 @@ public abstract class Event {
 	}
 
 	void log(final Level level,
-	         final String message)
-	{
+	         final String message) {
 		log.log(level,message);
 	}
 
@@ -62,10 +60,7 @@ public abstract class Event {
 		synchronized (statusmonitor) {
 			this.status=status;
 			if (Debug.TRACKCOMMANDS && type==COMMAND) {
-				log.log(Level.FINER,
-				        "Command {0} in region {1}entering status {2}",
-				        new Object[]{getName(),region().toString(),status}
-				       );
+				log.log(Level.FINER,"Command {0} in region {1}entering status {2}",new Object[]{getName(),region().toString(),status});
 			}
 			statusmonitor.notify();
 		}
@@ -88,8 +83,7 @@ public abstract class Event {
 		if (type==UDP) { return "UDP"; }
 		if (type==XML) { return "XML"; }
 		if (type==COMMAND) { return "Command"; }
-		throw new AssertionError(
-				"Unknown type.  How did you get here?  The constructor should have thrown this exception.");
+		throw new AssertionError("Unknown type.  How did you get here?  The constructor should have thrown this exception.");
 	}
 
 	/**

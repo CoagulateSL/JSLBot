@@ -19,8 +19,7 @@ public class Health extends Handler {
 	float health;
 
 	public Health(@Nonnull final JSLBot bot,
-	              @Nonnull final Configuration c)
-	{
+	              @Nonnull final Configuration c) {
 		super(bot,c);
 		verbose=Boolean.parseBoolean(c.get("verbose","false"));
 	}

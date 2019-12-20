@@ -22,8 +22,7 @@ import static net.coagulate.JSLBot.Handlers.Objects.CompressedFlags.*;
 public class Objects extends Handler {
 
 	public Objects(@Nonnull final JSLBot bot,
-	               final Configuration c)
-	{ super(bot,c); }
+	               final Configuration c) { super(bot,c); }
 
 	public void objectUpdateUDPImmediate(@Nonnull final UDPEvent event) {
 		final ObjectUpdate data=(ObjectUpdate) event.body();
@@ -142,8 +141,7 @@ public class Objects extends Handler {
 	@Nonnull
 	@CmdHelp(description="Find an object by a name fragment")
 	public String objectFindCommand(@Nonnull final CommandEvent command,
-	                                @Nonnull @ParamHelp(description="Fragment of a name to search for") String name)
-	{
+	                                @Nonnull @ParamHelp(description="Fragment of a name to search for") String name) {
 		final Regional region=command.region();
 		ObjectData best=null;
 		name=name.toLowerCase();
@@ -207,7 +205,8 @@ public class Objects extends Handler {
 				final LLQuaternion angularvel=new LLQuaternion(buffer);
 			}
 			if ((compressedflags&PARENT.getValue())==PARENT.getValue()) { object.parentid=new U32(buffer); }
-			if ((compressedflags&TREE.getValue())==TREE.getValue()) { final byte treespecies=buffer.get(); } else {
+			if ((compressedflags&TREE.getValue())==TREE.getValue()) { final byte treespecies=buffer.get(); }
+			else {
 				if ((compressedflags&SCRACHPAD.getValue())==SCRACHPAD.getValue()) {
 					final String scratchpad=BotUtils.readZeroTerminatedString(buffer);
 				}
@@ -246,8 +245,7 @@ public class Objects extends Handler {
 	@Nullable
 	@CmdHelp(description="Lookup or request a prim by UUID")
 	public String objectUUIDCommand(@Nonnull final CommandEvent command,
-	                                @ParamHelp(description="Prim UUID") final String uuid)
-	{
+	                                @ParamHelp(description="Prim UUID") final String uuid) {
 		final Regional region=command.region();
 		final LLUUID lluuid=new LLUUID(uuid);
 		final ObjectData od=region.getObject(lluuid);
@@ -258,8 +256,7 @@ public class Objects extends Handler {
 	@Nonnull
 	@CmdHelp(description="Lookup or request a prim by local id")
 	public String objectGetCommand(@Nonnull final CommandEvent command,
-	                               @Nonnull @ParamHelp(description="Local prim id (32 bit int)") final String localid)
-	{
+	                               @Nonnull @ParamHelp(description="Local prim id (32 bit int)") final String localid) {
 		final Regional region=command.region();
 		final int id=Integer.parseInt(localid);
 		if (region.hasObject(id)) { return "Exists as "+region.getObject(id).name; }
@@ -279,12 +276,12 @@ public class Objects extends Handler {
 	@CmdHelp(description="Return a prim by UUID or localid")
 	public String objectReturnCommand(@Nonnull final CommandEvent command,
 	                                  @Nullable @ParamHelp(description="UUID of prim to return") final String primuuid,
-	                                  @Nullable @ParamHelp(description="LocalID of prim to return") final String localid)
-	{
+	                                  @Nullable @ParamHelp(description="LocalID of prim to return") final String localid) {
 		final Regional region=command.region();
 		// One way or another we need the local ID
 		final int id;
-		if (localid!=null) { id=Integer.parseInt(localid); } else {
+		if (localid!=null) { id=Integer.parseInt(localid); }
+		else {
 			if (primuuid==null) { return "9 - You must supply Prim UUID or Local simulator ID"; }
 			// extract by primuuid
 			final LLUUID uuid=new LLUUID(primuuid);

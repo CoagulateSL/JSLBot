@@ -59,11 +59,9 @@ public abstract class BotUtils {
 			}
 			//System.out.println("Using mac "+hex(mac)+" from "+stored.toString());
 			return hex(mac);
-		} catch (@Nonnull final SocketException ex) {
-			throw new AssertionError(
-					"Unable to retrieve any network interfaces MAC addres; unsupported platform or no networking present???",
-					ex
-			);
+		}
+		catch (@Nonnull final SocketException ex) {
+			throw new AssertionError("Unable to retrieve any network interfaces MAC addres; unsupported platform or no networking present???",ex);
 		}
 	}
 
@@ -83,7 +81,8 @@ public abstract class BotUtils {
 		final MessageDigest md5;
 		try {
 			md5=MessageDigest.getInstance("MD5");
-		} catch (@Nonnull final NoSuchAlgorithmException ex) {
+		}
+		catch (@Nonnull final NoSuchAlgorithmException ex) {
 			throw new AssertionError("MD5 hashing is not supported on this platform?");
 		}
 		final byte[] digest;
@@ -111,8 +110,7 @@ public abstract class BotUtils {
 	                                      final String firstname,
 	                                      final String lastname,
 	                                      @Nonnull String password,
-	                                      final String location) throws MalformedURLException, XmlRpcException
-	{
+	                                      final String location) throws MalformedURLException, XmlRpcException {
 		final XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
 		config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
 		final XmlRpcClient client=new XmlRpcClient();
@@ -144,14 +142,17 @@ public abstract class BotUtils {
 			}
 		}
 		final Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
-		@SuppressWarnings("unchecked") final HashMap<Object,Object> result=(HashMap<Object,Object>) resultobject;
+		@SuppressWarnings("unchecked")
+		final HashMap<Object,Object> result=(HashMap<Object,Object>) resultobject;
 		if (Debug.AUTH) {
 			// dump the result
 			for (final Map.Entry<Object,Object> entry: result.entrySet()) {
 				String printline=(entry.getKey()+" -> ");
 				final Object output=entry.getValue();
-				if (output instanceof String) { printline+=("[String] "+output); } else {
-					if (output instanceof Integer) { printline+=("[Integer] "+output); } else {
+				if (output instanceof String) { printline+=("[String] "+output); }
+				else {
+					if (output instanceof Integer) { printline+=("[Integer] "+output); }
+					else {
 						final String clas=entry.getValue().getClass().getTypeName();
 						printline+="["+clas+"] "+(output);
 					}
@@ -254,7 +255,8 @@ public abstract class BotUtils {
 		for (int i=6;i<input.length;i++) {
 			if (input[i]==0) {
 				zerocount++;
-			} else {
+			}
+			else {
 				if (zerocount>0) {
 					output.add((byte) 0);
 					output.add((byte) zerocount);

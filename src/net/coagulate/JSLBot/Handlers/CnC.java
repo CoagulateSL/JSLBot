@@ -33,22 +33,19 @@ public class CnC extends Handler {
 	private Date homesickness;
 
 	public CnC(@Nonnull final JSLBot bot,
-	           @Nonnull final Configuration c)
-	{
+	           @Nonnull final Configuration c) {
 		super(bot,c);
 		String authoriser=c.get("authoriser","OwnerOnly");
 		if (!authoriser.contains(".")) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
 		Authorisation auth=null;
 		try {
-			auth=(Authorisation) Class.forName(authoriser)
-			                          .getConstructor(JSLBot.class,Configuration.class)
-			                          .newInstance(bot,c.subspace("authorisation"));
-		} catch (@Nonnull final Exception e) {
+			auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
+		}
+		catch (@Nonnull final Exception e) {
 			log.log(SEVERE,"Unable to load authoriser "+authoriser,e);
 		}
 		if (auth==null) {
-			log.warning(
-					"No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
+			log.warning("No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
 			auth=new DenyAll(bot,c.subspace("authorisation"));
 		}
 		bot.brain().setAuth(auth);
@@ -97,14 +94,10 @@ public class CnC extends Handler {
 				final String mins=Integer.toString(seconds/60);
 				String secs=Integer.toString(seconds%60);
 				if (secs.length()==1) { secs="0"+secs; }
-				log.log(level,
-				        "Simulator "+event.region()
-				                          .circuit()+" will shut down in "+mins+"m"+secs+"s at "+datetime.format(when)
-				       );
+				log.log(level,"Simulator "+event.region().circuit()+" will shut down in "+mins+"m"+secs+"s at "+datetime.format(when));
 			}
 			if (!handled) {
-				log.warning("Unhandled warning from "+event.region()
-				                                           .circuit()+" included info:"+info.vmessage+" / "+info.vextraparams);
+				log.warning("Unhandled warning from "+event.region().circuit()+" included info:"+info.vmessage+" / "+info.vextraparams);
 			}
 		}
 	}
@@ -334,8 +327,7 @@ public class CnC extends Handler {
 	}
 
 	public void processInstantMessage(final UDPEvent event,
-	                                  @Nonnull final ImprovedInstantMessage m)
-	{
+	                                  @Nonnull final ImprovedInstantMessage m) {
 		//System.out.println(m.dump());
 		final String from=m.bmessageblock.vfromagentname.toString();
 		final LLUUID source=m.bagentdata.vagentid;
@@ -347,8 +339,7 @@ public class CnC extends Handler {
 	}
 
 	private String parseCommand(@Nonnull final String message,
-	                            @Nonnull final Map<String,String> paramsout1)
-	{
+	                            @Nonnull final Map<String,String> paramsout1) {
 		final String[] parts=message.split(" ");
 		int index=0;
 		final String command=parts[0];
@@ -358,7 +349,8 @@ public class CnC extends Handler {
 		for (int i=index;i<parts.length;i++) {
 			if ("".equals(keyword)) {
 				keyword=parts[i];
-			} else {
+			}
+			else {
 				if (!"".equals(parameter)) { parameter+=" "; }
 				parameter+=parts[i];
 				if ((!parameter.startsWith("\"")) || (parameter.startsWith("\"") && parameter.endsWith("\""))) {
@@ -414,8 +406,7 @@ public class CnC extends Handler {
 	private void runCommands(final String from,
 	                         @Nonnull final LLUUID source,
 	                         @Nonnull String message,
-	                         @Nullable final String prefix)
-	{
+	                         @Nullable final String prefix) {
 		boolean prefixok=false;
 		if (prefix==null || prefix.isEmpty()) { prefixok=true; }
 		if (!prefixok) {
@@ -435,12 +426,14 @@ public class CnC extends Handler {
 			command.invokerUUID(source);
 			response=bot.brain().auth(command);
 			if (response==null) { response=command.execute(); }
-		} catch (@Nonnull final Exception e) {
+		}
+		catch (@Nonnull final Exception e) {
 			log.log(WARNING,"CnC Subcommand exceptioned:"+e,e);
 			response="Exception:"+e;
 		}
 
-		if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); } else {
+		if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
+		else {
 			if (!"".equals(response)) { bot.im(source,">> "+response); }
 		}
 	}
@@ -457,8 +450,7 @@ public class CnC extends Handler {
 	@CmdHelp(description="Send an instant message")
 	public String imCommand(final CommandEvent command,
 	                        @ParamHelp(description="UUID to message") final String uuid,
-	                        @Nonnull @ParamHelp(description="Message to send") final String message)
-	{
+	                        @Nonnull @ParamHelp(description="Message to send") final String message) {
 		bot.im(new LLUUID(uuid),message);
 		log.info("Sent IM to <"+uuid+"> "+bot.getUserName(new LLUUID(uuid))+" - "+message);
 		return "IM sent";
@@ -467,15 +459,15 @@ public class CnC extends Handler {
 	@Nonnull
 	@CmdHelp(description="Get Help :)  If you see this you're doing it right")
 	public String helpCommand(final CommandEvent commandevent,
-	                          @Nullable @ParamHelp(description="Optional command to get more info about") String command)
-	{
+	                          @Nullable @ParamHelp(description="Optional command to get more info about") String command) {
 		if (command==null || command.isEmpty()) {
 			StringBuilder response=new StringBuilder();
 			final Set<String> unsortedcommands=bot.brain().getCommands();
 			final List<String> commands=new ArrayList<>(unsortedcommands);
 			Collections.sort(commands);
 			for (String acommand: commands) {
-				if (response.length()>0) { response.append(", "); } else { response=new StringBuilder("\n"); }
+				if (response.length()>0) { response.append(", "); }
+				else { response=new StringBuilder("\n"); }
 				acommand=acommand.substring(0,acommand.length()-"command".length());
 				response.append(acommand);
 			}
@@ -521,31 +513,26 @@ public class CnC extends Handler {
 	@Nonnull
 	@CmdHelp(description="Say a message in local chat")
 	public String sayCommand(final CommandEvent event,
-	                         @Nonnull final String message)
-	{ return chat(1,message); }
+	                         @Nonnull final String message) { return chat(1,message); }
 
 	@Nonnull
 	@CmdHelp(description="Shout a message in local chat")
 	public String shoutCommand(final CommandEvent event,
-	                           @Nonnull final String message)
-	{ return chat(2,message); }
+	                           @Nonnull final String message) { return chat(2,message); }
 
 	@Nonnull
 	@CmdHelp(description="Whisper a message in local chat")
 	public String whisperCommand(final CommandEvent event,
-	                             @Nonnull final String message)
-	{ return chat(0,message); }
+	                             @Nonnull final String message) { return chat(0,message); }
 
 	@Nonnull
 	private String chat(final int messagetype,
-	                    @Nonnull final String message)
-	{ return chat(messagetype,0,message); }
+	                    @Nonnull final String message) { return chat(messagetype,0,message); }
 
 	@Nonnull
 	private String chat(final int messagetype,
 	                    final int channel,
-	                    @Nonnull final String message)
-	{
+	                    @Nonnull final String message) {
 		final ChatFromViewer req=new ChatFromViewer(bot);
 		req.bchatdata.vtype=new U8(messagetype);
 		req.bchatdata.vchannel=new S32(channel);
@@ -574,7 +561,8 @@ public class CnC extends Handler {
 			return;
 		}
 		// otherwise, go home
-		log.info("Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in maintenance
+		log.info("Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in
+		// maintenance
 		new CommandEvent(bot,bot.getRegional(),"home",new HashMap<>(),null).execute();
 		try { Thread.sleep(1000L); } catch (@Nonnull final InterruptedException e) {}
 		if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
@@ -591,8 +579,7 @@ public class CnC extends Handler {
 	@Nonnull
 	@CmdHelp(description="Manage the homesickness of this bot")
 	public String homesickCommand(final CommandEvent event,
-	                              @Nullable @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear") final String region)
-	{
+	                              @Nullable @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear") final String region) {
 		if (region==null || region.isEmpty()) {
 			final String home=bot.homeSickFor();
 			if (home==null || home.isEmpty()) { return "Bot has no longing for any home"; }
@@ -616,8 +603,7 @@ public class CnC extends Handler {
 		private CircuitLauncher(final JSLBot bot,
 		                        final String numericip,
 		                        final int port,
-		                        final long handle)
-		{
+		                        final long handle) {
 			this.numericip=numericip;
 			this.port=port;
 			this.handle=handle;
@@ -626,7 +612,8 @@ public class CnC extends Handler {
 		public void run() {
 			try {
 				bot.createCircuit(numericip,port,handle,null);
-			} catch (@Nonnull final Exception e) {
+			}
+			catch (@Nonnull final Exception e) {
 				log.severe("Failed to set up circuit to "+Global.regionName(handle)+" (#"+Long.toUnsignedString(handle)+")");
 			}
 

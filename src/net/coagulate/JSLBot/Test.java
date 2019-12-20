@@ -27,7 +27,8 @@ public class Test {
 		// a lot depends on your backing store, the file provider can serve different files to different bots via instansiation,
 		// or separate namespaces of one file to separate bots, via recursive instansiation (see Configuration's constructors)
 		final String CONFIGFILE;
-		if (args.length>0) { CONFIGFILE=args[0]; } else {
+		if (args.length>0) { CONFIGFILE=args[0]; }
+		else {
 			final Scanner in=new Scanner(System.in);
 			System.out.print("Name of config file: ");
 			CONFIGFILE=in.nextLine();
@@ -75,13 +76,13 @@ public class Test {
 		m.put("CnC.authorisation.ownerusername",ownername);
 		m.put("password",BotUtils.md5hash(password));
 
-		try (final FileOutputStream fos=new FileOutputStream(CONFIGFILE);final ObjectOutputStream oos=new ObjectOutputStream(
-				fos))
-		{
+		try (final FileOutputStream fos=new FileOutputStream(CONFIGFILE);final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
 			oos.writeObject(m);
-		} catch (@Nonnull final FileNotFoundException ex) {
+		}
+		catch (@Nonnull final FileNotFoundException ex) {
 			throw new AssertionError("File not found creating file (incorrect directory??");
-		} catch (@Nonnull final IOException ex) {
+		}
+		catch (@Nonnull final IOException ex) {
 			throw new AssertionError("Unable to write configuration file",ex);
 		}
 

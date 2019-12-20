@@ -108,8 +108,7 @@ public class JSLBot extends Thread {
 	}
 
 	void accountMessageIn(final int id,
-	                      final int length)
-	{
+	                      final int length) {
 		synchronized (messagebytesin) {
 			int sum=0;
 			if (messagebytesin.containsKey(id)) { sum=messagebytesin.get(id); }
@@ -119,8 +118,7 @@ public class JSLBot extends Thread {
 	}
 
 	void accountMessageOut(final int id,
-	                       final int length)
-	{
+	                       final int length) {
 		synchronized (messagebytesout) {
 			int sum=0;
 			if (messagebytesout.containsKey(id)) { sum=messagebytesout.get(id); }
@@ -223,7 +221,8 @@ public class JSLBot extends Thread {
 		if (connected) { return; }
 		try {
 			synchronized (connectsignal) { connectsignal.wait(milliseconds); }
-		} catch (@Nonnull final InterruptedException e) {}
+		}
+		catch (@Nonnull final InterruptedException e) {}
 		if (connected) { return; }
 		throw new IllegalStateException("Still not connected after timeout");
 	}
@@ -231,31 +230,23 @@ public class JSLBot extends Thread {
 	private void setup(final String firstname,
 	                   final String lastname,
 	                   final String password,
-	                   final String loginlocation)
-	{
+	                   final String loginlocation) {
 		// test that method names are preserved
 		try {
-			final String argname=getClass().getDeclaredMethod("setup",
-			                                                  String.class,
-			                                                  String.class,
-			                                                  String.class,
-			                                                  String.class
-			                                                 ).getParameters()[0].getName();
+			final String argname=getClass().getDeclaredMethod("setup",String.class,String.class,String.class,String.class).getParameters()[0].getName();
 			if ("arg0".equals(argname) || (!"firstname".equals(argname))) {
 				System.out.println("===== FATAL ERROR =====");
 				System.out.println("The name of the first method for setup() is "+argname);
 				System.out.println("In the source this is called 'firstname'");
 				System.out.println("JSLBot uses reflection to read parameter names to implement bot commands");
 				System.out.println("It is necessary to include parameter names in the compiled bytecode");
-				System.out.println(
-						"This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
-				System.out.println(
-						"Command functionality will not work without this feature, the bot has been aborted for safety reasons");
-				System.out.println(
-						"NetBeans note: Add to compiler additional options and DISABLE compile on save which ignores these settings");
+				System.out.println("This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
+				System.out.println("Command functionality will not work without this feature, the bot has been aborted for safety reasons");
+				System.out.println("NetBeans note: Add to compiler additional options and DISABLE compile on save which ignores these settings");
 				throw new AssertionError("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
 			}
-		} catch (@Nonnull final NoSuchMethodException|SecurityException ex) {
+		}
+		catch (@Nonnull final NoSuchMethodException|SecurityException ex) {
 			throw new AssertionError("Unable to read signature of setup method??",ex);
 		}
 
@@ -312,22 +303,22 @@ public class JSLBot extends Thread {
 	private void performLogin(final String firstname,
 	                          final String lastname,
 	                          @Nonnull final String password,
-	                          final String location) throws Exception
-	{
+	                          final String location) throws Exception {
 		Exception last=null;
 		for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
 			try {
 				login(firstname,lastname,password,location);
 				return;
-			} catch (@Nonnull final RuntimeException|IOException|XmlRpcException e) {
+			}
+			catch (@Nonnull final RuntimeException|IOException|XmlRpcException e) {
 				last=e;
 				long delay=Constants.RETRY_INTERVAL*retries;
 				if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
 				if (e instanceof NullPointerException) {
 					log.log(SEVERE,"Unexpected null pointer exception during login",e);
-				} else {
-					log.info("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getClass()
-					                                                                             .getSimpleName()+":"+e.getMessage());
+				}
+				else {
+					log.info("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getClass().getSimpleName()+":"+e.getMessage());
 				}
 				try { if (!quit) { Thread.sleep(delay); } } catch (@Nonnull final InterruptedException f) {}
 			}
@@ -341,8 +332,7 @@ public class JSLBot extends Thread {
 	private void login(final String firstname,
 	                   final String lastname,
 	                   @Nonnull final String password,
-	                   final String loginlocation) throws IOException, XmlRpcException
-	{
+	                   final String loginlocation) throws IOException, XmlRpcException {
 		// authentication is performed over XMLRPC over HTTPS
 		final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation);
 		if (!("true".equalsIgnoreCase((String) result.get("login")))) {
@@ -364,7 +354,8 @@ public class JSLBot extends Thread {
 		final int loginx=(Integer) result.get("region_x");
 		final int loginy=(Integer) result.get("region_y");
 		final Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
-		@SuppressWarnings("unchecked") final // if it isn't, what do we do anyway?
+		@SuppressWarnings("unchecked")
+		final // if it isn't, what do we do anyway?
 				Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
 		for (final Map.Entry<String,String> entry: rootmap.entrySet()) {
 			if (Debug.AUTH) {
@@ -449,7 +440,8 @@ public class JSLBot extends Thread {
 			p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
 			p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
 			p.bagentdata.vfar=new F32((float) 0.001);
-		} else {
+		}
+		else {
 			p.bagentdata.vcameracenter=camera;
 			p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
 			p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
@@ -492,8 +484,7 @@ public class JSLBot extends Thread {
 	 * @param message Message to send
 	 */
 	public void im(final LLUUID uuid,
-	               @Nonnull final String message)
-	{
+	               @Nonnull final String message) {
 		final ImprovedInstantMessage reply=new ImprovedInstantMessage(this);
 		reply.bmessageblock.vtoagentid=uuid;
 		reply.bmessageblock.vmessage=new Variable2(message);
@@ -530,8 +521,7 @@ public class JSLBot extends Thread {
 	 * @param reliable If set, use reliable mode
 	 */
 	public void send(final Message m,
-	                 final boolean reliable)
-	{
+	                 final boolean reliable) {
 		final Packet p=new Packet(m);
 		p.setReliable(reliable);
 		send(p);
@@ -582,7 +572,8 @@ public class JSLBot extends Thread {
 	public String getFirstName(@Nonnull final LLUUID uuid) {
 		if (uuid.equals(new LLUUID())) { return "NOUUID"; }
 		if (Global.firstName(uuid)==null) {
-			try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) {
+			try { getCAPS().getNames(uuid); }
+			catch (@Nonnull final IOException e) {
 				log.log(WARNING,"Failed to lookup agent names",e);
 			}
 		}
@@ -601,7 +592,8 @@ public class JSLBot extends Thread {
 	public String getLastName(@Nonnull final LLUUID uuid) {
 		if (uuid.equals(new LLUUID())) { return "NOUUID"; }
 		if (Global.lastName(uuid)==null) {
-			try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) {
+			try { getCAPS().getNames(uuid); }
+			catch (@Nonnull final IOException e) {
 				log.log(WARNING,"Failed to lookup agent names",e);
 			}
 		}
@@ -620,7 +612,8 @@ public class JSLBot extends Thread {
 	public String getUserName(@Nonnull final LLUUID uuid) {
 		if (uuid.equals(new LLUUID())) { return "NOUUID"; }
 		if (Global.userName(uuid)==null) {
-			try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) {
+			try { getCAPS().getNames(uuid); }
+			catch (@Nonnull final IOException e) {
 				log.log(WARNING,"Failed to lookup agent names",e);
 			}
 		}
@@ -639,7 +632,8 @@ public class JSLBot extends Thread {
 	public String getDisplayName(@Nonnull final LLUUID uuid) {
 		if (uuid.equals(new LLUUID())) { return "NOUUID"; }
 		if (Global.displayName(uuid)==null) {
-			try { getCAPS().getNames(uuid); } catch (@Nonnull final IOException e) {
+			try { getCAPS().getNames(uuid); }
+			catch (@Nonnull final IOException e) {
 				log.log(WARNING,"Failed to lookup agent names",e);
 			}
 		}
@@ -664,8 +658,7 @@ public class JSLBot extends Thread {
 	public Circuit createCircuit(final String numericip,
 	                             final int port,
 	                             final long handle,
-	                             final String capsurl) throws IOException
-	{
+	                             final String capsurl) throws IOException {
 		synchronized (circuits) {
 			if (circuits.containsKey(handle)) {
 				if (circuits.get(handle).isAlive()) {
@@ -690,8 +683,7 @@ public class JSLBot extends Thread {
 	 * @param circ         Associated circuit, used as a 'check' only
 	 */
 	void deregisterCircuit(final Long regionhandle,
-	                       final Circuit circ)
-	{
+	                       final Circuit circ) {
 		synchronized (circuits) {
 			final Circuit c=circuits.get(regionhandle);
 			if (c!=null) { c.close(); }
@@ -787,8 +779,7 @@ public class JSLBot extends Thread {
 
 	public void setPos(final float x,
 	                   final float y,
-	                   final float z)
-	{
+	                   final float z) {
 		this.x=x;
 		this.y=y;
 		this.z=z;
@@ -805,8 +796,7 @@ public class JSLBot extends Thread {
 
 	public void setLookAt(final float x,
 	                      final float y,
-	                      final float z)
-	{
+	                      final float z) {
 		lx=x;
 		ly=y;
 		lz=z;

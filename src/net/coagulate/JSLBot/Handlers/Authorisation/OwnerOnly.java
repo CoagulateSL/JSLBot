@@ -24,8 +24,7 @@ public class OwnerOnly extends Authorisation {
 	 * @param c   The configuration, from which "ownerusername" and "owneruuid" will be read.
 	 */
 	public OwnerOnly(@Nonnull final JSLBot bot,
-	                 @Nonnull final Configuration c)
-	{
+	                 @Nonnull final Configuration c) {
 		super(bot,c);
 		ownerusername=c.get("ownerusername");
 		final String owneruuidstr=c.get("owneruuid");
