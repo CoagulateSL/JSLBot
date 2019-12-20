@@ -110,6 +110,7 @@ public final class CAPS extends Thread {
 	 */
 	void getNames(@Nonnull final LLUUID agentid) throws MalformedURLException, IOException {
 		final LLSDMap map=invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
+		if (map==null) { throw new IOException("getDisplayNames CAP returned a null map"); }
 		final LLSDArray agents=(LLSDArray) map.get("agents");
 		for (final Object agento: agents) {
 			final LLSDMap agent=(LLSDMap) agento;
@@ -138,7 +139,7 @@ public final class CAPS extends Thread {
 	 *
 	 * @throws IOException If the CAP fails, or the CAP requested is not known to us
 	 */
-	@Nonnull
+	@Nullable
 	public LLSDMap invokeCAPS(final String capname,
 	                          final String appendtocap,
 	                          final LLSD content) throws IOException

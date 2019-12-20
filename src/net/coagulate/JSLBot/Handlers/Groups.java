@@ -198,6 +198,7 @@ public class Groups extends Handler {
 		req.put("group_id",new LLSDUUID(uuid));
 		final LLSD llsd=new LLSD(req);
 		final LLSDMap response=bot.getCAPS().invokeCAPS("GroupMemberData","",llsd);
+		if (response==null) { throw new IOException("GroupMemberData CAPS returned a null map"); }
 		final LLSDMap members=(LLSDMap) response.get("members");
 		if (members==null) { throw new NullPointerException("Failed to extract members map"); }
 		groupmembership.put(new LLUUID(uuid),members);
