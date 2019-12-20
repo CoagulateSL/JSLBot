@@ -162,7 +162,7 @@ public final class CAPS extends Thread {
 	 *
 	 * @throws IOException If there is a failure with the CAPS
 	 */
-	@Nonnull
+	@Nullable
 	public LLSDMap invokeXML(@Nullable final String url,
 	                         @Nullable final LLSD content) throws IOException
 	{
@@ -189,9 +189,7 @@ public final class CAPS extends Thread {
 		}
 		final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
 		final String read=s.next();
-		final LLSDMap ret=(LLSDMap) new LLSD(read).getFirst();
-		if (ret==null) { throw new IOException("Map read was null"); }
-		return ret;
+		return (LLSDMap) new LLSD(read).getFirst();
 	}
 
 	@Nonnull
