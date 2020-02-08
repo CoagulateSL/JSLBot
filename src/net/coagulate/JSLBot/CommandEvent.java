@@ -127,7 +127,7 @@ public class CommandEvent extends Event {
 		return bot().brain().execute(this);
 	}
 
-	@Nonnull
+	@Nullable
 	String run(@Nonnull final Object callon,
 	           @Nonnull final Method handler) {
 		if (Debug.TRACKCOMMANDS) {
