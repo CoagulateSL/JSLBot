@@ -28,7 +28,7 @@ public class CommandEvent extends Event {
 	// auto IM the response to
 	private final LLUUID respondto;
 	// the response its self, for other threads to read.
-	@Nonnull
+	@Nullable
 	private String response="";
 	private boolean immediate;
 	// for evaluating the 'authorisation' of this command
@@ -54,10 +54,10 @@ public class CommandEvent extends Event {
 
 	public void respondTo(@Nonnull final String response) { this.response=response; }
 
-	@Nonnull
+	@Nullable
 	public String response() { return response; }
 
-	void response(@Nonnull final String response) { this.response=response; }
+	void response(@Nullable final String response) { this.response=response; }
 
 	private void immediate(final boolean immediate) { this.immediate=immediate; }
 
@@ -100,7 +100,7 @@ public class CommandEvent extends Event {
 	 *
 	 * @return Command response
 	 */
-	@Nonnull
+	@Nullable
 	public String submitAndWait(final long timeoutmillis) {
 		submit();
 		waitFinish(timeoutmillis);
