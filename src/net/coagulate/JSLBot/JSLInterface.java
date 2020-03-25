@@ -1,7 +1,11 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.JSLBot.Handlers.Groups;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * JSL Public "API" (the useful part that does all the work for you).
@@ -55,6 +59,11 @@ public class JSLInterface {
 		cmd.put("avataruuid",avataruuid);
 		cmd.put("groupuuid",groupuuid);
 		cmd.put("roleuuid",roleuuid);
+		groupRoster(groupuuid);
+		if (((Groups) (bot.getHandler("Groups"))).isMember(new LLUUID(avataruuid),new LLUUID(groupuuid))) {
+			bot.getLogger("groupInvite").log(Level.FINE,"Avatar "+avataruuid+" is already in group "+groupuuid+", not re-inviting");
+			return;
+		}
 		new CommandEvent(bot,bot.getRegional(),"groupInvite",cmd,null).submitAndWait();
 	}
 
