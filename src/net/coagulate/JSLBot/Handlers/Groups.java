@@ -11,9 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Handle group related commands and messages.
@@ -187,6 +185,27 @@ public class Groups extends Handler {
 			if (entry.getKey().equals(uuid)) { return entry.getValue(); }
 		}
 		return null;
+	}
+	@Nonnull
+	public Set<LLUUID> getMembers(final String groupuuid) { return getMembers(new LLUUID(groupuuid)); }
+
+	@Nonnull
+	public Set<LLUUID> getMembers(final LLUUID groupuuid) {
+		final LLSDMap members=getMembership(groupuuid);
+		final Set<LLUUID> ret=new HashSet<>();
+		if (members==null) { throw new IllegalStateException("Failed to get group roster for some reason"); }
+		for (final String member: members.keys()) {
+			final LLUUID uuid=new LLUUID(member);
+			ret.add(uuid);
+		}
+		return ret;
+	}
+
+	public boolean isMember(final LLUUID avatar,final LLUUID group) {
+		for (LLUUID member:getMembers(group)) {
+			if (avatar.equals(member)) { return true; }
+		}
+		return false;
 	}
 
 	@CmdHelp(description="Collect a group's roster")
