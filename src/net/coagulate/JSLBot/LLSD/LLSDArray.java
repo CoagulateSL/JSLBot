@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot.LLSD;
 
-import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -44,7 +43,7 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
 	}
 
 	@Override
-	public @NotNull Iterator<Atomic> iterator() {
+	public @Nonnull Iterator<Atomic> iterator() {
 		return data.iterator();
 	}
 }
