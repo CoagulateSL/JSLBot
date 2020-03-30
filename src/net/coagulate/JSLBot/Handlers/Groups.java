@@ -202,7 +202,7 @@ public class Groups extends Handler {
 	}
 
 	public boolean isMember(final LLUUID avatar,final LLUUID group) {
-		for (LLUUID member:getMembers(group)) {
+		for (final LLUUID member:getMembers(group)) {
 			if (avatar.equals(member)) { return true; }
 		}
 		return false;
