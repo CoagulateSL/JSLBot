@@ -43,7 +43,8 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
 	}
 
 	@Override
-	public @Nonnull Iterator<Atomic> iterator() {
+	@Nonnull
+	public Iterator<Atomic> iterator() {
 		return data.iterator();
 	}
 }
