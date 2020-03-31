@@ -26,6 +26,7 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
 		}
 	}
 
+	// ---------- INSTANCE ----------
 	public void add(final String s) { data.add(new LLSDString(s)); }
 
 	public void add(final Atomic a) { data.add(a); }

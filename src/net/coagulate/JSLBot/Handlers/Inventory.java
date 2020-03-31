@@ -32,6 +32,7 @@ public class Inventory extends Handler implements Runnable {
 		super(bot,config);
 	}
 
+	// ---------- INSTANCE ----------
 	@Override
 	public void loggedIn() {
 		inventorytree.clear();
@@ -68,6 +69,18 @@ public class Inventory extends Handler implements Runnable {
 		inventorycomplete=true;
 	}
 
+	@Nonnull
+	@CmdHelp(description="Dump inventory map to the console")
+	public String inventoryDumpCommand(final CommandEvent event) {
+		synchronized (inventorytree) {
+			String map="";
+			map=map+inventoryDump(bot.getInventoryRoot(),"");
+			System.out.println(map);
+			return "Dumped to console.";
+		}
+	}
+
+	// ----- Internal Instance -----
 	private void processCategory(final int type,
 	                             final LLUUID agentid,
 	                             final LLUUID id,
@@ -170,17 +183,6 @@ public class Inventory extends Handler implements Runnable {
 		else {
 			if (debugqueries) { System.out.println("Generated new queries:"+query.size()); }
 			downloadqueue.addAll(query);
-		}
-	}
-
-	@Nonnull
-	@CmdHelp(description="Dump inventory map to the console")
-	public String inventoryDumpCommand(final CommandEvent event) {
-		synchronized (inventorytree) {
-			String map="";
-			map=map+inventoryDump(bot.getInventoryRoot(),"");
-			System.out.println(map);
-			return "Dumped to console.";
 		}
 	}
 

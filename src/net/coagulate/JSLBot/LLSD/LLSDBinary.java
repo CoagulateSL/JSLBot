@@ -28,6 +28,7 @@ public class LLSDBinary extends Atomic {
 		value=Base64.getEncoder().encodeToString(ByteBuffer.allocate(4).putInt(a).array());
 	}
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {

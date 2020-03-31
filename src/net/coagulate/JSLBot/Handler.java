@@ -21,6 +21,8 @@ public abstract class Handler {
 		log=bot.getLogger("Handler."+getClass().getSimpleName());
 	}
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Name of the handler
 	 */

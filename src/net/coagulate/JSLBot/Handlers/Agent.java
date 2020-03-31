@@ -33,6 +33,7 @@ public class Agent extends Handler {
 	public Agent(@Nonnull final JSLBot bot,
 	             final Configuration c) {super(bot,c);}
 
+	// ---------- INSTANCE ----------
 	@Override
 	public void loggedIn() {
 		// get financials

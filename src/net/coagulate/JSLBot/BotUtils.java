@@ -23,6 +23,8 @@ import java.util.*;
  * @author Iain Price
  */
 public abstract class BotUtils {
+	// ---------- STATICS ----------
+
 	/**
 	 * Turns a byte array into a hex string
 	 *
@@ -90,6 +92,82 @@ public abstract class BotUtils {
 		return "$1$"+hex(digest);
 		//return hex(digest);
 	}
+
+	/**
+	 * ZeroEncode the input byte array.
+	 * Add acks /after/ zerocoding, they are not included.
+	 * See the SL protocol documentation.
+	 *
+	 * @param input raw byte array
+	 *
+	 * @return ZeroCoded byte array
+	 */
+	@Nonnull
+	public static byte[] zeroEncode(@Nonnull final byte[] input) {
+		final List<Byte> output=new ArrayList<>();
+		// first 5 bytes (header) are not encoded
+		for (int i=0;i<6;i++) { output.add(input[i]); }
+		int zerocount=0;
+		// rest is
+		for (int i=6;i<input.length;i++) {
+			if (input[i]==0) {
+				zerocount++;
+			}
+			else {
+				if (zerocount>0) {
+					output.add((byte) 0);
+					output.add((byte) zerocount);
+					zerocount=0;
+				}
+				output.add(input[i]);
+			}
+		}
+		if (zerocount>0) {
+			output.add((byte) 0);
+			output.add((byte) zerocount);
+		}
+		final byte[] outputbytes=new byte[output.size()];
+		int offset=0;
+		// and put it back into the byte array :P
+		for (final Byte b: output) {
+			outputbytes[offset]=b;
+			offset++;
+		}
+		return outputbytes;
+	}
+
+	/**
+	 * Read a zero byte terminated string from a byte buffer.
+	 *
+	 * @param buffer Byte buffer containing a zero terminated string.
+	 *
+	 * @return String read up to the zero byte.
+	 */
+	@Nonnull
+	public static String readZeroTerminatedString(@Nonnull final ByteBuffer buffer) {
+		final List<Byte> bytes=new ArrayList<>();
+		byte b=-1;
+		while (b!=0) {
+			b=buffer.get();
+			if (b>0) { bytes.add(b); }
+		}
+		final Byte[] bytesarray=bytes.toArray(new Byte[0]);
+		final byte[] ba=new byte[bytesarray.length];
+		for (int i=0;i<bytesarray.length;i++) { ba[i]=bytesarray[i]; }
+		return new String(ba);
+	}
+
+	@Nonnull
+	public static String unravel(@Nullable Throwable t) {
+		final StringBuilder response=new StringBuilder();
+		while (t!=null) {
+			response.append("\n[").append(t.getLocalizedMessage()).append("]");
+			t=t.getCause();
+		}
+		return response.toString();
+	}
+
+	// ----- Internal Statics -----
 
 	/**
 	 * Create and execute the XMLRPC logon command.
@@ -234,79 +312,5 @@ public abstract class BotUtils {
 		req.add("ViewerStartAuction");
 		req.add("ViewerStats");
 		return req;
-	}
-
-	/**
-	 * ZeroEncode the input byte array.
-	 * Add acks /after/ zerocoding, they are not included.
-	 * See the SL protocol documentation.
-	 *
-	 * @param input raw byte array
-	 *
-	 * @return ZeroCoded byte array
-	 */
-	@Nonnull
-	public static byte[] zeroEncode(@Nonnull final byte[] input) {
-		final List<Byte> output=new ArrayList<>();
-		// first 5 bytes (header) are not encoded
-		for (int i=0;i<6;i++) { output.add(input[i]); }
-		int zerocount=0;
-		// rest is
-		for (int i=6;i<input.length;i++) {
-			if (input[i]==0) {
-				zerocount++;
-			}
-			else {
-				if (zerocount>0) {
-					output.add((byte) 0);
-					output.add((byte) zerocount);
-					zerocount=0;
-				}
-				output.add(input[i]);
-			}
-		}
-		if (zerocount>0) {
-			output.add((byte) 0);
-			output.add((byte) zerocount);
-		}
-		final byte[] outputbytes=new byte[output.size()];
-		int offset=0;
-		// and put it back into the byte array :P
-		for (final Byte b: output) {
-			outputbytes[offset]=b;
-			offset++;
-		}
-		return outputbytes;
-	}
-
-	/**
-	 * Read a zero byte terminated string from a byte buffer.
-	 *
-	 * @param buffer Byte buffer containing a zero terminated string.
-	 *
-	 * @return String read up to the zero byte.
-	 */
-	@Nonnull
-	public static String readZeroTerminatedString(@Nonnull final ByteBuffer buffer) {
-		final List<Byte> bytes=new ArrayList<>();
-		byte b=-1;
-		while (b!=0) {
-			b=buffer.get();
-			if (b>0) { bytes.add(b); }
-		}
-		final Byte[] bytesarray=bytes.toArray(new Byte[0]);
-		final byte[] ba=new byte[bytesarray.length];
-		for (int i=0;i<bytesarray.length;i++) { ba[i]=bytesarray[i]; }
-		return new String(ba);
-	}
-
-	@Nonnull
-	public static String unravel(@Nullable Throwable t) {
-		final StringBuilder response=new StringBuilder();
-		while (t!=null) {
-			response.append("\n[").append(t.getLocalizedMessage()).append("]");
-			t=t.getCause();
-		}
-		return response.toString();
 	}
 }

@@ -21,6 +21,7 @@ public class XMLEvent extends Event {
 		this.content=content;
 	}
 
+	// ---------- INSTANCE ----------
 	public Atomic body() { return content; }
 
 	@Nonnull

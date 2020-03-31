@@ -31,6 +31,7 @@ public abstract class Constants {
 	public static final long BRAIN_PROCRASTINATES_FOR_MILLISECONDS=1000; // how long to sleep the thread on the event queue before releasing the thread for maintenance
 	// tasks etc
 
+	// ---------- STATICS ----------
 	@Nonnull
 	public static String getVersionNumber() { return MAJOR_VERSION_NUMBER+"."+MINOR_VERSION_NUMBER+"."+BUGFIX_VERSION_NUMBER; }
 

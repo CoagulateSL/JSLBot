@@ -26,6 +26,8 @@ public class AllowAll extends Authorisation {
 		log.warning("Creating AllowAll authoriser, if used, anyone may completely control this bot");
 	}
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Approve all events
 	 *

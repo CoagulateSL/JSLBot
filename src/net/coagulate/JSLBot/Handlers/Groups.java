@@ -28,6 +28,7 @@ public class Groups extends Handler {
 		super(bot,config);
 	}
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	@CmdHelp(description="Invite a user to a given group/role")
 	public String groupInviteCommand(final CommandEvent command,
@@ -87,19 +88,6 @@ public class Groups extends Handler {
 			}
 		}
 		return resp.toString();
-	}
-
-	@Nullable
-	private LLUUID findGroupUUID(@Nonnull final String name) {
-		synchronized (groups) {
-			for (final Map.Entry<LLUUID,GroupData> entry: groups.entrySet()) {
-				final GroupData gd=entry.getValue();
-				if (gd!=null) {
-					if (name.equalsIgnoreCase(gd.groupname)) { return entry.getKey(); }
-				}
-			}
-		}
-		return null;
 	}
 
 	public void improvedInstantMessageUDPImmediate(@Nonnull final UDPEvent event) {
@@ -186,6 +174,7 @@ public class Groups extends Handler {
 		}
 		return null;
 	}
+
 	@Nonnull
 	public Set<LLUUID> getMembers(final String groupuuid) { return getMembers(new LLUUID(groupuuid)); }
 
@@ -201,8 +190,9 @@ public class Groups extends Handler {
 		return ret;
 	}
 
-	public boolean isMember(final LLUUID avatar,final LLUUID group) {
-		for (final LLUUID member:getMembers(group)) {
+	public boolean isMember(final LLUUID avatar,
+	                        final LLUUID group) {
+		for (final LLUUID member: getMembers(group)) {
 			if (avatar.equals(member)) { return true; }
 		}
 		return false;
@@ -241,6 +231,20 @@ public class Groups extends Handler {
 		return "0 - Group activation requested";
 	}
 
+	// ----- Internal Instance -----
+	@Nullable
+	private LLUUID findGroupUUID(@Nonnull final String name) {
+		synchronized (groups) {
+			for (final Map.Entry<LLUUID,GroupData> entry: groups.entrySet()) {
+				final GroupData gd=entry.getValue();
+				if (gd!=null) {
+					if (name.equalsIgnoreCase(gd.groupname)) { return entry.getKey(); }
+				}
+			}
+		}
+		return null;
+	}
+
 	public static class GroupData {
 		@Nullable
 		String groupname;
@@ -252,6 +256,7 @@ public class Groups extends Handler {
 		@Nullable
 		LLUUID uuid;
 
+		// ---------- INSTANCE ----------
 		@Nonnull
 		public LLUUID uuid() {
 			if (uuid==null) { throw new IllegalArgumentException("Group data has no UUID?"); }

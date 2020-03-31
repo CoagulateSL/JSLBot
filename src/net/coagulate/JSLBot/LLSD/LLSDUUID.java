@@ -55,6 +55,8 @@ public class LLSDUUID extends Atomic {
 		value=new LLUUID();
 	}
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Write the XML UUID tag pair representing this atom.
 	 *

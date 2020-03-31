@@ -30,6 +30,7 @@ public class FileBasedConfiguration extends Configuration {
 		}
 	}
 
+	// ---------- INSTANCE ----------
 	@Nullable
 	@Override
 	public String get(final String key) {
@@ -54,11 +55,10 @@ public class FileBasedConfiguration extends Configuration {
 		}
 	}
 
-
-	private void writeStore() throws IOException {
-		try (final FileOutputStream fos=new FileOutputStream(filename);final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
-			oos.writeObject(kvstore);
-		}
+	@Nonnull
+	@Override
+	public Set<String> get() {
+		return kvstore.keySet();
 	}
 
 	@Nonnull
@@ -72,12 +72,13 @@ public class FileBasedConfiguration extends Configuration {
 		return response;
 	}
 
-	@Nonnull
-	@Override
-	public Set<String> get() {
-		return kvstore.keySet();
-	}
-
 	@Override
 	public boolean persistent() { return true; }
+
+	// ----- Internal Instance -----
+	private void writeStore() throws IOException {
+		try (final FileOutputStream fos=new FileOutputStream(filename);final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
+			oos.writeObject(kvstore);
+		}
+	}
 }

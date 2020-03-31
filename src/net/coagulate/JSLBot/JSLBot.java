@@ -88,6 +88,7 @@ public class JSLBot extends Thread {
 		loadConf(conf);
 	}
 
+	// ---------- INSTANCE ----------
 	public int getSecondsSinceStartup() {
 		final int now=(int) Math.round(new Date().getTime()/1000.0);
 		return now-startuptime;
@@ -104,26 +105,6 @@ public class JSLBot extends Thread {
 			for (final Map.Entry<Integer,Integer> entry: messagebytesout.entrySet()) {
 				System.out.println("Message ID : "+entry.getKey()+" transmitted "+entry.getValue());
 			}
-		}
-	}
-
-	void accountMessageIn(final int id,
-	                      final int length) {
-		synchronized (messagebytesin) {
-			int sum=0;
-			if (messagebytesin.containsKey(id)) { sum=messagebytesin.get(id); }
-			sum+=length;
-			messagebytesin.put(id,sum);
-		}
-	}
-
-	void accountMessageOut(final int id,
-	                       final int length) {
-		synchronized (messagebytesout) {
-			int sum=0;
-			if (messagebytesout.containsKey(id)) { sum=messagebytesout.get(id); }
-			sum+=length;
-			messagebytesout.put(id,sum);
 		}
 	}
 
@@ -151,9 +132,6 @@ public class JSLBot extends Thread {
 		shutdown("Forced to reconnect");
 	}
 
-
-	// ********** LOGIN CODE / BOT PRIMITIVES **********
-
 	/**
 	 * Instruct the bot to always reconnect whne disconnected
 	 */
@@ -172,6 +150,9 @@ public class JSLBot extends Thread {
 		homesickfor=regionname;
 	}
 
+
+	// ********** LOGIN CODE / BOT PRIMITIVES **********
+
 	@Nullable
 	public String homeSickFor() { return homesickfor; }
 
@@ -187,19 +168,6 @@ public class JSLBot extends Thread {
 	public JSLInterface api() {
 		if (jslinterface==null) { throw new NullPointerException("JSLInterface not yet initialised"); }
 		return jslinterface;
-	}
-
-	private void loadConf(final Configuration conf) {
-		// load from config and call 'setup'
-		config=conf;
-		String location=config.get("loginlocation");
-		if (location==null || "".equals(location)) { location="home"; }  // default to home
-		//String potentialmaster=config.get("owner");
-
-		final String handlerlist=config.get("handlers","");
-		brain.loadHandlers(handlerlist.split(","));
-		setup(config.get("firstname"),config.get("lastname"),config.get("password"),location);
-		log.info("JSLBot initialisation complete, ready to launch");
 	}
 
 	/**
@@ -225,38 +193,6 @@ public class JSLBot extends Thread {
 		catch (@Nonnull final InterruptedException e) {}
 		if (connected) { return; }
 		throw new IllegalStateException("Still not connected after timeout");
-	}
-
-	private void setup(final String firstname,
-	                   final String lastname,
-	                   final String password,
-	                   final String loginlocation) {
-		// test that method names are preserved
-		try {
-			final String argname=getClass().getDeclaredMethod("setup",String.class,String.class,String.class,String.class).getParameters()[0].getName();
-			if ("arg0".equals(argname) || (!"firstname".equals(argname))) {
-				System.out.println("===== FATAL ERROR =====");
-				System.out.println("The name of the first method for setup() is "+argname);
-				System.out.println("In the source this is called 'firstname'");
-				System.out.println("JSLBot uses reflection to read parameter names to implement bot commands");
-				System.out.println("It is necessary to include parameter names in the compiled bytecode");
-				System.out.println("This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
-				System.out.println("Command functionality will not work without this feature, the bot has been aborted for safety reasons");
-				System.out.println("NetBeans note: Add to compiler additional options and DISABLE compile on save which ignores these settings");
-				throw new AssertionError("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
-			}
-		}
-		catch (@Nonnull final NoSuchMethodException|SecurityException ex) {
-			throw new AssertionError("Unable to read signature of setup method??",ex);
-		}
-
-		jslinterface=new JSLInterface(this);
-		LLCATruster.initialise(); // probably compromises the SSL engine in various ways :(
-		this.firstname=firstname;
-		this.lastname=lastname;
-		this.password=password;
-		this.loginlocation=loginlocation;
-		log.config(Constants.getVersion());
 	}
 
 	@Nonnull
@@ -292,98 +228,12 @@ public class JSLBot extends Thread {
 		}
 	}
 
+	@Nonnull
+	@Override
+	public String toString() { return getFullName(); }
+
 	public Logger getLogger(final String subspace) {
 		return Logger.getLogger(log.getName()+"."+subspace);
-	}
-
-
-	// ********** TRANSMISSION PRIMITIVES **********
-
-	// Wrapper for logging in, implements retries and backoff.
-	private void performLogin(final String firstname,
-	                          final String lastname,
-	                          @Nonnull final String password,
-	                          final String location) throws Exception {
-		Exception last=null;
-		for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
-			try {
-				login(firstname,lastname,password,location);
-				return;
-			}
-			catch (@Nonnull final RuntimeException|IOException|XmlRpcException e) {
-				last=e;
-				long delay=Constants.RETRY_INTERVAL*retries;
-				if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
-				if (e instanceof NullPointerException) {
-					log.log(SEVERE,"Unexpected null pointer exception during login",e);
-				}
-				else {
-					log.info("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getClass().getSimpleName()+":"+e.getMessage());
-				}
-				try { if (!quit) { Thread.sleep(delay); } } catch (@Nonnull final InterruptedException f) {}
-			}
-			if (quit) { return; }
-		}
-		log.severe("All login attempts failed!");
-		throw new IOException("Failed login",last);
-	}
-
-	// Perform a login attempt
-	private void login(final String firstname,
-	                   final String lastname,
-	                   @Nonnull final String password,
-	                   final String loginlocation) throws IOException, XmlRpcException {
-		// authentication is performed over XMLRPC over HTTPS
-		final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation);
-		if (!("true".equalsIgnoreCase((String) result.get("login")))) {
-			throw new IOException("Server gave error: "+result.get("message"));
-		}
-		final String message=(String) result.get("message");
-		log.info("Login MOTD: "+message);
-
-		// the response contains things we'll need
-		final String fn=(String) result.get("first_name");
-		this.firstname=fn.substring(1,fn.length()-1);
-		this.lastname=(String) result.get("last_name");
-		uuid=new LLUUID((String) result.get("agent_id"));
-		// probably want to note the "udp_blacklist" which is a comma separated list of packet types to not use.  but then if we just aren't using them either...?
-		circuitcode=(int) result.get("circuit_code");
-		sessionid=new LLUUID((String) result.get("session_id"));
-		final String ip=(String) result.get("sim_ip");
-		final int port=(Integer) result.get("sim_port");
-		final int loginx=(Integer) result.get("region_x");
-		final int loginy=(Integer) result.get("region_y");
-		final Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
-		@SuppressWarnings("unchecked")
-		final // if it isn't, what do we do anyway?
-				Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
-		for (final Map.Entry<String,String> entry: rootmap.entrySet()) {
-			if (Debug.AUTH) {
-				log.finer("Inventory Root "+entry.getKey()+" = "+entry.getValue());
-			}
-			inventoryroot=new LLUUID(entry.getValue());
-		}
-		//System.out.println("inventoryroot type is "+inventoryroot.getClass().getName());
-		// derive region handle
-		final U64 handle=new U64();
-		handle.value=loginx;
-		handle.value=handle.value<<(32);
-		handle.value=handle.value|(loginy);
-		if (Debug.AUTH || Debug.REGIONHANDLES) {
-			log.finer("Computed initial handle of "+Long.toUnsignedString(handle.value));
-		}
-		// caps
-		final String seedcaps=(String) result.get("seed_capability");
-		log.info("Login is complete, opening initial circuit.");
-		final Circuit initial=new Circuit(this,ip,port,handle.value,seedcaps);
-		initial.connect();
-		// for our main connection, "move in" to the sim, it's expecting us :P
-		primary=initial;
-		circuits.put(handle.value,initial);
-		completeAgentMovement();
-		agentUpdate();
-		connected=true;
-		synchronized (connectsignal) { connectsignal.notifyAll(); } // wake up, sleepers
 	}
 
 	/**
@@ -406,6 +256,9 @@ public class JSLBot extends Thread {
 	 * Send an agent update if one has not been sent recently
 	 */
 	public void agentUpdate() { agentUpdate(false); }
+
+
+	// ********** TRANSMISSION PRIMITIVES **********
 
 	public void blind() {
 		blind=true;
@@ -464,20 +317,6 @@ public class JSLBot extends Thread {
 	}
 
 	/**
-	 * Send this generally useful message down the primary UDP circuit
-	 */
-	@Nonnull
-	Packet useCircuitCode() {
-		final UseCircuitCode cc=new UseCircuitCode();
-		cc.bcircuitcode.vcode=new U32(getCircuitCode());
-		cc.bcircuitcode.vsessionid=getSession();
-		cc.bcircuitcode.vid=getUUID();
-		final Packet p=new Packet(cc);
-		p.setReliable(true);
-		return p;
-	}
-
-	/**
 	 * Send an instant message immediately using the primary circuit
 	 *
 	 * @param uuid    UUID of agent to send message to
@@ -489,12 +328,6 @@ public class JSLBot extends Thread {
 		reply.bmessageblock.vtoagentid=uuid;
 		reply.bmessageblock.vmessage=new Variable2(message);
 		send(reply,true);
-	}
-
-	@Nonnull
-	Circuit circuit() {
-		if (primary==null) { throw new IllegalStateException("Primary circuit is not yet set up"); }
-		return primary;
 	}
 
 	/**
@@ -541,17 +374,6 @@ public class JSLBot extends Thread {
 	 * @param c The new primary circuit.
 	 */
 	public void setPrimaryCircuit(final Circuit c) { primary=c; }
-
-	// post login main loop, update + think in a loop, until we're quitting (disconnecting)
-	private void mainLoop() throws Exception {
-		performLogin(firstname,lastname,password,loginlocation);
-		if (!quit) { brain.loggedIn(); }
-		while (!quit) {
-			//agentUpdate();
-			brain.think();
-		}
-		log.warning("Bot exited: "+quitreason);
-	}
 
 	/**
 	 * Get the primary circuit's CAPS.
@@ -676,30 +498,6 @@ public class JSLBot extends Thread {
 	}
 
 	/**
-	 * Inform bot that a circuit closed.
-	 * If this is our primary (non child agent) circuit we're in trouble and will quit.
-	 *
-	 * @param regionhandle Region handle that's closing connection.
-	 * @param circ         Associated circuit, used as a 'check' only
-	 */
-	void deregisterCircuit(final Long regionhandle,
-	                       final Circuit circ) {
-		synchronized (circuits) {
-			final Circuit c=circuits.get(regionhandle);
-			if (c!=null) { c.close(); }
-			if (circ!=c && c!=null) {
-				log.severe("Closing a region handle but the circuit is not the one we have registered");
-			}
-			circuits.remove(regionhandle);
-			// dont warn if shutting down
-			if (!quit && c==primary) {
-				log.severe("Closure of primary circuit detected, this is fatal?");
-				shutdown("Primary circuit lost, we have been disconnected?");
-			}
-		}
-	}
-
-	/**
 	 * Get the regional info for the primary region
 	 *
 	 * @return Primary region the avatar is present in
@@ -724,17 +522,6 @@ public class JSLBot extends Thread {
 			}
 		}
 		return regionalset;
-	}
-
-	/**
-	 * Get the circuit for a given region handle
-	 *
-	 * @param regionhandle Region handle to query
-	 *
-	 * @return Circuit for the region handle, or null
-	 */
-	Circuit getCircuit(final Long regionhandle) {
-		return circuits.get(regionhandle);
 	}
 
 	/**
@@ -823,6 +610,82 @@ public class JSLBot extends Thread {
 		forceAgentUpdate();
 	}
 
+	// ----- Internal Instance -----
+	void accountMessageIn(final int id,
+	                      final int length) {
+		synchronized (messagebytesin) {
+			int sum=0;
+			if (messagebytesin.containsKey(id)) { sum=messagebytesin.get(id); }
+			sum+=length;
+			messagebytesin.put(id,sum);
+		}
+	}
+
+	void accountMessageOut(final int id,
+	                       final int length) {
+		synchronized (messagebytesout) {
+			int sum=0;
+			if (messagebytesout.containsKey(id)) { sum=messagebytesout.get(id); }
+			sum+=length;
+			messagebytesout.put(id,sum);
+		}
+	}
+
+	/**
+	 * Send this generally useful message down the primary UDP circuit
+	 */
+	@Nonnull
+	Packet useCircuitCode() {
+		final UseCircuitCode cc=new UseCircuitCode();
+		cc.bcircuitcode.vcode=new U32(getCircuitCode());
+		cc.bcircuitcode.vsessionid=getSession();
+		cc.bcircuitcode.vid=getUUID();
+		final Packet p=new Packet(cc);
+		p.setReliable(true);
+		return p;
+	}
+
+	@Nonnull
+	Circuit circuit() {
+		if (primary==null) { throw new IllegalStateException("Primary circuit is not yet set up"); }
+		return primary;
+	}
+
+	/**
+	 * Inform bot that a circuit closed.
+	 * If this is our primary (non child agent) circuit we're in trouble and will quit.
+	 *
+	 * @param regionhandle Region handle that's closing connection.
+	 * @param circ         Associated circuit, used as a 'check' only
+	 */
+	void deregisterCircuit(final Long regionhandle,
+	                       final Circuit circ) {
+		synchronized (circuits) {
+			final Circuit c=circuits.get(regionhandle);
+			if (c!=null) { c.close(); }
+			if (circ!=c && c!=null) {
+				log.severe("Closing a region handle but the circuit is not the one we have registered");
+			}
+			circuits.remove(regionhandle);
+			// dont warn if shutting down
+			if (!quit && c==primary) {
+				log.severe("Closure of primary circuit detected, this is fatal?");
+				shutdown("Primary circuit lost, we have been disconnected?");
+			}
+		}
+	}
+
+	/**
+	 * Get the circuit for a given region handle
+	 *
+	 * @param regionhandle Region handle to query
+	 *
+	 * @return Circuit for the region handle, or null
+	 */
+	Circuit getCircuit(final Long regionhandle) {
+		return circuits.get(regionhandle);
+	}
+
 	int getCircuitSequence() {
 		synchronized (circuitsequencelock) {
 			circuitsequence++;
@@ -830,9 +693,148 @@ public class JSLBot extends Thread {
 		}
 	}
 
-	@Nonnull
-	@Override
-	public String toString() { return getFullName(); }
+	private void loadConf(final Configuration conf) {
+		// load from config and call 'setup'
+		config=conf;
+		String location=config.get("loginlocation");
+		if (location==null || "".equals(location)) { location="home"; }  // default to home
+		//String potentialmaster=config.get("owner");
+
+		final String handlerlist=config.get("handlers","");
+		brain.loadHandlers(handlerlist.split(","));
+		setup(config.get("firstname"),config.get("lastname"),config.get("password"),location);
+		log.info("JSLBot initialisation complete, ready to launch");
+	}
+
+	private void setup(final String firstname,
+	                   final String lastname,
+	                   final String password,
+	                   final String loginlocation) {
+		// test that method names are preserved
+		try {
+			final String argname=getClass().getDeclaredMethod("setup",String.class,String.class,String.class,String.class).getParameters()[0].getName();
+			if ("arg0".equals(argname) || (!"firstname".equals(argname))) {
+				System.out.println("===== FATAL ERROR =====");
+				System.out.println("The name of the first method for setup() is "+argname);
+				System.out.println("In the source this is called 'firstname'");
+				System.out.println("JSLBot uses reflection to read parameter names to implement bot commands");
+				System.out.println("It is necessary to include parameter names in the compiled bytecode");
+				System.out.println("This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
+				System.out.println("Command functionality will not work without this feature, the bot has been aborted for safety reasons");
+				System.out.println("NetBeans note: Add to compiler additional options and DISABLE compile on save which ignores these settings");
+				throw new AssertionError("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
+			}
+		}
+		catch (@Nonnull final NoSuchMethodException|SecurityException ex) {
+			throw new AssertionError("Unable to read signature of setup method??",ex);
+		}
+
+		jslinterface=new JSLInterface(this);
+		LLCATruster.initialise(); // probably compromises the SSL engine in various ways :(
+		this.firstname=firstname;
+		this.lastname=lastname;
+		this.password=password;
+		this.loginlocation=loginlocation;
+		log.config(Constants.getVersion());
+	}
+
+	// Wrapper for logging in, implements retries and backoff.
+	private void performLogin(final String firstname,
+	                          final String lastname,
+	                          @Nonnull final String password,
+	                          final String location) throws Exception {
+		Exception last=null;
+		for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
+			try {
+				login(firstname,lastname,password,location);
+				return;
+			}
+			catch (@Nonnull final RuntimeException|IOException|XmlRpcException e) {
+				last=e;
+				long delay=Constants.RETRY_INTERVAL*retries;
+				if (delay>Constants.MAX_RETRY_INTERVAL) { delay=Constants.MAX_RETRY_INTERVAL; }
+				if (e instanceof NullPointerException) {
+					log.log(SEVERE,"Unexpected null pointer exception during login",e);
+				}
+				else {
+					log.info("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getClass().getSimpleName()+":"+e.getMessage());
+				}
+				try { if (!quit) { Thread.sleep(delay); } } catch (@Nonnull final InterruptedException f) {}
+			}
+			if (quit) { return; }
+		}
+		log.severe("All login attempts failed!");
+		throw new IOException("Failed login",last);
+	}
+
+	// Perform a login attempt
+	private void login(final String firstname,
+	                   final String lastname,
+	                   @Nonnull final String password,
+	                   final String loginlocation) throws IOException, XmlRpcException {
+		// authentication is performed over XMLRPC over HTTPS
+		final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation);
+		if (!("true".equalsIgnoreCase((String) result.get("login")))) {
+			throw new IOException("Server gave error: "+result.get("message"));
+		}
+		final String message=(String) result.get("message");
+		log.info("Login MOTD: "+message);
+
+		// the response contains things we'll need
+		final String fn=(String) result.get("first_name");
+		this.firstname=fn.substring(1,fn.length()-1);
+		this.lastname=(String) result.get("last_name");
+		uuid=new LLUUID((String) result.get("agent_id"));
+		// probably want to note the "udp_blacklist" which is a comma separated list of packet types to not use.  but then if we just aren't using them either...?
+		circuitcode=(int) result.get("circuit_code");
+		sessionid=new LLUUID((String) result.get("session_id"));
+		final String ip=(String) result.get("sim_ip");
+		final int port=(Integer) result.get("sim_port");
+		final int loginx=(Integer) result.get("region_x");
+		final int loginy=(Integer) result.get("region_y");
+		final Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
+		@SuppressWarnings("unchecked")
+		final // if it isn't, what do we do anyway?
+				Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
+		for (final Map.Entry<String,String> entry: rootmap.entrySet()) {
+			if (Debug.AUTH) {
+				log.finer("Inventory Root "+entry.getKey()+" = "+entry.getValue());
+			}
+			inventoryroot=new LLUUID(entry.getValue());
+		}
+		//System.out.println("inventoryroot type is "+inventoryroot.getClass().getName());
+		// derive region handle
+		final U64 handle=new U64();
+		handle.value=loginx;
+		handle.value=handle.value<<(32);
+		handle.value=handle.value|(loginy);
+		if (Debug.AUTH || Debug.REGIONHANDLES) {
+			log.finer("Computed initial handle of "+Long.toUnsignedString(handle.value));
+		}
+		// caps
+		final String seedcaps=(String) result.get("seed_capability");
+		log.info("Login is complete, opening initial circuit.");
+		final Circuit initial=new Circuit(this,ip,port,handle.value,seedcaps);
+		initial.connect();
+		// for our main connection, "move in" to the sim, it's expecting us :P
+		primary=initial;
+		circuits.put(handle.value,initial);
+		completeAgentMovement();
+		agentUpdate();
+		connected=true;
+		synchronized (connectsignal) { connectsignal.notifyAll(); } // wake up, sleepers
+	}
+
+	// post login main loop, update + think in a loop, until we're quitting (disconnecting)
+	private void mainLoop() throws Exception {
+		performLogin(firstname,lastname,password,loginlocation);
+		if (!quit) { brain.loggedIn(); }
+		while (!quit) {
+			//agentUpdate();
+			brain.think();
+		}
+		log.warning("Bot exited: "+quitreason);
+	}
 
 	/**
 	 * Describes a command.
@@ -842,6 +844,8 @@ public class JSLBot extends Thread {
 	@Documented
 	@Target(ElementType.METHOD)
 	public @interface CmdHelp {
+
+		// ---------- INSTANCE ----------
 
 		/**
 		 * Get the description for this command
@@ -859,6 +863,8 @@ public class JSLBot extends Thread {
 	@Target(ElementType.PARAMETER)
 	public @interface ParamHelp {
 
+		// ---------- INSTANCE ----------
+
 		/**
 		 * Description for this parameter
 		 *
@@ -872,6 +878,7 @@ public class JSLBot extends Thread {
 
 		ShutdownHook(final JSLBot bot) {this.bot=bot;}
 
+		// ---------- INSTANCE ----------
 		@Override
 		public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
 	}

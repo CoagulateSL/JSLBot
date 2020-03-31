@@ -17,6 +17,8 @@ public class JSLInterface {
 
 	JSLInterface(final JSLBot bot) { this.bot=bot; }
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Send and wait for an instant message to be sent.
 	 *

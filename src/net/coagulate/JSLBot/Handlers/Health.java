@@ -24,6 +24,7 @@ public class Health extends Handler {
 		verbose=Boolean.parseBoolean(c.get("verbose","false"));
 	}
 
+	// ---------- INSTANCE ----------
 	public void healthMessageUDPImmediate(@Nonnull final UDPEvent event) {
 		final HealthMessage h=(HealthMessage) event.body();
 		health=h.bhealthdata.vhealth.value;

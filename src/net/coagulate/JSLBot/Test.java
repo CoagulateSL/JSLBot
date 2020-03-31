@@ -13,6 +13,8 @@ import java.util.Scanner;
  */
 public class Test {
 
+	// ---------- STATICS ----------
+
 	/**
 	 * Launch a singular bot using a config store and lose our thread to its AI thread.
 	 *
@@ -42,6 +44,8 @@ public class Test {
 		//noinspection CallToThreadRun
 		bot.run(); // lose control to bot.  call start() to background the bot and continue execution here.
 	}
+
+	// ----- Internal Statics -----
 
 	/**
 	 * Builds a base configuration file

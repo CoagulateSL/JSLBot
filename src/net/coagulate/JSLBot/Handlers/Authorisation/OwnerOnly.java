@@ -43,6 +43,8 @@ public class OwnerOnly extends Authorisation {
 		log.config("OwnerOnly mode enabled, authorised for "+permitted);
 	}
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Approves events if issued by the owner.
 	 * Rejects all if no uuid + username defined.

@@ -21,6 +21,7 @@ public class LLSDString extends Atomic {
 		value=item.getTextContent();
 	}
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {

@@ -35,6 +35,8 @@ public class EventQueue extends Thread {
 		setDaemon(true);
 	}
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Get the owning CAPS
 	 *
@@ -77,6 +79,13 @@ public class EventQueue extends Thread {
 		}
 	}
 
+	@Nonnull
+	@Override
+	public String toString() { return caps()+" / EventQueue"; }
+
+	public String getRegionName() { return caps().circuit().getRegionName(); }
+
+	// ----- Internal Instance -----
 	private void runMain() throws Exception {
 		// Event queue - poll the URL endlessly, most of the time it hangs for 30 seconds and '502's
 		// Otherwise it 200s and gives us a document.  Yay.
@@ -175,11 +184,5 @@ public class EventQueue extends Thread {
 			event.submit();
 		}
 	}
-
-	public String getRegionName() { return caps().circuit().getRegionName(); }
-
-	@Nonnull
-	@Override
-	public String toString() { return caps()+" / EventQueue"; }
 
 }

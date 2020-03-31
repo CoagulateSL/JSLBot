@@ -32,6 +32,7 @@ public class Teleportation extends Handler {
 		config=c;
 	}
 
+	// ---------- INSTANCE ----------
 	// nothing more than a status message
 	public void teleportProgressUDPImmediate(@Nonnull final UDPEvent event) {
 		final TeleportProgress tp=(TeleportProgress) event.body();
@@ -193,24 +194,6 @@ public class Teleportation extends Handler {
 
 	}
 
-	private boolean waitTeleport() {
-		teleporting=true;
-		boolean expired=false;
-		try {
-			synchronized (signal) {
-				signal.wait(10000);
-				expired=true;
-			}
-		}
-		catch (@Nonnull final InterruptedException e) {}
-		if (expired) { log.severe("Timer expired while teleporting, lost in transit?"); }
-		final boolean completed=!teleporting;
-		teleporting=false;
-		bot.setMaxFOV();
-		bot.agentUpdate();
-		return completed;
-	}
-
 	@Nonnull
 	@CmdHelp(description="Sends you a teleport lure")
 	public String lureMeCommand(@Nonnull final CommandEvent command) {
@@ -242,6 +225,25 @@ public class Teleportation extends Handler {
 		req.btargetdata.add(target);
 		bot.send(req,true);
 		return "0 - TP Lure Request Sent";
+	}
+
+	// ----- Internal Instance -----
+	private boolean waitTeleport() {
+		teleporting=true;
+		boolean expired=false;
+		try {
+			synchronized (signal) {
+				signal.wait(10000);
+				expired=true;
+			}
+		}
+		catch (@Nonnull final InterruptedException e) {}
+		if (expired) { log.severe("Timer expired while teleporting, lost in transit?"); }
+		final boolean completed=!teleporting;
+		teleporting=false;
+		bot.setMaxFOV();
+		bot.agentUpdate();
+		return completed;
 	}
 
 }

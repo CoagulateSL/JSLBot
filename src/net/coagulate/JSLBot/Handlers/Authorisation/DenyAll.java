@@ -28,6 +28,8 @@ public class DenyAll extends Authorisation {
 		log.config("Created a DenyAll authoriser, if engaged all remote commands will be denied.");
 	}
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Denies everything.
 	 *

@@ -39,10 +39,7 @@ public abstract class Event {
 		setType();
 	}
 
-	void log(final Level level,
-	         final String message) {
-		log.log(level,message);
-	}
+	// ---------- INSTANCE ----------
 
 	/**
 	 * Get the event's current status
@@ -50,21 +47,6 @@ public abstract class Event {
 	 * @return The STATUS of this event
 	 */
 	public STATUS status() { return status; }
-
-	/**
-	 * Set the event's current status
-	 *
-	 * @param status the new status for this event
-	 */
-	void status(final STATUS status) {
-		synchronized (statusmonitor) {
-			this.status=status;
-			if (Debug.TRACKCOMMANDS && type==COMMAND) {
-				log.log(Level.FINER,"Command {0} in region {1}entering status {2}",new Object[]{getName(),region().toString(),status});
-			}
-			statusmonitor.notify();
-		}
-	}
 
 	/**
 	 * Get the events type
@@ -101,22 +83,6 @@ public abstract class Event {
 		return bot;
 	}
 
-	private void setType() {
-		if (this instanceof UDPEvent) {
-			type=UDP;
-			return;
-		}
-		if (this instanceof XMLEvent) {
-			type=XML;
-			return;
-		}
-		if (this instanceof CommandEvent) {
-			type=COMMAND;
-			return;
-		}
-		throw new IllegalArgumentException("This class "+getClass().getName()+" is not assignable from the expected types");
-	}
-
 	@Nonnull
 	@Override
 	public String toString() {
@@ -150,6 +116,43 @@ public abstract class Event {
 			if (status==COMPLETE) { return; }
 		}
 		throw new IllegalStateException("Command timed out in status "+status());
+	}
+
+	// ----- Internal Instance -----
+	void log(final Level level,
+	         final String message) {
+		log.log(level,message);
+	}
+
+	/**
+	 * Set the event's current status
+	 *
+	 * @param status the new status for this event
+	 */
+	void status(final STATUS status) {
+		synchronized (statusmonitor) {
+			this.status=status;
+			if (Debug.TRACKCOMMANDS && type==COMMAND) {
+				log.log(Level.FINER,"Command {0} in region {1}entering status {2}",new Object[]{getName(),region().toString(),status});
+			}
+			statusmonitor.notify();
+		}
+	}
+
+	private void setType() {
+		if (this instanceof UDPEvent) {
+			type=UDP;
+			return;
+		}
+		if (this instanceof XMLEvent) {
+			type=XML;
+			return;
+		}
+		if (this instanceof CommandEvent) {
+			type=COMMAND;
+			return;
+		}
+		throw new IllegalArgumentException("This class "+getClass().getName()+" is not assignable from the expected types");
 	}
 
 	/**

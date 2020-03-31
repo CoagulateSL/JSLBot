@@ -53,6 +53,7 @@ public class CnC extends Handler {
 		if (!homesick.isEmpty()) { bot.homeSickFor(homesick); }
 	}
 
+	// ----- Internal Statics -----
 	@Nonnull
 	private static Date parseRegionRestart(@Nonnull final String m) {
 		if (m.split("\n").length<2) { throw new IllegalArgumentException("Expected at least 2 lines of input"); }
@@ -68,6 +69,7 @@ public class CnC extends Handler {
 		return new Date(shutdown);
 	}
 
+	// ---------- INSTANCE ----------
 	public void alertMessageUDPDelayed(@Nonnull final UDPEvent event) {
 		final AlertMessage msg=(AlertMessage) event.body();
 		log.warning("Simulator "+event.region().circuit()+" sends Alert, data message: "+msg.balertdata.vmessage);
@@ -338,34 +340,6 @@ public class CnC extends Handler {
 		runCommands(from,source,message,prefix);
 	}
 
-	private String parseCommand(@Nonnull final String message,
-	                            @Nonnull final Map<String,String> paramsout1) {
-		final String[] parts=message.split(" ");
-		int index=0;
-		final String command=parts[0];
-		index++;
-		String keyword="";
-		String parameter="";
-		for (int i=index;i<parts.length;i++) {
-			if ("".equals(keyword)) {
-				keyword=parts[i];
-			}
-			else {
-				if (!"".equals(parameter)) { parameter+=" "; }
-				parameter+=parts[i];
-				if ((!parameter.startsWith("\"")) || (parameter.startsWith("\"") && parameter.endsWith("\""))) {
-					if (parameter.startsWith("\"")) {
-						parameter=parameter.substring(1,parameter.length()-1);
-					}
-					paramsout1.put(keyword,parameter);
-					keyword="";
-					parameter="";
-				}
-			}
-		}
-		return command;
-	}
-
 	public void enableSimulatorXMLImmediate(@Nonnull final XMLEvent event) {
 		final LLSDArray simulatorinfos=(LLSDArray) ((LLSDMap) event.body()).get("SimulatorInfo");
 		for (final Object m: simulatorinfos) {
@@ -401,41 +375,6 @@ public class CnC extends Handler {
 	public String quitCommand(final CommandEvent command) {
 		bot.shutdown("Instant Message instructed us to quit");
 		return "Shutting down as requested (this message will not be delivered)";
-	}
-
-	private void runCommands(final String from,
-	                         @Nonnull final LLUUID source,
-	                         @Nonnull String message,
-	                         @Nullable final String prefix) {
-		boolean prefixok=false;
-		if (prefix==null || prefix.isEmpty()) { prefixok=true; }
-		if (!prefixok) {
-			if (message.startsWith(prefix)) {
-				message=message.substring(prefix.length());
-				prefixok=true;
-			}
-		}
-		if (!prefixok) { return; }
-		log.info(source.toUUIDString()+" <"+from+"> invokes command "+message);
-		final Map<String,String> params=new HashMap<>();
-		final String keyword=parseCommand(message,params);
-		String response;
-		try {
-			final CommandEvent command=new CommandEvent(bot,bot.getRegional(),keyword,params,source);
-			command.invokerUsername(from);
-			command.invokerUUID(source);
-			response=bot.brain().auth(command);
-			if (response==null) { response=command.execute(); }
-		}
-		catch (@Nonnull final Exception e) {
-			log.log(WARNING,"CnC Subcommand exceptioned:"+e,e);
-			response="Exception:"+e;
-		}
-
-		if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
-		else {
-			if (!"".equals(response)) { bot.im(source,">> "+response); }
-		}
 	}
 
 	@Nonnull
@@ -525,22 +464,6 @@ public class CnC extends Handler {
 	public String whisperCommand(final CommandEvent event,
 	                             @Nonnull final String message) { return chat(0,message); }
 
-	@Nonnull
-	private String chat(final int messagetype,
-	                    @Nonnull final String message) { return chat(messagetype,0,message); }
-
-	@Nonnull
-	private String chat(final int messagetype,
-	                    final int channel,
-	                    @Nonnull final String message) {
-		final ChatFromViewer req=new ChatFromViewer(bot);
-		req.bchatdata.vtype=new U8(messagetype);
-		req.bchatdata.vchannel=new S32(channel);
-		req.bchatdata.vmessage=new Variable2(message);
-		bot.send(req,true);
-		return "0 - Sent";
-	}
-
 	@Override
 	public void maintenance() {
 		if (bot.homeSickFor()==null) { return; } // we dont get homesick
@@ -595,6 +518,86 @@ public class CnC extends Handler {
 		return "Bot now longs for home of '"+bot.homeSickFor()+"'";
 	}
 
+	// ----- Internal Instance -----
+	private String parseCommand(@Nonnull final String message,
+	                            @Nonnull final Map<String,String> paramsout1) {
+		final String[] parts=message.split(" ");
+		int index=0;
+		final String command=parts[0];
+		index++;
+		String keyword="";
+		String parameter="";
+		for (int i=index;i<parts.length;i++) {
+			if ("".equals(keyword)) {
+				keyword=parts[i];
+			}
+			else {
+				if (!"".equals(parameter)) { parameter+=" "; }
+				parameter+=parts[i];
+				if ((!parameter.startsWith("\"")) || (parameter.startsWith("\"") && parameter.endsWith("\""))) {
+					if (parameter.startsWith("\"")) {
+						parameter=parameter.substring(1,parameter.length()-1);
+					}
+					paramsout1.put(keyword,parameter);
+					keyword="";
+					parameter="";
+				}
+			}
+		}
+		return command;
+	}
+
+	private void runCommands(final String from,
+	                         @Nonnull final LLUUID source,
+	                         @Nonnull String message,
+	                         @Nullable final String prefix) {
+		boolean prefixok=false;
+		if (prefix==null || prefix.isEmpty()) { prefixok=true; }
+		if (!prefixok) {
+			if (message.startsWith(prefix)) {
+				message=message.substring(prefix.length());
+				prefixok=true;
+			}
+		}
+		if (!prefixok) { return; }
+		log.info(source.toUUIDString()+" <"+from+"> invokes command "+message);
+		final Map<String,String> params=new HashMap<>();
+		final String keyword=parseCommand(message,params);
+		String response;
+		try {
+			final CommandEvent command=new CommandEvent(bot,bot.getRegional(),keyword,params,source);
+			command.invokerUsername(from);
+			command.invokerUUID(source);
+			response=bot.brain().auth(command);
+			if (response==null) { response=command.execute(); }
+		}
+		catch (@Nonnull final Exception e) {
+			log.log(WARNING,"CnC Subcommand exceptioned:"+e,e);
+			response="Exception:"+e;
+		}
+
+		if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
+		else {
+			if (!"".equals(response)) { bot.im(source,">> "+response); }
+		}
+	}
+
+	@Nonnull
+	private String chat(final int messagetype,
+	                    @Nonnull final String message) { return chat(messagetype,0,message); }
+
+	@Nonnull
+	private String chat(final int messagetype,
+	                    final int channel,
+	                    @Nonnull final String message) {
+		final ChatFromViewer req=new ChatFromViewer(bot);
+		req.bchatdata.vtype=new U8(messagetype);
+		req.bchatdata.vchannel=new S32(channel);
+		req.bchatdata.vmessage=new Variable2(message);
+		bot.send(req,true);
+		return "0 - Sent";
+	}
+
 	class CircuitLauncher extends Thread {
 		final String numericip;
 		final int port;
@@ -609,6 +612,7 @@ public class CnC extends Handler {
 			this.handle=handle;
 		}
 
+		// ---------- INSTANCE ----------
 		public void run() {
 			try {
 				bot.createCircuit(numericip,port,handle,null);

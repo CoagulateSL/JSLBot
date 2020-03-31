@@ -76,6 +76,8 @@ public class LLSD extends Container {
 		}
 	}
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Format this document as XML/LLSD
 	 *

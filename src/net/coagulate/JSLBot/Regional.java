@@ -47,9 +47,8 @@ public class Regional {
 		circuit=c;
 	}
 
+	// ---------- INSTANCE ----------
 	public Circuit circuit() { return circuit; }
-
-	private JSLBot bot() { return circuit.bot(); }
 
 	public long handle() { return circuit.handle(); }
 
@@ -183,7 +182,6 @@ public class Regional {
 
 	public void setSunPhase(final float sunphase) { this.sunphase=sunphase; }
 
-
 	@Nonnull
 	public String dump() {
 		String d="";
@@ -196,6 +194,9 @@ public class Regional {
 	@Nonnull
 	@Override
 	public String toString() { return circuit+"/Regional"; }
+
+	// ----- Internal Instance -----
+	private JSLBot bot() { return circuit.bot(); }
 
 	public static class ParcelData {
 
@@ -237,6 +238,7 @@ public class Regional {
 			this.region=region;
 		}
 
+		// ---------- INSTANCE ----------
 		@Nonnull
 		@Override
 		public String toString() {

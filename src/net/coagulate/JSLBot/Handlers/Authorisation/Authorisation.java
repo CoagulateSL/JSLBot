@@ -23,7 +23,7 @@ public abstract class Authorisation {
 
 	protected Authorisation(@Nonnull final JSLBot bot) { initLogger(bot); }
 
-	private void initLogger(@Nonnull final JSLBot bot) {log=bot.getLogger("Authorisation."+getClass().getSimpleName());}
+	// ---------- INSTANCE ----------
 
 	/**
 	 * Returns null if approved, otherwise some explanative text
@@ -34,4 +34,7 @@ public abstract class Authorisation {
 	 */
 	@Nullable
 	public abstract String approve(CommandEvent event);
+
+	// ----- Internal Instance -----
+	private void initLogger(@Nonnull final JSLBot bot) {log=bot.getLogger("Authorisation."+getClass().getSimpleName());}
 }

@@ -56,6 +56,8 @@ public class LLCATruster implements X509TrustManager, HostnameVerifier {
 		}
 	}
 
+	// ---------- STATICS ----------
+
 	/**
 	 * Do not use the JSLBot LLCA Truster.  You will probably get SSL errors if you don't implement this yourself somehow.
 	 */
@@ -68,6 +70,7 @@ public class LLCATruster implements X509TrustManager, HostnameVerifier {
 		initialised=true;
 	}
 
+	// ---------- INSTANCE ----------
 	@Override
 	public boolean verify(final String string,
 	                      @Nonnull final SSLSession ssls) {

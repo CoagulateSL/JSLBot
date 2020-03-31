@@ -21,6 +21,7 @@ public class UDPEvent extends Event {
 		this.content=content;
 	}
 
+	// ---------- INSTANCE ----------
 	public Message body() { return content; }
 
 	@Override

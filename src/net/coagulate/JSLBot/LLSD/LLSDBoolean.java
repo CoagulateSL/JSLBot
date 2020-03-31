@@ -39,6 +39,7 @@ public class LLSDBoolean extends Atomic {
 		throw new AssertionError("Unexpected LLSDBoolean(Node) constructor argument '"+v+"'");
 	}
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {

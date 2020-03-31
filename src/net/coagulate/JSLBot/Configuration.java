@@ -11,6 +11,8 @@ import java.util.Set;
  */
 public abstract class Configuration {
 
+	// ---------- INSTANCE ----------
+
 	/**
 	 * Create a subspace inside this configuration.
 	 * By applying a common prefix to all the subspace methods, a hierarchical structure of preferences (in 'folders' if you like) can be constructed.

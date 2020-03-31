@@ -120,14 +120,7 @@ public final class Circuit extends Thread implements Closeable {
 		regionhandle=passedregionhandle;
 	}
 
-	@Nonnull
-	private InetSocketAddress address() {
-		if (address==null) {
-			throw new IllegalStateException("Attempting to get circuit socket address but it's null, weirdly");
-		}
-		return address;
-	}
-
+	// ---------- INSTANCE ----------
 	public String getRegionName() { return regionname; }
 
 	// Get the CAPS object attached to this circuit's region
@@ -255,23 +248,9 @@ public final class Circuit extends Thread implements Closeable {
 		bot.deregisterCircuit(regionhandle,this);
 	}
 
-	/**
-	 * When the last ack packet was sent, as an interval from now.
-	 *
-	 * @return How long ago last acks were sent, in milliseconds
-	 */
-	private long lastAck() {
-		return new Date().getTime()-lastacks.getTime();
-	}
-
-	/**
-	 * When maintenance last ran, as an interval from now
-	 *
-	 * @return How long ago maintenance last ran, in milliseconds
-	 */
-	private long lastMaintenance() {
-		return new Date().getTime()-lastmaintenance.getTime();
-	}
+	@Nonnull
+	@Override
+	public String toString() { return getRegionName()+"#"+circuitsequence; }
 
 	/**
 	 * Add a packet to the list to send ACKs for
@@ -281,77 +260,6 @@ public final class Circuit extends Thread implements Closeable {
 	public void requiresAck(final Packet p) {
 		synchronized (inflight) {
 			inflight.put(p,new Date());
-		}
-	}
-
-	/**
-	 * Handle a received ACK
-	 */
-	private void receivedAck(final int seqno) {
-		Packet match=null;
-		synchronized (inflight) {
-			for (final Packet p: inflight.keySet()) {
-				if (p.getSequence()==seqno) { match=p; }
-			}
-			if (match==null) {
-				log.log(Level.FINE,"Unexpected ACK {0}",seqno);
-				return;
-			}
-			inflight.remove(match);
-			inflight.notifyAll();
-		}
-	}
-
-	/**
-	 * Run maintenance tasks
-	 */
-	private void maintenance() {
-		final long interval=new Date().getTime()-lastpacket.getTime();
-		if (interval>(Constants.CIRCUIT_PING*1000)) {
-			if (!pinged) {
-				pinged=true;
-				log.log(Level.FINE,"Circuit silent for more than {0} seconds, sending ping.",Constants.CIRCUIT_PING);
-				final StartPingCheck ping=new StartPingCheck();
-				send(ping,true);
-			}
-		}
-		else { pinged=false; } // ping when crossing threshold.  once.  reset threshold detection here.
-		if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) {
-			disconnectlogged=true;
-			log.log(SEVERE,"Circuit has received no packets in {0} seconds, closing.",Constants.CIRCUIT_TIMEOUT);
-			close();
-			return;
-		}
-		// polled every 2.5s
-		maintenancecounter++;
-		lastmaintenance=new Date();
-		if ((maintenancecounter%12)==0) {
-			// trim the list of remember transmissions, if they didn't send after 60 seconds they're dead.
-			synchronized (acked) {
-				final Set<Integer> removeme=new HashSet<>();
-				for (final Map.Entry<Integer,Date> entry: acked.entrySet()) {
-					if (((new Date().getTime())-(entry.getValue().getTime()))>60000) {
-						removeme.add(entry.getKey()); // can't remove while iterating, concurrent mod exception
-					}
-				}
-				for (final int seq: removeme) {
-					acked.remove(seq);
-				}
-			}
-		}
-		synchronized (inflight) {
-			for (final Map.Entry<Packet,Date> entry: inflight.entrySet()) {
-				final Packet p=entry.getKey();
-				// retransmit any packets that haven't been acked in a while
-				final Date sent=entry.getValue();
-				if (packetrate<5 && ((new Date().getTime())-(sent.getTime()))>Constants.ACK_TIMEOUT) {
-					//System.out.println("In retransmit with packetrate "+packetrate);
-					log.finer("Retransmitting packet "+p.getSequence());
-					p.setResent(true);
-					send(p);
-					inflight.put(p,new Date());
-				}
-			}
 		}
 	}
 
@@ -489,6 +397,149 @@ public final class Circuit extends Thread implements Closeable {
 			log.log(Level.FINE,"We have requested closure of circuit to {0}",regionname);
 		}
 		disconnected=true;
+	}
+
+	public long handle() {
+		return regionhandle;
+	}
+
+	public JSLBot bot() {
+		return bot;
+	}
+
+	@Nonnull
+	public Regional regional() {
+		if (regional==null) {
+			throw new NullPointerException("Regional information not established for this circuit yet");
+		}
+		return regional;
+	}
+
+	/**
+	 * Fire up CAPS for this simulator.
+	 * Avoid replacing existing caps with a duplicate, log if we're replacing a non duplicate...
+	 *
+	 * @param newcapsurl The new CAPS url
+	 */
+	public void connectCAPS(final String newcapsurl) {
+		if (caps!=null && caps.eventqueue()!=null && caps.eventqueue().isAlive()) {
+			if (capsurl!=null && capsurl.equals(newcapsurl)) {
+				if (Debug.EVENTQUEUE) {
+					log.fine("Passed duplicate of existing CAPS url, not reconnecting anything");
+					return;
+				}
+			}
+			if (Debug.EVENTQUEUE) {
+				log.info("Passed DIFFERENT caps URL to existing CAPS url which is still alive?");
+				return;
+			}
+		}
+		capsurl=newcapsurl;
+		if (Debug.EVENTQUEUE) { log.log(Level.INFO,"Establishing connection to CAPS for region {0}",getRegionName()); }
+		caps=new CAPS(this,newcapsurl);
+		caps.start();
+	}
+
+	public Logger getLogger(final String subspace) {
+		return Logger.getLogger(log.getName()+"."+subspace);
+	}
+
+	// ----- Internal Instance -----
+	@Nonnull
+	private InetSocketAddress address() {
+		if (address==null) {
+			throw new IllegalStateException("Attempting to get circuit socket address but it's null, weirdly");
+		}
+		return address;
+	}
+
+	/**
+	 * When the last ack packet was sent, as an interval from now.
+	 *
+	 * @return How long ago last acks were sent, in milliseconds
+	 */
+	private long lastAck() {
+		return new Date().getTime()-lastacks.getTime();
+	}
+
+	/**
+	 * When maintenance last ran, as an interval from now
+	 *
+	 * @return How long ago maintenance last ran, in milliseconds
+	 */
+	private long lastMaintenance() {
+		return new Date().getTime()-lastmaintenance.getTime();
+	}
+
+	/**
+	 * Handle a received ACK
+	 */
+	private void receivedAck(final int seqno) {
+		Packet match=null;
+		synchronized (inflight) {
+			for (final Packet p: inflight.keySet()) {
+				if (p.getSequence()==seqno) { match=p; }
+			}
+			if (match==null) {
+				log.log(Level.FINE,"Unexpected ACK {0}",seqno);
+				return;
+			}
+			inflight.remove(match);
+			inflight.notifyAll();
+		}
+	}
+
+	/**
+	 * Run maintenance tasks
+	 */
+	private void maintenance() {
+		final long interval=new Date().getTime()-lastpacket.getTime();
+		if (interval>(Constants.CIRCUIT_PING*1000)) {
+			if (!pinged) {
+				pinged=true;
+				log.log(Level.FINE,"Circuit silent for more than {0} seconds, sending ping.",Constants.CIRCUIT_PING);
+				final StartPingCheck ping=new StartPingCheck();
+				send(ping,true);
+			}
+		}
+		else { pinged=false; } // ping when crossing threshold.  once.  reset threshold detection here.
+		if (interval>(Constants.CIRCUIT_TIMEOUT*1000)) {
+			disconnectlogged=true;
+			log.log(SEVERE,"Circuit has received no packets in {0} seconds, closing.",Constants.CIRCUIT_TIMEOUT);
+			close();
+			return;
+		}
+		// polled every 2.5s
+		maintenancecounter++;
+		lastmaintenance=new Date();
+		if ((maintenancecounter%12)==0) {
+			// trim the list of remember transmissions, if they didn't send after 60 seconds they're dead.
+			synchronized (acked) {
+				final Set<Integer> removeme=new HashSet<>();
+				for (final Map.Entry<Integer,Date> entry: acked.entrySet()) {
+					if (((new Date().getTime())-(entry.getValue().getTime()))>60000) {
+						removeme.add(entry.getKey()); // can't remove while iterating, concurrent mod exception
+					}
+				}
+				for (final int seq: removeme) {
+					acked.remove(seq);
+				}
+			}
+		}
+		synchronized (inflight) {
+			for (final Map.Entry<Packet,Date> entry: inflight.entrySet()) {
+				final Packet p=entry.getKey();
+				// retransmit any packets that haven't been acked in a while
+				final Date sent=entry.getValue();
+				if (packetrate<5 && ((new Date().getTime())-(sent.getTime()))>Constants.ACK_TIMEOUT) {
+					//System.out.println("In retransmit with packetrate "+packetrate);
+					log.finer("Retransmitting packet "+p.getSequence());
+					p.setResent(true);
+					send(p);
+					inflight.put(p,new Date());
+				}
+			}
+		}
 	}
 
 	/**
@@ -634,55 +685,6 @@ public final class Circuit extends Thread implements Closeable {
 			new UDPEvent(bot,r,m,m.getName()).submit();
 		}
 
-	}
-
-	public long handle() {
-		return regionhandle;
-	}
-
-	public JSLBot bot() {
-		return bot;
-	}
-
-	@Nonnull
-	public Regional regional() {
-		if (regional==null) {
-			throw new NullPointerException("Regional information not established for this circuit yet");
-		}
-		return regional;
-	}
-
-	/**
-	 * Fire up CAPS for this simulator.
-	 * Avoid replacing existing caps with a duplicate, log if we're replacing a non duplicate...
-	 *
-	 * @param newcapsurl The new CAPS url
-	 */
-	public void connectCAPS(final String newcapsurl) {
-		if (caps!=null && caps.eventqueue()!=null && caps.eventqueue().isAlive()) {
-			if (capsurl!=null && capsurl.equals(newcapsurl)) {
-				if (Debug.EVENTQUEUE) {
-					log.fine("Passed duplicate of existing CAPS url, not reconnecting anything");
-					return;
-				}
-			}
-			if (Debug.EVENTQUEUE) {
-				log.info("Passed DIFFERENT caps URL to existing CAPS url which is still alive?");
-				return;
-			}
-		}
-		capsurl=newcapsurl;
-		if (Debug.EVENTQUEUE) { log.log(Level.INFO,"Establishing connection to CAPS for region {0}",getRegionName()); }
-		caps=new CAPS(this,newcapsurl);
-		caps.start();
-	}
-
-	@Nonnull
-	@Override
-	public String toString() { return getRegionName()+"#"+circuitsequence; }
-
-	public Logger getLogger(final String subspace) {
-		return Logger.getLogger(log.getName()+"."+subspace);
 	}
 
 }

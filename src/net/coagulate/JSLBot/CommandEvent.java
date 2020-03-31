@@ -48,6 +48,7 @@ public class CommandEvent extends Event {
 		this.respondto=respondto;
 	}
 
+	// ---------- INSTANCE ----------
 	public Map<String,String> parameters() {return parameters;}
 
 	public LLUUID respondTo() { return respondto; }
@@ -56,12 +57,6 @@ public class CommandEvent extends Event {
 
 	@Nullable
 	public String response() { return response; }
-
-	void response(@Nullable final String response) { this.response=response; }
-
-	private void immediate(final boolean immediate) { this.immediate=immediate; }
-
-	boolean immediate() { return immediate; }
 
 	@Nullable
 	public String invokerUsername() { return invokerusername; }
@@ -127,6 +122,11 @@ public class CommandEvent extends Event {
 		return bot().brain().execute(this);
 	}
 
+	// ----- Internal Instance -----
+	void response(@Nullable final String response) { this.response=response; }
+
+	boolean immediate() { return immediate; }
+
 	@Nullable
 	String run(@Nonnull final Object callon,
 	           @Nonnull final Method handler) {
@@ -147,6 +147,7 @@ public class CommandEvent extends Event {
 		}
 	}
 
+	private void immediate(final boolean immediate) { this.immediate=immediate; }
 
 	@Nonnull
 	private List<Object> getParameters(@Nonnull final Method method) {

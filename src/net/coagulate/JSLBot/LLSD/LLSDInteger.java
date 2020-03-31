@@ -23,6 +23,7 @@ public class LLSDInteger extends Atomic {
 		value=Integer.parseInt(str);
 	}
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {

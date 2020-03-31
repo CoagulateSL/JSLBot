@@ -19,6 +19,7 @@ public class ConfigurationSubspace extends Configuration {
 		p=prefix;
 	}
 
+	// ---------- INSTANCE ----------
 	@Nullable
 	@Override
 	public String get(final String param) {
@@ -32,17 +33,17 @@ public class ConfigurationSubspace extends Configuration {
 	}
 
 	@Override
+	public Set<String> get() {
+		return getMaster().get();
+	}
+
+	@Override
 	public String dump() {
 		return c.dump();
 	}
 
 	@Override
 	public Configuration getMaster() {return c;}
-
-	@Override
-	public Set<String> get() {
-		return getMaster().get();
-	}
 
 	@Override
 	public boolean persistent() { return getMaster().persistent(); }

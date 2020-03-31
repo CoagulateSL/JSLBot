@@ -49,6 +49,69 @@ public class Brain {
 		brain=new HashSet<>();
 	}
 
+	// ---------- INSTANCE ----------
+
+	/**
+	 * Get a method from a command name.
+	 *
+	 * @param name Command name (without suffix)
+	 *
+	 * @return Command's implementing method
+	 */
+	public Method getCommand(final String name) {
+		return commandmap.get((name+"command").toLowerCase());
+	}
+
+	/**
+	 * Get all commands.
+	 *
+	 * @return A set of the command names in the map.  Note these have the 'command' suffix.
+	 */
+	@Nonnull
+	public Set<String> getCommands() {
+		return new HashSet<>(commandmap.keySet());
+	}
+
+	// what passes for an API :P
+	@Nullable
+	public String execute(@Nonnull final Event event) { return execute(event,true); }
+
+	public void queue(final Event event) {
+		synchronized (queue) {
+			queue.add(event);
+			queue.notifyAll();
+		}
+	}
+
+	/**
+	 * Set the authorisation module.
+	 *
+	 * @param auth New module
+	 */
+	public void setAuth(@Nullable final Authorisation auth) {
+		if (auth==null) { this.auth=new DenyAll(bot); }
+		else { this.auth=auth; }
+	}
+
+	/**
+	 * Check authorisation for an event.
+	 *
+	 * @param event Event to check
+	 *
+	 * @return null if approved, otherwise rejection reason
+	 *
+	 * @see Authorisation
+	 */
+	@Nullable
+	public String auth(final CommandEvent event) {
+		return auth.approve(event);
+	}
+
+	@Nonnull
+	@Override
+	public String toString() { return bot+"/Brain"; }
+
+	// ----- Internal Instance -----
 	boolean isEmpty() {return brain.isEmpty();}
 
 	/**
@@ -73,6 +136,109 @@ public class Brain {
 		for (final String handler: handlers) {
 			loadHandler(handler);
 		}
+	}
+
+	/**
+	 * Process Delayed event queue.
+	 * Called by, and only by, the BOT AI Thread.
+	 * Sleeps, if procrastinating (not shutting down) for a defined delay.
+	 * Pops an event off the queue if one is available and executes it as delayed mode execution (does not requeue event but runs in THIS thread)
+	 */
+	void think() {
+		Event event=null;
+		synchronized (queue) {
+			if (queue.isEmpty() && procrastinate) {
+				Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating");
+				try {
+					queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS);
+				}
+				catch (@Nonnull final InterruptedException iex) {}
+			}
+			if (!queue.isEmpty()) { event=queue.remove(0); }
+		}
+		if (event!=null) { execute(event,false); }
+		callMaintenance();
+	}
+
+	/**
+	 * Stops the brain procrastinating waiting for events.
+	 * Basically called during bot shutdown, we will stop the sleep-for-event behaviour, and wake up any sleeping threads.
+	 * Any trapped threads, or new calls to think() will thus be released immediately (though perhaps after running an event...)
+	 * <p>
+	 * Make sure the bot really is quitting otherwise you'll drive the event queue thread into a CPU consuming tight loop.
+	 */
+	void stopProcrastinating() {
+		procrastinate=false;
+		synchronized (queue) { queue.notifyAll(); }
+	}
+
+	/**
+	 * Tell handlers we are logged in.
+	 * Some handlers will generate events such as "query balance" etc
+	 */
+	void loggedIn() {
+		for (final Handler h: brain) {
+			try { h.loggedIn(); }
+			catch (@Nonnull final Exception e) {
+				log.log(SEVERE,"Handler "+h+" exceptioned handling login",e);
+			}
+		}
+	}
+
+	/**
+	 * Call on every login loop.
+	 * Makes sure we dont get stuck in a rapidly spamming loop.  See Constants.java for the config.
+	 */
+	void loginLoopSafety() {
+		// if we have any null slots then we didn't even launch MAX times yet
+		for (int i=0;i<launches.length;i++) {
+			if (launches[i]==null) {
+				log.info("Reconnection Safety: We have not yet launched 5 times");
+				launches[i]=new Date();
+				return;// use slot, return OK
+			}
+		}
+		// not not any null slots, whats the oldest timer?
+		Date oldest=null;
+		for (final Date d: launches) {
+			if (oldest==null) { oldest=d; }
+			else { if (d.before(oldest)) { oldest=d; } }
+		}
+		if (oldest==null) {
+			throw new AssertionError("How is oldest null at this point?  if null we should have hit 'launched less than 5 times'");
+		}
+		final long ago=new Date().getTime()-oldest.getTime();
+		final int secondsago=(int) (ago/1000f);
+		log.info("Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
+		if (ago<(Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS)) {
+			log.severe("Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");
+			loginLoopSafetyViolation();
+			return; // if we get here.
+		}
+		// otherwise, overwrite oldest date with now and continue
+		for (int i=0;i<launches.length;i++) {
+			if (launches[i]==oldest) {
+				launches[i]=new Date();
+				return;
+			}
+		}
+		// should never get here
+		throw new AssertionError("An oldest launch time was found in pass #1, but could not be found to be replaced in pass #2");
+	}
+
+	/**
+	 * Get a handler by name.
+	 *
+	 * @param name Name of handler
+	 *
+	 * @return Handler if found, otherwise exception.
+	 */
+	@Nonnull
+	Handler getHandler(final String name) {
+		for (final Handler h: brain) {
+			if (h.getClass().getSimpleName().equals(name)) { return h; }
+		}
+		throw new IllegalArgumentException("No handler called '"+name+"' is loaded");
 	}
 
 	/**
@@ -125,27 +291,6 @@ public class Brain {
 	}
 
 	/**
-	 * Get a method from a command name.
-	 *
-	 * @param name Command name (without suffix)
-	 *
-	 * @return Command's implementing method
-	 */
-	public Method getCommand(final String name) {
-		return commandmap.get((name+"command").toLowerCase());
-	}
-
-	/**
-	 * Get all commands.
-	 *
-	 * @return A set of the command names in the map.  Note these have the 'command' suffix.
-	 */
-	@Nonnull
-	public Set<String> getCommands() {
-		return new HashSet<>(commandmap.keySet());
-	}
-
-	/**
 	 * Instansiate a handler.
 	 *
 	 * @param name Class name
@@ -183,17 +328,6 @@ public class Brain {
 		final char[] c=method.toCharArray();
 		c[0]=Character.toLowerCase(c[0]);
 		return new String(c);
-	}
-
-	// what passes for an API :P
-	@Nullable
-	public String execute(@Nonnull final Event event) { return execute(event,true); }
-
-	public void queue(final Event event) {
-		synchronized (queue) {
-			queue.add(event);
-			queue.notifyAll();
-		}
 	}
 
 	/**
@@ -336,53 +470,6 @@ public class Brain {
 		handlermap.put(fen,methods);
 	}
 
-	/**
-	 * Process Delayed event queue.
-	 * Called by, and only by, the BOT AI Thread.
-	 * Sleeps, if procrastinating (not shutting down) for a defined delay.
-	 * Pops an event off the queue if one is available and executes it as delayed mode execution (does not requeue event but runs in THIS thread)
-	 */
-	void think() {
-		Event event=null;
-		synchronized (queue) {
-			if (queue.isEmpty() && procrastinate) {
-				Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating");
-				try {
-					queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS);
-				}
-				catch (@Nonnull final InterruptedException iex) {}
-			}
-			if (!queue.isEmpty()) { event=queue.remove(0); }
-		}
-		if (event!=null) { execute(event,false); }
-		callMaintenance();
-	}
-
-	/**
-	 * Stops the brain procrastinating waiting for events.
-	 * Basically called during bot shutdown, we will stop the sleep-for-event behaviour, and wake up any sleeping threads.
-	 * Any trapped threads, or new calls to think() will thus be released immediately (though perhaps after running an event...)
-	 * <p>
-	 * Make sure the bot really is quitting otherwise you'll drive the event queue thread into a CPU consuming tight loop.
-	 */
-	void stopProcrastinating() {
-		procrastinate=false;
-		synchronized (queue) { queue.notifyAll(); }
-	}
-
-	/**
-	 * Tell handlers we are logged in.
-	 * Some handlers will generate events such as "query balance" etc
-	 */
-	void loggedIn() {
-		for (final Handler h: brain) {
-			try { h.loggedIn(); }
-			catch (@Nonnull final Exception e) {
-				log.log(SEVERE,"Handler "+h+" exceptioned handling login",e);
-			}
-		}
-	}
-
 	private void callMaintenance() {
 		for (final Handler h: brain) {
 			try {h.maintenance();}
@@ -390,47 +477,6 @@ public class Brain {
 				log.log(SEVERE,"Handler "+h+" exceptioned during maintenance",e);
 			}
 		}
-	}
-
-	/**
-	 * Call on every login loop.
-	 * Makes sure we dont get stuck in a rapidly spamming loop.  See Constants.java for the config.
-	 */
-	void loginLoopSafety() {
-		// if we have any null slots then we didn't even launch MAX times yet
-		for (int i=0;i<launches.length;i++) {
-			if (launches[i]==null) {
-				log.info("Reconnection Safety: We have not yet launched 5 times");
-				launches[i]=new Date();
-				return;// use slot, return OK
-			}
-		}
-		// not not any null slots, whats the oldest timer?
-		Date oldest=null;
-		for (final Date d: launches) {
-			if (oldest==null) { oldest=d; }
-			else { if (d.before(oldest)) { oldest=d; } }
-		}
-		if (oldest==null) {
-			throw new AssertionError("How is oldest null at this point?  if null we should have hit 'launched less than 5 times'");
-		}
-		final long ago=new Date().getTime()-oldest.getTime();
-		final int secondsago=(int) (ago/1000f);
-		log.info("Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
-		if (ago<(Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS)) {
-			log.severe("Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");
-			loginLoopSafetyViolation();
-			return; // if we get here.
-		}
-		// otherwise, overwrite oldest date with now and continue
-		for (int i=0;i<launches.length;i++) {
-			if (launches[i]==oldest) {
-				launches[i]=new Date();
-				return;
-			}
-		}
-		// should never get here
-		throw new AssertionError("An oldest launch time was found in pass #1, but could not be found to be replaced in pass #2");
 	}
 
 	/**
@@ -447,49 +493,6 @@ public class Brain {
 			try { Thread.sleep(60000); } catch (@Nonnull final InterruptedException e) {}
 		}
 		log.warning("Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
-	}
-
-	/**
-	 * Set the authorisation module.
-	 *
-	 * @param auth New module
-	 */
-	public void setAuth(@Nullable final Authorisation auth) {
-		if (auth==null) { this.auth=new DenyAll(bot); }
-		else { this.auth=auth; }
-	}
-
-	/**
-	 * Check authorisation for an event.
-	 *
-	 * @param event Event to check
-	 *
-	 * @return null if approved, otherwise rejection reason
-	 *
-	 * @see Authorisation
-	 */
-	@Nullable
-	public String auth(final CommandEvent event) {
-		return auth.approve(event);
-	}
-
-	@Nonnull
-	@Override
-	public String toString() { return bot+"/Brain"; }
-
-	/**
-	 * Get a handler by name.
-	 *
-	 * @param name Name of handler
-	 *
-	 * @return Handler if found, otherwise exception.
-	 */
-	@Nonnull
-	Handler getHandler(final String name) {
-		for (final Handler h: brain) {
-			if (h.getClass().getSimpleName().equals(name)) { return h; }
-		}
-		throw new IllegalArgumentException("No handler called '"+name+"' is loaded");
 	}
 
 }

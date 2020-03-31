@@ -14,6 +14,7 @@ public class Sink extends Handler {
 	public Sink(@Nonnull final JSLBot bot,
 	            final Configuration c) {super(bot,c);}
 
+	// ---------- INSTANCE ----------
 	public void simStatsUDPDelayed(final UDPEvent event) {}
 
 	public void avatarAppearanceUDPDelayed(final UDPEvent event) {}

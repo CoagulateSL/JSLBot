@@ -32,6 +32,7 @@ public class Regions extends Handler {
 	public Regions(@Nonnull final JSLBot bot,
 	               final Configuration conf) { super(bot,conf); }
 
+	// ---------- INSTANCE ----------
 	@CmdHelp(description="Look up a region handle from a region name")
 	public String regionLookupCommand(final CommandEvent command,
 	                                  @Nullable @ParamHelp(description="Name of region to lookup") final String name) {

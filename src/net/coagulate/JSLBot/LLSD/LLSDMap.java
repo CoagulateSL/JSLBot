@@ -32,6 +32,7 @@ public class LLSDMap extends Container {
 	}
 
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String prefix) {

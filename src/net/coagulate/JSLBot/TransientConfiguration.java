@@ -15,6 +15,7 @@ public class TransientConfiguration extends Configuration {
 	// our transient store
 	private final Map<String,String> kv=new HashMap<>();
 
+	// ---------- INSTANCE ----------
 	@Nullable
 	@Override
 	public String get(final String param) {
@@ -30,6 +31,12 @@ public class TransientConfiguration extends Configuration {
 
 	@Nonnull
 	@Override
+	public Set<String> get() {
+		return kv.keySet();
+	}
+
+	@Nonnull
+	@Override
 	public String dump() {
 		String response="";
 		for (final Map.Entry<String,String> entry: kv.entrySet()) {
@@ -37,12 +44,6 @@ public class TransientConfiguration extends Configuration {
 			response+=entry.getKey()+"="+entry.getValue();
 		}
 		return response;
-	}
-
-	@Nonnull
-	@Override
-	public Set<String> get() {
-		return kv.keySet();
 	}
 
 	@Override

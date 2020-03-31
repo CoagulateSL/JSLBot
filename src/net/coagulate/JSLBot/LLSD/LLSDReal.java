@@ -21,6 +21,7 @@ public class LLSDReal extends Atomic {
 		value=Float.parseFloat(item.getTextContent());
 	}
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {

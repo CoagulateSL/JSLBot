@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
  */
 public abstract class Atomic {
 
+	// ----- Internal Statics -----
 	@Nullable
 	static Atomic create(@Nonnull final Node item) {
 		final String type=item.getNodeName();
@@ -28,6 +29,7 @@ public abstract class Atomic {
 		throw new AssertionError("Unknown LLSD type "+type);
 	}
 
+	// ---------- INSTANCE ----------
 	@Nonnull
 	public String toXML() { return toXML(""); }
 

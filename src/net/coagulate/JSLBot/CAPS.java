@@ -50,14 +50,7 @@ public final class CAPS extends Thread {
 		this.circuit=circuit;
 	}
 
-	@Nonnull
-	private LLSDMap capabilities() {
-		if (capabilities==null) { throw new IllegalStateException("Accessing capabilities before it is ready"); }
-		return capabilities;
-	}
-
-	@Nullable
-	EventQueue eventqueue() { return eq; }
+	// ---------- INSTANCE ----------
 
 	/**
 	 * Initialises and launches the event queue, in a background thread
@@ -73,60 +66,9 @@ public final class CAPS extends Thread {
 		}
 	}
 
-	/**
-	 * Initialise the CAPS - download the CAPS list from the server
-	 */
-	private void initialise() throws IOException {
-		final LLSDArray req=BotUtils.getCAPSArray();
-		final LLSD getcaps=new LLSD(req);
-		capabilities=invokeXML(caps,getcaps);
-	}
-
-	/**
-	 * Launch the event queue driver, if the CAPS exists, which it should
-	 */
-	private synchronized void launchEventQueue() {
-		if (launched) {return; }
-		launched=true;
-		if (capabilities().containsKey("EventQueueGet")) {
-			eq=new EventQueue(this,capabilities().get("EventQueueGet").toString());
-			eq.setDaemon(true);
-			eq.start();
-			log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");
-		}
-		else {
-			log.severe("CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we "
-					           +"are"+" bound to the present sim.  This is neither normal or expected behaviour.");
-		}
-	}
-
-	/**
-	 * Run a CAPS getDisplayNames event for a given UUID.
-	 * Does /not/ use the cache, internal use only!
-	 *
-	 * @param agentid agent to lookup
-	 *
-	 * @throws MalformedURLException caps problem
-	 * @throws IOException           caps problem
-	 */
-	void getNames(@Nonnull final LLUUID agentid) throws MalformedURLException, IOException {
-		final LLSDMap map=invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
-		if (map==null) { throw new IOException("getDisplayNames CAP returned a null map"); }
-		final LLSDArray agents=(LLSDArray) map.get("agents");
-		for (final Object agento: agents) {
-			final LLSDMap agent=(LLSDMap) agento;
-			//System.out.println(agent.toXML());
-			final LLSDUUID describedagent=(LLSDUUID) agent.get("id");
-			final LLSDString displayname=(LLSDString) agent.get("display_name");
-			final LLSDString firstname=(LLSDString) agent.get("legacy_first_name");
-			final LLSDString lastname=(LLSDString) agent.get("legacy_last_name");
-			final LLSDString username=(LLSDString) agent.get("username");
-			Global.displayName(describedagent.toLLUUID(),displayname.toString());
-			Global.firstName(describedagent.toLLUUID(),firstname.toString());
-			Global.lastName(describedagent.toLLUUID(),lastname.toString());
-			Global.userName(describedagent.toLLUUID(),username.toString());
-		}
-	}
+	@Nonnull
+	@Override
+	public String toString() { return circuit+" / CAPS"; }
 
 	/**
 	 * Call a specific cap, with a suffix and an optional document.
@@ -193,19 +135,80 @@ public final class CAPS extends Thread {
 		return (LLSDMap) new LLSD(read).getFirst();
 	}
 
+	public String regionName() { return circuit.getRegionName(); }
+
+	public Logger getLogger(final String subspace) {
+		return Logger.getLogger(log.getName()+"."+subspace);
+	}
+
+	// ----- Internal Instance -----
+	@Nullable
+	EventQueue eventqueue() { return eq; }
+
+	/**
+	 * Run a CAPS getDisplayNames event for a given UUID.
+	 * Does /not/ use the cache, internal use only!
+	 *
+	 * @param agentid agent to lookup
+	 *
+	 * @throws MalformedURLException caps problem
+	 * @throws IOException           caps problem
+	 */
+	void getNames(@Nonnull final LLUUID agentid) throws MalformedURLException, IOException {
+		final LLSDMap map=invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
+		if (map==null) { throw new IOException("getDisplayNames CAP returned a null map"); }
+		final LLSDArray agents=(LLSDArray) map.get("agents");
+		for (final Object agento: agents) {
+			final LLSDMap agent=(LLSDMap) agento;
+			//System.out.println(agent.toXML());
+			final LLSDUUID describedagent=(LLSDUUID) agent.get("id");
+			final LLSDString displayname=(LLSDString) agent.get("display_name");
+			final LLSDString firstname=(LLSDString) agent.get("legacy_first_name");
+			final LLSDString lastname=(LLSDString) agent.get("legacy_last_name");
+			final LLSDString username=(LLSDString) agent.get("username");
+			Global.displayName(describedagent.toLLUUID(),displayname.toString());
+			Global.firstName(describedagent.toLLUUID(),firstname.toString());
+			Global.lastName(describedagent.toLLUUID(),lastname.toString());
+			Global.userName(describedagent.toLLUUID(),username.toString());
+		}
+	}
+
 	@Nonnull
 	Circuit circuit() {
 		return circuit;
 	}
 
-	public String regionName() { return circuit.getRegionName(); }
-
 	@Nonnull
-	@Override
-	public String toString() { return circuit+" / CAPS"; }
+	private LLSDMap capabilities() {
+		if (capabilities==null) { throw new IllegalStateException("Accessing capabilities before it is ready"); }
+		return capabilities;
+	}
 
-	public Logger getLogger(final String subspace) {
-		return Logger.getLogger(log.getName()+"."+subspace);
+	/**
+	 * Initialise the CAPS - download the CAPS list from the server
+	 */
+	private void initialise() throws IOException {
+		final LLSDArray req=BotUtils.getCAPSArray();
+		final LLSD getcaps=new LLSD(req);
+		capabilities=invokeXML(caps,getcaps);
+	}
+
+	/**
+	 * Launch the event queue driver, if the CAPS exists, which it should
+	 */
+	private synchronized void launchEventQueue() {
+		if (launched) {return; }
+		launched=true;
+		if (capabilities().containsKey("EventQueueGet")) {
+			eq=new EventQueue(this,capabilities().get("EventQueueGet").toString());
+			eq.setDaemon(true);
+			eq.start();
+			log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");
+		}
+		else {
+			log.severe("CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we "
+					           +"are"+" bound to the present sim.  This is neither normal or expected behaviour.");
+		}
 	}
 
 }

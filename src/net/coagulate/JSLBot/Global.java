@@ -20,6 +20,56 @@ public final class Global {
 	private static final Map<LLUUID,String> usernames=new HashMap<>();
 	private static final Map<Long,String> regionnames=new HashMap<>();
 
+	// ---------- STATICS ----------
+
+	/**
+	 * Look up a region name via the cache
+	 *
+	 * @param handle Long region handle to look up
+	 *
+	 * @return The name of the region attached.
+	 */
+	public static String regionName(final Long handle) {
+		synchronized (regionnames) {
+			return regionnames.get(handle);
+		}
+	}
+
+	/**
+	 * Set a region name in the cache
+	 *
+	 * @param handle Long region handle to cache
+	 * @param name   Region name for the handle
+	 */
+	public static void regionName(@Nullable final Long handle,
+	                              @Nullable final String name) {
+		if (handle!=null && name!=null && (!name.isEmpty())) {
+			synchronized (regionnames) { regionnames.put(handle,name); }
+		}
+	}
+
+	/**
+	 * Look up a region handle in the cache
+	 *
+	 * @param name Name of the region to look up
+	 *
+	 * @return Long region handle
+	 */
+	@Nullable
+	public static Long regionHandle(final String name) {
+		synchronized (regionnames) {
+			for (final Map.Entry<Long,String> entry: regionnames.entrySet()) {
+				if (entry.getValue().equalsIgnoreCase(name)) { return entry.getKey(); }
+			}
+		}
+		return null;
+	}
+
+	// this would be much better if we factoried the UUIDs and could just use == (i.e. "xxx.get(LLUUID)" directly
+	// maybe we can, this fault was never well tested.
+
+	// ----- Internal Statics -----
+
 	/**
 	 * Cache a last name
 	 */
@@ -37,9 +87,6 @@ public final class Global {
 	 */
 	static void displayName(final LLUUID uuid,
 	                        final String displayname) { synchronized (displaynames) { displaynames.put(uuid,displayname); } }
-
-	// this would be much better if we factoried the UUIDs and could just use == (i.e. "xxx.get(LLUUID)" directly
-	// maybe we can, this fault was never well tested.
 
 	/**
 	 * Cache a username
@@ -97,48 +144,5 @@ public final class Global {
 			}
 			return null;
 		}
-	}
-
-	/**
-	 * Look up a region name via the cache
-	 *
-	 * @param handle Long region handle to look up
-	 *
-	 * @return The name of the region attached.
-	 */
-	public static String regionName(final Long handle) {
-		synchronized (regionnames) {
-			return regionnames.get(handle);
-		}
-	}
-
-	/**
-	 * Set a region name in the cache
-	 *
-	 * @param handle Long region handle to cache
-	 * @param name   Region name for the handle
-	 */
-	public static void regionName(@Nullable final Long handle,
-	                              @Nullable final String name) {
-		if (handle!=null && name!=null && (!name.isEmpty())) {
-			synchronized (regionnames) { regionnames.put(handle,name); }
-		}
-	}
-
-	/**
-	 * Look up a region handle in the cache
-	 *
-	 * @param name Name of the region to look up
-	 *
-	 * @return Long region handle
-	 */
-	@Nullable
-	public static Long regionHandle(final String name) {
-		synchronized (regionnames) {
-			for (final Map.Entry<Long,String> entry: regionnames.entrySet()) {
-				if (entry.getValue().equalsIgnoreCase(name)) { return entry.getKey(); }
-			}
-		}
-		return null;
 	}
 }

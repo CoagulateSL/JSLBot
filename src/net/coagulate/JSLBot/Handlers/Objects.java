@@ -24,6 +24,7 @@ public class Objects extends Handler {
 	public Objects(@Nonnull final JSLBot bot,
 	               final Configuration c) { super(bot,c); }
 
+	// ---------- INSTANCE ----------
 	public void objectUpdateUDPImmediate(@Nonnull final UDPEvent event) {
 		final ObjectUpdate data=(ObjectUpdate) event.body();
 		// and request more info too
@@ -324,6 +325,7 @@ public class Objects extends Handler {
 
 		CompressedFlags(final int id) { this.id=id; }
 
+		// ---------- INSTANCE ----------
 		public int getValue() { return id; }
 	}
 }
