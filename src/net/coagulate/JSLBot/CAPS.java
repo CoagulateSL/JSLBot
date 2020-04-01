@@ -206,8 +206,7 @@ public final class CAPS extends Thread {
 			log.info("CAPS seed interrogated successfully; EventQueueGet driver launched");
 		}
 		else {
-			log.severe("CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we "
-					           +"are"+" bound to the present sim.  This is neither normal or expected behaviour.");
+			log.severe("CAPS seed interrogated successfully; There was NO EVENTQUEUEGET CAPABILITY!!! Without this we are unable to successfully change region circuits - we "+"are"+" bound to the present sim.  This is neither normal or expected behaviour.");
 		}
 	}
 
