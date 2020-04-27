@@ -38,14 +38,13 @@ public final class Circuit extends Thread implements Closeable {
 	private final Object lockdisconnecting=new Object();
 	int maintenancecounter;
 	private Logger log;
-	private int circuitsequence;
+	private final int circuitsequence;
 	// sequence number for packets in this circuit
 	private int sequence=1;
 	// reference to the agent we're a circuit for
-	private JSLBot bot;
+	private final JSLBot bot;
 	// the simulator's details
-	@Nullable
-	private InetSocketAddress address;
+	@Nullable private InetSocketAddress address;
 	// our listening socket / endpoint
 	private DatagramSocket socket;
 	// biggest remote packet we acked or something.  comes up in UDP ping messages, but i dont think we even need it
@@ -62,24 +61,18 @@ public final class Circuit extends Thread implements Closeable {
 	@Nullable
 	private LLUUID regionuuid;
 	// last time we rxed anything
-	@Nonnull
-	private Date lastpacket=new Date();
+	@Nonnull private Date lastpacket=new Date();
 	// the primary all important region handle
-	@Nonnull
-	private Long regionhandle;
+	@Nonnull private final Long regionhandle;
 	// primary CAPS url
-	@Nullable
-	private String capsurl;
+	@Nullable private String capsurl;
 	// primary CAPS object
-	@Nullable
-	private CAPS caps;
+	@Nullable private CAPS caps;
 	// Region object for this circuit's region
-	@Nullable
-	private Regional regional;
+	@Nullable private final Regional regional;
 	// target address
-	@Nullable
-	private String simip;
-	private int simport;
+	@Nullable private final String simip;
+	private final int simport;
 	// how many packets sent
 	private int packetrate;
 	// Have started a disconnect, so dont error so much

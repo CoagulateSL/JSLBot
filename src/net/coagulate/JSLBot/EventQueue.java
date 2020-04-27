@@ -86,7 +86,7 @@ public class EventQueue extends Thread {
 	public String getRegionName() { return caps().circuit().getRegionName(); }
 
 	// ----- Internal Instance -----
-	private void runMain() throws Exception {
+	@SuppressWarnings("BusyWait") private void runMain() throws Exception {
 		// Event queue - poll the URL endlessly, most of the time it hangs for 30 seconds and '502's
 		// Otherwise it 200s and gives us a document.  Yay.
 		// Either way we just keep doing this.  If we get a 404 then the URL has been invalidated and we can exit.
