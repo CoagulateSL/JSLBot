@@ -793,8 +793,7 @@ public class JSLBot extends Thread {
 		final int loginx=(Integer) result.get("region_x");
 		final int loginy=(Integer) result.get("region_y");
 		final Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
-		@SuppressWarnings("unchecked")
-		final // if it isn't, what do we do anyway?
+		@SuppressWarnings("unchecked") final // if it isn't, what do we do anyway?
 				Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
 		for (final Map.Entry<String,String> entry: rootmap.entrySet()) {
 			if (Debug.AUTH) {

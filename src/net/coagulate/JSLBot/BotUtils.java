@@ -220,8 +220,7 @@ public abstract class BotUtils {
 			}
 		}
 		final Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
-		@SuppressWarnings("unchecked")
-		final HashMap<Object,Object> result=(HashMap<Object,Object>) resultobject;
+		@SuppressWarnings("unchecked") final HashMap<Object,Object> result=(HashMap<Object,Object>) resultobject;
 		if (Debug.AUTH) {
 			// dump the result
 			for (final Map.Entry<Object,Object> entry: result.entrySet()) {
