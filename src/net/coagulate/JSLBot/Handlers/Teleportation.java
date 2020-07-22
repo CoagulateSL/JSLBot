@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.Handlers;
 
 import net.coagulate.JSLBot.*;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.JSLBot.Param;
 import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
@@ -154,10 +154,10 @@ public class Teleportation extends Handler {
 	@Nonnull
 	@CmdHelp(description="Initiate a teleport to a target location")
 	public String teleportCommand(@Nonnull final CommandEvent command,
-	                              @ParamHelp(description="Name of region to teleport to") final String region,
-	                              @ParamHelp(description="X Co-ordinate to request") final String x,
-	                              @ParamHelp(description="Y Co-ordinate to request") final String y,
-	                              @ParamHelp(description="Z Co-ordinate to request") final String z) {
+	                              @Param(name="region",description="Name of region to teleport to") final String region,
+	                              @Param(name="x",description="X Co-ordinate to request") final String x,
+	                              @Param(name="y",description="Y Co-ordinate to request") final String y,
+	                              @Param(name="z",description="Z Co-ordinate to request") final String z) {
 		final Regional r=command.region();
 		final TeleportLocationRequest tp=new TeleportLocationRequest();
 		tp.bagentdata.vagentid=bot.getUUID();
@@ -212,7 +212,7 @@ public class Teleportation extends Handler {
 	@Nonnull
 	@CmdHelp(description="Sends a teleport lure")
 	public String lureCommand(@Nonnull final CommandEvent command,
-	                          @Nonnull @ParamHelp(description="UUID to lure") final String uuid) {
+	                          @Nonnull @Param(name="uuid",description="UUID to lure") final String uuid) {
 		final LLUUID targetuuid=new LLUUID(uuid);
 		final StartLure req=new StartLure(bot);
 		String invokeruuid="???";

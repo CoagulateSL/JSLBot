@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.Handlers;
 
 import net.coagulate.JSLBot.*;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.JSLBot.Param;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.*;
 
@@ -142,7 +142,7 @@ public class Objects extends Handler {
 	@Nonnull
 	@CmdHelp(description="Find an object by a name fragment")
 	public String objectFindCommand(@Nonnull final CommandEvent command,
-	                                @Nonnull @ParamHelp(description="Fragment of a name to search for") String name) {
+	                                @Nonnull @Param(name="name",description="Fragment of a name to search for") String name) {
 		final Regional region=command.region();
 		ObjectData best=null;
 		name=name.toLowerCase();
@@ -246,7 +246,7 @@ public class Objects extends Handler {
 	@Nullable
 	@CmdHelp(description="Lookup or request a prim by UUID")
 	public String objectUUIDCommand(@Nonnull final CommandEvent command,
-	                                @ParamHelp(description="Prim UUID") final String uuid) {
+	                                @Param(name="uuid",description="Prim UUID") final String uuid) {
 		final Regional region=command.region();
 		final LLUUID lluuid=new LLUUID(uuid);
 		final ObjectData od=region.getObject(lluuid);
@@ -257,7 +257,7 @@ public class Objects extends Handler {
 	@Nonnull
 	@CmdHelp(description="Lookup or request a prim by local id")
 	public String objectGetCommand(@Nonnull final CommandEvent command,
-	                               @Nonnull @ParamHelp(description="Local prim id (32 bit int)") final String localid) {
+	                               @Nonnull @Param(name="localid",description="Local prim id (32 bit int)") final String localid) {
 		final Regional region=command.region();
 		final int id=Integer.parseInt(localid);
 		if (region.hasObject(id)) { return "Exists as "+region.getObject(id).name; }
@@ -276,8 +276,8 @@ public class Objects extends Handler {
 	@Nonnull
 	@CmdHelp(description="Return a prim by UUID or localid")
 	public String objectReturnCommand(@Nonnull final CommandEvent command,
-	                                  @Nullable @ParamHelp(description="UUID of prim to return") final String primuuid,
-	                                  @Nullable @ParamHelp(description="LocalID of prim to return") final String localid) {
+	                                  @Nullable @Param(name="primuuid",description="UUID of prim to return") final String primuuid,
+	                                  @Nullable @Param(name="localid",description="LocalID of prim to return") final String localid) {
 		final Regional region=command.region();
 		// One way or another we need the local ID
 		final int id;

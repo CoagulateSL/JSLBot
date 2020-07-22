@@ -710,25 +710,6 @@ public class JSLBot extends Thread {
 	                   final String lastname,
 	                   final String password,
 	                   final String loginlocation) {
-		// test that method names are preserved
-		try {
-			final String argname=getClass().getDeclaredMethod("setup",String.class,String.class,String.class,String.class).getParameters()[0].getName();
-			if ("arg0".equals(argname) || (!"firstname".equals(argname))) {
-				System.out.println("===== FATAL ERROR =====");
-				System.out.println("The name of the first method for setup() is "+argname);
-				System.out.println("In the source this is called 'firstname'");
-				System.out.println("JSLBot uses reflection to read parameter names to implement bot commands");
-				System.out.println("It is necessary to include parameter names in the compiled bytecode");
-				System.out.println("This is generally done by compiling (javac) with the '-g' and '-parameters' option to enable debug info");
-				System.out.println("Command functionality will not work without this feature, the bot has been aborted for safety reasons");
-				System.out.println("NetBeans note: Add to compiler additional options and DISABLE compile on save which ignores these settings");
-				throw new AssertionError("Invalid JSLBot compilation, expected argument name 'newbrain', got '"+argname+"'");
-			}
-		}
-		catch (@Nonnull final NoSuchMethodException|SecurityException ex) {
-			throw new AssertionError("Unable to read signature of setup method??",ex);
-		}
-
 		jslinterface=new JSLInterface(this);
 		LLCATruster.initialise(); // probably compromises the SSL engine in various ways :(
 		this.firstname=firstname;
@@ -860,10 +841,15 @@ public class JSLBot extends Thread {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@Target(ElementType.PARAMETER)
-	public @interface ParamHelp {
+	public @interface Param {
 
 		// ---------- INSTANCE ----------
 
+		/** Name of this parameter
+		 *
+		 * @return The parameters name
+		 */
+		@Nonnull String name();
 		/**
 		 * Description for this parameter
 		 *

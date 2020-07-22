@@ -158,7 +158,7 @@ public class CommandEvent extends Event {
 			//System.out.println(param.toString());
 			if (firstparam) { firstparam=false; }
 			else {
-				final String paramname=param.getName();
+				final String paramname=param.getAnnotation(JSLBot.Param.class).name();
 				params.add(parameters().getOrDefault(paramname,null));
 			}
 		}

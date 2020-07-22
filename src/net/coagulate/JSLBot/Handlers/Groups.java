@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.Handlers;
 
 import net.coagulate.JSLBot.*;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.JSLBot.Param;
 import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.*;
@@ -214,8 +214,8 @@ public class Groups extends Handler {
 	@Nonnull
 	@CmdHelp(description="Selects a group as active")
 	public String activateGroupCommand(final CommandEvent event,
-	                                   @Nullable @ParamHelp(description="Group UUID to activate (or zero UUID for none)") final String uuid,
-	                                   @Nonnull @ParamHelp(description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final String name) {
+	                                   @Nullable @Param(name="uuid",description="Group UUID to activate (or zero UUID for none)") final String uuid,
+	                                   @Nonnull @Param(name="name",description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final String name) {
 		LLUUID target;
 		if (uuid==null || uuid.isEmpty()) {
 			target=findGroupUUID(name);

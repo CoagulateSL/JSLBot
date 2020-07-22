@@ -2,7 +2,7 @@ package net.coagulate.JSLBot.Handlers;
 
 import net.coagulate.JSLBot.*;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.JSLBot.Param;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 import net.coagulate.JSLBot.Packets.Types.LLVector3;
@@ -145,7 +145,7 @@ public class Agent extends Handler {
 	@Nonnull
 	@CmdHelp(description="Set agent's draw distance")
 	public String drawdistanceCommand(final CommandEvent command,
-	                                  @Nullable @ParamHelp(description="Meters draw distance") final String set) {
+	                                  @Nullable @Param(name="set",description="Meters draw distance") final String set) {
 		if (set==null || set.isEmpty()) { return "0 - Draw distance is "+bot.drawDistance(); }
 		bot.drawDistance(Float.parseFloat(set));
 		return "0 - Draw Distance Set";

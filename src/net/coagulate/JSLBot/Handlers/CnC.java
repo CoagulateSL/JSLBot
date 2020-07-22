@@ -4,7 +4,7 @@ import net.coagulate.JSLBot.*;
 import net.coagulate.JSLBot.Handlers.Authorisation.Authorisation;
 import net.coagulate.JSLBot.Handlers.Authorisation.DenyAll;
 import net.coagulate.JSLBot.JSLBot.CmdHelp;
-import net.coagulate.JSLBot.JSLBot.ParamHelp;
+import net.coagulate.JSLBot.JSLBot.Param;
 import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Messages.*;
 import net.coagulate.JSLBot.Packets.Types.*;
@@ -388,8 +388,8 @@ public class CnC extends Handler {
 	@Nonnull
 	@CmdHelp(description="Send an instant message")
 	public String imCommand(final CommandEvent command,
-	                        @ParamHelp(description="UUID to message") final String uuid,
-	                        @Nonnull @ParamHelp(description="Message to send") final String message) {
+	                        @Param(name="uuid",description="UUID to message") final String uuid,
+	                        @Nonnull @Param(name="message",description="Message to send") final String message) {
 		bot.im(new LLUUID(uuid),message);
 		log.info("Sent IM to <"+uuid+"> "+bot.getUserName(new LLUUID(uuid))+" - "+message);
 		return "IM sent";
@@ -398,7 +398,7 @@ public class CnC extends Handler {
 	@Nonnull
 	@CmdHelp(description="Get Help :)  If you see this you're doing it right")
 	public String helpCommand(final CommandEvent commandevent,
-	                          @Nullable @ParamHelp(description="Optional command to get more info about") String command) {
+	                          @Nullable @Param(name="command",description="Optional command to get more info about") String command) {
 		if (command==null || command.isEmpty()) {
 			StringBuilder response=new StringBuilder();
 			final Set<String> unsortedcommands=bot.brain().getCommands();
@@ -422,9 +422,9 @@ public class CnC extends Handler {
 		}
 		for (final Parameter param: m.getParameters()) {
 			if (!param.getType().equals(Regional.class)) {
-				ret.append("\n").append(param.getName());
-				if (param.getAnnotation(ParamHelp.class)!=null) {
-					ret.append(" - ").append(param.getAnnotation(ParamHelp.class).description());
+				ret.append("\n").append(param.getAnnotation(JSLBot.Param.class).name());
+				if (param.getAnnotation(Param.class)!=null) {
+					ret.append(" - ").append(param.getAnnotation(Param.class).description());
 				}
 			}
 		}
@@ -502,7 +502,7 @@ public class CnC extends Handler {
 	@Nonnull
 	@CmdHelp(description="Manage the homesickness of this bot")
 	public String homesickCommand(final CommandEvent event,
-	                              @Nullable @ParamHelp(description="Name of region to long for, blank to get current, or NONE to clear") final String region) {
+	                              @Nullable @Param(name="region",description="Name of region to long for, blank to get current, or NONE to clear") final String region) {
 		if (region==null || region.isEmpty()) {
 			final String home=bot.homeSickFor();
 			if (home==null || home.isEmpty()) { return "Bot has no longing for any home"; }
