@@ -1,9 +1,4 @@
-/.idea/
-/nbproject/
-/build/
-/dist/
-/out/
-*.class
-/build.xml
-/JSLBot.iml
 JSLBot.jar
+/generated-sources/
+/bin/
+/out/

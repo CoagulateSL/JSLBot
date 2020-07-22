@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="JSLBot:jar" />
+    </artifacts-to-build>
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3b6533dc-1e18-4255-adee-4c824b040f65" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/JSLBot.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JavaCore/src/META-INF/MANIFEST.MF" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JavaCore/src/net/coagulate/Core/Tools/ValueMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/CommandEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/CommandEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Agent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/CnC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/CnC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Groups.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Groups.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Objects.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Objects.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Regions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Regions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Teleportation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/Handlers/Teleportation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/net/coagulate/JSLBot/JSLBot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/net/coagulate/JSLBot/JSLBot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../JavaCore/JavaCore.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../JavaCore/JavaCore.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../JavaCore/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../JavaCore/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../JavaCore/src/net/coagulate/Core/HTTP/HTTPListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../JavaCore/src/net/coagulate/Core/HTTP/HTTPListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../JavaCore/src/net/coagulate/Core/Tools/ClassTools.java" beforeDir="false" afterPath="$PROJECT_DIR$/../JavaCore/src/net/coagulate/Core/Tools/ClassTools.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1f0UE4BBOjIeFabHRaD8Gz3buDS" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../JavaCore/pom.xml" />
+    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.3908046" />
+  </component>
+  <component name="RunManager">
+    <configuration name="Test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="net.coagulate.JSLBot.Test" />
+      <module name="JSLBot" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="net.coagulate.JSLBot.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Test" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3b6533dc-1e18-4255-adee-4c824b040f65" name="Default Changelist" comment="" />
+      <created>1595354388637</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1595354388637</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="435" y="171" key="#Project_Structure" timestamp="1595390444341">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="435" y="171" key="#Project_Structure/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595390444341" />
+    <state x="690" y="330" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1595354846357">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="690" y="330" key="#com.intellij.ide.util.TreeClassChooserDialog/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595354846357" />
+    <state x="694" y="229" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1595354434829">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="694" y="229" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595354434829" />
+    <state x="810" y="464" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1595355940048">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="810" y="464" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595355940048" />
+    <state x="743" y="409" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1595355644487">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="743" y="409" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595355644487" />
+    <state x="740" y="295" key="FileChooserDialogImpl" timestamp="1595354572163">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="740" y="295" key="FileChooserDialogImpl/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595354572163" />
+    <state width="1877" height="295" key="GridCell.Tab.0.bottom" timestamp="1595357963589">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="1877" height="295" key="GridCell.Tab.0.bottom/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595357963589" />
+    <state width="1877" height="295" key="GridCell.Tab.0.center" timestamp="1595357963589">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="1877" height="295" key="GridCell.Tab.0.center/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595357963589" />
+    <state width="1877" height="295" key="GridCell.Tab.0.left" timestamp="1595357963589">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="1877" height="295" key="GridCell.Tab.0.left/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595357963589" />
+    <state width="1877" height="295" key="GridCell.Tab.0.right" timestamp="1595357963589">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="1877" height="295" key="GridCell.Tab.0.right/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595357963589" />
+    <state x="490" y="195" key="Maven.ArtifactSearchDialog" timestamp="1595354799338">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="490" y="195" key="Maven.ArtifactSearchDialog/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595354799338" />
+    <state x="2268" y="-26" width="1485" height="1058" key="find.popup" timestamp="1595356189577">
+      <screen x="2023" y="0" width="1817" height="1080" />
+    </state>
+    <state x="2268" y="-26" width="1485" height="1058" key="find.popup/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595356189577" />
+    <state x="629" y="201" key="new project wizard" timestamp="1595354502922">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="629" y="201" key="new project wizard/3840.0.1920.1080/-1920.-118.1920.1200/2023.0.1817.1080/0.0.1920.1080/1917.1080.800.480@0.0.1920.1080" timestamp="1595354502922" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/JSLBot$Test.ic" NAME="Test Coverage Results" MODIFIED="1595355019061" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>net.coagulate.JSLBot.*</FILTER>
+    </SUITE>
+  </component>
+</project>
