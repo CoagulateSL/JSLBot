@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 
 /**
  * An event that represents an invoked command.
@@ -145,6 +146,10 @@ public class CommandEvent extends Event {
 			if (t.getCause()!=null) { t=t.getCause(); }
 			log.log(INFO,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+BotUtils.unravel(t),t);
 			return "Exception inside handler "+handler.getName()+BotUtils.unravel(t);
+		}
+		catch (@Nonnull final Throwable generic) {
+			log.log(WARNING,"Handler calling error for "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" failed to invoke with "+BotUtils.unravel(generic),generic);
+			return "Exception calling handler "+handler.getName()+BotUtils.unravel(generic);
 		}
 	}
 
