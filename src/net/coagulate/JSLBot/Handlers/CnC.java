@@ -421,11 +421,17 @@ public class CnC extends Handler {
 			ret.append("\n").append(m.getAnnotation(CmdHelp.class).description());
 		}
 		for (final Parameter param: m.getParameters()) {
-			if (!param.getType().equals(Regional.class)) {
-				ret.append("\n").append(param.getAnnotation(JSLBot.Param.class).name());
+			if (!(param.getType().equals(Regional.class) || param.getType().equals(CommandEvent.class))) {
+				Param annotation = param.getAnnotation(Param.class);
 				if (param.getAnnotation(Param.class)!=null) {
+					ret.append("\n").append(annotation.name());
 					ret.append(" - ").append(param.getAnnotation(Param.class).description());
-				}
+				} else {
+					ret.append("\nThis command is not properly documented (Missing annotations in ")
+							.append(m.getDeclaringClass().getSimpleName())
+							.append(".")
+							.append(m.getName())
+							.append(")"); }
 			}
 		}
 		return ret.toString();
@@ -487,7 +493,7 @@ public class CnC extends Handler {
 		log.info("Bot has homesickness and is attempting to teleport home during free-will"); // specifically when the brain isn't occupied, otherwise we wouldn't be in
 		// maintenance
 		new CommandEvent(bot,bot.getRegional(),"home",new HashMap<>(),null).execute();
-		try { Thread.sleep(1000L); } catch (@Nonnull final InterruptedException e) {}
+		try { Thread.sleep(1000L); } catch (@Nonnull final InterruptedException ignored) {}
 		if (bot.getRegionName().equalsIgnoreCase(bot.homeSickFor())) {
 			// success
 			log.info("Bot has successfully cured its self of homesickness by going home, bot is no longer homesick");
