@@ -200,7 +200,7 @@ public class Groups extends Handler {
 
 	@CmdHelp(description="Collect a group's roster")
 	public void groupRosterCommand(final CommandEvent command,
-	                               final String uuid) throws IOException {
+	                               @Nonnull @Param(name = "uuid",description = "Group UUID to get roster for") final String uuid) throws IOException {
 		final LLSDMap req=new LLSDMap();
 		req.put("group_id",new LLSDUUID(uuid));
 		final LLSD llsd=new LLSD(req);
