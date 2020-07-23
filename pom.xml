@@ -6,7 +6,7 @@
 
     <groupId>net.coagulate</groupId>
     <artifactId>JSLBot</artifactId>
-    <version>1.00.00</version>
+    <version>0.8.1</version>
 
     <build>
         <directory>${project.basedir}/bin</directory>
