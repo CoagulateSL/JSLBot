@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.Core.Exceptions.System.SystemImplementationException;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 import javax.annotation.Nonnull;
@@ -158,8 +159,13 @@ public class CommandEvent extends Event {
 			//System.out.println(param.toString());
 			if (firstparam) { firstparam=false; }
 			else {
-				final String paramname=param.getAnnotation(JSLBot.Param.class).name();
-				params.add(parameters().getOrDefault(paramname,null));
+				JSLBot.Param annotation = param.getAnnotation(JSLBot.Param.class);
+				if (annotation!=null) {
+					final String paramname = annotation.name();
+					params.add(parameters().getOrDefault(paramname, null));
+				} else {
+					throw new SystemImplementationException("Parameter "+param.getName()+" of method "+method.getDeclaringClass().getSimpleName()+"."+method.getName()+" is missing a Param annotation");
+				}
 			}
 		}
 		return params;
