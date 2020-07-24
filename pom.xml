@@ -7,6 +7,13 @@
     <groupId>net.coagulate</groupId>
     <artifactId>JSLBot</artifactId>
     <version>0.8.1</version>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub IPrice Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/iprice/JSLBot</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <directory>${project.basedir}/bin</directory>
