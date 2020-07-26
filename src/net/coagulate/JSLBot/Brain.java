@@ -397,9 +397,10 @@ public class Brain {
 				queue(event);
 				return response;
 			}
-			if (!warned.contains(fen) && (handlermap.get(fen+"Delayed")==null || handlermap.get(fen+"Delayed")
-			                                                                               .isEmpty()) && (handlermap.get(fen+"Immediate")==null || handlermap.get(fen+"Immediate")
-			                                                                                                                                                  .isEmpty())) {
+			if (!warned.contains(fen) &&
+					( handlermap.get(fen+"Delayed")==null || handlermap.get(fen+"Delayed").isEmpty()) &&
+					( handlermap.get(fen+"Immediate")==null || handlermap.get(fen+"Immediate").isEmpty())
+				) {
 				log.log(FINE,"No handler for UDP/XML event {0}",fen);
 				warned.add(fen);
 			}

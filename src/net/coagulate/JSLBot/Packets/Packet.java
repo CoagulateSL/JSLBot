@@ -155,7 +155,7 @@ public class Packet {
             source.order(ByteOrder.BIG_ENDIAN);
             int sequence=source.getInt();
             byte extralen=source.get();
-            byte extra[]=new byte[extralen];
+            byte[] extra =new byte[extralen];
             if (extralen>0) { source.get(extra,0,extralen); }
             
             // STOP - everything from here on in MIGHT be zerocoded
@@ -272,7 +272,7 @@ public class Packet {
             throw new AssertionError("Construction error decoding Packet",ex);
         }
     }
-    public Set<Integer> appendedacks=new HashSet<>();
+    public final Set<Integer> appendedacks=new HashSet<>();
     
     public String dump() {
         String acks="";

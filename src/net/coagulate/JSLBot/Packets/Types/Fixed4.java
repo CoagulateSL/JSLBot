@@ -9,7 +9,7 @@ import net.coagulate.JSLBot.BotUtils;
  */
 public class Fixed4 extends Unimplemented{
 
-    public byte values[]=new byte[4];
+    public final byte[] values =new byte[4];
     @Override
     public int size() {
         return 4;

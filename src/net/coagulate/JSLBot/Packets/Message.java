@@ -8,13 +8,13 @@ import java.nio.ByteBuffer;
  */
 public interface Message {
 
-    public abstract int getId();
-    public abstract int getFrequency();
-    public abstract String getName();
+    int getId();
+    int getFrequency();
+    String getName();
 
-    public abstract int size();
-    public abstract String dump();
-    public abstract void writeBytes(ByteBuffer out);
-    public abstract void readBytes(ByteBuffer in);
+    int size();
+    String dump();
+    void writeBytes(ByteBuffer out);
+    void readBytes(ByteBuffer in);
     
 }
