@@ -458,16 +458,19 @@ public class CnC extends Handler {
 	@Nonnull
 	@CmdHelp(description="Say a message in local chat")
 	public String sayCommand(final CommandEvent event,
+	                         @Param(name="message",description = "Message to say")
 	                         @Nonnull final String message) { return chat(1,message); }
 
 	@Nonnull
 	@CmdHelp(description="Shout a message in local chat")
 	public String shoutCommand(final CommandEvent event,
+							   @Param(name="message",description = "Message to shout")
 	                           @Nonnull final String message) { return chat(2,message); }
 
 	@Nonnull
 	@CmdHelp(description="Whisper a message in local chat")
 	public String whisperCommand(final CommandEvent event,
+								 @Param(name="message",description = "Message to whisper")
 	                             @Nonnull final String message) { return chat(0,message); }
 
 	@Override

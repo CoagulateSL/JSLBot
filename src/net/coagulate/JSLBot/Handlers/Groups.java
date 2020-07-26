@@ -32,8 +32,11 @@ public class Groups extends Handler {
 	@Nonnull
 	@CmdHelp(description="Invite a user to a given group/role")
 	public String groupInviteCommand(final CommandEvent command,
+									 @Param(name="avataruuid",description = "Avatar UUID to invite to group")
 	                                 final String avataruuid,
+	                                 @Param(name="groupuuid",description="Group UUID to invite avatar to")
 	                                 final String groupuuid,
+	                                 @Param(name="roleuuid",description = "Role UUID within group to invite avatar to")
 	                                 @Nullable final String roleuuid) {
 		final LLUUID avatar=new LLUUID(avataruuid);
 		final LLUUID group=new LLUUID(groupuuid);
@@ -56,7 +59,9 @@ public class Groups extends Handler {
 	@Nonnull
 	@CmdHelp(description="Eject a user from a given group/role")
 	public String groupEjectCommand(final CommandEvent command,
+	                                @Param(name="avataruuid",description = "Avatar UUID to eject from group")
 	                                final String avataruuid,
+									@Param(name="groupuuid",description = "Group UUID to eject from")
 	                                final String groupuuid) {
 		final LLUUID avatar=new LLUUID(avataruuid);
 		final LLUUID group=new LLUUID(groupuuid);
