@@ -24,11 +24,7 @@ To avoid complicating standard use cases JSLBot modifies the SSL connection's im
 If you are using the SSL context for anything else, this may cause you validation problems elsewhere.  You may call LLCATruster.doNotUse() before using JSLBot to disable this implementation, NOTE that if you do this you are responsible for including the Linden Labs Certificate Authority into the trusted root certificates via whatever appropriate means (keystore, system trust store, etc), otherwise the software will fail.
 ***NOTE***
 
-The most basic way is to compile the JAR file using ANT and then launch it, as instructed by ANT, from the dist folder.
-
-It's best not to use 'ant run' for the first launch as it tends to interfer with the console IO for some reason.
-
-You want to run the class 'net.coagulate.JSLBot.Test' in this mode.
+The most basic way is to compile the JAR file using maven and then launch it from the jar in the bin folder.
 
 The bot should be given a single parameter - a writable location for a configuration file.
 
