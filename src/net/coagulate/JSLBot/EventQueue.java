@@ -73,7 +73,7 @@ public class EventQueue extends Thread {
 		catch (@Nonnull final Exception e) {
 			log.log(SEVERE,"Event queue crashed: "+e,e);
 		}
-		if (bot().circuit().getCAPS().eventqueue()==this) {
+		if (bot().circuit().getCAPS().eventqueue()==this && bot().connected()) {
 			log.log(SEVERE,"CRITICAL FAILURE - primary caps circuit is closed, this is reason to reconnect");
 			bot().shutdown("Primary event queue CAPS failed.");
 		}
@@ -116,7 +116,7 @@ public class EventQueue extends Thread {
 				}
 				catch (@Nonnull final Exception e) {
 					log.warning("Error writing to event queue, sleeping");
-					try { Thread.sleep(5000); } catch (@Nonnull final InterruptedException ee) {}
+					try { Thread.sleep(5000); } catch (@Nonnull final InterruptedException ignored) {}
 				}
 				if (Debug.EVENTQUEUE) { log.finer("Entering event queue wait"); }
 				final int status=connection.getResponseCode();
