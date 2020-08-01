@@ -126,6 +126,7 @@ public class JSLBot extends Thread {
 	public boolean quitting() { return quit; }
 
 	public void setReconnect() { reconnect=true; }
+	public void clearReconnect() { reconnect=false; }
 
 	public void forceReconnect() {
 		reconnect=true;
@@ -190,7 +191,7 @@ public class JSLBot extends Thread {
 		try {
 			synchronized (connectsignal) { connectsignal.wait(milliseconds); }
 		}
-		catch (@Nonnull final InterruptedException e) {}
+		catch (@Nonnull final InterruptedException ignored) {}
 		if (connected) { return; }
 		throw new IllegalStateException("Still not connected after timeout");
 	}
@@ -550,7 +551,7 @@ public class JSLBot extends Thread {
 		// because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
 		final Set<Circuit> closeme=new HashSet<>(getCircuits());
 		for (final Circuit c: closeme) {
-			try { c.close(); } catch (@Nonnull final Exception e) {}
+			try { c.close(); } catch (@Nonnull final Exception ignored) {}
 		}
 		brain.stopProcrastinating();  // release the main thread
 	}
@@ -740,7 +741,7 @@ public class JSLBot extends Thread {
 				else {
 					log.info("Login attempt "+(retries+1)+"/"+Constants.MAX_RETRIES+" failed: "+e.getClass().getSimpleName()+":"+e.getMessage());
 				}
-				try { if (!quit) { Thread.sleep(delay); } } catch (@Nonnull final InterruptedException f) {}
+				try { if (!quit) { Thread.sleep(delay); } } catch (@Nonnull final InterruptedException ignored) {}
 			}
 			if (quit) { return; }
 		}
