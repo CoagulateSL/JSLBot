@@ -134,7 +134,7 @@ public class JSLBot extends Thread {
 	}
 
 	/**
-	 * Instruct the bot to always reconnect whne disconnected
+	 * Instruct the bot to always reconnect when disconnected
 	 */
 	public void setAlwaysReconnect() {
 		ALWAYS_RECONNECT=true;
@@ -211,7 +211,7 @@ public class JSLBot extends Thread {
 		if (registershutdownhook) { Runtime.getRuntime().addShutdownHook(new ShutdownHook(this)); }
 		// catch and report.  "mainLoop()" should guard against everything its self so this means that function is broken
 		// nominated for 'best line of code, 2016'
-		// ^^ nominated for most useul comment for dating my intermittent work on this project, now mid 2018.
+		// ^^ nominated for most usual comment for dating my intermittent work on this project, now mid 2018.
 		if (brain.isEmpty()) { log.warning("Bot has no brain and will be a virtual zombie."); }
 		reconnect=true;
 		while (ALWAYS_RECONNECT || reconnect) {
@@ -276,7 +276,7 @@ public class JSLBot extends Thread {
 		if (quitting()) {
 			return;
 		}
-		// dont spam too many of these
+		// don't spam too many of these
 		if (!force && lastagentupdate!=null) {
 			if ((new Date().getTime())-lastagentupdate.getTime()<Constants.AGENT_UPDATE_FREQUENCY_MILLISECONDS) {
 				return;
@@ -657,18 +657,18 @@ public class JSLBot extends Thread {
 	 * If this is our primary (non child agent) circuit we're in trouble and will quit.
 	 *
 	 * @param regionhandle Region handle that's closing connection.
-	 * @param circ         Associated circuit, used as a 'check' only
+	 * @param circuit         Associated circuit, used as a 'check' only
 	 */
 	void deregisterCircuit(final Long regionhandle,
-	                       final Circuit circ) {
+	                       final Circuit circuit) {
 		synchronized (circuits) {
 			final Circuit c=circuits.get(regionhandle);
 			if (c!=null) { c.close(); }
-			if (circ!=c && c!=null) {
+			if (circuit!=c && c!=null) {
 				log.severe("Closing a region handle but the circuit is not the one we have registered");
 			}
 			circuits.remove(regionhandle);
-			// dont warn if shutting down
+			// don't warn if shutting down
 			if (!quit && c==primary) {
 				log.severe("Closure of primary circuit detected, this is fatal?");
 				shutdown("Primary circuit lost, we have been disconnected?");
