@@ -152,7 +152,7 @@ public class Brain {
 				try {
 					queue.wait(Constants.BRAIN_PROCRASTINATES_FOR_MILLISECONDS);
 				}
-				catch (@Nonnull final InterruptedException iex) {}
+				catch (@Nonnull final InterruptedException ignored) {}
 			}
 			if (!queue.isEmpty()) { event=queue.remove(0); }
 		}
@@ -187,7 +187,7 @@ public class Brain {
 
 	/**
 	 * Call on every login loop.
-	 * Makes sure we dont get stuck in a rapidly spamming loop.  See Constants.java for the config.
+	 * Makes sure we don't get stuck in a rapidly spamming loop.  See Constants.java for the config.
 	 */
 	void loginLoopSafety() {
 		// if we have any null slots then we didn't even launch MAX times yet
@@ -264,7 +264,6 @@ public class Brain {
 	 * A command is a method that is annotated with CmdHelp (and optionally its parameters with ParamHelp), and whose method name ends with "command".
 	 */
 	private void populateCommandMap() {
-		final boolean debug=false;
 		for (final Handler h: brain) {
 			for (final Method m: h.getClass().getMethods()) {
 				if (m.getAnnotation(CmdHelp.class)!=null) {
@@ -291,7 +290,7 @@ public class Brain {
 	}
 
 	/**
-	 * Instansiate a handler.
+	 * Instantiate a handler.
 	 *
 	 * @param name Class name
 	 *
@@ -343,7 +342,6 @@ public class Brain {
 	@Nullable
 	private String execute(@Nonnull final Event event,
 	                       final boolean immediate) {
-		final String messageid=event.getPrefixedName();
 		String fen=formatEventName(event);
 		fen=fen+event.typeString();
 		String method=fen;
@@ -397,6 +395,7 @@ public class Brain {
 				queue(event);
 				return response;
 			}
+			//noinspection ConstantConditions
 			if (handlermap==null) { throw new NullPointerException("handler map is empty at this point processing "+event.getName()); }
 			if (!warned.contains(fen) &&
 					( handlermap.get(fen+"Delayed")==null || handlermap.get(fen+"Delayed").isEmpty()) &&
@@ -492,7 +491,7 @@ public class Brain {
 		// no configuration here yet, hard coded 15 minute sleep, have fun with that.
 		for (int i=15;i>0;i--) {
 			log.severe("Reconnection Safety: RECONNECTION SAFETY HAS TRIPPED.  THREAD FORCE-SLEEPING FOR "+i+" MINUTES.");
-			try { Thread.sleep(60000); } catch (@Nonnull final InterruptedException e) {}
+			try { Thread.sleep(60000); } catch (@Nonnull final InterruptedException ignored) {}
 		}
 		log.warning("Reconnection Safety: Reconnection safety tripped, we have slept for 15 minutes, and will now return to attempting connections.");
 	}
