@@ -397,6 +397,7 @@ public class Brain {
 				queue(event);
 				return response;
 			}
+			if (handlermap==null) { throw new NullPointerException("handler map is empty at this point processing "+event.getName()); }
 			if (!warned.contains(fen) &&
 					( handlermap.get(fen+"Delayed")==null || handlermap.get(fen+"Delayed").isEmpty()) &&
 					( handlermap.get(fen+"Immediate")==null || handlermap.get(fen+"Immediate").isEmpty())
