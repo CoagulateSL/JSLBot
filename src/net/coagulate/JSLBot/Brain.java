@@ -395,11 +395,16 @@ public class Brain {
 				queue(event);
 				return response;
 			}
-			//noinspection ConstantConditions
-			if (handlermap==null) { throw new NullPointerException("handler map is empty at this point processing "+event.getName()); }
+			Set<Method> delayedhandler = handlermap.get(fen + "Delayed");
+			boolean nodelayedhandler=true;
+			if (delayedhandler!=null && (!delayedhandler.isEmpty())) { nodelayedhandler=false; }
+			Set<Method> immediatehandler = handlermap.get(fen + "Immediate");
+			boolean noimmediatehandler=true;
+			if (immediatehandler!=null && (!immediatehandler.isEmpty())) { noimmediatehandler=false; }
+			// what else could it be
 			if (!warned.contains(fen) &&
-					( handlermap.get(fen+"Delayed")==null || handlermap.get(fen+"Delayed").isEmpty()) &&
-					( handlermap.get(fen+"Immediate")==null || handlermap.get(fen+"Immediate").isEmpty())
+					( nodelayedhandler ) &&
+					( noimmediatehandler )
 				) {
 				log.log(FINE,"No handler for UDP/XML event {0}",fen);
 				warned.add(fen);
