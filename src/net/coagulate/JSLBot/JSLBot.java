@@ -76,6 +76,7 @@ public class JSLBot extends Thread {
 	private float lz;
 	private int fovgen;
 	private int circuitsequence;
+	public int controlflags;
 
 	/**
 	 * Create a bot based on configuration data.
@@ -290,7 +291,7 @@ public class JSLBot extends Thread {
 		final LLVector3 camera=getPos();
 		camera.z+=5;
 		if (blind) {
-			p.bagentdata.vcameracenter=new LLVector3(192,144,402);
+			p.bagentdata.vcameracenter=new LLVector3(192,144,9999);
 			p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
 			p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
 			p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
@@ -303,6 +304,7 @@ public class JSLBot extends Thread {
 			p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
 			p.bagentdata.vfar=new F32(drawdistance);
 		}
+		p.bagentdata.vcontrolflags=new U32(controlflags);
 		// FIXME CHECK THIS
         /*if (Math.random()>0.5) { p.bagentdata.vcontrolflags=new U32(1<<26); }
         p.bagentdata.vbodyrotation.x=(float) (Math.random()*Math.PI*2);
