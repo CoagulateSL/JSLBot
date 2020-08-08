@@ -188,9 +188,10 @@ public abstract class BotUtils {
 	                                      final String firstname,
 	                                      final String lastname,
 	                                      @Nonnull String password,
-	                                      final String location) throws MalformedURLException, XmlRpcException {
+	                                      final String location,
+										  @Nonnull final String loginuri) throws MalformedURLException, XmlRpcException {
 		final XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
-		config.setServerURL(new URL("https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
+		config.setServerURL(new URL(loginuri));
 		final XmlRpcClient client=new XmlRpcClient();
 		client.setConfig(config);
 		final HashMap<String,Object> params=new HashMap<>();

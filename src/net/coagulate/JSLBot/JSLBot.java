@@ -43,6 +43,7 @@ public class JSLBot extends Thread {
 	private String lastname;
 	private String password;
 	private String loginlocation;
+	private String loginuri;
 	private LLUUID sessionid;
 	private LLUUID uuid;
 	private int circuitcode;
@@ -703,20 +704,24 @@ public class JSLBot extends Thread {
 
 		final String handlerlist=config.get("handlers","");
 		brain.loadHandlers(handlerlist.split(","));
-		setup(config.get("firstname"),config.get("lastname"),config.get("password"),location);
+		String uri=config.get("loginuri");
+		if (uri==null || uri.isEmpty()) { uri="https://login.agni.lindenlab.com/cgi-bin/login.cgi"; }
+		setup(config.get("firstname"),config.get("lastname"),config.get("password"),location,uri);
 		log.info("JSLBot initialisation complete, ready to launch");
 	}
 
 	private void setup(final String firstname,
 	                   final String lastname,
 	                   final String password,
-	                   final String loginlocation) {
+	                   final String loginlocation,
+					   @Nonnull final String loginuri) {
 		jslinterface=new JSLInterface(this);
 		LLCATruster.initialise(); // probably compromises the SSL engine in various ways :(
 		this.firstname=firstname;
 		this.lastname=lastname;
 		this.password=password;
 		this.loginlocation=loginlocation;
+		this.loginuri=loginuri;
 		log.config(Constants.getVersion());
 	}
 
@@ -724,11 +729,12 @@ public class JSLBot extends Thread {
 	private void performLogin(final String firstname,
 	                          final String lastname,
 	                          @Nonnull final String password,
-	                          final String location) throws Exception {
+	                          final String location,
+							  @Nonnull final String loginuri) throws Exception {
 		Exception last=null;
 		for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
 			try {
-				login(firstname,lastname,password,location);
+				login(firstname,lastname,password,location,loginuri);
 				return;
 			}
 			catch (@Nonnull final RuntimeException|IOException|XmlRpcException e) {
@@ -753,9 +759,10 @@ public class JSLBot extends Thread {
 	private void login(final String firstname,
 	                   final String lastname,
 	                   @Nonnull final String password,
-	                   final String loginlocation) throws IOException, XmlRpcException {
+	                   final String loginlocation,
+					   @Nonnull final String loginuri) throws IOException, XmlRpcException {
 		// authentication is performed over XMLRPC over HTTPS
-		final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation);
+		final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation,loginuri);
 		if (!("true".equalsIgnoreCase((String) result.get("login")))) {
 			throw new IOException("Server gave error: "+result.get("message"));
 		}
@@ -808,7 +815,7 @@ public class JSLBot extends Thread {
 
 	// post login main loop, update + think in a loop, until we're quitting (disconnecting)
 	private void mainLoop() throws Exception {
-		performLogin(firstname,lastname,password,loginlocation);
+		performLogin(firstname,lastname,password,loginlocation,loginuri);
 		if (!quit) { brain.loggedIn(); }
 		while (!quit) {
 			//agentUpdate();

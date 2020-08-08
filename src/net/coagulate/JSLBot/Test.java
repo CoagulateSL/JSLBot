@@ -69,6 +69,8 @@ public class Test {
 		final String owneruuid=in.nextLine();
 		System.out.print("Owner Username: ");
 		final String ownername=in.nextLine();
+		System.out.print("Login URI (leave blank for Second Life default): ");
+		final String loginuri=in.nextLine();
 		System.out.println("\nCreating initial configuration file ...");
 
 		m.put("firstname",firstname);
@@ -79,7 +81,7 @@ public class Test {
 		m.put("CnC.authorisation.owneruuid",owneruuid);
 		m.put("CnC.authorisation.ownerusername",ownername);
 		m.put("password",BotUtils.md5hash(password));
-
+		m.put("loginuri",loginuri);
 		try (final FileOutputStream fos=new FileOutputStream(CONFIGFILE);final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
 			oos.writeObject(m);
 		}
