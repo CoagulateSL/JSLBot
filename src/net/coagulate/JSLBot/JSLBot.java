@@ -819,6 +819,13 @@ public class JSLBot extends Thread {
 	private void mainLoop() throws Exception {
 		performLogin(firstname,lastname,password,loginlocation,loginuri);
 		if (!quit) { brain.loggedIn(); }
+		if (!config.get("homeseat","").isBlank())
+		{
+			Map<String,String> args=new HashMap<>();
+			args.put("uuid",config.get("homeseat"));
+			CommandEvent sit=new CommandEvent(this,null,"siton",args,new LLUUID(config.get("CnC.authorisation.owneruuid")));
+			brain.execute(sit);
+		}
 		while (!quit) {
 			//agentUpdate();
 			brain.think();
@@ -876,5 +883,11 @@ public class JSLBot extends Thread {
 		// ---------- INSTANCE ----------
 		@Override
 		public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
+	}
+
+	public String getHomeSeat() {
+		String ret=config.get("homeseat","");
+		if (ret==null) { ret=""; }
+		return ret;
 	}
 }

@@ -189,8 +189,19 @@ public class Teleportation extends Handler {
 		bot.send(req,true);
 		final boolean completed=waitTeleport();
 		log.info("Teleport home "+(completed?"completed":"FAILED"));
-		if (completed) { return "1 - TP Sequence Completed"; }
-		else { return "0 - TP Sequence failed"; }
+		if (completed) {
+			if (!bot.getHomeSeat().isBlank()) {
+				if (!bot.getHomeSeat().isBlank()) {
+					Map<String, String> args = new HashMap<>();
+					args.put("uuid", bot.getHomeSeat());
+					CommandEvent sit = new CommandEvent(bot, null, "siton", args, new LLUUID(config.get("CnC.authorisation.owneruuid")));
+					bot.brain().queue(sit);
+					return "1 - Home sequence with sit complete";
+				}
+			}
+			return "1 - Home sequence completed";
+		}
+		else { return "0 - Home Sequence failed"; }
 
 	}
 
