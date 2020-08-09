@@ -1,6 +1,9 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.Core.BuildInfo.JSLBotBuildInfo;
+
 import javax.annotation.Nonnull;
+import java.text.SimpleDateFormat;
 
 /**
  * Some fairly arbitrary constants.
@@ -9,11 +12,11 @@ import javax.annotation.Nonnull;
  */
 public abstract class Constants {
 
-	public static final int MAJOR_VERSION_NUMBER=0;
-	public static final int MINOR_VERSION_NUMBER=9;
-	public static final int BUGFIX_VERSION_NUMBER=0;
+	public static final int MAJOR_VERSION_NUMBER= JSLBotBuildInfo.MAJORVERSION;
+	public static final int MINOR_VERSION_NUMBER= JSLBotBuildInfo.MINORVERSION;
+	public static final int BUGFIX_VERSION_NUMBER= JSLBotBuildInfo.BUGFIXVERSION;
 
-	public static final String VERSION_DATE="2020-07-24";
+	public static final String VERSION_DATE=new SimpleDateFormat("yyyy-MM-dd HH:mm").format(JSLBotBuildInfo.BUILDDATE);
 	public static final String COPYRIGHT_MESSAGE="(C) jslbot@predestined.net";
 
 	public static final boolean PACKET_ACCOUNTING=true;
