@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Types;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -24,7 +25,7 @@ public class LLVector3 extends Type{
         read(buffer);
     }
 
-    public LLVector3(String pos) {
+    public LLVector3(@Nonnull String pos) {
         pos=pos.replaceAll("<","");
         pos=pos.replaceAll(">","");
         String[] comps = pos.split(",");
