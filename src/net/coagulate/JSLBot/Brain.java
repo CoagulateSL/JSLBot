@@ -156,8 +156,18 @@ public class Brain {
 			}
 			if (!queue.isEmpty()) { event=queue.remove(0); }
 		}
-		if (event!=null) { execute(event,false); }
+		if (event!=null) {
+			idle=false;
+			execute(event,false);
+			idle=true;
+		}
 		callMaintenance();
+	}
+	private boolean idle=false;
+	/** Checks the bot isn't running a command, and has no queue */
+	public boolean isIdle() {
+		if (!idle) { return false; } // running a command
+		return queue.isEmpty();
 	}
 
 	/**
