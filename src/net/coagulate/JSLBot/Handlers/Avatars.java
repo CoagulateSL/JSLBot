@@ -91,7 +91,7 @@ public class Avatars extends Handler {
                 resolvedUUIDs.put(element.vid, element.vfirstname.toString() + " " + element.vlastname.toString());
             }
         }
-        resolveUUIDLock.notifyAll();
+        synchronized (resolveUUIDLock) { resolveUUIDLock.notifyAll(); }
     }
 
 
