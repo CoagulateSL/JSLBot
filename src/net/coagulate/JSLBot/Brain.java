@@ -244,7 +244,7 @@ public class Brain {
 	 * @return Handler if found, otherwise exception.
 	 */
 	@Nonnull
-	Handler getHandler(final String name) {
+	public Handler getHandler(final String name) {
 		for (final Handler h: brain) {
 			if (h.getClass().getSimpleName().equals(name)) { return h; }
 		}
