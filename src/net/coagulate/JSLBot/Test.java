@@ -36,6 +36,7 @@ public class Test {
 			CONFIGFILE=in.nextLine();
 		}
 		if (CONFIGFILE==null) { throw new NullPointerException("You must supply a configuration file name"); }
+		if (CONFIGFILE.isBlank()) { throw new AssertionError("You must supply a file name so that we can create a configuration file!"); }
 		if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
 		final Configuration config=new FileBasedConfiguration(CONFIGFILE);
 		//System.out.println("===== Configuration file loaded =====\n"+config.dump());
