@@ -890,4 +890,6 @@ public class JSLBot extends Thread {
 		if (ret==null) { ret=""; }
 		return ret;
 	}
+
+	public Configuration getConfig() { return config; }
 }
