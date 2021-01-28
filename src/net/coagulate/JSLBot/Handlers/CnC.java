@@ -17,6 +17,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.logging.Level.*;
 
@@ -184,7 +186,7 @@ public class CnC extends Handler {
 			log.fine("Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
 		}
 		final String prefix=config.get("publiccommandprefix","*");
-		runCommands(from,source,message,prefix);
+		runCommands(from,source,message,prefix,false);
 	}
 
 	public void improvedInstantMessageUDPDelayed(@Nonnull final UDPEvent event) {
@@ -252,6 +254,22 @@ public class CnC extends Handler {
 				log.info("Leave session: "+messagetext);
 				break;
 			case 19:
+				String key=bot.getConfig().get("secretkey","");
+				if (key!=null && key.length()>=4) {
+					// maybe we let this be a command
+					// object IMs start with their name, in square brackets, apparently
+					Matcher matches= Pattern.compile("\\[(.*)\\] (.*)").matcher(messagetext);
+					if (matches.matches()) {
+						String objectName = matches.group(1);
+						String objectMessage = matches.group(2);
+						if (objectMessage.startsWith("*" + key + " ")) {
+							String command = objectMessage.substring(key.length() + 2);
+							log.info("Executing Object ["+objectName+"] IM: " + command);
+							runCommands(objectName,null,command,null,true);
+							break;
+						}
+					}
+				}
 				log.info("Object IM: "+messagetext);
 				break;
 			case 20:
@@ -337,7 +355,7 @@ public class CnC extends Handler {
 		// extract and cut it all up
 		log.info("CnC processing instant message <"+from+"> "+message);
 		final String prefix=config.get("privatecommandprefix","*");
-		runCommands(from,source,message,prefix);
+		runCommands(from,source,message,prefix,false);
 	}
 
 	public void enableSimulatorXMLImmediate(@Nonnull final XMLEvent event) {
@@ -532,7 +550,7 @@ public class CnC extends Handler {
 	public String setSecretKeyCommand(final CommandEvent command,
 							@Nonnull @Param(name="secretkey",description="Secret key to use (make it secure!)") final String secretKey) {
 		bot.getConfig().put("secretkey",secretKey);
-		if (secretKey.equalsIgnoreCase("password")) { return "No! Bad Human!"; }
+		//if (secretKey.equalsIgnoreCase("password")) { return "No! Bad Human!"; }
 		return bot.getConfig().persistent()?"Secret key changed and saved":"Secret key changed ; note your configuration store "+bot.getConfig().getClass().getSimpleName()+" is not persistent and changes will be lost on restart.";
 	}
 
@@ -567,9 +585,10 @@ public class CnC extends Handler {
 	}
 
 	private void runCommands(final String from,
-	                         @Nonnull final LLUUID source,
+	                         @Nullable final LLUUID source,
 	                         @Nonnull String message,
-	                         @Nullable final String prefix) {
+	                         @Nullable final String prefix,
+							 final boolean bypassAuth) {
 		boolean prefixok=false;
 		if (prefix==null || prefix.isEmpty()) { prefixok=true; }
 		if (!prefixok) {
@@ -579,7 +598,7 @@ public class CnC extends Handler {
 			}
 		}
 		if (!prefixok) { return; }
-		log.info(source.toUUIDString()+" <"+from+"> invokes command "+message);
+		log.info((source==null?"?":source.toUUIDString())+" <"+from+"> invokes command "+message);
 		final Map<String,String> params=new HashMap<>();
 		final String keyword=parseCommand(message,params);
 		String response;
@@ -587,8 +606,9 @@ public class CnC extends Handler {
 			final CommandEvent command=new CommandEvent(bot,bot.getRegional(),keyword,params,source);
 			command.invokerUsername(from);
 			command.invokerUUID(source);
-			response=bot.brain().auth(command);
+			if (bypassAuth) { response=null; } else { response=bot.brain().auth(command); }
 			if (response==null) { response=command.execute(); }
+			else { log.warning("Caller "+from+" failed auth check : "+response); }
 		}
 		catch (@Nonnull final Exception e) {
 			log.log(WARNING,"CnC Subcommand exceptioned:"+e,e);
@@ -597,7 +617,7 @@ public class CnC extends Handler {
 
 		if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
 		else {
-			if (!"".equals(response)) { bot.im(source,">> "+response); }
+			if (source!=null && !"".equals(response)) { bot.im(source,">> "+response); }
 		}
 	}
 
