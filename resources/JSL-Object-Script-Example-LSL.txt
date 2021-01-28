@@ -1,0 +1,24 @@
+// An overdone example of how to control your JSLBot
+//
+// Firstly, set up a secret key (think password) for your objects : Instant Message your bot with
+// *setsecretkey secretkey password
+// but change password to something reasonable (remember, this password protects control of your bot!)
+// Note your secret key must be AT LEAST FOUR CHARACTERS or the system will behave like you have no secret key.  Also don't set it to "password".
+// Now set up the following variables:
+
+key BOT_UUID="321d1b7a-2d2c-40ee-89b9-6a3152e2808d";
+string BOT_KEY="password";
+
+// makes the bot send the IM
+jslBotMessage(key target,string message) {
+    llInstantMessage(BOT_UUID,"*"+BOT_KEY+" im uuid "+((string)target)+" message \""+message+"\"");
+}
+
+default
+{
+    // a really dumb driver to send you an instant message
+    touch_start(integer total_number)
+    {
+        jslBotMessage(llDetectedKey(0),"Ooh, you clicked my control prim, how exciting!");
+    }
+}
