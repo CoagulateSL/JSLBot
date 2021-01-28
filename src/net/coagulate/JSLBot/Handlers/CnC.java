@@ -527,6 +527,15 @@ public class CnC extends Handler {
 		return "Bot now longs for home of '"+bot.homeSickFor()+"'";
 	}
 
+	@Nonnull
+	@CmdHelp(description="Set the secret key")
+	public String setSecretKeyCommand(final CommandEvent command,
+							@Nonnull @Param(name="secretkey",description="Secret key to use (make it secure!)") final String secretKey) {
+		bot.getConfig().put("secretkey",secretKey);
+		return bot.getConfig().persistent()?"Secret key changed and saved":"Secret key changed ; note your configuration store "+bot.getConfig().getClass().getSimpleName()+" is not persistent and changes will be lost on restart.";
+	}
+
+
 	// ----- Internal Instance -----
 	private String parseCommand(@Nonnull final String message,
 	                            @Nonnull final Map<String,String> paramsout1) {
