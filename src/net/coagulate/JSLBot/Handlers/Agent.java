@@ -213,7 +213,7 @@ public class Agent extends Handler {
 	@Nonnull
 	@CmdHelp(description="Have the avatar sit on an object")
 	public String sitOnCommand(final CommandEvent command,
-									  @Nullable @Param(name="uuid",description="UUID of the prim to sit on") final String uuid) {
+									  @Nonnull @Param(name="uuid",description="UUID of the prim to sit on") final String uuid) {
 		AgentRequestSit sit=new AgentRequestSit(bot);
 		sit.btargetobject.vtargetid=new LLUUID(uuid);
 		sit.btargetobject.voffset=new LLVector3(0,0,0);
