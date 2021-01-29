@@ -258,7 +258,7 @@ public class CnC extends Handler {
 				if (key!=null && key.length()>=4) {
 					// maybe we let this be a command
 					// object IMs start with their name, in square brackets, apparently
-					Matcher matches= Pattern.compile("\\[(.*)\\] (.*)").matcher(messagetext);
+					Matcher matches= Pattern.compile("\\[(.*)\\] (.*)",Pattern.DOTALL).matcher(messagetext);
 					if (matches.matches()) {
 						String objectName = matches.group(1);
 						String objectMessage = matches.group(2);
