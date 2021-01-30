@@ -6,6 +6,7 @@ import net.coagulate.JSLBot.Packets.Types.U8;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -170,8 +171,11 @@ public abstract class Block {
         }
         if (List.class.isAssignableFrom(f.getType())) {
             try {
-                U8 qty=new U8();
-                qty.read(in);
+                U8 qty=new U8(0);
+                try { qty.read(in); }
+                catch (BufferUnderflowException ignored) {
+                    //System.out.println("Exception reading qty ; default zero");
+                }
                 List<Block> list=new ArrayList<>();
                 for (int i=0;i<qty.value;i++) {
                     Class<?> listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
@@ -190,7 +194,10 @@ public abstract class Block {
         // else, a LL type?
         try {
             Type value=(Type) f.getType().getDeclaredConstructor().newInstance();
-            value.read(in);
+            try { value.read(in); }
+            catch (BufferUnderflowException ignored) {
+                //System.out.println("Buffer underflow reading a data type "+f.getType());
+            }
             f.set(this,value);
         } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             throw new IllegalArgumentException("Failed to set class "+this.getClass().getName()+" field "+f.getName()+" type "+f.getType().getName(),e);
