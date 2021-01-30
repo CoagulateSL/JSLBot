@@ -17,8 +17,6 @@ public class Sink extends Handler {
 	// ---------- INSTANCE ----------
 	public void simStatsUDPDelayed(final UDPEvent event) {}
 
-	public void avatarAppearanceUDPDelayed(final UDPEvent event) {}
-
 	public void attachedSoundUDPDelayed(final UDPEvent event) {}
 
 	public void viewerEffectUDPDelayed(final UDPEvent event) {}
