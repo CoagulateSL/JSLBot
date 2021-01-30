@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -130,9 +131,18 @@ public final class CAPS extends Thread {
 				wr.write(postdata);
 			}
 		}
-		final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
-		final String read=s.next();
-		return (LLSDMap) new LLSD(read).getFirst();
+		try {
+			final Scanner s = new Scanner(connection.getInputStream()).useDelimiter("\\A");
+			final String read = s.next();
+			return (LLSDMap) new LLSD(read).getFirst();
+		} catch (IOException e) {
+			InputStream errorStream = connection.getErrorStream();
+			if (errorStream!=null) {
+				final Scanner errs = new Scanner(errorStream).useDelimiter("\\A");
+				throw new IOException(((LLSDMap)(new LLSD(errs.next()).getFirst())).get("error").toString(),e);
+			} else { System.out.println("Error stream is null"); }
+			throw e;
+		}
 	}
 
 	public String regionName() { return circuit.getRegionName(); }
@@ -182,6 +192,10 @@ public final class CAPS extends Thread {
 	private LLSDMap capabilities() {
 		if (capabilities==null) { throw new IllegalStateException("Accessing capabilities before it is ready"); }
 		return capabilities;
+	}
+
+	public void dump() {
+		System.out.println(capabilities().toXML());
 	}
 
 	/**
