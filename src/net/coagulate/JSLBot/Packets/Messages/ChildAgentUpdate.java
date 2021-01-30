@@ -23,6 +23,8 @@ public class ChildAgentUpdate extends Block implements Message {
 	public List<ChildAgentUpdate_bAgentAccess> bagentaccess;
 	@Sequence(7)
 	public List<ChildAgentUpdate_bAgentInfo> bagentinfo;
+	@Sequence(8)
+	public List<ChildAgentUpdate_bAgentInventoryHost> bagentinventoryhost;
 	public ChildAgentUpdate(){}
 	public ChildAgentUpdate(JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();

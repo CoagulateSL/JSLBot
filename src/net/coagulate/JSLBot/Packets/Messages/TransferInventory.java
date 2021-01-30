@@ -11,4 +11,6 @@ public class TransferInventory extends Block implements Message {
 	public TransferInventory_bInfoBlock binfoblock=new TransferInventory_bInfoBlock();
 	@Sequence(1)
 	public List<TransferInventory_bInventoryBlock> binventoryblock;
+	@Sequence(2)
+	public TransferInventory_bValidationBlock bvalidationblock=new TransferInventory_bValidationBlock();
 }

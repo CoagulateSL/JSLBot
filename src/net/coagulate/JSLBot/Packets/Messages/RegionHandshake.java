@@ -13,4 +13,6 @@ public class RegionHandshake extends Block implements Message {
 	public RegionHandshake_bRegionInfo2 bregioninfo2=new RegionHandshake_bRegionInfo2();
 	@Sequence(2)
 	public RegionHandshake_bRegionInfo3 bregioninfo3=new RegionHandshake_bRegionInfo3();
+	@Sequence(3)
+	public List<RegionHandshake_bRegionInfo4> bregioninfo4;
 }

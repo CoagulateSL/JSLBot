@@ -9,4 +9,6 @@ public class ScriptQuestion extends Block implements Message {
 	public final String getName() { return "ScriptQuestion"; }
 	@Sequence(0)
 	public ScriptQuestion_bData bdata=new ScriptQuestion_bData();
+	@Sequence(1)
+	public ScriptQuestion_bExperience bexperience=new ScriptQuestion_bExperience();
 }

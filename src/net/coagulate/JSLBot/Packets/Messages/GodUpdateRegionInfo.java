@@ -11,6 +11,8 @@ public class GodUpdateRegionInfo extends Block implements Message {
 	public GodUpdateRegionInfo_bAgentData bagentdata=new GodUpdateRegionInfo_bAgentData();
 	@Sequence(1)
 	public GodUpdateRegionInfo_bRegionInfo bregioninfo=new GodUpdateRegionInfo_bRegionInfo();
+	@Sequence(2)
+	public List<GodUpdateRegionInfo_bRegionInfo2> bregioninfo2;
 	public GodUpdateRegionInfo(){}
 	public GodUpdateRegionInfo(JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();

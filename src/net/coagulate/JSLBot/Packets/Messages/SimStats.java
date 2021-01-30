@@ -13,6 +13,8 @@ public class SimStats extends Block implements Message {
 	public List<SimStats_bStat> bstat;
 	@Sequence(2)
 	public SimStats_bPidStat bpidstat=new SimStats_bPidStat();
+	@Sequence(3)
+	public List<SimStats_bRegionInfo> bregioninfo;
     public Float getStat(SimStat stat) {
         SimStat[] lookup = SimStat.values();
         for (SimStats_bStat astat:bstat) {

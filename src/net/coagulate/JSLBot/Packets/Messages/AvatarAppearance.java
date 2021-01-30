@@ -13,4 +13,8 @@ public class AvatarAppearance extends Block implements Message {
 	public AvatarAppearance_bObjectData bobjectdata=new AvatarAppearance_bObjectData();
 	@Sequence(2)
 	public List<AvatarAppearance_bVisualParam> bvisualparam;
+	@Sequence(3)
+	public List<AvatarAppearance_bAppearanceData> bappearancedata;
+	@Sequence(4)
+	public List<AvatarAppearance_bAppearanceHover> bappearancehover;
 }

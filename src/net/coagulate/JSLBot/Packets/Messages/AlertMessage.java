@@ -11,4 +11,6 @@ public class AlertMessage extends Block implements Message {
 	public AlertMessage_bAlertData balertdata=new AlertMessage_bAlertData();
 	@Sequence(1)
 	public List<AlertMessage_bAlertInfo> balertinfo;
+	@Sequence(2)
+	public List<AlertMessage_bAgentInfo> bagentinfo;
 }

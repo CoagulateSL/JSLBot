@@ -9,4 +9,6 @@ public class SimStatus extends Block implements Message {
 	public final String getName() { return "SimStatus"; }
 	@Sequence(0)
 	public SimStatus_bSimStatus bsimstatus=new SimStatus_bSimStatus();
+	@Sequence(1)
+	public SimStatus_bSimFlags bsimflags=new SimStatus_bSimFlags();
 }

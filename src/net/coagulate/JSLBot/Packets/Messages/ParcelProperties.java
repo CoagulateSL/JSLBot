@@ -11,4 +11,6 @@ public class ParcelProperties extends Block implements Message {
 	public ParcelProperties_bParcelData bparceldata=new ParcelProperties_bParcelData();
 	@Sequence(1)
 	public ParcelProperties_bAgeVerificationBlock bageverificationblock=new ParcelProperties_bAgeVerificationBlock();
+	@Sequence(2)
+	public ParcelProperties_bRegionAllowAccessBlock bregionallowaccessblock=new ParcelProperties_bRegionAllowAccessBlock();
 }

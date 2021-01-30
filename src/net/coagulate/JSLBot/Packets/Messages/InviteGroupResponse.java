@@ -9,4 +9,6 @@ public class InviteGroupResponse extends Block implements Message {
 	public final String getName() { return "InviteGroupResponse"; }
 	@Sequence(0)
 	public InviteGroupResponse_bInviteData binvitedata=new InviteGroupResponse_bInviteData();
+	@Sequence(1)
+	public InviteGroupResponse_bGroupData bgroupdata=new InviteGroupResponse_bGroupData();
 }

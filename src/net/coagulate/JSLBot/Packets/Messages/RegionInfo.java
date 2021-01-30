@@ -13,6 +13,8 @@ public class RegionInfo extends Block implements Message {
 	public RegionInfo_bRegionInfo bregioninfo=new RegionInfo_bRegionInfo();
 	@Sequence(2)
 	public RegionInfo_bRegionInfo2 bregioninfo2=new RegionInfo_bRegionInfo2();
+	@Sequence(3)
+	public List<RegionInfo_bRegionInfo3> bregioninfo3;
 	public RegionInfo(){}
 	public RegionInfo(JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();

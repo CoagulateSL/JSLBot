@@ -9,6 +9,8 @@ public class ObjectFlagUpdate extends Block implements Message {
 	public final String getName() { return "ObjectFlagUpdate"; }
 	@Sequence(0)
 	public ObjectFlagUpdate_bAgentData bagentdata=new ObjectFlagUpdate_bAgentData();
+	@Sequence(1)
+	public List<ObjectFlagUpdate_bExtraPhysics> bextraphysics;
 	public ObjectFlagUpdate(){}
 	public ObjectFlagUpdate(JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();

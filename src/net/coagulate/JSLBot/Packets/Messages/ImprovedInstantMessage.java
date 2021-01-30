@@ -11,6 +11,8 @@ public class ImprovedInstantMessage extends Block implements Message {
 	public ImprovedInstantMessage_bAgentData bagentdata=new ImprovedInstantMessage_bAgentData();
 	@Sequence(1)
 	public ImprovedInstantMessage_bMessageBlock bmessageblock=new ImprovedInstantMessage_bMessageBlock();
+	@Sequence(2)
+	public ImprovedInstantMessage_bEstateBlock bestateblock=new ImprovedInstantMessage_bEstateBlock();
 	public ImprovedInstantMessage(){}
 	public ImprovedInstantMessage(JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();
