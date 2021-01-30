@@ -11,6 +11,7 @@ import net.coagulate.JSLBot.Packets.Types.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.DateFormat;
@@ -553,6 +554,60 @@ public class CnC extends Handler {
 		if (secretKey.equalsIgnoreCase("password")) { return "No! Bad Human!"; }
 		return bot.getConfig().persistent()?"Secret key changed and saved":"Secret key changed ; note your configuration store "+bot.getConfig().getClass().getSimpleName()+" is not persistent and changes will be lost on restart.";
 	}
+
+	/*
+	@Nonnull @CmdHelp(description="Test command")
+	public String testCommand(final CommandEvent command) throws IOException {
+		bot.completeAgentMovement();
+		bot.agentUpdate(true);
+		//bot.getCAPS().dump();
+		final LLSDMap req=new LLSDMap();
+		req.put("cof_version",new LLSDInteger(132));
+		final LLSD llsd=new LLSD(req);
+		final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd);
+		return "Test command executed "+response.toXML();
+	}
+	*/
+
+	boolean hasCoffed=false;
+	public void avatarAppearanceUDPDelayed(final UDPEvent event) {
+		if (hasCoffed) { return; }
+		AvatarAppearance app=(AvatarAppearance)(event.body());
+		if (app.bappearancedata.size()==0) {
+			//System.out.println("Skipping no COF listed");
+			return;
+		}
+		int cofVersion=app.bappearancedata.get(0).vcofversion.value;
+		if (cofVersion==0) {
+			//System.out.println("Skip COF 0");
+			return;
+		}
+		//System.out.println("REQUESTING COF "+cofVersion);
+		final LLSDMap req=new LLSDMap();
+		req.put("cof_version",new LLSDInteger(cofVersion));
+		LLSD llsd=new LLSD(req);
+		try { final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd); }
+		catch (IOException e) {
+			String error=e.getMessage();
+			Matcher matcher=Pattern.compile("Cof Version Mismatch: [0-9]+ != ([0-9]+)").matcher(error);
+			if (matcher.matches()) {
+				//System.out.println("Retrying for COF "+matcher.group(1));
+				req.put("cof_version",new LLSDInteger(Integer.parseInt(matcher.group(1))));
+				llsd=new LLSD(req);
+				try { final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd); }
+				catch (IOException f) {
+					log.log(WARNING,"Failed to fetch Appearance COF again "+matcher.group(1)+" - "+f.toString(),f);
+					return;
+				}
+				hasCoffed=true;
+				return;
+			} else { log.log(WARNING,"Cof retrier failed to match error message:"+error); }
+			log.log(WARNING,"Failed to fetch Appearance COF "+cofVersion+" - "+e.toString(),e);
+			return;
+		}
+		hasCoffed=true;
+	}
+
 
 
 	// ----- Internal Instance -----
