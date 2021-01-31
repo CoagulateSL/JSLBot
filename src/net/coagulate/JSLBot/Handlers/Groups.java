@@ -153,7 +153,9 @@ public class Groups extends Handler {
 			if (potential==group) { signalObject=potential; }
 		}
 		grouproles.put(group,roles);
-		if (signalObject!=null) { synchronized(signalObject) { signalObject.notifyAll(); } }
+		if (signalObject!=null) { //noinspection SynchronizationOnLocalVariableOrMethodParameter
+			// the warning is correct, but, we stashed the local scoped variable in the map
+			synchronized(signalObject) { signalObject.notifyAll(); } }
 	}
 
 	@Nonnull
@@ -178,6 +180,9 @@ public class Groups extends Handler {
 		req.bgroupdata.vgroupid=target;
 		req.bgroupdata.vrequestid=requestID;
 		bot.send(req,true);
+		//noinspection SynchronizationOnLocalVariableOrMethodParameter
+		// the inspection warning is correct, but we pulled ourReference from a shared map into a local variable
+		// (partly because we're about to replace it in the map we pulled it from)
 		synchronized (ourReference) {
 			try { ourReference.wait(15000); }
 			catch (InterruptedException e) { return "1 - Wait was interrupted"; }
@@ -190,7 +195,7 @@ public class Groups extends Handler {
 		return reply.toString();
 	}
 
-	public class GroupRole {
+	public static class GroupRole {
 		public LLUUID roleID;
 		public String name;
 		public String title;
