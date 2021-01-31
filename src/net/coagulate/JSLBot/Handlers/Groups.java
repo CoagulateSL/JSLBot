@@ -22,6 +22,7 @@ public class Groups extends Handler {
 
 	final Map<LLUUID,LLSDMap> groupmembership=new HashMap<>();
 	private final Map<LLUUID,GroupData> groups=new HashMap<>();
+	private final Map<Long,Set<GroupRole>> grouproles=new HashMap<>();
 
 	public Groups(@Nonnull final JSLBot bot,
 	              final Configuration config) {
@@ -139,6 +140,73 @@ public class Groups extends Handler {
 		}
 	}
 
+	public void groupRoleDataReplyUDPImmediate(@Nonnull final UDPEvent event) {
+		final GroupRoleDataReply reply=(GroupRoleDataReply) event.body();
+		// only processing the role data at the moment!
+		long group=reply.bgroupdata.vgroupid.toLong();
+		Set<GroupRole> roles=new HashSet<>();
+		for (GroupRoleDataReply_bRoleData role:reply.broledata) {
+			roles.add(new GroupRole(role.vroleid,role.vname.toString(),role.vtitle.toString(),role.vdescription.toString(),role.vpowers.value,role.vmembers.value));
+		}
+		Long signalObject=null;
+		for (Long potential:grouproles.keySet()) {
+			if (potential==group) { signalObject=potential; }
+		}
+		grouproles.put(group,roles);
+		if (signalObject!=null) { synchronized(signalObject) { signalObject.notifyAll(); } }
+	}
+
+	@Nonnull
+	@CmdHelp(description = "Returns a list of a group's roles")
+	public String groupRolesCommand(final CommandEvent event,
+									@Nullable @Param(name="uuid",description="Group UUID to query") final String uuid,
+									@Nullable @Param(name="name",description="Group name to query, if UUID not supplied") final String name) {
+		if (uuid==null && name==null) { return "1 - No group parameter supplied"; }
+		LLUUID target;
+		if (uuid==null || uuid.isEmpty()) {
+			if (name==null) { return "1 - No group parameter supplied"; }
+			target=findGroupUUID(name);
+		}
+		else {
+			target=new LLUUID(uuid);
+		}
+		if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
+		final GroupRoleDataRequest req=new GroupRoleDataRequest(bot);
+		Long ourReference=target.toLong();
+		grouproles.put(ourReference,null);
+		LLUUID requestID=LLUUID.random();
+		req.bgroupdata.vgroupid=target;
+		req.bgroupdata.vrequestid=requestID;
+		bot.send(req,true);
+		synchronized (ourReference) {
+			try { ourReference.wait(15000); }
+			catch (InterruptedException e) { return "1 - Wait was interrupted"; }
+		}
+		if (grouproles.get(ourReference)==null) { return "1 - No response received within timeout"; }
+		StringBuilder reply=new StringBuilder("Group Roles for group UUID ").append(target.toUUIDString());
+		for (GroupRole role:grouproles.get(ourReference)) {
+			reply.append("\n").append(role.name).append(" - ").append(role.roleID.toUUIDString());
+		}
+		return reply.toString();
+	}
+
+	public class GroupRole {
+		public LLUUID roleID;
+		public String name;
+		public String title;
+		public String description;
+		public long powers;
+		public int members;
+		public GroupRole(LLUUID roleID,String name,String title,String description,long powers,int members) {
+			this.roleID=roleID;
+			this.name=name;
+			this.title=title;
+			this.description=description;
+			this.powers=powers;
+			this.members=members;
+		}
+	}
+
 	public void agentGroupDataUpdateXMLDelayed(@Nonnull final XMLEvent event) {
 		final LLSDMap body=event.map();
 		final LLSDArray groupslist=(LLSDArray) body.get("GroupData");
@@ -220,9 +288,10 @@ public class Groups extends Handler {
 	@CmdHelp(description="Selects a group as active")
 	public String activateGroupCommand(final CommandEvent event,
 	                                   @Nullable @Param(name="uuid",description="Group UUID to activate (or zero UUID for none)") final String uuid,
-	                                   @Nonnull @Param(name="name",description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final String name) {
+	                                   @Nullable @Param(name="name",description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final String name) {
 		LLUUID target;
 		if (uuid==null || uuid.isEmpty()) {
+			if (name==null) { return "1 - No group parameter supplied"; }
 			target=findGroupUUID(name);
 		}
 		else {
