@@ -2,6 +2,7 @@ package net.coagulate.JSLBot.Packets.Types;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
@@ -21,6 +22,28 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
 
     public LLUUID(ByteBuffer buffer) {
         read(buffer);
+    }
+
+    public static LLUUID random() {
+        // apparently UUIDs might be used as arbitary request markers.
+        String random="";
+        for (int i=0;i<32;i++) {
+            random=random+randomHexChar();
+        }
+        return new LLUUID(random);
+    }
+
+    private static String randomHexChar() {
+        int rand=ThreadLocalRandom.current().nextInt(16);
+        if (rand<10) { return ""+rand; }
+        // lazy
+        if (rand==10) { return "A"; }
+        if (rand==11) { return "B"; }
+        if (rand==12) { return "C"; }
+        if (rand==13) { return "D"; }
+        if (rand==14) { return "E"; }
+        if (rand==15) { return "F"; }
+        throw new AssertionError("A random from 0-15 was outside 0-15 : "+rand);
     }
 
     @Override
