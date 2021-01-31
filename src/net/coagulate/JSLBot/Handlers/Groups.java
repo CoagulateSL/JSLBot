@@ -154,7 +154,8 @@ public class Groups extends Handler {
 		}
 		grouproles.put(group,roles);
 		if (signalObject!=null) {
-			// the warning is correct, but, we stashed the local scoped variable in the map
+			// the inspection warning is correct, but we pulled ourReference from a shared map into a local variable
+			// (partly because we're about to replace it in the map we pulled it from)
 			//noinspection SynchronizationOnLocalVariableOrMethodParameter
 			synchronized(signalObject) { signalObject.notifyAll(); } }
 	}
@@ -181,8 +182,7 @@ public class Groups extends Handler {
 		req.bgroupdata.vgroupid=target;
 		req.bgroupdata.vrequestid=requestID;
 		bot.send(req,true);
-		// the inspection warning is correct, but we pulled ourReference from a shared map into a local variable
-		// (partly because we're about to replace it in the map we pulled it from)
+		// the warning is correct, but, we stashed the local scoped variable in the map
 		//noinspection SynchronizationOnLocalVariableOrMethodParameter
 		synchronized (ourReference) {
 			try { ourReference.wait(15000); }
