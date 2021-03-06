@@ -8,6 +8,7 @@ import net.coagulate.JSLBot.Packets.Types.U32BE;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
@@ -105,7 +106,10 @@ public class Packet {
      *
      * @return The content message
      */
-    public Message message() { return message; }
+    @Nullable
+    public Message messageNullable() { return message; }
+    @Nonnull
+    public Message message() { if (message==null) { throw new NullPointerException("Packet message is null"); } return message; }
     
     /** Write this packet into a ByteBuffer.
      *
@@ -140,7 +144,7 @@ public class Packet {
                 (new U32BE(getId())).write(out); break;
             default: throw new IllegalArgumentException("Frequency invalid "+getFrequency());
         }
-        message().writeBytes(out);
+        messageNullable().writeBytes(out);
     }
 
     /** Convert a byte stream into Packet
@@ -252,7 +256,7 @@ public class Packet {
             response=new Packet(message);
             response.flags=flags;
             response.sequence=sequence;
-            response.message().readBytes(source);
+            response.messageNullable().readBytes(source);
             //System.out.println(source.position()+"/"+source.capacity()+" (ZC:"+response.getZeroCode());
             // appended acks? :P
             if (response.getAck()) {
@@ -306,17 +310,17 @@ public class Packet {
         return total;
     }
     
-    public int getId() { return message().getId(); }
-    public int getFrequency() { return message().getFrequency(); }
-    public String getName() { return message().getName(); }
+    public int getId() { return messageNullable().getId(); }
+    public int getFrequency() { return messageNullable().getFrequency(); }
+    public String getName() { return messageNullable().getName(); }
     
     @Override
     public String toString() { return dump(); }
 
-    public int messageSize() { return message().size(); }
+    public int messageSize() { return messageNullable().size(); }
 
 
-    public String messageDump() { return message().dump(); }
+    public String messageDump() { return messageNullable().dump(); }
 
     public byte getFlags() {
         return flags;

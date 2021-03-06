@@ -611,7 +611,7 @@ public final class Circuit extends Thread implements Closeable {
 			return;
 		}
 		boolean internal=false; // circuit control packets.  only for stuff that should never be propagated.  acks and pings basically.
-		final Message m=p.message();
+		final Message m=p.messageNullable();
 		//System.out.println(m.getClass().getSimpleName());
 		if (m instanceof PacketAck) {
 			// packetacks are just bunches of acks.  but might be zerocoded and little endian =)
