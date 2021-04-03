@@ -201,7 +201,7 @@ public final class Circuit extends Thread implements Closeable {
 					}
 					final Packet p;
 					p=Packet.decode(rx);
-					if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
+					if (Constants.PACKET_ACCOUNTING_BY_MESSAGE && bot!=null) {
 						bot.accountMessageIn(p.message().getId(),receive.getLength());
 					}
 					for (final Integer rxack: p.appendedacks) { receivedAck(rxack); }
