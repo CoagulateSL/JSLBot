@@ -85,6 +85,8 @@ public class EventQueue extends Thread {
 
 	public String getRegionName() { return caps().circuit().getRegionName(); }
 
+	private boolean shutdown=false;
+	public void shutdown() { shutdown=true; }
 	// ----- Internal Instance -----
 	@SuppressWarnings("BusyWait")
 	private void runMain() throws Exception {
@@ -94,7 +96,7 @@ public class EventQueue extends Thread {
 		int id=0;
 		final URL url=new URL(eventqueue);
 		int errorcount=0;
-		while (true) { // we could stop on circuit exit or some other things, but it seems to work fine just waiting for the inevitable 404
+		while (!shutdown) { // we could stop on circuit exit or some other things, but it seems to work fine just waiting for the inevitable 404
 			try {
 				// format request document
 				final LLSDMap post=new LLSDMap();
@@ -170,6 +172,7 @@ public class EventQueue extends Thread {
 				log.fine("IOException during Event Queue poll, errorcount is "+errorcount+" / 10 : "+e.getLocalizedMessage());
 			}
 		}
+		log.fine("Event queue was shut down");
 	}
 
 	private void process(@Nonnull final LLSDArray events) {

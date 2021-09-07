@@ -556,6 +556,7 @@ public class JSLBot extends Thread {
 		for (final Circuit c: closeme) {
 			try { c.close(); } catch (@Nonnull final Exception ignored) {}
 		}
+		getCircuits().clear();
 		brain.stopProcrastinating();  // release the main thread
 	}
 

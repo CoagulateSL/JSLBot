@@ -129,6 +129,10 @@ public final class Circuit extends Thread implements Closeable {
 		if (caps==null) { throw new IllegalStateException("CAPS is not currently configured for this circuit"); }
 		return caps;
 	}
+	@Nullable
+	public CAPS getCAPSNullable() {
+		return caps;
+	}
 
 	@Nonnull
 	public String getSimIPAndPort() { return simip+":"+simport; }
@@ -381,6 +385,13 @@ public final class Circuit extends Thread implements Closeable {
 		synchronized (lockdisconnecting) {
 			if (disconnecting) { return; }
 			disconnecting=true;
+		}
+		CAPS ourcaps=getCAPS();
+		if (ourcaps!=null) {
+			EventQueue oureventqueue=ourcaps.eventqueue();
+			if (oureventqueue!=null) {
+				oureventqueue.shutdown();
+			}
 		}
 		final LogoutRequest l=new LogoutRequest(); //debug(owner,"Logout Request exceptioned - ",e); }
 		l.bagentdata.vagentid=bot.getUUID();
