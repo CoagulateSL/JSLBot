@@ -886,11 +886,7 @@ public class JSLBot extends Thread {
 		public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
 	}
 
-	public String getHomeSeat() {
-		String ret=config.get("homeseat","");
-		if (ret==null) { ret=""; }
-		return ret;
-	}
+	public String getHomeSeat() { return config.get("homeseat",""); }
 
 	public Configuration getConfig() { return config; }
 }
