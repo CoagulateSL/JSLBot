@@ -38,7 +38,7 @@ public final class Circuit extends Thread implements Closeable {
 	private final Object lockdisconnecting=new Object();
 	private final int circuitsequence;
 	// reference to the agent we're a circuit for
-	private final JSLBot bot;
+	private JSLBot bot;
 	// the primary all important region handle
 	@Nonnull
 	private final Long regionhandle;
@@ -408,6 +408,8 @@ public final class Circuit extends Thread implements Closeable {
 			log.log(Level.FINE,"We have requested closure of circuit to {0}",regionname);
 		}
 		disconnected=true;
+		// disconnect us from the bot so nothing can reach back up, or at least it will NPE when it tries (debugging reconnection)
+		bot=null;
 	}
 
 	public long handle() {
