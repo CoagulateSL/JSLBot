@@ -386,7 +386,7 @@ public final class Circuit extends Thread implements Closeable {
 			if (disconnecting) { return; }
 			disconnecting=true;
 		}
-		CAPS ourcaps=getCAPS();
+		CAPS ourcaps=getCAPSNullable();
 		if (ourcaps!=null) {
 			EventQueue oureventqueue=ourcaps.eventqueue();
 			if (oureventqueue!=null) {
@@ -402,7 +402,7 @@ public final class Circuit extends Thread implements Closeable {
 		try {
 			socket.close();
 		}
-		catch (@Nonnull final Exception e) { }//debug(owner,"Socket closure exceptioned - ",e); }
+		catch (@Nonnull final Exception ignored) { }//debug(owner,"Socket closure exceptioned - ",e); }
 		if (!disconnectlogged) {
 			disconnectlogged=true;
 			log.log(Level.FINE,"We have requested closure of circuit to {0}",regionname);
