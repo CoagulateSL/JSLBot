@@ -39,7 +39,7 @@ public class CommandEvent extends Event {
 	private LLUUID invokeruuid;
 
 	public CommandEvent(@Nonnull final JSLBot bot,
-	                    @Nonnull final Regional r,
+	                    @Nullable final Regional r,
 	                    @Nonnull final String name,
 	                    final Map<String,String> parameters,
 	                    final LLUUID respondto) {
