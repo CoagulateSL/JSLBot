@@ -205,8 +205,11 @@ public final class Circuit extends Thread implements Closeable {
 					}
 					final Packet p;
 					p=Packet.decode(rx);
-					if (Constants.PACKET_ACCOUNTING_BY_MESSAGE && bot!=null) {
-						bot.accountMessageIn(p.message().getId(),receive.getLength());
+					if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
+						JSLBot botcopy = bot;
+						if (botcopy != null) {
+							botcopy.accountMessageIn(p.message().getId(), receive.getLength());
+						}
 					}
 					for (final Integer rxack: p.appendedacks) { receivedAck(rxack); }
 					//if (p.getReliable()) { System.out.println("ACK REQUIRED IN:"+p.getName()); }
@@ -354,12 +357,13 @@ public final class Circuit extends Thread implements Closeable {
             e.printStackTrace(); // show me!
         }*/
 		//System.out.println("TX: "+p.getName());
+		JSLBot botcopy = bot;
 		if (Constants.PACKET_ACCOUNTING) {
 			bytesout.addAndGet(packet.getLength());
-			bot.bytesout.addAndGet(packet.getLength());
+			if (botcopy!=null) { botcopy.bytesout.addAndGet(packet.getLength()); }
 		}
 		if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
-			bot.accountMessageOut(p.getId(),packet.getLength());
+			if (botcopy!=null) { botcopy.accountMessageOut(p.getId(),packet.getLength()); }
 		}
 		try { socket.send(packet); }
 		catch (@Nonnull final IOException e) {
