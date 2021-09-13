@@ -277,17 +277,18 @@ public final class Circuit extends Thread implements Closeable {
 	 * @param reliable Send as reliable/require ACKs
 	 */
 	public void send(final Message m,
-	                 final boolean reliable) {
+	                 final boolean reliable) throws IllegalStateException {
 		final Packet p=new Packet(m);
 		p.setReliable(reliable);
-		send(p);
+		try { send(p); }
+		catch (IOException e) { this.close(); throw new IllegalStateException("Errors closed the circuit",e); }
 	}
 
 	/* Send a message, unreliably */
 	public void send(final Message m) { send(m,false); }
 
 	/* Send a packet */
-	public void send(@Nonnull final Packet p) {
+	public void send(@Nonnull final Packet p) throws IOException {
 		final List<Integer> sending=new ArrayList<>(); // list of acks we'll append.
 		// synchronise up around the ack queue, strip it , aka "claim it"...
 		synchronized (ackqueue) {
@@ -365,12 +366,15 @@ public final class Circuit extends Thread implements Closeable {
 		if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
 			if (botcopy!=null) { botcopy.accountMessageOut(p.getId(),packet.getLength()); }
 		}
-		try { socket.send(packet); }
+		try { socket.send(packet); errors=0; }
 		catch (@Nonnull final IOException e) {
 			log.log(SEVERE,"Error transmitting packet "+e,e);
+			errors++;
+			if (errors>=3) { throw new IOException("Circuit to "+getRegionName()+" failed 3x",e); }
 		}
 		packetrate++;
 	}
+	private int errors=0;
 
 	/**
 	 * Produce a reliable sequence counter for packets
@@ -552,8 +556,10 @@ public final class Circuit extends Thread implements Closeable {
 					//System.out.println("In retransmit with packetrate "+packetrate);
 					log.finer("Retransmitting packet "+p.getSequence());
 					p.setResent(true);
-					send(p);
-					inflight.put(p,new Date());
+					try {
+						send(p);
+						inflight.put(p, new Date());
+					} catch (IOException e) { this.close(); throw new IllegalStateException("Failed to send a retransmit",e); }
 				}
 			}
 		}
@@ -681,7 +687,8 @@ public final class Circuit extends Thread implements Closeable {
 			final Packet replypacket=new Packet(reply);
 			replypacket.setReliable(true);
 			replypacket.setZeroCode(true);
-			send(replypacket);
+			try { send(replypacket); }
+			catch (IOException e) { throw new IllegalStateException("Circuit failed during handshake, this is probably fatal",e); }
 			// open our eyes
 			bot.setMaxFOV();
 			bot.agentUpdate();

@@ -348,7 +348,11 @@ public class JSLBot extends Thread {
 	 */
 	public void send(@Nonnull final Packet p) {
 		if (primary==null) { throw new IllegalStateException("Primary circuit is not defined or connected"); }
-		primary.send(p);
+		try { primary.send(p); }
+		catch (IOException e) {
+			this.setReconnect();
+			throw new IllegalStateException("Primary circuit was closed",e);
+		}
 	}
 
 	/**
