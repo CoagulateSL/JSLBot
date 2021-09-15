@@ -161,7 +161,7 @@ public abstract class BotUtils {
 	public static String unravel(@Nullable Throwable t) {
 		final StringBuilder response=new StringBuilder();
 		while (t!=null) {
-			response.append("\n[").append(t.getLocalizedMessage()).append("]");
+			response.append(" - [").append(t.getLocalizedMessage()).append("]");
 			t=t.getCause();
 		}
 		return response.toString();
