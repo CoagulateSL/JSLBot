@@ -76,9 +76,14 @@ public class EventQueue extends Thread {
 		catch (@Nonnull final Exception e) {
 			log.log(SEVERE,"Event queue crashed: "+e,e);
 		}
-		if (bot().circuit().getCAPS().eventqueue()==this && bot().connected()) {
+		JSLBot mybot=botNullable();
+		if (mybot==null) {
+			log.log(SEVERE,"CRITICAL (consequential) FAILURE - primary caps is closed, bot has already disconnected from us");
+			return;
+		}
+		if (mybot.circuit().getCAPS().eventqueue()==this && mybot.connected()) {
 			log.log(SEVERE,"CRITICAL FAILURE - primary caps circuit is closed, this is reason to reconnect");
-			bot().shutdown("Primary event queue CAPS failed.");
+			mybot.shutdown("Primary event queue CAPS failed.");
 		}
 	}
 
