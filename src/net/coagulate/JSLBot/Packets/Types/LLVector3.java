@@ -10,6 +10,7 @@ import java.nio.ByteOrder;
  */
 public class LLVector3 extends Type{
 
+    @Nonnull
     public static LLVector3 random() {
         LLVector3 v=new LLVector3();
         v.x=(float) (Math.random()*10.0-5.0);
@@ -21,7 +22,7 @@ public class LLVector3 extends Type{
     public float y=0;
     public float z=0;
 
-    public LLVector3(ByteBuffer buffer) {
+    public LLVector3(@Nonnull ByteBuffer buffer) {
         read(buffer);
     }
 
@@ -41,14 +42,14 @@ public class LLVector3 extends Type{
     public LLVector3(float x,float y,float z) {
         this.x=x; this.y=y; this.z=z;
     }
-    public LLVector3(String x,String y,String z){
+    public LLVector3(@Nonnull String x, @Nonnull String y, @Nonnull String z){
         this.x=Float.parseFloat(x);
         this.y=Float.parseFloat(y);
         this.z=Float.parseFloat(z);
     }
 
     @Override
-    public void read(ByteBuffer in) {
+    public void read(@Nonnull ByteBuffer in) {
         in.order(ByteOrder.LITTLE_ENDIAN);
         x=in.getFloat();
         y=in.getFloat();
@@ -56,13 +57,14 @@ public class LLVector3 extends Type{
     }
 
     @Override
-    public void write(ByteBuffer out) {
+    public void write(@Nonnull ByteBuffer out) {
         out.order(ByteOrder.LITTLE_ENDIAN);
         out.putFloat(x);
         out.putFloat(y);
         out.putFloat(z);
     }
 
+    @Nonnull
     @Override
     public String dump() {
         return "<"+x+","+y+","+z+">";

@@ -154,10 +154,10 @@ public class Teleportation extends Handler {
 	@Nonnull
 	@CmdHelp(description="Initiate a teleport to a target location")
 	public String teleportCommand(@Nonnull final CommandEvent command,
-	                              @Param(name="region",description="Name of region to teleport to") final String region,
-	                              @Param(name="x",description="X Co-ordinate to request") final String x,
-	                              @Param(name="y",description="Y Co-ordinate to request") final String y,
-	                              @Param(name="z",description="Z Co-ordinate to request") final String z) {
+								  @Param(name="region",description="Name of region to teleport to") final String region,
+								  @Nonnull @Param(name="x", description="X Co-ordinate to request") final String x,
+								  @Nonnull @Param(name="y", description="Y Co-ordinate to request") final String y,
+								  @Nonnull @Param(name="z", description="Z Co-ordinate to request") final String z) {
 		final Regional r=command.region();
 		final TeleportLocationRequest tp=new TeleportLocationRequest();
 		tp.bagentdata.vagentid=bot.getUUID();

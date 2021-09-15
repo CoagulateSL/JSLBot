@@ -20,6 +20,7 @@ public class Avatars extends Handler {
     private static final Map<LLUUID,String> resolvedUUIDs=new HashMap<>();
     private static final Object resolveUUIDLock=new Object();
 
+    @Nonnull
     @JSLBot.CmdHelp(description="Look up an Avatar's profile from UUID")
     public String resolveUUIDCommand(final CommandEvent command,
                                       @Nullable @JSLBot.Param(name="uuid", description="UUID of Avatar to look up, or comma separated list of UUIDs") String uuid) {
@@ -34,7 +35,8 @@ public class Avatars extends Handler {
         return output.toString();
     }
 
-    public Map<String,String> resolveUUIDStrings(final List<String> uuids) {
+    @Nonnull
+    public Map<String,String> resolveUUIDStrings(@Nonnull final List<String> uuids) {
         List<LLUUID> converted=new ArrayList<>(uuids.size());
         for (String uuid:uuids) {
             converted.add(new LLUUID(uuid));
@@ -45,7 +47,8 @@ public class Avatars extends Handler {
         }
         return map;
     }
-    public Map<LLUUID,String> resolveUUIDs(final List<LLUUID> uuids) {
+    @Nonnull
+    public Map<LLUUID,String> resolveUUIDs(@Nonnull final List<LLUUID> uuids) {
         UUIDNameRequest req=new UUIDNameRequest();
         req.buuidnameblock=new ArrayList<>();
         Map<LLUUID,String> map=new HashMap<>();

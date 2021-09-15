@@ -22,9 +22,13 @@ import java.util.logging.Level;
 public class Agent extends Handler {
 	private final Set<LLUUID> online=new HashSet<>();
 	private final Set<LLUUID> offline=new HashSet<>();
+	@Nonnull
 	private String grouptitle="";
+	@Nonnull
 	private String groupname="";
+	@Nonnull
 	private String firstname="";
+	@Nonnull
 	private String lastname="";
 	private int balance;
 	@Nullable

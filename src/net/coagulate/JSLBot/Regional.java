@@ -196,6 +196,7 @@ public class Regional {
 	public String toString() { return circuit+"/Regional"; }
 
 	// ----- Internal Instance -----
+	@Nonnull
 	private JSLBot bot() { return circuit.bot(); }
 
 	public static class ParcelData {

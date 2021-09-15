@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Types;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -13,7 +14,7 @@ public class LLQuaternion extends Type {
     public float z=0;
 
     public LLQuaternion(){}
-    public LLQuaternion(ByteBuffer buffer) {
+    public LLQuaternion(@Nonnull ByteBuffer buffer) {
         read(buffer);
     }
     @Override
@@ -22,7 +23,7 @@ public class LLQuaternion extends Type {
     }
 
     @Override
-    public void read(ByteBuffer in) {
+    public void read(@Nonnull ByteBuffer in) {
         in.order(ByteOrder.LITTLE_ENDIAN);
         x=in.getFloat();
         y=in.getFloat();
@@ -30,13 +31,14 @@ public class LLQuaternion extends Type {
     }
 
     @Override
-    public void write(ByteBuffer out) {
+    public void write(@Nonnull ByteBuffer out) {
         out.order(ByteOrder.LITTLE_ENDIAN);
         out.putFloat(x);
         out.putFloat(y);
         out.putFloat(z);
     }
 
+    @Nonnull
     @Override
     public String dump() {
         return "<"+x+","+y+","+z+">";

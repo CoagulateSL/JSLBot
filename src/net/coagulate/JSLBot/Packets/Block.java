@@ -3,6 +3,7 @@ package net.coagulate.JSLBot.Packets;
 import net.coagulate.JSLBot.Packets.Types.Type;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -15,17 +16,18 @@ import java.util.*;
  * @author Iain Price
  */
 public abstract class Block {
+    @Nonnull
     public ByteBuffer writeBlock() { throw new UnsupportedOperationException("Not implemented"); }
     public void readBlock(ByteBuffer in)  { throw new UnsupportedOperationException("Not implemented"); }
     
     @SuppressWarnings("unchecked") // reflect is a pain enough without force parameterising everything
-    public int fieldSize(Field f) {
+    public int fieldSize(@Nonnull Field f) {
         if (Block.class.isAssignableFrom(f.getType())) {
             try {
                 // its a block
                 Block b=(Block)(f.getType().getDeclaredConstructor().newInstance());
                 return b.size();
-            } catch (InvocationTargetException|NoSuchMethodException|InstantiationException|IllegalAccessException ex) {
+            } catch (@Nonnull InvocationTargetException|NoSuchMethodException|InstantiationException|IllegalAccessException ex) {
                 throw new IllegalArgumentException("Unable to size supposed Block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),ex);
             }
         }
@@ -36,7 +38,7 @@ public abstract class Block {
                 int size=0;
                 for (Block b:l) { size=size+b.size(); }
                 return size+(new U8().size());
-            } catch (IllegalAccessException | IllegalArgumentException e) {
+            } catch (@Nonnull IllegalAccessException | IllegalArgumentException e) {
                 throw new IllegalArgumentException("Unable to size supposed variable count block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),e);
             }
         }
@@ -50,6 +52,7 @@ public abstract class Block {
         }
     }
     // gets the block's data fields, in order
+    @Nonnull
     private List<Field> getFields() {
         // NOTE the fields all seem to come back in the order they're declared (Oracle JDK 8)
         // this isn't actually guaranteed by the method however, so we're annotating the fields with an ordering number and going off that
@@ -85,7 +88,7 @@ public abstract class Block {
                     Block b=(Block)(f.get(this));
                     if (b==null) { throw new NullPointerException("Block contents "+this.getClass().getSimpleName()+" is null"); }
                     size+=b.size();
-                } catch (IllegalArgumentException |IllegalAccessException ex) {
+                } catch (@Nonnull IllegalArgumentException |IllegalAccessException ex) {
                     throw new IllegalArgumentException("Exception in block "+this.getClass().getSimpleName()+"",ex);
                 }
                 if (debug) { System.out.println("< Exit Block recursion: "+f.getType().getName()); }
@@ -100,7 +103,7 @@ public abstract class Block {
         return size;
     }
     public void messageRead(ByteBuffer in) { throw new UnsupportedOperationException("NOTIMP"); }
-    private void fieldToBytes(Field f,ByteBuffer output) {
+    private void fieldToBytes(@Nonnull Field f, ByteBuffer output) {
         final boolean debug=false;
         if (debug) { System.out.println("Outputting field "+f.getName()+" of type "+f.getType().getName()); }
         if (Type.class.isAssignableFrom(f.getType())) {
@@ -108,7 +111,7 @@ public abstract class Block {
                 Type t=(Type) (f.get(this));
                 t.write(output);
                 return;
-            } catch (IllegalArgumentException|IllegalAccessException ex) {
+            } catch (@Nonnull IllegalArgumentException|IllegalAccessException ex) {
                 throw new IllegalArgumentException("Internal error during field to bytes on field "+f.getName()+" of type "+f.getType().getName(),ex);
             }
         }
@@ -119,20 +122,20 @@ public abstract class Block {
             fieldToBytes(f,out);
         }
     }
-    public void writeBytes(ByteBuffer out) {
+    public void writeBytes(@Nonnull ByteBuffer out) {
         List <Field> fields=getFields();
         for (Field f: fields) {
             writeField(out,f);
         }
     }
-    private void writeField(ByteBuffer out,Field f) {
+    private void writeField(@Nonnull ByteBuffer out, @Nonnull Field f) {
         if (Block.class.isAssignableFrom(f.getType())) {
             Block b;
             try {
                 b = (Block) f.get(this);
                 b.writeBytes(out);
                 return;
-            } catch (IllegalAccessException|IllegalArgumentException ex) {
+            } catch (@Nonnull IllegalAccessException|IllegalArgumentException ex) {
                 throw new IllegalArgumentException("Error writing field "+f.getName()+" of type "+f.getType().getName(),ex);
             }
         }
@@ -145,18 +148,18 @@ public abstract class Block {
                 qty.write(out);
                 for (Block b:l) { b.writeBytes(out); }
                 return;
-            } catch (IllegalAccessException | IllegalArgumentException e) {
+            } catch (@Nonnull IllegalAccessException | IllegalArgumentException e) {
                 throw new IllegalArgumentException("Error writing variable count block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),e);
             }
         }        
         fieldToBytes(f,out);
     }
-    public void readBytes(ByteBuffer in) {
+    public void readBytes(@Nonnull ByteBuffer in) {
         for (Field f:getFields()) {
             readField(in,f);
         }
     }
-    private void readField(ByteBuffer in,Field f) {
+    private void readField(@Nonnull ByteBuffer in, @Nonnull Field f) {
         final boolean debug=false;
         if (debug) { System.out.println("READING FIELD "+f.getName()+" from "+this.getClass().getName()+" type "+f.getType().getName()); }
         if (Block.class.isAssignableFrom(f.getType())) {
@@ -165,7 +168,7 @@ public abstract class Block {
                 b = (Block) f.get(this);
                 b.readBytes(in);
                 return;
-            } catch (IllegalAccessException|IllegalArgumentException ex) {
+            } catch (@Nonnull IllegalAccessException|IllegalArgumentException ex) {
                 throw new IllegalArgumentException("Error reading Block field "+f.getName()+" of type "+f.getType().getName(),ex);
             }
         }
@@ -186,7 +189,7 @@ public abstract class Block {
                 }
                 f.set(this,list);
                 return;
-            } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+            } catch (@Nonnull IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
                 throw new IllegalArgumentException("Failed to read LIST type (variable block type) from class "+this.getClass().getName()+" field "+f.getName()+" type "+f.getType().getName()+" generic type "+f.getGenericType().getTypeName(),e);
             }
         }
@@ -199,7 +202,7 @@ public abstract class Block {
                 //System.out.println("Buffer underflow reading a data type "+f.getType());
             }
             f.set(this,value);
-        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (@Nonnull IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             throw new IllegalArgumentException("Failed to set class "+this.getClass().getName()+" field "+f.getName()+" type "+f.getType().getName(),e);
         }
     }
@@ -211,7 +214,7 @@ public abstract class Block {
         }
         return ret;
     }
-    private String dumpField(Field f) {
+    private String dumpField(@Nonnull Field f) {
         String ret="";
         ret+="   field: "+f.getName()+"["+f.getType().getSimpleName()+"]=";
         try {
@@ -231,7 +234,7 @@ public abstract class Block {
                 }
             }
             ret+=o.toString()+"\n";
-        } catch (NullPointerException|IllegalAccessException | IllegalArgumentException e) {
+        } catch (@Nonnull NullPointerException|IllegalAccessException | IllegalArgumentException e) {
             ret+=e.toString();
         }
         return ret;

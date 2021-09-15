@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
 /** Represents the Message section of a UDP packet
@@ -10,6 +11,7 @@ public interface Message {
 
     int getId();
     int getFrequency();
+    @Nonnull
     String getName();
 
     int size();

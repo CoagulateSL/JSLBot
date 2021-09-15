@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Types;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -18,33 +19,35 @@ public class U16 extends Type {
     @Override
     public int size() { return 2; }
 
-    public U16(ByteBuffer buffer) {
+    public U16(@Nonnull ByteBuffer buffer) {
         readvalue(buffer);
     }
-    public U16(ByteBuffer buffer,ByteOrder byteorder) {
+    public U16(@Nonnull ByteBuffer buffer, ByteOrder byteorder) {
         this.byteorder=byteorder;
         readvalue(buffer);
     }
     
-    void readvalue(ByteBuffer buffer) {
+    void readvalue(@Nonnull ByteBuffer buffer) {
         buffer.order(byteorder);
         value=buffer.getShort();
     }
     
+    @Nonnull
     public String toString() { return Short.toString(value); }
 
     @Override
-    public void read(ByteBuffer in) {
+    public void read(@Nonnull ByteBuffer in) {
         in.order(byteorder);
         value=in.getShort();
     }
 
     @Override
-    public void write(ByteBuffer out) {
+    public void write(@Nonnull ByteBuffer out) {
         out.order(byteorder);
         out.putShort(value);
     }
 
+    @Nonnull
     @Override
     public String dump() {
         return Short.toString(value);

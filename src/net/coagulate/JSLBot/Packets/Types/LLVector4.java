@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Types;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -18,7 +19,7 @@ public class LLVector4 extends Unimplemented{
     }
 
     @Override
-    public void read(ByteBuffer in) {
+    public void read(@Nonnull ByteBuffer in) {
         in.order(ByteOrder.LITTLE_ENDIAN);
         x=in.getFloat();
         y=in.getFloat();
@@ -27,7 +28,7 @@ public class LLVector4 extends Unimplemented{
     }
 
     @Override
-    public void write(ByteBuffer out) {
+    public void write(@Nonnull ByteBuffer out) {
         out.order(ByteOrder.LITTLE_ENDIAN);
         out.putFloat(x);
         out.putFloat(y);
@@ -35,6 +36,7 @@ public class LLVector4 extends Unimplemented{
         out.putFloat(t);
     }
 
+    @Nonnull
     @Override
     public String dump() {
         return "<"+x+","+y+","+z+","+t+">";

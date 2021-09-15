@@ -91,6 +91,7 @@ public class EventQueue extends Thread {
 	@Override
 	public String toString() { return caps()+" / EventQueue"; }
 
+	@Nonnull
 	public String getRegionName() { return caps().circuit().getRegionName(); }
 
 	private boolean shutdown=false;

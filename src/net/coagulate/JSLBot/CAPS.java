@@ -145,6 +145,7 @@ public final class CAPS extends Thread {
 		}
 	}
 
+	@Nonnull
 	public String regionName() { return circuit.getRegionName(); }
 
 	public Logger getLogger(final String subspace) {

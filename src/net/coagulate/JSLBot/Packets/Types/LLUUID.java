@@ -1,5 +1,7 @@
 package net.coagulate.JSLBot.Packets.Types;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ThreadLocalRandom;
@@ -11,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class LLUUID extends Type implements Comparable<LLUUID> {
     byte[] uuid=new byte[16];
     public LLUUID() {}
-    public LLUUID(String uuid) {
+    public LLUUID(@Nullable String uuid) {
         if (uuid==null || uuid.length()==0) { uuid="00000000000000000000000000000000"; }
         uuid=uuid.replaceAll("-","");
         if (uuid.length()!=32) { throw new IllegalArgumentException("UID should be 32 chars long: "+uuid); }
@@ -20,10 +22,11 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
         }
     }
 
-    public LLUUID(ByteBuffer buffer) {
+    public LLUUID(@Nonnull ByteBuffer buffer) {
         read(buffer);
     }
 
+    @Nonnull
     public static LLUUID random() {
         // apparently UUIDs might be used as arbitary request markers.
         String random="";
@@ -33,6 +36,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
         return new LLUUID(random);
     }
 
+    @Nonnull
     private static String randomHexChar() {
         int rand=ThreadLocalRandom.current().nextInt(16);
         if (rand<10) { return ""+rand; }
@@ -49,6 +53,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     @Override
     public int size() { return 16; }
 
+    @Nonnull
     public ByteBuffer content() {
         ByteBuffer content=ByteBuffer.allocate(size());
         content.put(uuid);
@@ -61,13 +66,13 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     }
 
     @Override
-    public void read(ByteBuffer in) {
+    public void read(@Nonnull ByteBuffer in) {
         uuid=new byte[16];
         in.get(uuid,0,16);
     }
 
     @Override
-    public void write(ByteBuffer out) {
+    public void write(@Nonnull ByteBuffer out) {
         out.put(uuid);
     }
 
@@ -97,13 +102,14 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
         return value;
     }
 
+    @Nonnull
     public String toUUIDString() {
         String s=toString();
         return s.substring(0, 8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20);
     }
 
     @Override
-    public int compareTo(LLUUID o) {
+    public int compareTo(@Nonnull LLUUID o) {
         if (o.toLong()==toLong()) { return 0; }
         if (o.toLong()>toLong()) { return 1; }
         if (o.toLong()<toLong()) { return -1; }

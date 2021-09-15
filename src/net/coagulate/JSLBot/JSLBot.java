@@ -339,6 +339,7 @@ public class JSLBot extends Thread {
 	 *
 	 * @return Region name
 	 */
+	@Nonnull
 	public String getRegionName() { return circuit().getRegionName(); }
 
 	/**
@@ -890,6 +891,7 @@ public class JSLBot extends Thread {
 		public void run() {bot.shutdown("JVM called shutdown hook (program terminated?)");}
 	}
 
+	@Nonnull
 	public String getHomeSeat() { return config.get("homeseat",""); }
 
 	public Configuration getConfig() { return config; }

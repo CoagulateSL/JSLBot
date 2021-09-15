@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Types;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
 /**
@@ -8,10 +9,11 @@ import java.nio.ByteBuffer;
  */
 public class Variable2 extends Type {
 
+    @Nonnull
     public  byte[] value=new byte[0];
 
     public Variable2(){}
-    public Variable2(String string) {
+    public Variable2(@Nonnull String string) {
         char[] array=string.toCharArray();
         value=new byte[array.length+1];
         for (int i=0;i<array.length;i++) { value[i]=(byte) array[i]; }
@@ -23,7 +25,7 @@ public class Variable2 extends Type {
     }
 
     @Override
-    public void read(ByteBuffer in) {
+    public void read(@Nonnull ByteBuffer in) {
         U16 length=new U16();
         length.read(in);
         int len=((int)(length.value)) & 0xffff;
@@ -34,17 +36,19 @@ public class Variable2 extends Type {
     }
 
     @Override
-    public void write(ByteBuffer out) {
+    public void write(@Nonnull ByteBuffer out) {
         U16 length=new U16();
         length.value=(short) value.length;
         length.write(out);
         out.put(value);
     }
 
+    @Nonnull
     @Override
     public String dump() {
         return "'"+toString()+"'";
     }
+    @Nonnull
     public String toString() {
         String str="";
         for (byte b:value) {

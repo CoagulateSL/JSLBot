@@ -38,6 +38,7 @@ public final class Circuit extends Thread implements Closeable {
 	private final Object lockdisconnecting=new Object();
 	private final int circuitsequence;
 	// reference to the agent we're a circuit for
+	@Nullable
 	private JSLBot bot;
 	// the primary all important region handle
 	@Nonnull
@@ -67,6 +68,7 @@ public final class Circuit extends Thread implements Closeable {
 	@Nonnull
 	private Date lastmaintenance=new Date();
 	// name of the simulator
+	@Nonnull
 	private String regionname="";
 	// handle of the simulator
 	@Nullable
@@ -121,6 +123,7 @@ public final class Circuit extends Thread implements Closeable {
 	}
 
 	// ---------- INSTANCE ----------
+	@Nonnull
 	public String getRegionName() { return regionname; }
 
 	// Get the CAPS object attached to this circuit's region

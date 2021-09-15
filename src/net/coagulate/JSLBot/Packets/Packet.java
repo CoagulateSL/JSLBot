@@ -116,7 +116,7 @@ public class Packet {
      * @param c Circuit this packet will go over, provides sequence numbers.
      * @param out ByteBuffer to write the packet into.
      */
-    public void write(Circuit c,ByteBuffer out) {
+    public void write(@Nonnull Circuit c, @Nonnull ByteBuffer out) {
         // note this method might be called on a packet more than once (for retransmission), some things only should happen the first time, like:
         if (sequence==0) { 
             // sequence number allocation
@@ -153,7 +153,7 @@ public class Packet {
      * @return Constructed Packet object
      */
     @Nullable
-    public static Packet decode(ByteBuffer source) {
+    public static Packet decode(@Nonnull ByteBuffer source) {
         try {
             byte flags=source.get();
             source.order(ByteOrder.BIG_ENDIAN);
@@ -272,12 +272,13 @@ public class Packet {
             }
             return response;
         }
-        catch (NoSuchMethodException|SecurityException|InstantiationException|IllegalAccessException|IllegalArgumentException|InvocationTargetException ex) {
+        catch (@Nonnull NoSuchMethodException|SecurityException|InstantiationException|IllegalAccessException|IllegalArgumentException|InvocationTargetException ex) {
             throw new AssertionError("Construction error decoding Packet",ex);
         }
     }
     public final Set<Integer> appendedacks=new HashSet<>();
     
+    @Nonnull
     public String dump() {
         String acks="";
         if (!appendedacks.isEmpty()) {
@@ -312,8 +313,10 @@ public class Packet {
     
     public int getId() { return messageNullable().getId(); }
     public int getFrequency() { return messageNullable().getFrequency(); }
+    @Nonnull
     public String getName() { return messageNullable().getName(); }
     
+    @Nonnull
     @Override
     public String toString() { return dump(); }
 
