@@ -424,7 +424,14 @@ public final class Circuit extends Thread implements Closeable {
 		return regionhandle;
 	}
 
+	@Nonnull
 	public JSLBot bot() {
+		JSLBot mybot=bot;
+		if (mybot==null) { throw new NullPointerException("Bot connection has gone away"); }
+		return bot;
+	}
+	@Nullable
+	public JSLBot botNullable() {
 		return bot;
 	}
 

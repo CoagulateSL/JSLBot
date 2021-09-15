@@ -152,7 +152,7 @@ public class Packet {
      * @param source ByteBuffer to decode
      * @return Constructed Packet object
      */
-    @Nonnull
+    @Nullable
     public static Packet decode(ByteBuffer source) {
         try {
             byte flags=source.get();

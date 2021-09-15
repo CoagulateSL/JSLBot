@@ -3,6 +3,7 @@ package net.coagulate.JSLBot;
 import net.coagulate.JSLBot.LLSD.*;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -58,8 +59,10 @@ public class EventQueue extends Thread {
 	 *
 	 * @return Bot from the CAPS from circuit that owns this Event Queue
 	 */
+	@Nonnull
 	public JSLBot bot() { return circuit().bot(); }
-
+	@Nullable
+	public JSLBot botNullable() { return circuit().botNullable(); }
 	/**
 	 * Call via start() to launch a background thread for polling the event queue
 	 */
