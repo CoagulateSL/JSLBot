@@ -1,8 +1,13 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
+import javax.annotation.Nullable;
+
 public class StartLure_bTargetData extends Block {
-	@Sequence(0)
+	@Nullable
+    @Sequence(0)
 	public LLUUID vtargetid=new LLUUID();
 }

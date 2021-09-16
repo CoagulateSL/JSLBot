@@ -103,7 +103,7 @@ public class Brain {
 	 * @see Authorisation
 	 */
 	@Nullable
-	public String auth(final CommandEvent event) {
+	public String auth(@Nonnull final CommandEvent event) {
 		return auth.approve(event);
 	}
 
@@ -145,7 +145,7 @@ public class Brain {
 	 * Pops an event off the queue if one is available and executes it as delayed mode execution (does not requeue event but runs in THIS thread)
 	 */
 	void think() {
-		Event event=null;
+		@Nullable Event event=null;
 		synchronized (queue) {
 			if (queue.isEmpty() && procrastinate) {
 				Thread.currentThread().setName("Brain for "+bot.getUsername()+" procrastinating");
@@ -187,7 +187,7 @@ public class Brain {
 	 * Some handlers will generate events such as "query balance" etc
 	 */
 	void loggedIn() {
-		for (final Handler h: brain) {
+		for (@Nonnull final Handler h: brain) {
 			try { h.loggedIn(); }
 			catch (@Nonnull final Exception e) {
 				log.log(SEVERE,"Handler "+h+" exceptioned handling login",e);
@@ -209,8 +209,8 @@ public class Brain {
 			}
 		}
 		// not not any null slots, whats the oldest timer?
-		Date oldest=null;
-		for (final Date d: launches) {
+		@Nullable Date oldest=null;
+		for (@Nonnull final Date d: launches) {
 			if (oldest==null) { oldest=d; }
 			else { if (d.before(oldest)) { oldest=d; } }
 		}
@@ -245,7 +245,7 @@ public class Brain {
 	 */
 	@Nonnull
 	public Handler getHandler(final String name) {
-		for (final Handler h: brain) {
+		for (@Nonnull final Handler h: brain) {
 			if (h.getClass().getSimpleName().equals(name)) { return h; }
 		}
 		throw new IllegalArgumentException("No handler called '"+name+"' is loaded");
@@ -259,7 +259,7 @@ public class Brain {
 	private void loadHandler(@Nullable final String handlername) {
 		if (handlername==null) { throw new NullPointerException("No handler specified"); }
 		try {
-			final Handler h=createHandler(handlername);
+			@Nonnull final Handler h=createHandler(handlername);
 			brain.add(h);
 		}
 		catch (@Nonnull final InvocationTargetException ex) {
@@ -274,10 +274,10 @@ public class Brain {
 	 * A command is a method that is annotated with CmdHelp (and optionally its parameters with ParamHelp), and whose method name ends with "command".
 	 */
 	private void populateCommandMap() {
-		for (final Handler h: brain) {
-			for (final Method m: h.getClass().getMethods()) {
+		for (@Nonnull final Handler h: brain) {
+			for (@Nonnull final Method m: h.getClass().getMethods()) {
 				if (m.getAnnotation(CmdHelp.class)!=null) {
-					final String commandname=m.getName().toLowerCase();
+					@Nonnull final String commandname=m.getName().toLowerCase();
 					if (commandmap.containsKey(commandname)) {
 						log.severe("Duplicate definition for command "+commandname);
 					}
@@ -311,11 +311,11 @@ public class Brain {
 	@Nonnull
 	private Handler createHandler(@Nonnull final String name) throws InvocationTargetException {
 		try {
-			String classname=name;
+			@Nonnull String classname=name;
 			if (!name.contains(".")) { classname="net.coagulate.JSLBot.Handlers."+name; }
-			final Class<?> c=Class.forName(classname);
-			final Configuration subconfiguration=bot.config.subspace(name);
-			final Constructor<?> cons=c.getConstructor(JSLBot.class,Configuration.class);
+			@Nonnull final Class<?> c=Class.forName(classname);
+			@Nonnull final Configuration subconfiguration=bot.config.subspace(name);
+			@Nonnull final Constructor<?> cons=c.getConstructor(JSLBot.class,Configuration.class);
 			return (Handler) (cons.newInstance(bot,subconfiguration));
 		}
 		catch (@Nonnull final SecurityException|NoSuchMethodException|ClassNotFoundException|IllegalAccessException|IllegalArgumentException|InstantiationException ex) {
@@ -333,8 +333,8 @@ public class Brain {
 	 */
 	@Nonnull
 	private String formatEventName(@Nonnull final Event event) {
-		final String method=event.getName();
-		final char[] c=method.toCharArray();
+		@Nonnull final String method=event.getName();
+		@Nonnull final char[] c=method.toCharArray();
 		c[0]=Character.toLowerCase(c[0]);
 		return new String(c);
 	}
@@ -352,15 +352,15 @@ public class Brain {
 	@Nullable
 	private String execute(@Nonnull final Event event,
 	                       final boolean immediate) {
-		String fen=formatEventName(event);
+		@Nonnull String fen=formatEventName(event);
 		fen=fen+event.typeString();
-		String method=fen;
+		@Nonnull String method=fen;
 		if (event instanceof UDPEvent || event instanceof XMLEvent) { method+=(immediate?"Immediate":"Delayed"); }
-		String response=null;
+		@Nullable String response=null;
 		if (immediate) { event.status(Event.STATUS.IMMEDIATE); }
 		else { event.status(Event.STATUS.RUNNING); }
 		if (!handlermap.containsKey(method)) { populateHandlerMap(event); }
-		Set<Method> handlers=null;
+		@Nullable Set<Method> handlers=null;
 		if (event instanceof UDPEvent || event instanceof XMLEvent) { handlers=handlermap.get(method); }
 		if (event instanceof CommandEvent) {
 			handlers=new HashSet<>();
@@ -375,13 +375,13 @@ public class Brain {
 			log.severe("Found a null map for "+method+", but this should have been populated");
 			return "";
 		}
-		for (final Method handler: handlers) {
+		for (@Nonnull final Method handler: handlers) {
 			try {
-				final Object callon=findHandler(handler);
+				@Nonnull final Object callon=findHandler(handler);
 				if (event instanceof UDPEvent) { response=(String) handler.invoke(callon,event); }
 				if (event instanceof XMLEvent) { response=(String) handler.invoke(callon,event); }
 				if (event instanceof CommandEvent) {
-					final CommandEvent cmd=(CommandEvent) event;
+					@Nonnull final CommandEvent cmd=(CommandEvent) event;
 					response=cmd.run(callon,handler);
 					cmd.response(response);
 				}
@@ -433,8 +433,8 @@ public class Brain {
 	 */
 	@Nonnull
 	private Object findHandler(@Nonnull final Method method) {
-		final Class<?> c=method.getDeclaringClass();
-		for (final Handler h: brain) {
+		@Nonnull final Class<?> c=method.getDeclaringClass();
+		for (@Nonnull final Handler h: brain) {
 			if (h.getClass().equals(c)) { return h; }
 		}
 		throw new IllegalArgumentException("Could not find declaring class for "+method);
@@ -463,11 +463,11 @@ public class Brain {
 	private void populateHandlerMap(@Nonnull final Event event,
 	                                final String suffix) {
 		// find all the handlers that have a method like this and accumulate them into a set =)
-		String fen=formatEventName(event);
+		@Nonnull String fen=formatEventName(event);
 		fen=fen+event.typeString();
 		fen=fen+suffix;
-		final Set<Method> methods=new HashSet<>();
-		for (final Handler handler: brain) {
+		@Nonnull final Set<Method> methods=new HashSet<>();
+		for (@Nonnull final Handler handler: brain) {
 			try {
 				if (event instanceof UDPEvent) { methods.add(handler.getClass().getMethod(fen,UDPEvent.class)); }
 				if (event instanceof XMLEvent) { methods.add(handler.getClass().getMethod(fen,XMLEvent.class)); }
@@ -487,7 +487,7 @@ public class Brain {
 	}
 
 	private void callMaintenance() {
-		for (final Handler h: brain) {
+		for (@Nonnull final Handler h: brain) {
 			try {h.maintenance();}
 			catch (@Nonnull final Exception e) {
 				log.log(SEVERE,"Handler "+h+" exceptioned during maintenance",e);

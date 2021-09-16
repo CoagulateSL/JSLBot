@@ -41,7 +41,7 @@ public class Agent extends Handler {
 	@Override
 	public void loggedIn() {
 		// get financials
-		final MoneyBalanceRequest req=new MoneyBalanceRequest();
+		@Nonnull final MoneyBalanceRequest req=new MoneyBalanceRequest();
 		req.bagentdata.vagentid=bot.getUUID();
 		req.bagentdata.vsessionid=bot.getSession();
 		req.bmoneydata.vtransactionid=new LLUUID();
@@ -49,7 +49,7 @@ public class Agent extends Handler {
 	}
 
 	public void agentDataUpdateUDPImmediate(@Nonnull final UDPEvent event) {
-		final AgentDataUpdate adu=(AgentDataUpdate) event.body();
+		@Nonnull final AgentDataUpdate adu=(AgentDataUpdate) event.body();
 		firstname=adu.bagentdata.vfirstname.toString();
 		lastname=adu.bagentdata.vlastname.toString();
 		groupname=adu.bagentdata.vgroupname.toString();
@@ -59,8 +59,8 @@ public class Agent extends Handler {
 
 	public void onlineNotificationUDPImmediate(@Nonnull final UDPEvent event) {
 		final List<OnlineNotification_bAgentBlock> agents=((OnlineNotification) event.body()).bagentblock;
-		for (final OnlineNotification_bAgentBlock block: agents) {
-			final LLUUID uuid=block.vagentid;
+		for (@Nonnull final OnlineNotification_bAgentBlock block: agents) {
+			@Nonnull final LLUUID uuid=block.vagentid;
 			synchronized (online) {
 				if (!online.contains(uuid)) {
 					log.log(Level.INFO,"Friend ONLINE: {0} ({1}) [{2}]",new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
@@ -73,8 +73,8 @@ public class Agent extends Handler {
 
 	public void offlineNotificationUDPImmediate(@Nonnull final UDPEvent event) {
 		final List<OfflineNotification_bAgentBlock> agents=((OfflineNotification) event.body()).bagentblock;
-		for (final OfflineNotification_bAgentBlock block: agents) {
-			final LLUUID uuid=block.vagentid;
+		for (@Nonnull final OfflineNotification_bAgentBlock block: agents) {
+			@Nonnull final LLUUID uuid=block.vagentid;
 			synchronized (offline) {
 				if (!offline.contains(uuid)) {
 					log.log(Level.INFO,"Friend offline: {0} ({1}) [{2}]",new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
@@ -86,27 +86,27 @@ public class Agent extends Handler {
 	}
 
 	public void agentMovementCompleteUDPImmediate(@Nonnull final UDPEvent event) {
-		final AgentMovementComplete amc=(AgentMovementComplete) event.body();
+		@Nonnull final AgentMovementComplete amc=(AgentMovementComplete) event.body();
 		bot.setPos(amc.bdata.vposition);
 		bot.setLookAt(amc.bdata.vlookat);
-		final U64 regionhandle=amc.bdata.vregionhandle;
+		@Nonnull final U64 regionhandle=amc.bdata.vregionhandle;
 		if (Debug.REGIONHANDLES) {
 			log.fine("AgentMovementComplete discovers region handle "+Long.toUnsignedString(regionhandle.value));
 		}
 	}
 
 	public void teleportLocalUDPImmediate(@Nonnull final UDPEvent event) {
-		final TeleportLocal tp=(TeleportLocal) event.body();
+		@Nonnull final TeleportLocal tp=(TeleportLocal) event.body();
 		bot.setPos(tp.binfo.vposition);
 		bot.setLookAt(tp.binfo.vlookat);
 	}
 
 	public void moneyBalanceReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		final MoneyBalanceReply money=(MoneyBalanceReply) event.body();
+		@Nonnull final MoneyBalanceReply money=(MoneyBalanceReply) event.body();
 		balance=money.bmoneydata.vmoneybalance.value;
 		final int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
 		final int sqmspent=money.bmoneydata.vsquaremeterscommitted.value;
-		final String description=money.bmoneydata.vdescription.toString();
+		@Nonnull final String description=money.bmoneydata.vdescription.toString();
 		log.log(Level.INFO,"Balance: {0}L$, Land: {1}m2/{2}m2 {3}",new Object[]{balance,sqmspent,sqmcredit,description});
 	}
 
@@ -170,17 +170,17 @@ public class Agent extends Handler {
 	}
 
 	public void coarseLocationUpdateUDPDelayed(@Nonnull final UDPEvent event) {
-		final CoarseLocationUpdate up=(CoarseLocationUpdate) event.body();
+		@Nonnull final CoarseLocationUpdate up=(CoarseLocationUpdate) event.body();
 		final List<CoarseLocationUpdate_bLocation> locations=up.blocation;
 		final List<CoarseLocationUpdate_bAgentData> agents=up.bagentdata;
 		if (locations.size()!=agents.size()) {
 			log.severe("Equal length co-ord/agent assumption violated");
 			return;
 		}
-		final Map<LLUUID,LLVector3> locmap=new HashMap<>();
+		@Nonnull final Map<LLUUID,LLVector3> locmap=new HashMap<>();
 		for (int i=0;i<locations.size();i++) {
-			final LLUUID agent=agents.get(i).vagentid;
-			final LLVector3 location=new LLVector3();
+			@Nonnull final LLUUID agent=agents.get(i).vagentid;
+			@Nonnull final LLVector3 location=new LLVector3();
 			location.x=locations.get(i).vx.value;
 			location.y=locations.get(i).vy.value;
 			location.z=locations.get(i).vz.value;
@@ -193,7 +193,7 @@ public class Agent extends Handler {
 	@CmdHelp(description="Set the agent's start location")
 	public String setHomeCommand(@Nonnull final CommandEvent event) {
 		reporthometo=event.respondTo();
-		final SetStartLocationRequest req=new SetStartLocationRequest(bot);
+		@Nonnull final SetStartLocationRequest req=new SetStartLocationRequest(bot);
 		req.bstartlocationdata.vsimname=new Variable1(bot.getRegionName());
 		req.bstartlocationdata.vlocationid.value=1;
 		req.bstartlocationdata.vlocationpos=bot.getPos();
@@ -203,7 +203,7 @@ public class Agent extends Handler {
 	}
 
 	public void alertMessageUDPDelayed(@Nonnull final UDPEvent event) {
-		final AlertMessage a=(AlertMessage) event.body();
+		@Nonnull final AlertMessage a=(AlertMessage) event.body();
 		if (a.balertinfo.size()>0) {
 			// this is a sweeping assumption, however, without knowing the full list of possibilities, i.e. the server code, this seems reasonable :|
 			if (a.balertinfo.get(0).vmessage.toString().toLowerCase().contains("home")) {
@@ -218,7 +218,7 @@ public class Agent extends Handler {
 	@CmdHelp(description="Have the avatar sit on an object")
 	public String sitOnCommand(final CommandEvent command,
 									  @Nonnull @Param(name="uuid",description="UUID of the prim to sit on") final String uuid) {
-		AgentRequestSit sit=new AgentRequestSit(bot);
+		@Nonnull AgentRequestSit sit=new AgentRequestSit(bot);
 		sit.btargetobject.vtargetid=new LLUUID(uuid);
 		sit.btargetobject.voffset=new LLVector3(0,0,0);
 		bot.send(sit,true);

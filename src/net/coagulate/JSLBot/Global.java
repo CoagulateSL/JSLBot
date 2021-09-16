@@ -4,6 +4,7 @@ package net.coagulate.JSLBot;
 
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +59,7 @@ public final class Global {
 	@Nullable
 	public static Long regionHandle(final String name) {
 		synchronized (regionnames) {
-			for (final Map.Entry<Long,String> entry: regionnames.entrySet()) {
+			for (@Nonnull final Map.Entry<Long,String> entry: regionnames.entrySet()) {
 				if (entry.getValue().equalsIgnoreCase(name)) { return entry.getKey(); }
 			}
 		}
@@ -100,7 +101,7 @@ public final class Global {
 	@Nullable
 	static String displayName(final LLUUID uuid) {
 		synchronized (displaynames) {
-			for (final Map.Entry<LLUUID,String> entry: displaynames.entrySet()) {
+			for (@Nonnull final Map.Entry<LLUUID,String> entry: displaynames.entrySet()) {
 				if (entry.getKey().equals(uuid)) { return entry.getValue(); }
 			}
 			return null;
@@ -113,7 +114,7 @@ public final class Global {
 	@Nullable
 	static String firstName(final LLUUID uuid) {
 		synchronized (firstnames) {
-			for (final Map.Entry<LLUUID,String> entry: firstnames.entrySet()) {
+			for (@Nonnull final Map.Entry<LLUUID,String> entry: firstnames.entrySet()) {
 				if (entry.getKey().equals(uuid)) { return entry.getValue(); }
 			}
 			return null;
@@ -126,7 +127,7 @@ public final class Global {
 	@Nullable
 	static String lastName(final LLUUID uuid) {
 		synchronized (lastnames) {
-			for (final Map.Entry<LLUUID,String> entry: lastnames.entrySet()) {
+			for (@Nonnull final Map.Entry<LLUUID,String> entry: lastnames.entrySet()) {
 				if (entry.getKey().equals(uuid)) { return entry.getValue(); }
 			}
 			return null;
@@ -139,7 +140,7 @@ public final class Global {
 	@Nullable
 	static String userName(final LLUUID uuid) {
 		synchronized (usernames) {
-			for (final Map.Entry<LLUUID,String> entry: usernames.entrySet()) {
+			for (@Nonnull final Map.Entry<LLUUID,String> entry: usernames.entrySet()) {
 				if (entry.getKey().equals(uuid)) { return entry.getValue(); }
 			}
 			return null;

@@ -15,12 +15,12 @@ public class Unimplemented extends Type {
     }
 
     @Override
-    public void read(ByteBuffer in) {
+    public void read(@Nonnull ByteBuffer in) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void write(ByteBuffer out) {
+    public void write(@Nonnull ByteBuffer out) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

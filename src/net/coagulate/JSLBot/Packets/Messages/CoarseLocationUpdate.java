@@ -1,15 +1,22 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+
 public class CoarseLocationUpdate extends Block implements Message {
 	public final int getFrequency() { return Frequency.MEDIUM; }
 	public final int getId() { return 6; }
-	public final String getName() { return "CoarseLocationUpdate"; }
+	@Nonnull
+    public final String getName() { return "CoarseLocationUpdate"; }
 	@Sequence(0)
 	public List<CoarseLocationUpdate_bLocation> blocation;
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public CoarseLocationUpdate_bIndex bindex=new CoarseLocationUpdate_bIndex();
 	@Sequence(2)
 	public List<CoarseLocationUpdate_bAgentData> bagentdata;

@@ -37,7 +37,7 @@ public abstract class Configuration {
 	@Nonnull
 	public String get(final String key,
 	                  @Nonnull final String defaultvalue) {
-		final String value=get(key);
+		@Nullable final String value=get(key);
 		if (value==null) { return defaultvalue; }
 		return value;
 	}

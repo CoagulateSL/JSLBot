@@ -1,8 +1,13 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.S32;
+
+import javax.annotation.Nonnull;
+
 public class PayPriceReply_bButtonData extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public S32 vpaybutton=new S32();
 }

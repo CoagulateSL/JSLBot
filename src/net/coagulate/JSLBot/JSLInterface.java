@@ -3,6 +3,8 @@ package net.coagulate.JSLBot;
 import net.coagulate.JSLBot.Handlers.Groups;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -28,7 +30,7 @@ public class JSLInterface {
 	public void instantMessage(final String uuid,
 	                           final String message) {
 		bot.waitConnection(15000);
-		final Map<String,String> cmd=new HashMap<>();
+		@Nonnull final Map<String,String> cmd=new HashMap<>();
 		cmd.put("uuid",uuid);
 		cmd.put("message",message);
 		new CommandEvent(bot,bot.getRegional(),"im",cmd,null).submitAndWait();
@@ -57,11 +59,11 @@ public class JSLInterface {
 	                        final String groupuuid,
 	                        final String roleuuid) {
 		bot.waitConnection(15000);
-		final Map<String,String> cmd=new HashMap<>();
+		@Nonnull final Map<String,String> cmd=new HashMap<>();
 		cmd.put("avataruuid",avataruuid);
 		cmd.put("groupuuid",groupuuid);
 		cmd.put("roleuuid",roleuuid);
-		RuntimeException delayed=null;
+		@Nullable RuntimeException delayed=null;
 		try {
 			groupRoster(groupuuid);
 			if (((Groups) (bot.getHandler("Groups"))).isMember(new LLUUID(avataruuid), new LLUUID(groupuuid))) {
@@ -84,7 +86,7 @@ public class JSLInterface {
 	public void groupEject(final String avataruuid,
 	                       final String groupuuid) {
 		bot.waitConnection(15000);
-		final Map<String,String> cmd=new HashMap<>();
+		@Nonnull final Map<String,String> cmd=new HashMap<>();
 		cmd.put("avataruuid",avataruuid);
 		cmd.put("groupuuid",groupuuid);
 		//cmd.put("roleuuid",roleuuid);
@@ -99,7 +101,7 @@ public class JSLInterface {
 	 */
 	public void groupRoster(final String groupuuid) {
 		bot.waitConnection(15000);
-		final Map<String,String> cmd=new HashMap<>();
+		@Nonnull final Map<String,String> cmd=new HashMap<>();
 		cmd.put("uuid",groupuuid);
 		new CommandEvent(bot,bot.getRegional(),"groupRoster",cmd,null).submitAndWait();
 	}

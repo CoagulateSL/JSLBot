@@ -110,8 +110,8 @@ public final class CAPS extends Thread {
 	public LLSDMap invokeXML(@Nullable final String url,
 	                         @Nullable final LLSD content) throws IOException {
 		if (url==null || url.isEmpty()) { throw new IllegalArgumentException("Null or empty URL passed."); }
-		final HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
-		byte[] postdata=new byte[0];
+		@Nonnull final HttpURLConnection connection=(HttpURLConnection) new URL(url).openConnection();
+		@Nonnull byte[] postdata=new byte[0];
 		if (content==null) {
 			connection.setRequestMethod("GET");
 			connection.setDoOutput(false);
@@ -126,19 +126,17 @@ public final class CAPS extends Thread {
 		connection.setRequestProperty("Content-Type","application/llsd+xml");
 		connection.setRequestProperty("charset","utf-8");
 		connection.setUseCaches(false);
-		if (content!=null) {
-			try (final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
-				wr.write(postdata);
-			}
+		try (@Nonnull final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
+			wr.write(postdata);
 		}
 		try {
-			final Scanner s = new Scanner(connection.getInputStream()).useDelimiter("\\A");
+			@Nonnull final Scanner s = new Scanner(connection.getInputStream()).useDelimiter("\\A");
 			final String read = s.next();
 			return (LLSDMap) new LLSD(read).getFirst();
 		} catch (IOException e) {
 			InputStream errorStream = connection.getErrorStream();
 			if (errorStream!=null) {
-				final Scanner errs = new Scanner(errorStream).useDelimiter("\\A");
+				@Nonnull final Scanner errs = new Scanner(errorStream).useDelimiter("\\A");
 				throw new IOException(((LLSDMap)(new LLSD(errs.next()).getFirst())).get("error").toString(),e);
 			} else { System.out.println("Error stream is null"); }
 			throw e;
@@ -166,17 +164,17 @@ public final class CAPS extends Thread {
 	 * @throws IOException           caps problem
 	 */
 	void getNames(@Nonnull final LLUUID agentid) throws MalformedURLException, IOException {
-		final LLSDMap map=invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
+		@Nullable final LLSDMap map=invokeCAPS("GetDisplayNames","/?ids="+agentid.toUUIDString(),null);
 		if (map==null) { throw new IOException("getDisplayNames CAP returned a null map"); }
-		final LLSDArray agents=(LLSDArray) map.get("agents");
+		@Nonnull final LLSDArray agents=(LLSDArray) map.get("agents");
 		for (final Object agento: agents) {
-			final LLSDMap agent=(LLSDMap) agento;
+			@Nonnull final LLSDMap agent=(LLSDMap) agento;
 			//System.out.println(agent.toXML());
-			final LLSDUUID describedagent=(LLSDUUID) agent.get("id");
-			final LLSDString displayname=(LLSDString) agent.get("display_name");
-			final LLSDString firstname=(LLSDString) agent.get("legacy_first_name");
-			final LLSDString lastname=(LLSDString) agent.get("legacy_last_name");
-			final LLSDString username=(LLSDString) agent.get("username");
+			@Nonnull final LLSDUUID describedagent=(LLSDUUID) agent.get("id");
+			@Nonnull final LLSDString displayname=(LLSDString) agent.get("display_name");
+			@Nonnull final LLSDString firstname=(LLSDString) agent.get("legacy_first_name");
+			@Nonnull final LLSDString lastname=(LLSDString) agent.get("legacy_last_name");
+			@Nonnull final LLSDString username=(LLSDString) agent.get("username");
 			Global.displayName(describedagent.toLLUUID(),displayname.toString());
 			Global.firstName(describedagent.toLLUUID(),firstname.toString());
 			Global.lastName(describedagent.toLLUUID(),lastname.toString());
@@ -203,8 +201,8 @@ public final class CAPS extends Thread {
 	 * Initialise the CAPS - download the CAPS list from the server
 	 */
 	private void initialise() throws IOException {
-		final LLSDArray req=BotUtils.getCAPSArray();
-		final LLSD getcaps=new LLSD(req);
+		@Nonnull final LLSDArray req=BotUtils.getCAPSArray();
+		@Nonnull final LLSD getcaps=new LLSD(req);
 		capabilities=invokeXML(caps,getcaps);
 	}
 

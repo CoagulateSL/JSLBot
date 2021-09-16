@@ -38,8 +38,8 @@ public class TransientConfiguration extends Configuration {
 	@Nonnull
 	@Override
 	public String dump() {
-		String response="";
-		for (final Map.Entry<String,String> entry: kv.entrySet()) {
+		@Nonnull String response="";
+		for (@Nonnull final Map.Entry<String,String> entry: kv.entrySet()) {
 			if (!"".equals(response)) { response+="\n"; }
 			response+=entry.getKey()+"="+entry.getValue();
 		}

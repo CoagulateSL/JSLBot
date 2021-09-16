@@ -33,7 +33,7 @@ public abstract class Authorisation {
 	 * @return Null if approved, otherwise a rejection reason.
 	 */
 	@Nullable
-	public abstract String approve(CommandEvent event);
+	public abstract String approve(@Nonnull CommandEvent event);
 
 	// ----- Internal Instance -----
 	private void initLogger(@Nonnull final JSLBot bot) {log=bot.getLogger("Authorisation."+getClass().getSimpleName());}

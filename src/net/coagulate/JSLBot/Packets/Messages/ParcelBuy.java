@@ -1,20 +1,29 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
+
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+
 public class ParcelBuy extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 213; }
-	public final String getName() { return "ParcelBuy"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "ParcelBuy"; }
+	@Nonnull
+    @Sequence(0)
 	public ParcelBuy_bAgentData bagentdata=new ParcelBuy_bAgentData();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public ParcelBuy_bData bdata=new ParcelBuy_bData();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public ParcelBuy_bParcelData bparceldata=new ParcelBuy_bParcelData();
 	public ParcelBuy(){}
-	public ParcelBuy(JSLBot bot) {
+	public ParcelBuy(@Nonnull JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();
 		bagentdata.vagentid=bot.getUUID();
 	}

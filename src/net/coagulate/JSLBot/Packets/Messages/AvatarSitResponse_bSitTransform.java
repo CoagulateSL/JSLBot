@@ -1,18 +1,30 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.BOOL;
+import net.coagulate.JSLBot.Packets.Types.LLQuaternion;
+import net.coagulate.JSLBot.Packets.Types.LLVector3;
+
+import javax.annotation.Nonnull;
+
 public class AvatarSitResponse_bSitTransform extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public BOOL vautopilot=new BOOL();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public LLVector3 vsitposition=new LLVector3();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public LLQuaternion vsitrotation=new LLQuaternion();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public LLVector3 vcameraeyeoffset=new LLVector3();
-	@Sequence(4)
+	@Nonnull
+    @Sequence(4)
 	public LLVector3 vcameraatoffset=new LLVector3();
-	@Sequence(5)
+	@Nonnull
+    @Sequence(5)
 	public BOOL vforcemouselook=new BOOL();
 }

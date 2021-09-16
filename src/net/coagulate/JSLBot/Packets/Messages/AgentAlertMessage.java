@@ -1,18 +1,26 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
+
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+
 public class AgentAlertMessage extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 135; }
-	public final String getName() { return "AgentAlertMessage"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "AgentAlertMessage"; }
+	@Nonnull
+    @Sequence(0)
 	public AgentAlertMessage_bAgentData bagentdata=new AgentAlertMessage_bAgentData();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public AgentAlertMessage_bAlertData balertdata=new AgentAlertMessage_bAlertData();
 	public AgentAlertMessage(){}
-	public AgentAlertMessage(JSLBot bot) {
+	public AgentAlertMessage(@Nonnull JSLBot bot) {
 		bagentdata.vagentid=bot.getUUID();
 	}
 }

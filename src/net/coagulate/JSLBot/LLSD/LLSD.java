@@ -70,7 +70,7 @@ public class LLSD extends Container {
 			}
 		}
 		catch (@Nonnull final SAXException|ParserConfigurationException|IOException ex) {
-			final IllegalArgumentException f=new IllegalArgumentException(ex);
+			@Nonnull final IllegalArgumentException f=new IllegalArgumentException(ex);
 			f.initCause(ex);
 			throw f;
 		}
@@ -88,8 +88,8 @@ public class LLSD extends Container {
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {
-		final StringBuilder response=new StringBuilder(lineprefix+"<llsd>\n");
-		for (final Container c: contents) {
+		@Nonnull final StringBuilder response=new StringBuilder(lineprefix+"<llsd>\n");
+		for (@Nonnull final Container c: contents) {
 			response.append(c.toXML(lineprefix+"  "));
 		}
 		response.append(lineprefix).append("</llsd>\n");

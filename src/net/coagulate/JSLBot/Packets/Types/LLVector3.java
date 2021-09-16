@@ -12,7 +12,7 @@ public class LLVector3 extends Type{
 
     @Nonnull
     public static LLVector3 random() {
-        LLVector3 v=new LLVector3();
+        @Nonnull LLVector3 v=new LLVector3();
         v.x=(float) (Math.random()*10.0-5.0);
         v.y=(float) (Math.random()*10.0-5.0);
         v.z=(float) (Math.random()*10.0-5.0);
@@ -29,7 +29,7 @@ public class LLVector3 extends Type{
     public LLVector3(@Nonnull String pos) {
         pos=pos.replaceAll("<","");
         pos=pos.replaceAll(">","");
-        String[] comps = pos.split(",");
+        @Nonnull String[] comps = pos.split(",");
         x=Float.parseFloat(comps[0]);
         y=Float.parseFloat(comps[1]);
         z=Float.parseFloat(comps[2]);

@@ -4,6 +4,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +22,7 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
 	public LLSDArray(@Nonnull final NodeList nodes) {
 		for (int i=0;i<nodes.getLength();i++) {
 			final Node n=nodes.item(i);
-			final Atomic atom=Atomic.create(n);
+			@Nullable final Atomic atom=Atomic.create(n);
 			if (atom!=null) { data.add(atom); }
 		}
 	}
@@ -37,8 +38,8 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
 	@Nonnull
 	@Override
 	public String toXML(final String prefix) {
-		final StringBuilder resp=new StringBuilder(prefix+"<array>\n");
-		for (final Atomic a: data) { resp.append(a.toXML(prefix+"  ")); }
+		@Nonnull final StringBuilder resp=new StringBuilder(prefix+"<array>\n");
+		for (@Nonnull final Atomic a: data) { resp.append(a.toXML(prefix+"  ")); }
 		resp.append(prefix).append("</array>\n");
 		return resp.toString();
 	}

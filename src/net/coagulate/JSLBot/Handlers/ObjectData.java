@@ -62,7 +62,7 @@ public class ObjectData {
 	// ---------- INSTANCE ----------
 	@Nullable
 	public String toString() {
-		String r="";
+		@Nonnull String r="";
 		r+="#"+id.value;
 		r+="@<"+x+","+y+","+z+"> ";
 		if (clickaction!=null) { r+=" onClick:"+clickaction; }

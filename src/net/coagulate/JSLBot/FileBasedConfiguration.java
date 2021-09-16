@@ -22,7 +22,7 @@ public class FileBasedConfiguration extends Configuration {
 	@SuppressWarnings("unchecked") // pretty stuck with this :)
 	public FileBasedConfiguration(@Nonnull final String filename) {
 		this.filename=filename;
-		try (final FileInputStream fis=new FileInputStream(filename);final ObjectInputStream ois=new ObjectInputStream(fis)) {
+		try (@Nonnull final FileInputStream fis=new FileInputStream(filename); @Nonnull final ObjectInputStream ois=new ObjectInputStream(fis)) {
 			kvstore=(Map<String,String>) ois.readObject();
 		}
 		catch (@Nonnull final IOException|ClassNotFoundException e) {
@@ -64,8 +64,8 @@ public class FileBasedConfiguration extends Configuration {
 	@Nonnull
 	@Override
 	public String dump() {
-		String response="";
-		for (final Map.Entry<String,String> entry: kvstore.entrySet()) {
+		@Nonnull String response="";
+		for (@Nonnull final Map.Entry<String,String> entry: kvstore.entrySet()) {
 			if (!"".equals(response)) { response+="\n"; }
 			response+=entry.getKey()+"="+entry.getValue();
 		}
@@ -77,7 +77,7 @@ public class FileBasedConfiguration extends Configuration {
 
 	// ----- Internal Instance -----
 	private void writeStore() throws IOException {
-		try (final FileOutputStream fos=new FileOutputStream(filename);final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
+		try (@Nonnull final FileOutputStream fos=new FileOutputStream(filename); @Nonnull final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
 			oos.writeObject(kvstore);
 		}
 	}

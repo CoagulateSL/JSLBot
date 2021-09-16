@@ -1,16 +1,23 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
+
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+
 public class ActivateGroup extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 368; }
-	public final String getName() { return "ActivateGroup"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "ActivateGroup"; }
+	@Nonnull
+    @Sequence(0)
 	public ActivateGroup_bAgentData bagentdata=new ActivateGroup_bAgentData();
 	public ActivateGroup(){}
-	public ActivateGroup(JSLBot bot) {
+	public ActivateGroup(@Nonnull JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();
 		bagentdata.vagentid=bot.getUUID();
 	}

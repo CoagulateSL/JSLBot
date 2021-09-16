@@ -14,7 +14,7 @@ public class Variable2 extends Type {
 
     public Variable2(){}
     public Variable2(@Nonnull String string) {
-        char[] array=string.toCharArray();
+        @Nonnull char[] array=string.toCharArray();
         value=new byte[array.length+1];
         for (int i=0;i<array.length;i++) { value[i]=(byte) array[i]; }
         value[value.length-1]=0;
@@ -26,7 +26,7 @@ public class Variable2 extends Type {
 
     @Override
     public void read(@Nonnull ByteBuffer in) {
-        U16 length=new U16();
+        @Nonnull U16 length=new U16();
         length.read(in);
         int len=((int)(length.value)) & 0xffff;
         value=new byte[len];
@@ -37,7 +37,7 @@ public class Variable2 extends Type {
 
     @Override
     public void write(@Nonnull ByteBuffer out) {
-        U16 length=new U16();
+        @Nonnull U16 length=new U16();
         length.value=(short) value.length;
         length.write(out);
         out.put(value);
@@ -50,7 +50,7 @@ public class Variable2 extends Type {
     }
     @Nonnull
     public String toString() {
-        String str="";
+        @Nonnull String str="";
         for (byte b:value) {
             if (b>0) { str=str+(char)b; }
         }

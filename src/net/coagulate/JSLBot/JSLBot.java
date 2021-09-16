@@ -99,12 +99,12 @@ public class JSLBot extends Thread {
 	public void dumpAccounting() {
 		System.out.println("DUMP ACCOUNTING FOR BOT "+getFullName());
 		synchronized (messagebytesin) {
-			for (final Map.Entry<Integer,Integer> entry: messagebytesin.entrySet()) {
+			for (@Nonnull final Map.Entry<Integer,Integer> entry: messagebytesin.entrySet()) {
 				System.out.println("Message ID : "+entry.getKey()+" received "+entry.getValue());
 			}
 		}
 		synchronized (messagebytesout) {
-			for (final Map.Entry<Integer,Integer> entry: messagebytesout.entrySet()) {
+			for (@Nonnull final Map.Entry<Integer,Integer> entry: messagebytesout.entrySet()) {
 				System.out.println("Message ID : "+entry.getKey()+" transmitted "+entry.getValue());
 			}
 		}
@@ -243,7 +243,7 @@ public class JSLBot extends Thread {
 	 * Send this generally useful message down the primary UDP circuit
 	 */
 	public void completeAgentMovement() {
-		final CompleteAgentMovement p=new CompleteAgentMovement();
+		@Nonnull final CompleteAgentMovement p=new CompleteAgentMovement();
 		p.bagentdata.vagentid=getUUID();
 		p.bagentdata.vsessionid=getSession();
 		p.bagentdata.vcircuitcode=new U32(getCircuitCode());
@@ -285,10 +285,10 @@ public class JSLBot extends Thread {
 			}
 		}
 		lastagentupdate=new Date();
-		final AgentUpdate p=new AgentUpdate();
+		@Nonnull final AgentUpdate p=new AgentUpdate();
 		p.bagentdata.vagentid=getUUID();
 		p.bagentdata.vsessionid=getSession();
-		final LLVector3 camera=getPos();
+		@Nonnull final LLVector3 camera=getPos();
 		camera.z+=5;
 		if (blind) {
 			p.bagentdata.vcameracenter=new LLVector3(192,144,9999);
@@ -328,7 +328,7 @@ public class JSLBot extends Thread {
 	 */
 	public void im(final LLUUID uuid,
 	               @Nonnull final String message) {
-		final ImprovedInstantMessage reply=new ImprovedInstantMessage(this);
+		@Nonnull final ImprovedInstantMessage reply=new ImprovedInstantMessage(this);
 		reply.bmessageblock.vtoagentid=uuid;
 		reply.bmessageblock.vmessage=new Variable2(message);
 		send(reply,true);
@@ -364,7 +364,7 @@ public class JSLBot extends Thread {
 	 */
 	public void send(final Message m,
 	                 final boolean reliable) {
-		final Packet p=new Packet(m);
+		@Nonnull final Packet p=new Packet(m);
 		p.setReliable(reliable);
 		send(p);
 	}
@@ -499,7 +499,7 @@ public class JSLBot extends Thread {
 				}
 			}
 			if (Debug.CIRCUIT) { log.fine("New circuit to "+handle); }
-			final Circuit newcircuit=new Circuit(this,numericip,port,handle,capsurl);
+			@Nonnull final Circuit newcircuit=new Circuit(this,numericip,port,handle,capsurl);
 			newcircuit.connect();
 			circuits.put(handle,newcircuit);
 			return newcircuit;
@@ -523,9 +523,9 @@ public class JSLBot extends Thread {
 	 */
 	@Nonnull
 	public Set<Regional> getRegionals() {
-		final Set<Regional> regionalset=new HashSet<>();
+		@Nonnull final Set<Regional> regionalset=new HashSet<>();
 		synchronized (circuits) {
-			for (final Circuit circuit: circuits.values()) {
+			for (@Nonnull final Circuit circuit: circuits.values()) {
 				//System.out.println("Circuit "+handle);
 				regionalset.add(circuit.regional());
 			}
@@ -557,8 +557,8 @@ public class JSLBot extends Thread {
 		quitreason=reason;
 		log.warning("Shutdown requested: "+reason);
 		// because we'll get concurrent modification exceptions otherwise, as we close the circuits while iterating.
-		final Set<Circuit> closeme=new HashSet<>(getCircuits());
-		for (final Circuit c: closeme) {
+		@Nonnull final Set<Circuit> closeme=new HashSet<>(getCircuits());
+		for (@Nonnull final Circuit c: closeme) {
 			try { c.close(); } catch (@Nonnull final Exception ignored) {}
 		}
 		getCircuits().clear();
@@ -600,7 +600,7 @@ public class JSLBot extends Thread {
 	}
 
 	public void setFOV(final float angle) {
-		final AgentFOV fov=new AgentFOV();
+		@Nonnull final AgentFOV fov=new AgentFOV();
 		fov.bagentdata.vagentid=getUUID();
 		fov.bagentdata.vcircuitcode=new U32(getCircuitCode());
 		fov.bagentdata.vsessionid=getSession();
@@ -646,11 +646,11 @@ public class JSLBot extends Thread {
 	 */
 	@Nonnull
 	Packet useCircuitCode() {
-		final UseCircuitCode cc=new UseCircuitCode();
+		@Nonnull final UseCircuitCode cc=new UseCircuitCode();
 		cc.bcircuitcode.vcode=new U32(getCircuitCode());
 		cc.bcircuitcode.vsessionid=getSession();
 		cc.bcircuitcode.vid=getUUID();
-		final Packet p=new Packet(cc);
+		@Nonnull final Packet p=new Packet(cc);
 		p.setReliable(true);
 		return p;
 	}
@@ -706,13 +706,13 @@ public class JSLBot extends Thread {
 	private void loadConf(final Configuration conf) {
 		// load from config and call 'setup'
 		config=conf;
-		String location=config.get("loginlocation");
+		@Nullable String location=config.get("loginlocation");
 		if (location==null || "".equals(location)) { location="home"; }  // default to home
 		//String potentialmaster=config.get("owner");
 
-		final String handlerlist=config.get("handlers","");
+		@Nonnull final String handlerlist=config.get("handlers","");
 		brain.loadHandlers(handlerlist.split(","));
-		String uri=config.get("loginuri");
+		@Nullable String uri=config.get("loginuri");
 		if (uri==null || uri.isEmpty()) { uri="https://login.agni.lindenlab.com/cgi-bin/login.cgi"; }
 		setup(config.get("firstname"),config.get("lastname"),config.get("password"),location,uri);
 		log.info("JSLBot initialisation complete, ready to launch");
@@ -739,7 +739,7 @@ public class JSLBot extends Thread {
 	                          @Nonnull final String password,
 	                          final String location,
 							  @Nonnull final String loginuri) throws Exception {
-		Exception last=null;
+		@Nullable Exception last=null;
 		for (int retries=0;retries<Constants.MAX_RETRIES;retries++) {
 			try {
 				login(firstname,lastname,password,location,loginuri);
@@ -770,29 +770,29 @@ public class JSLBot extends Thread {
 	                   final String loginlocation,
 					   @Nonnull final String loginuri) throws IOException, XmlRpcException {
 		// authentication is performed over XMLRPC over HTTPS
-		final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation,loginuri);
+		@Nonnull final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation,loginuri);
 		if (!("true".equalsIgnoreCase((String) result.get("login")))) {
 			throw new IOException("Server gave error: "+result.get("message"));
 		}
-		final String message=(String) result.get("message");
+		@Nonnull final String message=(String) result.get("message");
 		log.info("Login MOTD: "+message);
 
 		// the response contains things we'll need
-		final String fn=(String) result.get("first_name");
+		@Nonnull final String fn=(String) result.get("first_name");
 		this.firstname=fn.substring(1,fn.length()-1);
 		this.lastname=(String) result.get("last_name");
 		uuid=new LLUUID((String) result.get("agent_id"));
 		// probably want to note the "udp_blacklist" which is a comma separated list of packet types to not use.  but then if we just aren't using them either...?
 		circuitcode=(int) result.get("circuit_code");
 		sessionid=new LLUUID((String) result.get("session_id"));
-		final String ip=(String) result.get("sim_ip");
+		@Nonnull final String ip=(String) result.get("sim_ip");
 		final int port=(Integer) result.get("sim_port");
 		final int loginx=(Integer) result.get("region_x");
 		final int loginy=(Integer) result.get("region_y");
-		final Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
-		@SuppressWarnings("unchecked") final // if it isn't, what do we do anyway?
+		@Nonnull final Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
+		@Nonnull @SuppressWarnings("unchecked") final // if it isn't, what do we do anyway?
 				Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
-		for (final Map.Entry<String,String> entry: rootmap.entrySet()) {
+		for (@Nonnull final Map.Entry<String,String> entry: rootmap.entrySet()) {
 			if (Debug.AUTH) {
 				log.finer("Inventory Root "+entry.getKey()+" = "+entry.getValue());
 			}
@@ -800,7 +800,7 @@ public class JSLBot extends Thread {
 		}
 		//System.out.println("inventoryroot type is "+inventoryroot.getClass().getName());
 		// derive region handle
-		final U64 handle=new U64();
+		@Nonnull final U64 handle=new U64();
 		handle.value=loginx;
 		handle.value=handle.value<<(32);
 		handle.value=handle.value|(loginy);
@@ -808,9 +808,9 @@ public class JSLBot extends Thread {
 			log.finer("Computed initial handle of "+Long.toUnsignedString(handle.value));
 		}
 		// caps
-		final String seedcaps=(String) result.get("seed_capability");
+		@Nonnull final String seedcaps=(String) result.get("seed_capability");
 		log.info("Login is complete, opening initial circuit.");
-		final Circuit initial=new Circuit(this,ip,port,handle.value,seedcaps);
+		@Nonnull final Circuit initial=new Circuit(this,ip,port,handle.value,seedcaps);
 		initial.connect();
 		// for our main connection, "move in" to the sim, it's expecting us :P
 		primary=initial;
@@ -827,9 +827,9 @@ public class JSLBot extends Thread {
 		if (!quit) { brain.loggedIn(); }
 		if (!config.get("homeseat","").isBlank())
 		{
-			Map<String,String> args=new HashMap<>();
+			@Nonnull Map<String,String> args=new HashMap<>();
 			args.put("uuid",config.get("homeseat"));
-			CommandEvent sit=new CommandEvent(this,null,"siton",args,new LLUUID(config.get("CnC.authorisation.owneruuid")));
+			@Nonnull CommandEvent sit=new CommandEvent(this,null,"siton",args,new LLUUID(config.get("CnC.authorisation.owneruuid")));
 			brain.execute(sit);
 		}
 		while (!quit) {

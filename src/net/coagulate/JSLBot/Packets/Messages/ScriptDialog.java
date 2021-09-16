@@ -1,13 +1,20 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+
 public class ScriptDialog extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 190; }
-	public final String getName() { return "ScriptDialog"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "ScriptDialog"; }
+	@Nonnull
+    @Sequence(0)
 	public ScriptDialog_bData bdata=new ScriptDialog_bData();
 	@Sequence(1)
 	public List<ScriptDialog_bButtons> bbuttons;

@@ -27,14 +27,14 @@ public class OwnerOnly extends Authorisation {
 	                 @Nonnull final Configuration c) {
 		super(bot,c);
 		ownerusername=c.get("ownerusername");
-		final String owneruuidstr=c.get("owneruuid");
+		@Nullable final String owneruuidstr=c.get("owneruuid");
 		owneruuid=null;
 		if (owneruuidstr!=null) { owneruuid=new LLUUID(owneruuidstr); }
 		if (ownerusername==null && owneruuid==null) {
 			log.warning("OwnerAuth configured but no owner uuid or name was found, essentially in DenyAll mode");
 			return;
 		}
-		String permitted="";
+		@Nonnull String permitted="";
 		if (ownerusername!=null) { permitted="'"+ownerusername+"'"; }
 		if (owneruuid!=null) {
 			if (!permitted.isEmpty()) { permitted+=" "; }
@@ -60,8 +60,8 @@ public class OwnerOnly extends Authorisation {
 		if (owneruuid==null && ownerusername==null) {
 			return "Owner authorisation configured but no owner set, essentially denying all";
 		}
-		final String invokerusername=event.invokerUsername();
-		final LLUUID invokeruuid=event.invokerUUID();
+		@Nullable final String invokerusername=event.invokerUsername();
+		@Nullable final LLUUID invokeruuid=event.invokerUUID();
 		if (invokeruuid==null && invokerusername==null) { return "No invoker in supplied command event"; }
 		if (invokeruuid!=null && invokeruuid.equals(owneruuid)) { return null; } // approve
 		if (invokerusername!=null && invokerusername.equalsIgnoreCase(ownerusername)) { return null; }

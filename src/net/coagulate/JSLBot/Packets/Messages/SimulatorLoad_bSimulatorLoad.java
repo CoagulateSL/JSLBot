@@ -1,12 +1,21 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.BOOL;
+import net.coagulate.JSLBot.Packets.Types.F32;
+import net.coagulate.JSLBot.Packets.Types.S32;
+
+import javax.annotation.Nonnull;
+
 public class SimulatorLoad_bSimulatorLoad extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public F32 vtimedilation=new F32();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public S32 vagentcount=new S32();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public BOOL vcanacceptagents=new BOOL();
 }

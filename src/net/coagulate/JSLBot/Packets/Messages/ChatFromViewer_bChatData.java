@@ -1,12 +1,21 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.S32;
+import net.coagulate.JSLBot.Packets.Types.U8;
+import net.coagulate.JSLBot.Packets.Types.Variable2;
+
+import javax.annotation.Nonnull;
+
 public class ChatFromViewer_bChatData extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public Variable2 vmessage=new Variable2();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public U8 vtype=new U8();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public S32 vchannel=new S32();
 }

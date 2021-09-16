@@ -72,8 +72,8 @@ public class CommandEvent extends Event {
 	@Nonnull
 	@Override
 	public String dump() {
-		final StringBuilder ret=new StringBuilder("COMMAND: "+getName());
-		for (final Map.Entry<String,String> entry: parameters.entrySet()) {
+		@Nonnull final StringBuilder ret=new StringBuilder("COMMAND: "+getName());
+		for (@Nonnull final Map.Entry<String,String> entry: parameters.entrySet()) {
 			ret.append("\n").append(entry.getKey()).append("=").append(entry.getValue());
 		}
 		return ret.toString();
@@ -156,16 +156,16 @@ public class CommandEvent extends Event {
 
 	@Nonnull
 	private List<Object> getParameters(@Nonnull final Method method) {
-		final List<Object> params=new ArrayList<>();
+		@Nonnull final List<Object> params=new ArrayList<>();
 		params.add(this);
 		boolean firstparam=true;
-		for (final Parameter param: method.getParameters()) {
+		for (@Nonnull final Parameter param: method.getParameters()) {
 			//System.out.println(param.toString());
 			if (firstparam) { firstparam=false; }
 			else {
 				JSLBot.Param annotation = param.getAnnotation(JSLBot.Param.class);
 				if (annotation!=null) {
-					final String paramname = annotation.name();
+					@Nonnull final String paramname = annotation.name();
 					params.add(parameters().getOrDefault(paramname, null));
 				} else {
 					throw new IllegalArgumentException("Parameter "+param.getName()+" of method "+method.getDeclaringClass().getSimpleName()+"."+method.getName()+" is missing a Param annotation");

@@ -39,16 +39,16 @@ public class Groups extends Handler {
 	                                 final String groupuuid,
 	                                 @Param(name="roleuuid",description = "Role UUID within group to invite avatar to")
 	                                 @Nullable final String roleuuid) {
-		final LLUUID avatar=new LLUUID(avataruuid);
-		final LLUUID group=new LLUUID(groupuuid);
-		LLUUID role=new LLUUID();
+		@Nonnull final LLUUID avatar=new LLUUID(avataruuid);
+		@Nonnull final LLUUID group=new LLUUID(groupuuid);
+		@Nullable LLUUID role=new LLUUID();
 		if (roleuuid!=null) { role=new LLUUID(roleuuid); }
-		final InviteGroupRequest igr=new InviteGroupRequest();
+		@Nonnull final InviteGroupRequest igr=new InviteGroupRequest();
 		igr.bagentdata.vagentid=bot.getUUID();
 		igr.bagentdata.vsessionid=bot.getSession();
 		igr.bgroupdata.vgroupid=group;
 		igr.binvitedata=new ArrayList<>();
-		final InviteGroupRequest_bInviteData igrid=new InviteGroupRequest_bInviteData();
+		@Nonnull final InviteGroupRequest_bInviteData igrid=new InviteGroupRequest_bInviteData();
 		igrid.vinviteeid=avatar;
 		igrid.vroleid=role;
 		igr.binvitedata.add(igrid);
@@ -64,15 +64,15 @@ public class Groups extends Handler {
 	                                final String avataruuid,
 									@Param(name="groupuuid",description = "Group UUID to eject from")
 	                                final String groupuuid) {
-		final LLUUID avatar=new LLUUID(avataruuid);
-		final LLUUID group=new LLUUID(groupuuid);
+		@Nonnull final LLUUID avatar=new LLUUID(avataruuid);
+		@Nonnull final LLUUID group=new LLUUID(groupuuid);
 		//LLUUID role=new LLUUID(); if (roleuuid!=null) { role=new LLUUID(roleuuid); }
-		final EjectGroupMemberRequest egr=new EjectGroupMemberRequest();
+		@Nonnull final EjectGroupMemberRequest egr=new EjectGroupMemberRequest();
 		egr.bagentdata.vagentid=bot.getUUID();
 		egr.bagentdata.vsessionid=bot.getSession();
 		egr.bgroupdata.vgroupid=group;
 		egr.bejectdata=new ArrayList<>();
-		final EjectGroupMemberRequest_bEjectData egrid=new EjectGroupMemberRequest_bEjectData();
+		@Nonnull final EjectGroupMemberRequest_bEjectData egrid=new EjectGroupMemberRequest_bEjectData();
 		egrid.vejecteeid=avatar;
 		egr.bejectdata.add(egrid);
 		bot.send(egr,true);
@@ -83,9 +83,9 @@ public class Groups extends Handler {
 	@Nonnull
 	@CmdHelp(description="List groups the logged in agent is a member of")
 	public String groupsListCommand(final CommandEvent command) {
-		final StringBuilder resp=new StringBuilder("Groups:");
+		@Nonnull final StringBuilder resp=new StringBuilder("Groups:");
 		synchronized (groups) {
-			for (final GroupData g: groups.values()) {
+			for (@Nonnull final GroupData g: groups.values()) {
 				resp.append("\n");
 				resp.append(g.groupname).append(" (").append(g.uuid().toUUIDString()).append(") ");
 				if (g.contribution!=0) { resp.append("Contribution:").append(g.contribution).append(" "); }
@@ -97,16 +97,16 @@ public class Groups extends Handler {
 	}
 
 	public void improvedInstantMessageUDPImmediate(@Nonnull final UDPEvent event) {
-		final ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
+		@Nonnull final ImprovedInstantMessage m=(ImprovedInstantMessage) event.body();
 		if (m.bmessageblock.vdialog.value==3) {
-			final U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
+			@Nonnull final U32BE feeraw=new U32BE(ByteBuffer.wrap(m.bmessageblock.vbinarybucket.value));
 			final int fee=feeraw.value;
 			final LLUUID groupid=m.bmessageblock.vid;
-			final Map<String,String> param=new HashMap<>();
+			@Nonnull final Map<String,String> param=new HashMap<>();
 			param.put("groupid",groupid.toString());
-			final CommandEvent join=new CommandEvent(bot,event.region(),"acceptGroupInvites",param,null);
+			@Nullable final CommandEvent join=new CommandEvent(bot,event.region(),"acceptGroupInvites",param,null);
 			join.invokerUsername(m.bmessageblock.vfromagentname.toString());
-			final String reject=bot.brain().auth(join);
+			@Nullable final String reject=bot.brain().auth(join);
 			byte num=35;
 			if (fee>0) {
 				num=36;
@@ -116,7 +116,7 @@ public class Groups extends Handler {
 				log.info("Rejected invite to join group "+groupid.toUUIDString()+" from "+m.bmessageblock.vfromagentname);
 				num=36;
 			}
-			final ImprovedInstantMessage im=new ImprovedInstantMessage();
+			@Nonnull final ImprovedInstantMessage im=new ImprovedInstantMessage();
 			im.bagentdata.vagentid=bot.getUUID();
 			im.bagentdata.vsessionid=bot.getSession();
 			im.bmessageblock.vfromagentname=new Variable1(bot.getUsername());
@@ -130,8 +130,8 @@ public class Groups extends Handler {
 	}
 
 	public void joinGroupReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		final JoinGroupReply jgr=(JoinGroupReply) event.body();
-		final String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
+		@Nonnull final JoinGroupReply jgr=(JoinGroupReply) event.body();
+		@Nonnull final String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
 		if (jgr.bgroupdata.vsuccess.value!=0) {
 			log.info("Joined group "+groupid);
 		}
@@ -141,14 +141,14 @@ public class Groups extends Handler {
 	}
 
 	public void groupRoleDataReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		final GroupRoleDataReply reply=(GroupRoleDataReply) event.body();
+		@Nonnull final GroupRoleDataReply reply=(GroupRoleDataReply) event.body();
 		// only processing the role data at the moment!
 		long group=reply.bgroupdata.vgroupid.toLong();
-		Set<GroupRole> roles=new HashSet<>();
-		for (GroupRoleDataReply_bRoleData role:reply.broledata) {
+		@Nonnull Set<GroupRole> roles=new HashSet<>();
+		for (@Nonnull GroupRoleDataReply_bRoleData role:reply.broledata) {
 			roles.add(new GroupRole(role.vroleid,role.vname.toString(),role.vtitle.toString(),role.vdescription.toString(),role.vpowers.value,role.vmembers.value));
 		}
-		Long signalObject=null;
+		@Nullable Long signalObject=null;
 		for (Long potential:grouproles.keySet()) {
 			if (potential==group) { signalObject=potential; }
 		}
@@ -166,7 +166,7 @@ public class Groups extends Handler {
 									@Nullable @Param(name="uuid",description="Group UUID to query") final String uuid,
 									@Nullable @Param(name="name",description="Group name to query, if UUID not supplied") final String name) {
 		if (uuid==null && name==null) { return "1 - No group parameter supplied"; }
-		LLUUID target;
+		@Nullable LLUUID target;
 		if (uuid==null || uuid.isEmpty()) {
 			if (name==null) { return "1 - No group parameter supplied"; }
 			target=findGroupUUID(name);
@@ -175,10 +175,10 @@ public class Groups extends Handler {
 			target=new LLUUID(uuid);
 		}
 		if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
-		final GroupRoleDataRequest req=new GroupRoleDataRequest(bot);
+		@Nonnull final GroupRoleDataRequest req=new GroupRoleDataRequest(bot);
 		Long ourReference=target.toLong();
 		grouproles.put(ourReference,null);
-		LLUUID requestID=LLUUID.random();
+		@Nonnull LLUUID requestID=LLUUID.random();
 		req.bgroupdata.vgroupid=target;
 		req.bgroupdata.vrequestid=requestID;
 		bot.send(req,true);
@@ -189,8 +189,8 @@ public class Groups extends Handler {
 			catch (InterruptedException e) { return "1 - Wait was interrupted"; }
 		}
 		if (grouproles.get(ourReference)==null) { return "1 - No response received within timeout"; }
-		StringBuilder reply=new StringBuilder("Group Roles for group UUID ").append(target.toUUIDString());
-		for (GroupRole role:grouproles.get(ourReference)) {
+		@Nonnull StringBuilder reply=new StringBuilder("Group Roles for group UUID ").append(target.toUUIDString());
+		for (@Nonnull GroupRole role:grouproles.get(ourReference)) {
 			reply.append("\n").append(role.name).append(" - ").append(role.roleID.toUUIDString());
 		}
 		return reply.toString();
@@ -214,20 +214,20 @@ public class Groups extends Handler {
 	}
 
 	public void agentGroupDataUpdateXMLDelayed(@Nonnull final XMLEvent event) {
-		final LLSDMap body=event.map();
-		final LLSDArray groupslist=(LLSDArray) body.get("GroupData");
+		@Nonnull final LLSDMap body=event.map();
+		@Nonnull final LLSDArray groupslist=(LLSDArray) body.get("GroupData");
 		synchronized (groups) {
 			for (final Atomic groupatom: groupslist) {
-				final LLSDMap group=(LLSDMap) groupatom;
+				@Nonnull final LLSDMap group=(LLSDMap) groupatom;
 				final String groupname=group.get("GroupName").toString();
-				final LLSDBinary grouppowers=(LLSDBinary) group.get("GroupPowers");
+				@Nonnull final LLSDBinary grouppowers=(LLSDBinary) group.get("GroupPowers");
 				final boolean listinprofile=((LLSDBoolean) group.get("ListInProfile",new LLSDBoolean(true))).get();
 				final boolean acceptnotices=((LLSDBoolean) group.get("AcceptNotices",new LLSDBoolean(true))).get();
 				final int contribution=((LLSDInteger) group.get("Contribution")).get();
 				LLUUID uuid=((LLSDUUID) group.get("GroupID")).toLLUUID();
-				GroupData g=null;
+				@Nullable GroupData g=null;
 				synchronized (groups) {
-					for (final LLUUID compare: groups.keySet()) {
+					for (@Nonnull final LLUUID compare: groups.keySet()) {
 						if (compare.equals(uuid)) {
 							g=groups.get(compare);
 							uuid=compare;
@@ -248,7 +248,7 @@ public class Groups extends Handler {
 
 	@Nullable
 	public LLSDMap getMembership(final LLUUID uuid) {
-		for (final Map.Entry<LLUUID,LLSDMap> entry: groupmembership.entrySet()) {
+		for (@Nonnull final Map.Entry<LLUUID,LLSDMap> entry: groupmembership.entrySet()) {
 			if (entry.getKey().equals(uuid)) { return entry.getValue(); }
 		}
 		return null;
@@ -259,11 +259,11 @@ public class Groups extends Handler {
 
 	@Nonnull
 	public Set<LLUUID> getMembers(final LLUUID groupuuid) {
-		final LLSDMap members=getMembership(groupuuid);
-		final Set<LLUUID> ret=new HashSet<>();
+		@Nullable final LLSDMap members=getMembership(groupuuid);
+		@Nonnull final Set<LLUUID> ret=new HashSet<>();
 		if (members==null) { throw new IllegalStateException("Failed to get group roster for some reason"); }
 		for (final String member: members.keys()) {
-			final LLUUID uuid=new LLUUID(member);
+			@Nonnull final LLUUID uuid=new LLUUID(member);
 			ret.add(uuid);
 		}
 		return ret;
@@ -280,12 +280,12 @@ public class Groups extends Handler {
 	@CmdHelp(description="Collect a group's roster")
 	public void groupRosterCommand(final CommandEvent command,
 	                               @Nonnull @Param(name = "uuid",description = "Group UUID to get roster for") final String uuid) throws IOException {
-		final LLSDMap req=new LLSDMap();
+		@Nonnull final LLSDMap req=new LLSDMap();
 		req.put("group_id",new LLSDUUID(uuid));
-		final LLSD llsd=new LLSD(req);
-		final LLSDMap response=bot.getCAPS().invokeCAPS("GroupMemberData","",llsd);
+		@Nonnull final LLSD llsd=new LLSD(req);
+		@Nullable final LLSDMap response=bot.getCAPS().invokeCAPS("GroupMemberData","",llsd);
 		if (response==null) { throw new IOException("GroupMemberData CAPS returned a null map"); }
-		final LLSDMap members=(LLSDMap) response.get("members");
+		@Nonnull final LLSDMap members=(LLSDMap) response.get("members");
 		if (members==null) { throw new NullPointerException("Failed to extract members map"); }
 		groupmembership.put(new LLUUID(uuid),members);
 	}
@@ -295,7 +295,7 @@ public class Groups extends Handler {
 	public String activateGroupCommand(final CommandEvent event,
 	                                   @Nullable @Param(name="uuid",description="Group UUID to activate (or zero UUID for none)") final String uuid,
 	                                   @Nullable @Param(name="name",description="Group name to activate, if UUID not supplied (supports NONE in upper case)") final String name) {
-		LLUUID target;
+		@Nullable LLUUID target;
 		if (uuid==null || uuid.isEmpty()) {
 			if (name==null) { return "1 - No group parameter supplied"; }
 			target=findGroupUUID(name);
@@ -305,7 +305,7 @@ public class Groups extends Handler {
 		}
 		if (target==null && "NONE".equals(name)) { target=new LLUUID(); }
 		if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
-		final ActivateGroup req=new ActivateGroup(bot);
+		@Nonnull final ActivateGroup req=new ActivateGroup(bot);
 		req.bagentdata.vgroupid=target;
 		bot.send(req,true);
 		return "0 - Group activation requested";
@@ -315,7 +315,7 @@ public class Groups extends Handler {
 	@Nullable
 	private LLUUID findGroupUUID(@Nonnull final String name) {
 		synchronized (groups) {
-			for (final Map.Entry<LLUUID,GroupData> entry: groups.entrySet()) {
+			for (@Nonnull final Map.Entry<LLUUID,GroupData> entry: groups.entrySet()) {
 				final GroupData gd=entry.getValue();
 				if (gd!=null) {
 					if (name.equalsIgnoreCase(gd.groupname)) { return entry.getKey(); }

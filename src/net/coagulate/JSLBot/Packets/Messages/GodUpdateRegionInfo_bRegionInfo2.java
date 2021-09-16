@@ -1,8 +1,13 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.U64;
+
+import javax.annotation.Nonnull;
+
 public class GodUpdateRegionInfo_bRegionInfo2 extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public U64 vregionflagsextended=new U64();
 }

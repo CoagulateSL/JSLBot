@@ -37,5 +37,5 @@ public class AllowAll extends Authorisation {
 	 */
 	@Nullable
 	@Override
-	public String approve(final CommandEvent event) { return null; }
+	public String approve(@Nonnull final CommandEvent event) { return null; }
 }

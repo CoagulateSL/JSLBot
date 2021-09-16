@@ -25,10 +25,10 @@ public class Avatars extends Handler {
     public String resolveUUIDCommand(final CommandEvent command,
                                       @Nullable @JSLBot.Param(name="uuid", description="UUID of Avatar to look up, or comma separated list of UUIDs") String uuid) {
         if (uuid==null || "".equals(uuid)) { return "No UUID parameter passed."; }
-        List<String> param=new ArrayList<>();
+        @Nonnull List<String> param=new ArrayList<>();
         Collections.addAll(param, uuid.split(","));
-        StringBuilder output=new StringBuilder();
-        for (Map.Entry<String,String> entry:resolveUUIDStrings(param).entrySet()) {
+        @Nonnull StringBuilder output=new StringBuilder();
+        for (@Nonnull Map.Entry<String,String> entry:resolveUUIDStrings(param).entrySet()) {
             if (output.length()>0) { output.append(" "); }
             output.append(entry.getKey()).append("=").append(entry.getValue());
         }
@@ -37,25 +37,25 @@ public class Avatars extends Handler {
 
     @Nonnull
     public Map<String,String> resolveUUIDStrings(@Nonnull final List<String> uuids) {
-        List<LLUUID> converted=new ArrayList<>(uuids.size());
+        @Nonnull List<LLUUID> converted=new ArrayList<>(uuids.size());
         for (String uuid:uuids) {
             converted.add(new LLUUID(uuid));
         }
-        Map<String,String> map=new HashMap<>();
-        for (Map.Entry<LLUUID,String> entry:resolveUUIDs(converted).entrySet()) {
+        @Nonnull Map<String,String> map=new HashMap<>();
+        for (@Nonnull Map.Entry<LLUUID,String> entry:resolveUUIDs(converted).entrySet()) {
             map.put(entry.getKey().toUUIDString(),entry.getValue());
         }
         return map;
     }
     @Nonnull
     public Map<LLUUID,String> resolveUUIDs(@Nonnull final List<LLUUID> uuids) {
-        UUIDNameRequest req=new UUIDNameRequest();
+        @Nonnull UUIDNameRequest req=new UUIDNameRequest();
         req.buuidnameblock=new ArrayList<>();
-        Map<LLUUID,String> map=new HashMap<>();
+        @Nonnull Map<LLUUID,String> map=new HashMap<>();
         for (LLUUID uuid:uuids) {
             if (resolvedUUIDs.containsKey(uuid)) { map.put(uuid,resolvedUUIDs.get(uuid)); }
             else {
-                UUIDNameRequest_bUUIDNameBlock lookup = new UUIDNameRequest_bUUIDNameBlock();
+                @Nonnull UUIDNameRequest_bUUIDNameBlock lookup = new UUIDNameRequest_bUUIDNameBlock();
                 lookup.vid = uuid;
                 req.buuidnameblock.add(lookup);
             }
@@ -63,7 +63,7 @@ public class Avatars extends Handler {
         if (req.buuidnameblock.isEmpty()) { return map; }
         bot.send(req);
         boolean complete=false;
-        final Date now=new Date();
+        @Nonnull final Date now=new Date();
         while (!complete && (new Date().getTime()-(now.getTime()))<5000) {
             try {
                 synchronized (resolveUUIDLock) {
@@ -86,8 +86,8 @@ public class Avatars extends Handler {
     }
 
     public void uUIDNameReplyUDPImmediate(@Nonnull final UDPEvent event) {
-        UUIDNameReply reply= (UUIDNameReply) event.body();
-        for (UUIDNameReply_bUUIDNameBlock element:reply.buuidnameblock) {
+        @Nonnull UUIDNameReply reply= (UUIDNameReply) event.body();
+        for (@Nonnull UUIDNameReply_bUUIDNameBlock element:reply.buuidnameblock) {
             if (element.vlastname.toString().equalsIgnoreCase("Resident")) {
                 resolvedUUIDs.put(element.vid, element.vfirstname.toString());
             } else {

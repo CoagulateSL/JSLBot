@@ -31,16 +31,16 @@ public class Test {
 		final String CONFIGFILE;
 		if (args.length>0) { CONFIGFILE=args[0]; }
 		else {
-			final Scanner in=new Scanner(System.in);
+			@Nonnull final Scanner in=new Scanner(System.in);
 			System.out.print("Name of config file: ");
 			CONFIGFILE=in.nextLine();
 		}
 		if (CONFIGFILE==null) { throw new NullPointerException("You must supply a configuration file name"); }
 		if (CONFIGFILE.isBlank()) { throw new AssertionError("You must supply a file name so that we can create a configuration file!"); }
 		if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
-		final Configuration config=new FileBasedConfiguration(CONFIGFILE);
+		@Nonnull final Configuration config=new FileBasedConfiguration(CONFIGFILE);
 		//System.out.println("===== Configuration file loaded =====\n"+config.dump());
-		final JSLBot bot=new JSLBot(config);
+		@Nonnull final JSLBot bot=new JSLBot(config);
 		bot.ALWAYS_RECONNECT=true; // likely this will be cleaned up, but for testing...
 		//noinspection CallToThreadRun
 		bot.run(); // lose control to bot.  call start() to background the bot and continue execution here.
@@ -52,10 +52,10 @@ public class Test {
 	 * Builds a base configuration file
 	 */
 	static void initConfig(@Nonnull final String CONFIGFILE) {
-		final Map<String,String> m=new HashMap<>();
+		@Nonnull final Map<String,String> m=new HashMap<>();
 
 		System.out.println("---- ALERT ----\nConfiguration file '"+CONFIGFILE+"' does not exist.\nIf you complete this process it will be created\n\n");
-		final Scanner in=new Scanner(System.in);
+		@Nonnull final Scanner in=new Scanner(System.in);
 
 		System.out.print("Bot's first name: ");
 		final String firstname=in.nextLine();
@@ -83,7 +83,7 @@ public class Test {
 		m.put("CnC.authorisation.ownerusername",ownername);
 		m.put("password",BotUtils.md5hash(password));
 		m.put("loginuri",loginuri);
-		try (final FileOutputStream fos=new FileOutputStream(CONFIGFILE);final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
+		try (@Nonnull final FileOutputStream fos=new FileOutputStream(CONFIGFILE); @Nonnull final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
 			oos.writeObject(m);
 		}
 		catch (@Nonnull final FileNotFoundException ex) {

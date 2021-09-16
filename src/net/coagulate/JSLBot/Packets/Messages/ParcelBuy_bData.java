@@ -1,16 +1,27 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.BOOL;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+import net.coagulate.JSLBot.Packets.Types.S32;
+
+import javax.annotation.Nonnull;
+
 public class ParcelBuy_bData extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public LLUUID vgroupid=new LLUUID();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public BOOL visgroupowned=new BOOL();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public BOOL vremovecontribution=new BOOL();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public S32 vlocalid=new S32();
-	@Sequence(4)
+	@Nonnull
+    @Sequence(4)
 	public BOOL vfinal=new BOOL();
 }

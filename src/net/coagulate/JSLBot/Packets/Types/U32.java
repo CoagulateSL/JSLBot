@@ -20,7 +20,7 @@ public class U32 extends Type {
 
     @Nonnull
     public ByteBuffer content() {
-        ByteBuffer content=ByteBuffer.allocate(4);
+        @Nonnull ByteBuffer content=ByteBuffer.allocate(4);
         content.order(byteorder);
         content.putInt(value);
         return content;

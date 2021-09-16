@@ -1,8 +1,13 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.LLVector3;
+
+import javax.annotation.Nonnull;
+
 public class TelehubInfo_bSpawnPointBlock extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public LLVector3 vspawnpointpos=new LLVector3();
 }

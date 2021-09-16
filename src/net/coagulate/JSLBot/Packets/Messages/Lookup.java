@@ -1,6 +1,10 @@
 package net.coagulate.JSLBot.Packets.Messages;
+
+import javax.annotation.Nonnull;
+
 public class Lookup {
-	public static String lookup(long v) {
+	@Nonnull
+    public static String lookup(long v) {
 		if (v==0xffff0058) { return "SetAlwaysRun"; }
 		if (v==0xffff007c) { return "ModifyLand"; }
 		if (v==0xffff0095) { return "RegionHandshakeReply"; }

@@ -76,7 +76,7 @@ public class EventQueue extends Thread {
 		catch (@Nonnull final Exception e) {
 			log.log(SEVERE,"Event queue crashed: "+e,e);
 		}
-		JSLBot mybot=botNullable();
+		@Nullable JSLBot mybot=botNullable();
 		if (mybot==null) {
 			log.log(SEVERE,"CRITICAL (consequential) FAILURE - primary caps is closed, bot has already disconnected from us");
 			return;
@@ -103,18 +103,18 @@ public class EventQueue extends Thread {
 		// Otherwise it 200s and gives us a document.  Yay.
 		// Either way we just keep doing this.  If we get a 404 then the URL has been invalidated and we can exit.
 		int id=0;
-		final URL url=new URL(eventqueue);
+		@Nonnull final URL url=new URL(eventqueue);
 		int errorcount=0;
 		while (!shutdown) { // we could stop on circuit exit or some other things, but it seems to work fine just waiting for the inevitable 404
 			try {
 				// format request document
-				final LLSDMap post=new LLSDMap();
+				@Nonnull final LLSDMap post=new LLSDMap();
 				post.put("ack",new LLSDInteger(id));
 				post.put("done",new LLSDBoolean(false));
-				final LLSD postdoc=new LLSD(post);
-				final byte[] postdata=(postdoc.toXML().getBytes(StandardCharsets.UTF_8));
+				@Nonnull final LLSD postdoc=new LLSD(post);
+				@Nonnull final byte[] postdata=(postdoc.toXML().getBytes(StandardCharsets.UTF_8));
 				// send it
-				final HttpURLConnection connection=(HttpURLConnection) url.openConnection();
+				@Nonnull final HttpURLConnection connection=(HttpURLConnection) url.openConnection();
 				connection.setRequestMethod("POST");
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Type","application/llsd+xml");
@@ -122,7 +122,7 @@ public class EventQueue extends Thread {
 				connection.setRequestProperty("Content-Length",Integer.toString(postdata.length));
 				connection.setUseCaches(false);
 				// write document
-				try (final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
+				try (@Nonnull final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
 					wr.write(postdata);
 				}
 				catch (@Nonnull final Exception e) {
@@ -136,10 +136,10 @@ public class EventQueue extends Thread {
 					return;
 				}
 				if (status!=502 && status!=499) {
-					final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
+					@Nonnull final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
 					final String read=s.next();
 					//System.out.println("Event queue:"+read);
-					LLSD document=null;
+					@Nullable LLSD document=null;
 					try {
 						document=new LLSD(read);
 					}
@@ -149,17 +149,17 @@ public class EventQueue extends Thread {
 					}
 					if (document!=null) {
 						try {
-							final LLSDMap map=(LLSDMap) document.getFirst();
+							@Nonnull final LLSDMap map=(LLSDMap) document.getFirst();
 							if (map==null) {
 								log.log(SEVERE,"Loaded null LLSDMap from document "+read+", throwing IOException");
 								throw new IOException("Null LLSDMap response extracted from '"+read+"'");
 							}
 							else {
-								final LLSDInteger llsdid=(LLSDInteger) map.get("id");
+								@Nonnull final LLSDInteger llsdid=(LLSDInteger) map.get("id");
 								id=llsdid.get();
 								//System.out.println("Eventqueue#"+id+":"+document.toXML());
-								final LLSDMap outermap=(LLSDMap) document.getFirst();
-								final LLSDArray eventslist=(LLSDArray) outermap.get("events");
+								@Nonnull final LLSDMap outermap=(LLSDMap) document.getFirst();
+								@Nonnull final LLSDArray eventslist=(LLSDArray) outermap.get("events");
 								process(eventslist);
 							}
 						}
@@ -189,11 +189,11 @@ public class EventQueue extends Thread {
 			//System.out.println("**************** ATOM:\n"+a.toXML());
 			// this is so clunky
 			// should be a map, "message" key and a "body" key, with which we can commence the decode
-			final LLSDMap eventmap=(LLSDMap) a;
+			@Nonnull final LLSDMap eventmap=(LLSDMap) a;
 			final String messagetype=eventmap.get("message").toString();
 			final Atomic body=eventmap.get("body");
 			if (Debug.DUMPXML) { System.out.println("Message type is "+messagetype+"\n"+body.toXML()); }
-			final XMLEvent event=new XMLEvent(bot(),circuit().regional(),body,messagetype);
+			@Nonnull final XMLEvent event=new XMLEvent(bot(),circuit().regional(),body,messagetype);
 			event.submit();
 		}
 	}

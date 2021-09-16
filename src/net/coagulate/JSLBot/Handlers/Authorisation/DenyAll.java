@@ -39,5 +39,5 @@ public class DenyAll extends Authorisation {
 	 */
 	@Nonnull
 	@Override
-	public String approve(final CommandEvent event) { return "The DenyAll authoriser denies all requests"; }
+	public String approve(@Nonnull final CommandEvent event) { return "The DenyAll authoriser denies all requests"; }
 }

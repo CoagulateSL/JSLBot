@@ -29,7 +29,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     @Nonnull
     public static LLUUID random() {
         // apparently UUIDs might be used as arbitary request markers.
-        String random="";
+        @Nonnull String random="";
         for (int i=0;i<32;i++) {
             random=random+randomHexChar();
         }
@@ -55,7 +55,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
 
     @Nonnull
     public ByteBuffer content() {
-        ByteBuffer content=ByteBuffer.allocate(size());
+        @Nonnull ByteBuffer content=ByteBuffer.allocate(size());
         content.put(uuid);
         return content;
     }
@@ -83,7 +83,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     @Override
     public boolean equals(Object t) {
         if (!(t instanceof LLUUID)) { System.out.println("REALLY ODD COMPARISON TO A UUID"); return false; }
-        LLUUID l=(LLUUID)t;
+        @Nonnull LLUUID l=(LLUUID)t;
         for (int i=0;i<16;i++) { if (uuid[i]!=l.uuid[i]) { return false; }}
         return true;
     }

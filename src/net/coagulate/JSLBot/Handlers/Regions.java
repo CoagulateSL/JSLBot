@@ -38,14 +38,14 @@ public class Regions extends Handler {
 	                                  @Nullable @Param(name="name",description="Name of region to lookup") final String name) {
 		if (name==null || "".equals(name)) { return "No NAME parameter passed."; }
 		// check cache
-		Long cached=Global.regionHandle(name);
+		@Nullable Long cached=Global.regionHandle(name);
 		if (cached!=null) { return Long.toUnsignedString(cached); }
 		// issue request
-		final MapNameRequest request=new MapNameRequest(bot);
+		@Nonnull final MapNameRequest request=new MapNameRequest(bot);
 		request.bnamedata.vname=new Variable1(name);
 		bot.send(request);
 		// sleep on the signal, checking for a result when woken
-		final Date now=new Date();
+		@Nonnull final Date now=new Date();
 		while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
 			try {
 				synchronized (mapblockreplysignal) { mapblockreplysignal.wait(1000); }
@@ -70,11 +70,11 @@ public class Regions extends Handler {
 	 * @param event Event
 	 */
 	public void mapBlockReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		final MapBlockReply p=(MapBlockReply) event.body();
-		for (final MapBlockReply_bData data: p.bdata) {
+		@Nonnull final MapBlockReply p=(MapBlockReply) event.body();
+		for (@Nonnull final MapBlockReply_bData data: p.bdata) {
 			// for some reason we get multiple replies, one has no access and 0 X/Y for a not found, not sure what this is about :)
 			if (data.vaccess.value!=-1 && data.vx.value!=0 && data.vy.value!=0) {
-				final U64 handle=new U64();
+				@Nonnull final U64 handle=new U64();
 				handle.value=data.vx.value;
 				handle.value=handle.value<<(32+8);
 				handle.value=handle.value|(data.vy.value<<8);
@@ -91,7 +91,7 @@ public class Regions extends Handler {
 	}
 
 	public void parcelOverlayUDPImmediate(@Nonnull final UDPEvent event) {
-		final ParcelOverlay parceloverlay=(ParcelOverlay) event.body();
+		@Nonnull final ParcelOverlay parceloverlay=(ParcelOverlay) event.body();
 		final int quadrant=parceloverlay.bparceldata.vsequenceid.value;
 		int sequence=quadrant*1024;
 		for (int i=0;i<1024;i++) {
@@ -116,9 +116,9 @@ public class Regions extends Handler {
 	public String parcelIdCommand(@Nonnull final CommandEvent command,
 	                              @Nonnull @Param(name="x",description="X co-ordinate within the parcel") final String x,
 	                              @Nonnull @Param(name="y",description="Y co-ordinate within the parcel") final String y) {
-		final Regional region=command.region();
+		@Nonnull final Regional region=command.region();
 		final int reqid=region.getRequestId();
-		final ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
+		@Nonnull final ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
 		prr.bparceldata.vsequenceid=new S32(reqid);
 		prr.bparceldata.vnorth=new F32(Float.parseFloat(y));
 		prr.bparceldata.vsouth=new F32(Float.parseFloat(y));
@@ -136,11 +136,11 @@ public class Regions extends Handler {
 	}
 
 	public void parcelPropertiesXMLImmediate(@Nonnull final XMLEvent event) {
-		final LLSDMap body=event.map();
-		final LLSDArray array=(LLSDArray) body.get("ParcelData");
-		final LLSDMap data=(LLSDMap) array.get().get(0);
+		@Nonnull final LLSDMap body=event.map();
+		@Nonnull final LLSDArray array=(LLSDArray) body.get("ParcelData");
+		@Nonnull final LLSDMap data=(LLSDMap) array.get().get(0);
 		//System.out.println(data.toXML());
-		final LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
+		@Nonnull final LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
 		//System.out.println("Got parcel id "+parcelid.toString());
 		final ParcelData parcel=event.region().getParcel(parcelid.get());
 		final int sequenceid=((LLSDInteger) data.get("SequenceID")).get();
@@ -174,8 +174,8 @@ public class Regions extends Handler {
 	////////////////////// misc regional data
 
 	public void simulatorViewerTimeMessageUDPImmediate(@Nonnull final UDPEvent event) {
-		final Regional region=event.region();
-		final SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage) event.body();
+		@Nonnull final Regional region=event.region();
+		@Nonnull final SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage) event.body();
 		region.setDayUSec(time.btimeinfo.vusecsincestart.value);
 		region.setSunDirection(time.btimeinfo.vsundirection);
 		region.setSunPhase(time.btimeinfo.vsunphase.value);
@@ -184,8 +184,8 @@ public class Regions extends Handler {
 	@Nonnull
 	@CmdHelp(description="List regions currently known to the botz")
 	public String regionListCommand(final CommandEvent command) {
-		final StringBuilder response=new StringBuilder("\n");
-		for (final Regional regional: bot.getRegionals()) {
+		@Nonnull final StringBuilder response=new StringBuilder("\n");
+		for (@Nonnull final Regional regional: bot.getRegionals()) {
 			response.append(Long.toUnsignedString(regional.handle())).append(": ").append(regional.dump()).append("\n");
 		}
 		return response.toString();

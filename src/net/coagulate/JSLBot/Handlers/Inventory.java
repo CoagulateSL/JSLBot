@@ -9,6 +9,7 @@ import net.coagulate.JSLBot.LLSD.*;
 import net.coagulate.JSLBot.Packets.Types.LLUUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 
@@ -39,7 +40,7 @@ public class Inventory extends Handler implements Runnable {
 		inventory.clear();
 		inventorycomplete=false;
 		downloadqueue.add(bot.getInventoryRoot());
-		final Thread t=new Thread(this);
+		@Nonnull final Thread t=new Thread(this);
 		t.setName("Inventory download thread");
 		log.fine("Inventory download initiated.");
 		t.start();
@@ -51,8 +52,8 @@ public class Inventory extends Handler implements Runnable {
 	@Override
 	public void run() {
 		while (!downloadqueue.isEmpty()) {
-			final Iterator<LLUUID> i=downloadqueue.iterator();
-			final Set<LLUUID> download=new HashSet<>(downloadqueue);
+			@Nonnull final Iterator<LLUUID> i=downloadqueue.iterator();
+			@Nonnull final Set<LLUUID> download=new HashSet<>(downloadqueue);
 			downloadqueue.clear();
 			try { fetchInventory(download); }
 			catch (@Nonnull final IOException e) {
@@ -73,7 +74,7 @@ public class Inventory extends Handler implements Runnable {
 	@CmdHelp(description="Dump inventory map to the console")
 	public String inventoryDumpCommand(final CommandEvent event) {
 		synchronized (inventorytree) {
-			String map="";
+			@Nonnull String map="";
 			map=map+inventoryDump(bot.getInventoryRoot(),"");
 			System.out.println(map);
 			return "Dumped to console.";
@@ -117,7 +118,7 @@ public class Inventory extends Handler implements Runnable {
 	}
 
 	private void fetchInventory(final LLUUID uuid) throws IOException {
-		final Set<LLUUID> uuids=new HashSet<>();
+		@Nonnull final Set<LLUUID> uuids=new HashSet<>();
 		uuids.add(uuid);
 		fetchInventory(uuids);
 	}
@@ -125,32 +126,32 @@ public class Inventory extends Handler implements Runnable {
 	@SuppressWarnings("ConstantConditions")
 	private void fetchInventory(@Nonnull final Set<LLUUID> uuids) throws IOException {
 		final boolean debugqueries=false;
-		final LLSDMap outer=new LLSDMap();
-		final LLSD document=new LLSD(outer);
-		final LLSDArray array=new LLSDArray();
+		@Nonnull final LLSDMap outer=new LLSDMap();
+		@Nonnull final LLSD document=new LLSD(outer);
+		@Nonnull final LLSDArray array=new LLSDArray();
 		outer.put("folders",array);
 		// "a body containing a map, with one key - "folders", whose value is an array of maps, each with one key, "folder_id", containing the caterogy you want info about
 		// sounds fun
 
-		final Set<LLUUID> query=new HashSet<>();
+		@Nonnull final Set<LLUUID> query=new HashSet<>();
 		if (debugqueries) { System.out.println("Querying "+uuids.size()+" uuids"); }
 		for (final LLUUID uuid: uuids) {
-			final LLSDMap map=new LLSDMap();
+			@Nonnull final LLSDMap map=new LLSDMap();
 			map.put("fetch_items",new LLSDBoolean(true));
 			map.put("fetch_folders",new LLSDBoolean(true));
 			map.put("folder_id",new LLSDUUID(uuid));
 			array.add(map);
 		}
 
-		final LLSDMap result=bot.getCAPS().invokeCAPS("FetchInventoryDescendents2","",document);
-		final LLSDArray folders=(LLSDArray) result.get("folders");
+		@Nullable final LLSDMap result=bot.getCAPS().invokeCAPS("FetchInventoryDescendents2","",document);
+		@Nonnull final LLSDArray folders=(LLSDArray) result.get("folders");
 		if (debugqueries) { System.out.println("Outer array:"+folders.get().size()); }
 		for (final Atomic a: folders.get()) {
-			final LLSDMap innermap=(LLSDMap) a;
-			final LLSDArray inneritems=(LLSDArray) innermap.get("items");
+			@Nonnull final LLSDMap innermap=(LLSDMap) a;
+			@Nonnull final LLSDArray inneritems=(LLSDArray) innermap.get("items");
 			if (debugqueries) { System.out.println("Inner items:"+inneritems.get().size()); }
 			for (final Atomic itemmap: inneritems.get()) {
-				final LLSDMap item=(LLSDMap) itemmap;
+				@Nonnull final LLSDMap item=(LLSDMap) itemmap;
 				final LLUUID item_id=((LLSDUUID) item.get("item_id")).toLLUUID();
 				final LLUUID parent_id=((LLSDUUID) item.get("parent_id")).toLLUUID();
 				final String name=item.get("name").toString();
@@ -160,10 +161,10 @@ public class Inventory extends Handler implements Runnable {
 				final String desc=item.get("desc").toString();
 				processItem(item_id,parent_id,name,asset_id,type,inv_type,desc);
 			}
-			final LLSDArray innercategories=(LLSDArray) innermap.get("categories");
+			@Nonnull final LLSDArray innercategories=(LLSDArray) innermap.get("categories");
 			if (debugqueries) { System.out.println("Inner categories:"+innercategories.get().size()); }
 			for (final Atomic categorymap: innercategories.get()) {
-				final LLSDMap category=(LLSDMap) categorymap;
+				@Nonnull final LLSDMap category=(LLSDMap) categorymap;
 				//System.out.println("---------------");
 				//for (String s:item.keys()) { System.out.println(s+"="+item.get(s).toString()); }
 				//System.out.println(category.toXML());
@@ -189,19 +190,19 @@ public class Inventory extends Handler implements Runnable {
 	@Nonnull
 	private String inventoryDump(final LLUUID parent,
 	                             final String prefix) {
-		final StringBuilder ret=new StringBuilder();
+		@Nonnull final StringBuilder ret=new StringBuilder();
 		final Set<LLUUID> children=inventorytree.get(parent);
 		if (children==null || children.isEmpty()) { return ""; }
 		for (final LLUUID item: children) {
 			ret.append(prefix);
 			final InventoryAtom child=inventory.get(item);
 			if (child instanceof InventoryCategory) {
-				final InventoryCategory i=(InventoryCategory) child;
+				@Nonnull final InventoryCategory i=(InventoryCategory) child;
 				ret.append(i.name).append("\n");
 				ret.append(inventoryDump(i.id,prefix+"  "));
 			}
 			if (child instanceof InventoryItem) {
-				final InventoryItem i=(InventoryItem) child;
+				@Nonnull final InventoryItem i=(InventoryItem) child;
 				ret.append("-").append(i.name).append(" [").append(i.desc).append("]\n");
 			}
 		}

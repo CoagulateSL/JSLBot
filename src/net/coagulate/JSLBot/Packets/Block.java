@@ -25,7 +25,7 @@ public abstract class Block {
         if (Block.class.isAssignableFrom(f.getType())) {
             try {
                 // its a block
-                Block b=(Block)(f.getType().getDeclaredConstructor().newInstance());
+                @Nonnull Block b=(Block)(f.getType().getDeclaredConstructor().newInstance());
                 return b.size();
             } catch (@Nonnull InvocationTargetException|NoSuchMethodException|InstantiationException|IllegalAccessException ex) {
                 throw new IllegalArgumentException("Unable to size supposed Block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),ex);
@@ -33,17 +33,17 @@ public abstract class Block {
         }
         if (List.class.isAssignableFrom(f.getType())) {
             try {
-                List<Block> l=(List<Block>)(f.get(this));
-                Class<?> listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
+                @Nonnull List<Block> l=(List<Block>)(f.get(this));
+                @Nonnull Class<?> listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
                 int size=0;
-                for (Block b:l) { size=size+b.size(); }
+                for (@Nonnull Block b:l) { size=size+b.size(); }
                 return size+(new U8().size());
             } catch (@Nonnull IllegalAccessException | IllegalArgumentException e) {
                 throw new IllegalArgumentException("Unable to size supposed variable count block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),e);
             }
         }
         try {
-            Type lltype = (Type) f.get(this);
+            @Nonnull Type lltype = (Type) f.get(this);
             return lltype.size();
         } catch (IllegalAccessException ex) {
             throw new IllegalArgumentException("Unable to size supposed LL Type "+this.getClass().getName()+" field "+f.getName()+" of type "+f.getType().getName(),ex);
@@ -57,9 +57,9 @@ public abstract class Block {
         // NOTE the fields all seem to come back in the order they're declared (Oracle JDK 8)
         // this isn't actually guaranteed by the method however, so we're annotating the fields with an ordering number and going off that
         // must start at 0 and be sequential.  The sub blocks start at zero themselves too.
-        Map<Integer,Field> map=new HashMap<>();
-        Field[] fs=this.getClass().getDeclaredFields();
-        for (Field f : fs) {
+        @Nonnull Map<Integer,Field> map=new HashMap<>();
+        @Nonnull Field[] fs=this.getClass().getDeclaredFields();
+        for (@Nonnull Field f : fs) {
             if (!f.getName().equals("this$0")) {
                 Sequence a=f.getDeclaredAnnotation(Sequence.class);
                 // all fields in the block MUST have a sequence
@@ -67,8 +67,8 @@ public abstract class Block {
                 map.put(a.value(),f);
             }
         }
-        List<Field> result=new ArrayList<>();
-        List<Integer> sequence=new ArrayList<>();
+        @Nonnull List<Field> result=new ArrayList<>();
+        @Nonnull List<Integer> sequence=new ArrayList<>();
         sequence.addAll(map.keySet());
         Collections.sort(sequence);
         for (Integer i:sequence) {
@@ -80,12 +80,12 @@ public abstract class Block {
         final boolean debug=false;
         if (debug) { System.out.println("Sizing "+this.getClass().getName()); }
         int size=0;
-        List<Field> fields=getFields();
-        for (Field f:fields) {
+        @Nonnull List<Field> fields=getFields();
+        for (@Nonnull Field f:fields) {
             if (Block.class.isAssignableFrom(f.getType())) {
                 if (debug) { System.out.println("> Enter Block recursion: "+f.getType().getName()); }
                 try {
-                    Block b=(Block)(f.get(this));
+                    @Nonnull Block b=(Block)(f.get(this));
                     if (b==null) { throw new NullPointerException("Block contents "+this.getClass().getSimpleName()+" is null"); }
                     size+=b.size();
                 } catch (@Nonnull IllegalArgumentException |IllegalAccessException ex) {
@@ -103,12 +103,12 @@ public abstract class Block {
         return size;
     }
     public void messageRead(ByteBuffer in) { throw new UnsupportedOperationException("NOTIMP"); }
-    private void fieldToBytes(@Nonnull Field f, ByteBuffer output) {
+    private void fieldToBytes(@Nonnull Field f, @Nonnull ByteBuffer output) {
         final boolean debug=false;
         if (debug) { System.out.println("Outputting field "+f.getName()+" of type "+f.getType().getName()); }
         if (Type.class.isAssignableFrom(f.getType())) {
             try {
-                Type t=(Type) (f.get(this));
+                @Nonnull Type t=(Type) (f.get(this));
                 t.write(output);
                 return;
             } catch (@Nonnull IllegalArgumentException|IllegalAccessException ex) {
@@ -117,14 +117,14 @@ public abstract class Block {
         }
         throw new UnsupportedOperationException("Unknown field type, field name "+f.getName()+" type "+f.getType().getName());
     }
-    private void blockToBytes(Block b,ByteBuffer out) {
-        for (Field f:getFields()) {
+    private void blockToBytes(Block b, @Nonnull ByteBuffer out) {
+        for (@Nonnull Field f:getFields()) {
             fieldToBytes(f,out);
         }
     }
     public void writeBytes(@Nonnull ByteBuffer out) {
-        List <Field> fields=getFields();
-        for (Field f: fields) {
+        @Nonnull List <Field> fields=getFields();
+        for (@Nonnull Field f: fields) {
             writeField(out,f);
         }
     }
@@ -141,12 +141,12 @@ public abstract class Block {
         }
         if (List.class.isAssignableFrom(f.getType())) {
             try {
-                @SuppressWarnings("unchecked")
+                @Nonnull @SuppressWarnings("unchecked")
                 List<Block> l=(List<Block>)(f.get(this));
-                U8 qty=new U8();
+                @Nonnull U8 qty=new U8();
                 qty.value=(byte) l.size();
                 qty.write(out);
-                for (Block b:l) { b.writeBytes(out); }
+                for (@Nonnull Block b:l) { b.writeBytes(out); }
                 return;
             } catch (@Nonnull IllegalAccessException | IllegalArgumentException e) {
                 throw new IllegalArgumentException("Error writing variable count block "+this.getClass().getName()+"/"+f.getName()+" type "+f.getType().getName(),e);
@@ -155,7 +155,7 @@ public abstract class Block {
         fieldToBytes(f,out);
     }
     public void readBytes(@Nonnull ByteBuffer in) {
-        for (Field f:getFields()) {
+        for (@Nonnull Field f:getFields()) {
             readField(in,f);
         }
     }
@@ -174,16 +174,16 @@ public abstract class Block {
         }
         if (List.class.isAssignableFrom(f.getType())) {
             try {
-                U8 qty=new U8(0);
+                @Nonnull U8 qty=new U8(0);
                 try { qty.read(in); }
                 catch (BufferUnderflowException ignored) {
                     //System.out.println("Exception reading qty ; default zero");
                 }
-                List<Block> list=new ArrayList<>();
+                @Nonnull List<Block> list=new ArrayList<>();
                 for (int i=0;i<qty.value;i++) {
-                    Class<?> listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
+                    @Nonnull Class<?> listtype=(Class) ((ParameterizedType)(f.getGenericType())).getActualTypeArguments()[0];
                     if (debug) { System.out.println(listtype.getName()); }
-                    Block b=(Block) listtype.getDeclaredConstructor().newInstance();
+                    @Nonnull Block b=(Block) listtype.getDeclaredConstructor().newInstance();
                     b.readBytes(in);
                     list.add(b);
                 }
@@ -196,7 +196,7 @@ public abstract class Block {
 
         // else, a LL type?
         try {
-            Type value=(Type) f.getType().getDeclaredConstructor().newInstance();
+            @Nonnull Type value=(Type) f.getType().getDeclaredConstructor().newInstance();
             try { value.read(in); }
             catch (BufferUnderflowException ignored) {
                 //System.out.println("Buffer underflow reading a data type "+f.getType());
@@ -209,7 +209,7 @@ public abstract class Block {
     public String dump() {
         String ret="";
         ret+=" [=="+this.getClass().getSimpleName()+"==]\n";
-        for (Field f:getFields()) {
+        for (@Nonnull Field f:getFields()) {
             ret+=dumpField(f);
         }
         return ret;
@@ -220,15 +220,15 @@ public abstract class Block {
         try {
             Object o=f.get(this);
             if (Block.class.isAssignableFrom(o.getClass())) { 
-                Block b=(Block)o;
+                @Nonnull Block b=(Block)o;
                 ret=ret+b.dump();
                 return ret;
             }
             if (List.class.isAssignableFrom(o.getClass())) {
-                @SuppressWarnings("unchecked")
+                @Nonnull @SuppressWarnings("unchecked")
                 List<Block> l=(List<Block>)o;
                 int counter=0;
-                for (Block b:l) {
+                for (@Nonnull Block b:l) {
                     ret=ret+"{ #"+counter+" }  "+b.dump();
                     counter++;
                 }

@@ -1,18 +1,29 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.LLVector3;
+import net.coagulate.JSLBot.Packets.Types.S32;
+
+import javax.annotation.Nonnull;
+
 public class ObjectDeGrab_bSurfaceInfo extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public LLVector3 vuvcoord=new LLVector3();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public LLVector3 vstcoord=new LLVector3();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public S32 vfaceindex=new S32();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public LLVector3 vposition=new LLVector3();
-	@Sequence(4)
+	@Nonnull
+    @Sequence(4)
 	public LLVector3 vnormal=new LLVector3();
-	@Sequence(5)
+	@Nonnull
+    @Sequence(5)
 	public LLVector3 vbinormal=new LLVector3();
 }

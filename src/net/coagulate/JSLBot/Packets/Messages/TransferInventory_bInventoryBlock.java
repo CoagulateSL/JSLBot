@@ -1,10 +1,17 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+import net.coagulate.JSLBot.Packets.Types.S8;
+
+import javax.annotation.Nonnull;
+
 public class TransferInventory_bInventoryBlock extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public LLUUID vinventoryid=new LLUUID();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public S8 vtype=new S8();
 }

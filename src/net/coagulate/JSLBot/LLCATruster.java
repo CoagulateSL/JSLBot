@@ -31,11 +31,11 @@ public class LLCATruster implements X509TrustManager, HostnameVerifier {
 			// rather than have the user repeatedly fudge around with updating the keystore every time java updates (i hate that)
 			// we just use our own customised trust manager
 			// long winded java way of faking reading the cert from a stream
-			final InputStream stream=new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
-			final X509Certificate ca=(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(stream);
+			@Nonnull final InputStream stream=new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
+			@Nonnull final X509Certificate ca=(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(stream);
 			cas=new X509Certificate[]{ca};
 			// we're a TLS handler
-			final SSLContext sc=SSLContext.getInstance("TLS");
+			@Nonnull final SSLContext sc=SSLContext.getInstance("TLS");
 			sc.init(null,new TrustManager[]{this},new java.security.SecureRandom());
 			// install
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
@@ -54,12 +54,13 @@ public class LLCATruster implements X509TrustManager, HostnameVerifier {
 
 	public static synchronized void initialise() {
 		if (initialised) { return; }
-		final LLCATruster llcaTruster=new LLCATruster();
+		@Nonnull final LLCATruster llcaTruster=new LLCATruster();
 		HttpsURLConnection.setDefaultHostnameVerifier(llcaTruster);
 		initialised=true;
 	}
 
 	// ---------- INSTANCE ----------
+	@SuppressWarnings("NullableProblems")
 	@Override
 	public boolean verify(final String string,
 	                      @Nonnull final SSLSession ssls) {

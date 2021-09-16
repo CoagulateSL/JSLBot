@@ -1,18 +1,26 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
+
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+
 public class ObjectSpinStart extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 120; }
-	public final String getName() { return "ObjectSpinStart"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "ObjectSpinStart"; }
+	@Nonnull
+    @Sequence(0)
 	public ObjectSpinStart_bAgentData bagentdata=new ObjectSpinStart_bAgentData();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public ObjectSpinStart_bObjectData bobjectdata=new ObjectSpinStart_bObjectData();
 	public ObjectSpinStart(){}
-	public ObjectSpinStart(JSLBot bot) {
+	public ObjectSpinStart(@Nonnull JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();
 		bagentdata.vagentid=bot.getUUID();
 	}

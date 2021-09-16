@@ -1,10 +1,16 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.BOOL;
+
+import javax.annotation.Nonnull;
+
 public class SimStatus_bSimStatus extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public BOOL vcanacceptagents=new BOOL();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public BOOL vcanaccepttasks=new BOOL();
 }

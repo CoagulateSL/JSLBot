@@ -1,20 +1,31 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
 import net.coagulate.JSLBot.Packets.Types.*;
+
+import javax.annotation.Nonnull;
+
 public class RegionPresenceResponse_bRegionData extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public LLUUID vregionid=new LLUUID();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public U64 vregionhandle=new U64();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public IPADDR vinternalregionip=new IPADDR();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public IPADDR vexternalregionip=new IPADDR();
-	@Sequence(4)
+	@Nonnull
+    @Sequence(4)
 	public IPPORT vregionport=new IPPORT();
-	@Sequence(5)
+	@Nonnull
+    @Sequence(5)
 	public F64 vvaliduntil=new F64();
-	@Sequence(6)
+	@Nonnull
+    @Sequence(6)
 	public Variable1 vmessage=new Variable1();
 }

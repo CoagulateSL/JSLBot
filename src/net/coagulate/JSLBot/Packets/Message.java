@@ -16,7 +16,7 @@ public interface Message {
 
     int size();
     String dump();
-    void writeBytes(ByteBuffer out);
-    void readBytes(ByteBuffer in);
+    void writeBytes(@Nonnull ByteBuffer out);
+    void readBytes(@Nonnull ByteBuffer in);
     
 }

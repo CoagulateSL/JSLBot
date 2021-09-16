@@ -1,12 +1,21 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.BOOL;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+import net.coagulate.JSLBot.Packets.Types.Variable1;
+
+import javax.annotation.Nonnull;
+
 public class GroupTitlesReply_bGroupData extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public Variable1 vtitle=new Variable1();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public LLUUID vroleid=new LLUUID();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public BOOL vselected=new BOOL();
 }

@@ -1,10 +1,17 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.Fixed32;
+import net.coagulate.JSLBot.Packets.Types.LLUUID;
+
+import javax.annotation.Nonnull;
+
 public class CreateTrustedCircuit_bDataBlock extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public LLUUID vendpointid=new LLUUID();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public Fixed32 vdigest=new Fixed32();
 }

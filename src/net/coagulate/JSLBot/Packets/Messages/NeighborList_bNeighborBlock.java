@@ -1,20 +1,31 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
 import net.coagulate.JSLBot.Packets.Types.*;
+
+import javax.annotation.Nonnull;
+
 public class NeighborList_bNeighborBlock extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public IPADDR vip=new IPADDR();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public IPPORT vport=new IPPORT();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public IPADDR vpublicip=new IPADDR();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public IPPORT vpublicport=new IPPORT();
-	@Sequence(4)
+	@Nonnull
+    @Sequence(4)
 	public LLUUID vregionid=new LLUUID();
-	@Sequence(5)
+	@Nonnull
+    @Sequence(5)
 	public Variable1 vname=new Variable1();
-	@Sequence(6)
+	@Nonnull
+    @Sequence(6)
 	public U8 vsimaccess=new U8();
 }

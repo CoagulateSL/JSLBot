@@ -34,7 +34,7 @@ public abstract class BotUtils {
 	 */
 	@Nonnull
 	public static String hex(@Nonnull final byte[] in) {
-		final StringBuilder builder=new StringBuilder();
+		@Nonnull final StringBuilder builder=new StringBuilder();
 		for (final byte b: in) {
 			builder.append(String.format("%02x",b));
 		}
@@ -50,8 +50,8 @@ public abstract class BotUtils {
 	public static String getMac() {
 		try {
 			// this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
-			final Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
-			byte[] mac=null;
+			@Nonnull final Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
+			@Nullable byte[] mac=null;
 			while (e.hasMoreElements() && mac==null) {
 				final NetworkInterface ni=e.nextElement();
 				mac=ni.getHardwareAddress();
@@ -104,7 +104,7 @@ public abstract class BotUtils {
 	 */
 	@Nonnull
 	public static byte[] zeroEncode(@Nonnull final byte[] input) {
-		final List<Byte> output=new ArrayList<>();
+		@Nonnull final List<Byte> output=new ArrayList<>();
 		// first 5 bytes (header) are not encoded
 		for (int i=0;i<6;i++) { output.add(input[i]); }
 		int zerocount=0;
@@ -126,7 +126,7 @@ public abstract class BotUtils {
 			output.add((byte) 0);
 			output.add((byte) zerocount);
 		}
-		final byte[] outputbytes=new byte[output.size()];
+		@Nonnull final byte[] outputbytes=new byte[output.size()];
 		int offset=0;
 		// and put it back into the byte array :P
 		for (final Byte b: output) {
@@ -145,21 +145,21 @@ public abstract class BotUtils {
 	 */
 	@Nonnull
 	public static String readZeroTerminatedString(@Nonnull final ByteBuffer buffer) {
-		final List<Byte> bytes=new ArrayList<>();
+		@Nonnull final List<Byte> bytes=new ArrayList<>();
 		byte b=-1;
 		while (b!=0) {
 			b=buffer.get();
 			if (b>0) { bytes.add(b); }
 		}
-		final Byte[] bytesarray=bytes.toArray(new Byte[0]);
-		final byte[] ba=new byte[bytesarray.length];
+		@Nonnull final Byte[] bytesarray=bytes.toArray(new Byte[0]);
+		@Nonnull final byte[] ba=new byte[bytesarray.length];
 		for (int i=0;i<bytesarray.length;i++) { ba[i]=bytesarray[i]; }
 		return new String(ba);
 	}
 
 	@Nonnull
 	public static String unravel(@Nullable Throwable t) {
-		final StringBuilder response=new StringBuilder();
+		@Nonnull final StringBuilder response=new StringBuilder();
 		while (t!=null) {
 			response.append(" - [").append(t.getLocalizedMessage()).append("]");
 			t=t.getCause();
@@ -190,18 +190,18 @@ public abstract class BotUtils {
 	                                      @Nonnull String password,
 	                                      final String location,
 										  @Nonnull final String loginuri) throws MalformedURLException, XmlRpcException {
-		final XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
+		@Nonnull final XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
 		config.setServerURL(new URL(loginuri));
-		final XmlRpcClient client=new XmlRpcClient();
+		@Nonnull final XmlRpcClient client=new XmlRpcClient();
 		client.setConfig(config);
-		final HashMap<String,Object> params=new HashMap<>();
+		@Nonnull final HashMap<String,Object> params=new HashMap<>();
 		params.put("first",firstname);
 		params.put("last",lastname);
 		params.put("extended_errors",1);
 		params.put("start",location);
 		params.put("channel","JSLBot <Iain Maltz@Second Life>");
 		params.put("platform","Lin");
-		final List<String> options=new ArrayList<>();
+		@Nonnull final List<String> options=new ArrayList<>();
 		/*options.add("inventory-root");
 		options.add("adult-compliant");
 		options.add("buddy-list");
@@ -223,7 +223,7 @@ public abstract class BotUtils {
 		options.add("ui-config");
 		options.add("advanced-mode");
 		params.put("options",options);
-		final String mac=BotUtils.getMac();
+		@Nonnull final String mac=BotUtils.getMac();
 		params.put("mac",mac);
 		// MD-5 =)
 		// TURNS OUT SECOND LIFE ONLY USES THE FIRST 16 CHARS
@@ -232,22 +232,22 @@ public abstract class BotUtils {
 		if (password.length()>16 && (!password.startsWith("$1$"))) { password=password.substring(0,16); }
 		params.put("passwd",BotUtils.md5hash(password));
 		if (Debug.AUTH) {
-			for (final Map.Entry<String,Object> entry: params.entrySet()) {
+			for (@Nonnull final Map.Entry<String,Object> entry: params.entrySet()) {
 				System.out.println(entry.getKey()+"="+entry.getValue());
 			}
 		}
 		final Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
-		@SuppressWarnings("unchecked") final HashMap<Object,Object> result=(HashMap<Object,Object>) resultobject;
+		@Nonnull @SuppressWarnings("unchecked") final HashMap<Object,Object> result=(HashMap<Object,Object>) resultobject;
 		if (Debug.AUTH) {
 			// dump the result
-			for (final Map.Entry<Object,Object> entry: result.entrySet()) {
-				String printline=(entry.getKey()+" -> ");
+			for (@Nonnull final Map.Entry<Object,Object> entry: result.entrySet()) {
+				@Nonnull String printline=(entry.getKey()+" -> ");
 				final Object output=entry.getValue();
 				if (output instanceof String) { printline+=("[String] "+output); }
 				else {
 					if (output instanceof Integer) { printline+=("[Integer] "+output); }
 					else {
-						final String clas=entry.getValue().getClass().getTypeName();
+						@Nonnull final String clas=entry.getValue().getClass().getTypeName();
 						printline+="["+clas+"] "+(output);
 					}
 				}
@@ -265,7 +265,7 @@ public abstract class BotUtils {
 	@Nonnull
 	static LLSDArray getCAPSArray() {
 		//Mostly here because its a giant horrible block of text
-		final LLSDArray req=new LLSDArray();
+		@Nonnull final LLSDArray req=new LLSDArray();
 		req.add("AbuseCategories");
 		req.add("AcceptFriendship");
 		req.add("AcceptGroupInvite");

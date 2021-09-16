@@ -1,18 +1,26 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
+
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+
 public class AgentWearablesUpdate extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 382; }
-	public final String getName() { return "AgentWearablesUpdate"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "AgentWearablesUpdate"; }
+	@Nonnull
+    @Sequence(0)
 	public AgentWearablesUpdate_bAgentData bagentdata=new AgentWearablesUpdate_bAgentData();
 	@Sequence(1)
 	public List<AgentWearablesUpdate_bWearableData> bwearabledata;
 	public AgentWearablesUpdate(){}
-	public AgentWearablesUpdate(JSLBot bot) {
+	public AgentWearablesUpdate(@Nonnull JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();
 		bagentdata.vagentid=bot.getUUID();
 	}

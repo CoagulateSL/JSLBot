@@ -1,22 +1,32 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
+
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+
 public class UpdateAttachment extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 331; }
-	public final String getName() { return "UpdateAttachment"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "UpdateAttachment"; }
+	@Nonnull
+    @Sequence(0)
 	public UpdateAttachment_bAgentData bagentdata=new UpdateAttachment_bAgentData();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public UpdateAttachment_bAttachmentBlock battachmentblock=new UpdateAttachment_bAttachmentBlock();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public UpdateAttachment_bOperationData boperationdata=new UpdateAttachment_bOperationData();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public UpdateAttachment_bInventoryData binventorydata=new UpdateAttachment_bInventoryData();
 	public UpdateAttachment(){}
-	public UpdateAttachment(JSLBot bot) {
+	public UpdateAttachment(@Nonnull JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();
 		bagentdata.vagentid=bot.getUUID();
 	}

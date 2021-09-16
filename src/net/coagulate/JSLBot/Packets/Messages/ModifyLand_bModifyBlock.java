@@ -1,14 +1,23 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.F32;
+import net.coagulate.JSLBot.Packets.Types.U8;
+
+import javax.annotation.Nonnull;
+
 public class ModifyLand_bModifyBlock extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public U8 vaction=new U8();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public U8 vbrushsize=new U8();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public F32 vseconds=new F32();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public F32 vheight=new F32();
 }

@@ -1,14 +1,25 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.IPADDR;
+import net.coagulate.JSLBot.Packets.Types.IPPORT;
+import net.coagulate.JSLBot.Packets.Types.U64;
+import net.coagulate.JSLBot.Packets.Types.Variable2;
+
+import javax.annotation.Nonnull;
+
 public class CrossedRegion_bRegionData extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public IPADDR vsimip=new IPADDR();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public IPPORT vsimport=new IPPORT();
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public U64 vregionhandle=new U64();
-	@Sequence(3)
+	@Nonnull
+    @Sequence(3)
 	public Variable2 vseedcapability=new Variable2();
 }

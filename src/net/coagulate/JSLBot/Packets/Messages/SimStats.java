@@ -5,25 +5,29 @@ import net.coagulate.JSLBot.Packets.Frequency;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Sequence;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class SimStats extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 140; }
-	public final String getName() { return "SimStats"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "SimStats"; }
+	@Nonnull
+    @Sequence(0)
 	public SimStats_bRegion bregion=new SimStats_bRegion();
 	@Sequence(1)
 	public List<SimStats_bStat> bstat;
-	@Sequence(2)
+	@Nonnull
+    @Sequence(2)
 	public SimStats_bPidStat bpidstat=new SimStats_bPidStat();
 	@Sequence(3)
 	public List<SimStats_bRegionInfo> bregioninfo;
     @Nullable
     public Float getStat(SimStat stat) {
         SimStat[] lookup = SimStat.values();
-        for (SimStats_bStat astat:bstat) {
+        for (@Nonnull SimStats_bStat astat:bstat) {
             if (lookup[astat.vstatid.value]==stat) {
                 return astat.vstatvalue.value;
             }

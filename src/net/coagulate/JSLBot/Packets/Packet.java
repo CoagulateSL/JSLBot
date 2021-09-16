@@ -152,20 +152,20 @@ public class Packet {
      * @param source ByteBuffer to decode
      * @return Constructed Packet object
      */
-    @Nullable
+    @Nonnull
     public static Packet decode(@Nonnull ByteBuffer source) {
         try {
             byte flags=source.get();
             source.order(ByteOrder.BIG_ENDIAN);
             int sequence=source.getInt();
             byte extralen=source.get();
-            byte[] extra =new byte[extralen];
+            @Nonnull byte[] extra =new byte[extralen];
             if (extralen>0) { source.get(extra,0,extralen); }
             
             // STOP - everything from here on in MIGHT be zerocoded
             if ((flags & 0x80)!=0) {
                 // okay well this is a bit garbage :P
-                List<Byte> uncoded=new ArrayList<>();
+                @Nonnull List<Byte> uncoded=new ArrayList<>();
                 // zero run length encoding.  a zero byte is followed by a "qty" byte, how many zeros there were.  e.g. 00 01 means 1 zero :P
                 // all other bytes are preserved.
                 int pos=source.position();
@@ -230,11 +230,11 @@ public class Packet {
                 code= codebyte & 0xff;
             }
             if (Debug.PACKET) { System.out.println("Message is "+codebyte+" "+Integer.toHexString(code)+" (len:"+codesize+")");}
-            String messagetype=Lookup.lookup(code);
+            @Nonnull String messagetype=Lookup.lookup(code);
             //System.out.println("Message type is "+messagetype);
             if (messagetype.equals("TestMessage")) { // seems unlikely, debug it ...
                 System.err.println("Decoded a message to TestMessage - decoder error???");
-                byte[] array=source.array();
+                @Nonnull byte[] array=source.array();
                 for (int i=0;i<array.length;i++) {
                     System.err.print(Integer.toHexString(Byte.toUnsignedInt(array[i]))+" ");
                     if (i % 16 == 0) { System.out.println(); }
@@ -249,9 +249,11 @@ public class Packet {
                 messageclass=Class.forName("net.coagulate.JSLBot.Packets.Messages."+messagetype);
             }
             catch (ClassNotFoundException e) {
-                return null;
+                @Nonnull NullPointerException npe = new NullPointerException("Unable to create a message wrapper for message type " + messagetype);
+                npe.initCause(e);
+                throw npe;
             }
-            Constructor<?> messageconstructor=messageclass.getConstructor();
+            @Nonnull Constructor<?> messageconstructor=messageclass.getConstructor();
             message=(Message) messageconstructor.newInstance(new Object[0]);
             response=new Packet(message);
             response.flags=flags;
@@ -265,7 +267,7 @@ public class Packet {
                 //if (remain>0) { System.out.println("Appended ack bytes corrected "+remain); }
                 remain=remain/4;
                 for (int i=0;i<remain;i++) {
-                    U32BE ack=new U32BE(source);
+                    @Nonnull U32BE ack=new U32BE(source);
                     //System.out.println("READ ACK "+ack);
                     response.appendedacks.add(ack.value);
                 }
@@ -280,17 +282,17 @@ public class Packet {
     
     @Nonnull
     public String dump() {
-        String acks="";
+        @Nonnull String acks="";
         if (!appendedacks.isEmpty()) {
             acks=" [ACK:";
-            String comma="";
+            @Nonnull String comma="";
             for (Integer i:appendedacks) {
                 acks=acks+comma+i;
                 comma=",";
             }
             acks+="]";
         }
-        String dump=getName()+":";
+        @Nonnull String dump=getName()+":";
         if (this.getZeroCode()) { dump+="[Zero] "; }
         if (this.getReliable()) { dump+="[Reliable] "; }
         if (this.getResent()) { dump+="[Resent] "; }

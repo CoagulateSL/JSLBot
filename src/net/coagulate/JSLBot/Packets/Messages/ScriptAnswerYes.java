@@ -1,18 +1,26 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
+
 import net.coagulate.JSLBot.JSLBot;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Frequency;
+import net.coagulate.JSLBot.Packets.Message;
+import net.coagulate.JSLBot.Packets.Sequence;
+
+import javax.annotation.Nonnull;
+
 public class ScriptAnswerYes extends Block implements Message {
 	public final int getFrequency() { return Frequency.LOW; }
 	public final int getId() { return 132; }
-	public final String getName() { return "ScriptAnswerYes"; }
-	@Sequence(0)
+	@Nonnull
+    public final String getName() { return "ScriptAnswerYes"; }
+	@Nonnull
+    @Sequence(0)
 	public ScriptAnswerYes_bAgentData bagentdata=new ScriptAnswerYes_bAgentData();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public ScriptAnswerYes_bData bdata=new ScriptAnswerYes_bData();
 	public ScriptAnswerYes(){}
-	public ScriptAnswerYes(JSLBot bot) {
+	public ScriptAnswerYes(@Nonnull JSLBot bot) {
 		bagentdata.vsessionid=bot.getSession();
 		bagentdata.vagentid=bot.getUUID();
 	}

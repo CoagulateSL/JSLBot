@@ -91,7 +91,7 @@ public class Regional {
 	@Nullable
 	public ObjectData getObject(final LLUUID uuid) {
 		synchronized (objects) {
-			for (final ObjectData od: objects.values()) {
+			for (@Nonnull final ObjectData od: objects.values()) {
 				if (od.fullid!=null && od.fullid.equals(uuid)) {
 					return od;
 				}
@@ -144,7 +144,7 @@ public class Regional {
 
 	@Nonnull
 	public String dumpParcels() {
-		final Map<Byte,Integer> sizes=new HashMap<>();
+		@Nonnull final Map<Byte,Integer> sizes=new HashMap<>();
 		for (int x=0;x<64;x++) {
 			for (int y=0;y<64;y++) {
 				final byte id=parcelgrid[x][y];
@@ -155,8 +155,8 @@ public class Regional {
 			}
 		}
 		int totalsize=0;
-		final StringBuilder resp=new StringBuilder();
-		for (final Map.Entry<Byte,Integer> entry: sizes.entrySet()) {
+		@Nonnull final StringBuilder resp=new StringBuilder();
+		for (@Nonnull final Map.Entry<Byte,Integer> entry: sizes.entrySet()) {
 			resp.append("\n");
 			resp.append("#byeid#").append(((int) (byte) entry.getKey())&0xff);
 			resp.append(" ").append(entry.getValue()).append("m2");
@@ -184,7 +184,7 @@ public class Regional {
 
 	@Nonnull
 	public String dump() {
-		String d="";
+		@Nonnull String d="";
 		if (circuit==bot().circuit()) { d="[PRIMARY] "; }
 		d+="("+Global.regionName(circuit.handle())+") ";
 		d+=coarseagentlocationmap.size()+" agents, "+objects.size()+" objects";
@@ -243,7 +243,7 @@ public class Regional {
 		@Nonnull
 		@Override
 		public String toString() {
-			String ret="";
+			@Nonnull String ret="";
 			ret+=region.getName()+"#"+(id&0xff);
 			if (populated) {
 				ret+=" '"+name+"' ("+description+") prims:"+ownerprims+"/"+groupprims+"/"+otherprims+"="+primsused+" of "+maxprims+" (simmax:"+simwidetotalprims+") Privacy:"+(!seeavs)+" claimed "+new Date(
@@ -257,7 +257,7 @@ public class Regional {
 		public void populate(final boolean force) {
 			if (requested && !force) { return; }
 			requested=true;
-			final ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();
+			@Nonnull final ParcelPropertiesRequestByID req=new ParcelPropertiesRequestByID();
 			req.bagentdata.vagentid=region.bot().getUUID();
 			req.bagentdata.vsessionid=region.bot().getSession();
 			req.bparceldata.vlocalid=new S32(id);

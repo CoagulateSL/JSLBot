@@ -1,10 +1,17 @@
 package net.coagulate.JSLBot.Packets.Messages;
-import java.util.*;
-import net.coagulate.JSLBot.Packets.*;
-import net.coagulate.JSLBot.Packets.Types.*;
+
+import net.coagulate.JSLBot.Packets.Block;
+import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.BOOL;
+import net.coagulate.JSLBot.Packets.Types.Variable1;
+
+import javax.annotation.Nonnull;
+
 public class AgentAlertMessage_bAlertData extends Block {
-	@Sequence(0)
+	@Nonnull
+    @Sequence(0)
 	public BOOL vmodal=new BOOL();
-	@Sequence(1)
+	@Nonnull
+    @Sequence(1)
 	public Variable1 vmessage=new Variable1();
 }

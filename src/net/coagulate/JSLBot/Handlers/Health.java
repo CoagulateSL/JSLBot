@@ -26,7 +26,7 @@ public class Health extends Handler {
 
 	// ---------- INSTANCE ----------
 	public void healthMessageUDPImmediate(@Nonnull final UDPEvent event) {
-		final HealthMessage h=(HealthMessage) event.body();
+		@Nonnull final HealthMessage h=(HealthMessage) event.body();
 		health=h.bhealthdata.vhealth.value;
 		if (verbose) { log.info("Agent health is "+health); }
 	}

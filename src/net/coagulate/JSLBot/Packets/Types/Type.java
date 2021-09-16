@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot.Packets.Types;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
 /**
@@ -8,12 +9,12 @@ import java.nio.ByteBuffer;
  */
 public abstract class Type {
     public Type() {}
-    public Type(ByteBuffer in) { 
+    public Type(@Nonnull ByteBuffer in) {
         this.read(in);
     }
     public abstract int size();
-    public abstract void read(ByteBuffer in);
-    public abstract void write(ByteBuffer out);
+    public abstract void read(@Nonnull ByteBuffer in);
+    public abstract void write(@Nonnull ByteBuffer out);
     public abstract String dump();
     public String toString() { return dump(); }
 }
