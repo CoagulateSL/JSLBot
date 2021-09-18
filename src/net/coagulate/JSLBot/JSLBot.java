@@ -351,8 +351,7 @@ public class JSLBot extends Thread {
 		if (primary==null) { throw new IllegalStateException("Primary circuit is not defined or connected"); }
 		try { primary.send(p); }
 		catch (IOException e) {
-			this.setReconnect();
-			throw new IllegalStateException("Primary circuit was closed",e);
+			shutdown("Primary circuit was closed");
 		}
 	}
 
