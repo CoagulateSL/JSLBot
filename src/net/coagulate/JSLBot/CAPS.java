@@ -126,8 +126,10 @@ public final class CAPS extends Thread {
 		connection.setRequestProperty("Content-Type","application/llsd+xml");
 		connection.setRequestProperty("charset","utf-8");
 		connection.setUseCaches(false);
-		try (@Nonnull final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
-			wr.write(postdata);
+		if (content!=null) {
+			try (@Nonnull final DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+				wr.write(postdata);
+			}
 		}
 		try {
 			@Nonnull final Scanner s = new Scanner(connection.getInputStream()).useDelimiter("\\A");
