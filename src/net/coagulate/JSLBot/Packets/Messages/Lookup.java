@@ -277,7 +277,7 @@ public class Lookup {
 		if (v==0xffff0084) { return "ScriptAnswerYes"; }
 		if (v==0xffff016c) { return "GroupProposalBallot"; }
 		if (v==0x1c) { return "AtomicPassObject"; }
-		if (v==0xffff001e) { return "PlacesReply"; }
+		if (v==0x1e) { return "PlacesReply"; }
 		if (v==0xffff0019) { return "EconomyData"; }
 		if (v==0xffff00a3) { return "KickUser"; }
 		if (v==0xffff00ef) { return "ChatPass"; }
