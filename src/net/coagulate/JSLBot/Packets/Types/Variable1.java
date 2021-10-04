@@ -47,7 +47,7 @@ public class Variable1 extends Type {
     @Nonnull
     @Override
     public String dump() {
-        return "'"+toString()+"'";
+        return "'"+ this +"'";
     }
     @Nonnull
     public String toString() {

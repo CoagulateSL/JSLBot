@@ -197,12 +197,12 @@ public class Groups extends Handler {
 	}
 
 	public static class GroupRole {
-		public LLUUID roleID;
-		public String name;
-		public String title;
-		public String description;
-		public long powers;
-		public int members;
+		public final LLUUID roleID;
+		public final String name;
+		public final String title;
+		public final String description;
+		public final long powers;
+		public final int members;
 		public GroupRole(LLUUID roleID,String name,String title,String description,long powers,int members) {
 			this.roleID=roleID;
 			this.name=name;

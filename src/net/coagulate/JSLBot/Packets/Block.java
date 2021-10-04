@@ -233,7 +233,7 @@ public abstract class Block {
                     counter++;
                 }
             }
-            ret+=o.toString()+"\n";
+            ret+= o +"\n";
         } catch (@Nonnull NullPointerException|IllegalAccessException | IllegalArgumentException e) {
             ret+=e.toString();
         }

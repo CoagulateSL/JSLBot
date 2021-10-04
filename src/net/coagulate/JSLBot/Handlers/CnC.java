@@ -596,13 +596,13 @@ public class CnC extends Handler {
 				llsd=new LLSD(req);
 				try { @Nullable final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd); }
 				catch (IOException f) {
-					log.log(WARNING,"Failed to fetch Appearance COF again "+matcher.group(1)+" - "+f.toString(),f);
+					log.log(WARNING,"Failed to fetch Appearance COF again "+matcher.group(1)+" - "+ f,f);
 					return;
 				}
 				hasCoffed=true;
 				return;
 			} else { log.log(WARNING,"Cof retrier failed to match error message:"+error); }
-			log.log(WARNING,"Failed to fetch Appearance COF "+cofVersion+" - "+e.toString(),e);
+			log.log(WARNING,"Failed to fetch Appearance COF "+cofVersion+" - "+ e,e);
 			return;
 		}
 		hasCoffed=true;

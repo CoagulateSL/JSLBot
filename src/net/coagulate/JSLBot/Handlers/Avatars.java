@@ -91,7 +91,7 @@ public class Avatars extends Handler {
             if (element.vlastname.toString().equalsIgnoreCase("Resident")) {
                 resolvedUUIDs.put(element.vid, element.vfirstname.toString());
             } else {
-                resolvedUUIDs.put(element.vid, element.vfirstname.toString() + " " + element.vlastname.toString());
+                resolvedUUIDs.put(element.vid, element.vfirstname + " " + element.vlastname);
             }
         }
         synchronized (resolveUUIDLock) { resolveUUIDLock.notifyAll(); }
