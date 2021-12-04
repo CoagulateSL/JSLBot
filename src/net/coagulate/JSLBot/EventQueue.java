@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot;
 
-import net.coagulate.Core.Tools.ByteTools;
 import net.coagulate.JSLBot.LLSD.*;
 
 import javax.annotation.Nonnull;
@@ -136,10 +135,6 @@ public class EventQueue extends Thread {
 					log.info("EventQueue closed remotely");
 					return;
 				}
-				if (status==500) {
-					log.warning("500 Error: "+ByteTools.convertStreamToString(connection.getErrorStream()));
-					return;
-				}
 				if (status!=502 && status!=499) {
 					@Nonnull final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
 					final String read=s.next();
@@ -181,7 +176,7 @@ public class EventQueue extends Thread {
 				errorcount++;
 				if (errorcount>10) {
 					log.log(SEVERE,"10 errors in a row polling event queue, closing event queue",e);
-					throw new IOException("Too many event queue IOExceptions occured, terminating EventQueue",e);
+					throw new IOException("Too many event queue IOExceptions occured, terminating EventQueue");
 				}
 				log.fine("IOException during Event Queue poll, errorcount is "+errorcount+" / 10 : "+e.getLocalizedMessage());
 			}
