@@ -120,6 +120,8 @@ public class EventQueue extends Thread {
 				connection.setRequestProperty("Content-Type","application/llsd+xml");
 				connection.setRequestProperty("charset","utf-8");
 				connection.setRequestProperty("Content-Length",Integer.toString(postdata.length));
+				connection.setReadTimeout(65000);
+				connection.setConnectTimeout(10000);
 				connection.setUseCaches(false);
 				// write document
 				try (@Nonnull final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
@@ -169,7 +171,7 @@ public class EventQueue extends Thread {
 						}
 					}
 				}
-				else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired, repolling."); } }
+				else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired ("+status+"), repolling."); } }
 				errorcount=0;
 			}
 			catch (@Nonnull final IOException e) {
