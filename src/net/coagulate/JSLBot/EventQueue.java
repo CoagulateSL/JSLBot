@@ -138,8 +138,9 @@ public class EventQueue extends Thread {
 				}
 				if (status==500) {
 					log.warning("500 Error: "+ByteTools.convertStreamToString(connection.getErrorStream()));
+					return;
 				}
-				if (status!=502 && status!=499 && status!=500) {
+				if (status!=502 && status!=499) {
 					@Nonnull final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
 					final String read=s.next();
 					//System.out.println("Event queue:"+read);
