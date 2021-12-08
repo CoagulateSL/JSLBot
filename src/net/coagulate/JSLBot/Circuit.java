@@ -691,6 +691,7 @@ public final class Circuit extends Thread implements Closeable {
 				                     r.bregioninfo3.vcoloname.toString()}
 				       );
 				firsthandshake=false;
+				bot.setConnected();
 			}
 			@Nonnull final RegionHandshakeReply reply=new RegionHandshakeReply();
 			reply.bagentdata.vagentid=bot.getUUID();

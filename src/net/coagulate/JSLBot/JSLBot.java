@@ -769,53 +769,56 @@ public class JSLBot extends Thread {
 	                   final String loginlocation,
 					   @Nonnull final String loginuri) throws IOException, XmlRpcException {
 		// authentication is performed over XMLRPC over HTTPS
-		@Nonnull final Map<Object,Object> result=BotUtils.loginXMLRPC(this,firstname,lastname,password,loginlocation,loginuri);
+		@Nonnull final Map<Object, Object> result = BotUtils.loginXMLRPC(this, firstname, lastname, password, loginlocation, loginuri);
 		if (!("true".equalsIgnoreCase((String) result.get("login")))) {
-			throw new IOException("Server gave error: "+result.get("message"));
+			throw new IOException("Server gave error: " + result.get("message"));
 		}
-		@Nonnull final String message=(String) result.get("message");
-		log.info("Login MOTD: "+message);
+		@Nonnull final String message = (String) result.get("message");
+		log.info("Login MOTD: " + message);
 
 		// the response contains things we'll need
-		@Nonnull final String fn=(String) result.get("first_name");
-		this.firstname=fn.substring(1,fn.length()-1);
-		this.lastname=(String) result.get("last_name");
-		uuid=new LLUUID((String) result.get("agent_id"));
+		@Nonnull final String fn = (String) result.get("first_name");
+		this.firstname = fn.substring(1, fn.length() - 1);
+		this.lastname = (String) result.get("last_name");
+		uuid = new LLUUID((String) result.get("agent_id"));
 		// probably want to note the "udp_blacklist" which is a comma separated list of packet types to not use.  but then if we just aren't using them either...?
-		circuitcode=(int) result.get("circuit_code");
-		sessionid=new LLUUID((String) result.get("session_id"));
-		@Nonnull final String ip=(String) result.get("sim_ip");
-		final int port=(Integer) result.get("sim_port");
-		final int loginx=(Integer) result.get("region_x");
-		final int loginy=(Integer) result.get("region_y");
-		@Nonnull final Object[] inventoryrootarray=(Object[]) result.get("inventory-root");
+		circuitcode = (int) result.get("circuit_code");
+		sessionid = new LLUUID((String) result.get("session_id"));
+		@Nonnull final String ip = (String) result.get("sim_ip");
+		final int port = (Integer) result.get("sim_port");
+		final int loginx = (Integer) result.get("region_x");
+		final int loginy = (Integer) result.get("region_y");
+		@Nonnull final Object[] inventoryrootarray = (Object[]) result.get("inventory-root");
 		@Nonnull @SuppressWarnings("unchecked") final // if it isn't, what do we do anyway?
-				Map<String,String> rootmap=(Map<String,String>) inventoryrootarray[0];
-		for (@Nonnull final Map.Entry<String,String> entry: rootmap.entrySet()) {
+		Map<String, String> rootmap = (Map<String, String>) inventoryrootarray[0];
+		for (@Nonnull final Map.Entry<String, String> entry : rootmap.entrySet()) {
 			if (Debug.AUTH) {
-				log.finer("Inventory Root "+entry.getKey()+" = "+entry.getValue());
+				log.finer("Inventory Root " + entry.getKey() + " = " + entry.getValue());
 			}
-			inventoryroot=new LLUUID(entry.getValue());
+			inventoryroot = new LLUUID(entry.getValue());
 		}
 		//System.out.println("inventoryroot type is "+inventoryroot.getClass().getName());
 		// derive region handle
-		@Nonnull final U64 handle=new U64();
-		handle.value=loginx;
-		handle.value=handle.value<<(32);
-		handle.value=handle.value|(loginy);
+		@Nonnull final U64 handle = new U64();
+		handle.value = loginx;
+		handle.value = handle.value << (32);
+		handle.value = handle.value | (loginy);
 		if (Debug.AUTH || Debug.REGIONHANDLES) {
-			log.finer("Computed initial handle of "+Long.toUnsignedString(handle.value));
+			log.finer("Computed initial handle of " + Long.toUnsignedString(handle.value));
 		}
 		// caps
-		@Nonnull final String seedcaps=(String) result.get("seed_capability");
+		@Nonnull final String seedcaps = (String) result.get("seed_capability");
 		log.info("Login is complete, opening initial circuit.");
-		@Nonnull final Circuit initial=new Circuit(this,ip,port,handle.value,seedcaps);
+		@Nonnull final Circuit initial = new Circuit(this, ip, port, handle.value, seedcaps);
 		initial.connect();
 		// for our main connection, "move in" to the sim, it's expecting us :P
-		primary=initial;
-		circuits.put(handle.value,initial);
+		primary = initial;
+		circuits.put(handle.value, initial);
 		completeAgentMovement();
 		agentUpdate();
+	}
+
+	public void setConnected() {
 		connected=true;
 		synchronized (connectsignal) { connectsignal.notifyAll(); } // wake up, sleepers
 	}
