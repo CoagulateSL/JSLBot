@@ -137,7 +137,7 @@ public class EventQueue extends Thread {
 					log.info("EventQueue closed remotely");
 					return;
 				}
-				if (status!=502 && status!=499) {
+				if (status!=502 && status!=499 && status!=500) {
 					@Nonnull final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
 					final String read=s.next();
 					//System.out.println("Event queue:"+read);
