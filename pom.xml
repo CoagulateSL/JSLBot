@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.coagulate.SL</groupId>
-    <artifactId>JSLBot</artifactId>
+    <artifactId>jslbot</artifactId>
     <version>0.9.8</version>
     <distributionManagement>
         <repository>
