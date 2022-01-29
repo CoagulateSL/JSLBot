@@ -63,8 +63,8 @@ public class LLCATruster implements X509TrustManager, HostnameVerifier {
 	@Override
 	public boolean verify(final String string,
 	                      @Nonnull final SSLSession ssls) {
-		throw new AssertionError("Verify for "+string+" called with session "+ssls);
-		//return true;
+		//throw new AssertionError("Verify for "+string+" called with session "+ssls);
+		return true;
 	}
 
 	@Override
