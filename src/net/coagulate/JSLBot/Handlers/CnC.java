@@ -639,7 +639,7 @@ public class CnC extends Handler {
 		return command;
 	}
 
-	private void runCommands(final String from,
+	public void runCommands(final String from,
 	                         @Nullable final LLUUID source,
 	                         @Nonnull String message,
 	                         @Nullable final String prefix,
@@ -669,10 +669,16 @@ public class CnC extends Handler {
 			log.log(WARNING,"CnC Subcommand exceptioned:"+e,e);
 			response="Exception:"+e;
 		}
-
-		if (bot.quitting()) { log.warning("Not sending IM response due to shutdown: "+response); }
-		else {
-			if (source!=null && !"".equals(response)) { bot.im(source,">> "+response); }
+		if (!"".equals(response)) {
+			if (source==null) {
+				System.out.println(">> " + response);
+			} else {
+				if (bot.quitting()) {
+					log.warning("Not sending IM response due to shutdown: " + response);
+				} else {
+					bot.im(source, ">> " + response);
+				}
+			}
 		}
 	}
 
