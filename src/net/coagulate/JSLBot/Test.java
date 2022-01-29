@@ -13,6 +13,7 @@ import java.util.Scanner;
  */
 public class Test {
 
+	private static boolean CONSOLE=false;
 	// ---------- STATICS ----------
 
 	/**
@@ -21,7 +22,7 @@ public class Test {
 	 * @param args the command line arguments
 	 */
 	public static void main(@Nonnull final String[] args) {
-		System.out.println("JSLBot single-instance wrapper starting up");
+		System.out.println("JSLBot single-instance wrapper starting up (now supports --console)");
 		// as far as multiple bots go you have two options if you want to use this config system
 		// 1) You can just "sub-space" the configuration namespace; make a new Config(Config,prefix) and write your login values as "prefix.firstname" etc
 		// then pass each bot the sub-space of the configuration
@@ -35,6 +36,9 @@ public class Test {
 			System.out.print("Name of config file: ");
 			CONFIGFILE=in.nextLine();
 		}
+		for (String argument:args) {
+			if (argument.equalsIgnoreCase("--console")) { CONSOLE=true; System.out.println("Enabling console command mode"); }
+		}
 		if (CONFIGFILE==null) { throw new NullPointerException("You must supply a configuration file name"); }
 		if (CONFIGFILE.isBlank()) { throw new AssertionError("You must supply a file name so that we can create a configuration file!"); }
 		if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
@@ -42,8 +46,14 @@ public class Test {
 		//System.out.println("===== Configuration file loaded =====\n"+config.dump());
 		@Nonnull final JSLBot bot=new JSLBot(config);
 		bot.ALWAYS_RECONNECT=true; // likely this will be cleaned up, but for testing...
-		//noinspection CallToThreadRun
-		bot.run(); // lose control to bot.  call start() to background the bot and continue execution here.
+		if (!CONSOLE) {
+			//noinspection CallToThreadRun
+			bot.run(); // lose control to bot.  call start() to background the bot and continue execution here.
+			return;
+		}
+		// console mode
+		bot.start();
+		Console.run(bot);
 	}
 
 	// ----- Internal Statics -----
