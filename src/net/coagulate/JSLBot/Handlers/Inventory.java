@@ -80,7 +80,46 @@ public class Inventory extends Handler implements Runnable {
 			return "Dumped to console.";
 		}
 	}
-
+	@Nonnull
+	@CmdHelp(description="Find an item by name")
+	public String inventoryFindCommand(final CommandEvent event,
+									   @Nonnull @JSLBot.Param(description = "Substring of item name to find",name="name") final String name) {
+		synchronized (inventorytree) {
+			if (name==null) { return "1 - No search name supplied"; }
+			for (Map.Entry<LLUUID,InventoryAtom> entry:inventory.entrySet()) {
+				InventoryAtom atom=entry.getValue();
+				if (atom instanceof InventoryItem) {
+					InventoryItem item=(InventoryItem)atom;
+					if (item.name==null) { System.out.println("An item has a null name (?)"); }
+					if (item.name.toLowerCase().contains(name.toLowerCase())) {
+						System.out.println(entry.getKey().toUUIDString()+" : "+item.name+" "+item.assetid.toUUIDString());
+					}
+				}
+			}
+			return "Dumped to console.";
+		}
+	}
+	@Nonnull
+	@CmdHelp(description="Dump item data by inventory UUID (see inventoryFind)")
+	public String inventoryDetailCommand(final CommandEvent event,
+									   @Nonnull @JSLBot.Param(description = "UUID of item to report on",name="uuid") final String uuid) {
+		synchronized (inventorytree) {
+			if (uuid == null) {
+				return "1 - No UUID supplied";
+			}
+			LLUUID lluuid = new LLUUID(uuid);
+			for (Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
+				if (entry.getKey().equals(lluuid)) {
+					InventoryAtom atom = entry.getValue();
+					if (atom instanceof InventoryItem) {
+						InventoryItem item = (InventoryItem) atom;
+						return entry.getKey().toUUIDString() + "\nName:" + item.name + "\nAssetID:" + item.assetid.toUUIDString() + "\nDescription: " + item.desc + "\nType: " + item.invtype + "/" + item.type;
+					}
+				}
+			}
+			return "1 - Could not find object by uuid " + lluuid.toUUIDString();
+		}
+	}
 	// ----- Internal Instance -----
 	private void processCategory(final int type,
 	                             final LLUUID agentid,
