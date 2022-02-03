@@ -5,6 +5,7 @@ import net.coagulate.JSLBot.Packets.Block;
 import net.coagulate.JSLBot.Packets.Frequency;
 import net.coagulate.JSLBot.Packets.Message;
 import net.coagulate.JSLBot.Packets.Sequence;
+import net.coagulate.JSLBot.Packets.Types.U8;
 
 import javax.annotation.Nonnull;
 
@@ -27,4 +28,54 @@ public class ImprovedInstantMessage extends Block implements Message {
 		bagentdata.vsessionid=bot.getSession();
 		bagentdata.vagentid=bot.getUUID();
 	}
+
+	public enum InstantMessageDialog
+	{
+		MessageFromAgent(0),
+		MessageBox(1),
+		GroupInvitation(3),
+		InventoryOffered(4),
+		InventoryAccepted(5),
+		InventoryDeclined(6),
+		GroupVote(7),
+		TaskInventoryOffered(9),
+		TaskInventoryAccepted(10),
+		TaskInventoryDeclined(11),
+		NewUserDefault(12),
+		SessionAdd(13),
+		SessionOfflineAdd(14),
+		SessionGroupStart(15),
+		SessionCardlessStart(16),
+		SessionSend(17),
+		SessionDrop(18),
+		MessageFromObject(19),
+		BusyAutoResponse(20),
+		ConsoleAndChatHistory(21),
+		RequestTeleport(22),
+		AcceptTeleport(23),
+		DenyTeleport(24),
+		GodLikeRequestTeleport(25),
+		RequestLure(26),
+		GotoUrl(28),
+		Session911Start(29),
+		Lure911(30),
+		FromTaskAsAlert(31),
+		GroupNotice(32),
+		GroupNoticeInventoryAccepted(33),
+		GroupNoticeInventoryDeclined(34),
+		GroupInvitationAccept(35),
+		GroupInvitationDecline(36),
+		GroupNoticeRequested(37),
+		FriendshipOffered(38),
+		FriendshipAccepted(39),
+		FriendshipDeclined(40),
+		StartTyping(41),
+		StopTyping(42);
+		private U8 value;
+		private InstantMessageDialog(int value) {
+			this.value = new U8(value);
+		}
+		public U8 getValue() { return value; }
+	}
+
 }
