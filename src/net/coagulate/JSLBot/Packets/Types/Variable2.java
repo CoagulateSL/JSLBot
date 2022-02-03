@@ -19,6 +19,18 @@ public class Variable2 extends Type {
         for (int i=0;i<array.length;i++) { value[i]=(byte) array[i]; }
         value[value.length-1]=0;
     }
+
+    public Variable2(LLUUID uuid) {
+        value=new byte[16];
+        System.arraycopy(uuid.uuid,0,value,0,16);
+        // simple fixed conversion, uuid is known to be
+    }
+
+    public Variable2(byte[] binary) {
+        value=new byte[binary.length];
+        System.arraycopy(binary,0,value,0,binary.length);
+    }
+
     @Override
     public int size() {
         return value.length+(new U16().size());
