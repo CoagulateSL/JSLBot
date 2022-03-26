@@ -1,5 +1,6 @@
 package net.coagulate.JSLBot;
 
+import net.coagulate.Core.BuildInfo.GPHUDBuildInfo;
 import net.coagulate.Core.BuildInfo.JSLBotBuildInfo;
 
 import javax.annotation.Nonnull;
@@ -11,10 +12,6 @@ import java.text.SimpleDateFormat;
  * @author Iain Price
  */
 public abstract class Constants {
-
-	public static final int MAJOR_VERSION_NUMBER= JSLBotBuildInfo.MAJORVERSION;
-	public static final int MINOR_VERSION_NUMBER= JSLBotBuildInfo.MINORVERSION;
-	public static final int BUGFIX_VERSION_NUMBER= JSLBotBuildInfo.BUGFIXVERSION;
 
 	public static final String VERSION_DATE=new SimpleDateFormat("yyyy-MM-dd HH:mm").format(JSLBotBuildInfo.BUILDDATE);
 	public static final String COPYRIGHT_MESSAGE="(C) jslbot@predestined.net";
@@ -36,8 +33,5 @@ public abstract class Constants {
 
 	// ---------- STATICS ----------
 	@Nonnull
-	public static String getVersionNumber() { return MAJOR_VERSION_NUMBER+"."+MINOR_VERSION_NUMBER+"."+BUGFIX_VERSION_NUMBER; }
-
-	@Nonnull
-	public static String getVersion() { return "JSLBot "+getVersionNumber()+" "+VERSION_DATE+" "+COPYRIGHT_MESSAGE; }
+	public static String getVersion() { return "JSLBot "+new SimpleDateFormat("yyyy-MM-dd HH:mm").format(JSLBotBuildInfo.BUILDDATE)+" @"+JSLBotBuildInfo.COMMITID+" "+COPYRIGHT_MESSAGE; }
 }
