@@ -1,6 +1,5 @@
 package net.coagulate.JSLBot;
 
-import net.coagulate.Core.BuildInfo.GPHUDBuildInfo;
 import net.coagulate.Core.BuildInfo.JSLBotBuildInfo;
 
 import javax.annotation.Nonnull;
