@@ -9,7 +9,6 @@ import java.util.logging.Logger;
  * @author Iain Prive
  */
 public abstract class Handler {
-
 	protected final Logger log;
 	@Nonnull
 	protected final JSLBot bot;
