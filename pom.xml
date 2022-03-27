@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.coagulate.SL</groupId>
-    <artifactId>jslbot</artifactId>
-    <version>VERSIONNUMBERGOESHERE</version>
+    <artifactId>JSLBot</artifactId>
+    <version>Release</version>
 
     <build>
         <directory>${project.basedir}/bin</directory>
