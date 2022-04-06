@@ -208,16 +208,20 @@ public final class Circuit extends Thread implements Closeable {
 					}
 					@Nonnull final Packet p;
 					p=Packet.decode(rx);
-					if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
-						@Nullable JSLBot botcopy = bot;
-						if (botcopy != null && p!=null) {
-							botcopy.accountMessageIn(p.message().getId(), receive.getLength());
+					if (p!=null) {
+						if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
+							@Nullable JSLBot botcopy = bot;
+							if (botcopy != null && p != null) {
+								botcopy.accountMessageIn(p.message().getId(), receive.getLength());
+							}
 						}
+						for (final Integer rxack : p.appendedacks) {
+							receivedAck(rxack);
+						}
+						//if (p.getReliable()) { System.out.println("ACK REQUIRED IN:"+p.getName()); }
+						//System.out.println("RX: "+p.getName());
+						processPacket(p);
 					}
-					for (final Integer rxack: p.appendedacks) { receivedAck(rxack); }
-					//if (p.getReliable()) { System.out.println("ACK REQUIRED IN:"+p.getName()); }
-					//System.out.println("RX: "+p.getName());
-					processPacket(p);
 				}
 				catch (@Nonnull final SocketTimeoutException e) {
 					if (Debug.ACK) { log.finer("Exiting receive without event"); }
