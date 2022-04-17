@@ -554,7 +554,9 @@ public class CnC extends Handler {
 	public String setSecretKeyCommand(final CommandEvent command,
 							@Nonnull @Param(name="secretkey",description="Secret key to use (make it secure!)") final String secretKey) {
 		bot.getConfig().put("secretkey",secretKey);
-		if (secretKey.equalsIgnoreCase("password")) { return "No! Bad Human!"; }
+		if ("password".equalsIgnoreCase(secretKey)) {
+			return "No! Bad Human!";
+		}
 		return bot.getConfig().persistent()?"Secret key changed and saved":"Secret key changed ; note your configuration store "+bot.getConfig().getClass().getSimpleName()+" is not persistent and changes will be lost on restart.";
 	}
 

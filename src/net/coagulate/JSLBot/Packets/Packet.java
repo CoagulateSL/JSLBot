@@ -262,7 +262,7 @@ public class Packet {
             }
             @Nonnull final String messagetype = Lookup.lookup(code);
             //System.out.println("Message type is "+messagetype);
-            if (messagetype.equals("TestMessage")) { // seems unlikely, debug it ...
+            if ("TestMessage".equals(messagetype)) { // seems unlikely, debug it ...
                 System.err.println("Decoded a message to TestMessage - decoder error???");
                 @Nonnull final byte[] array = source.array();
                 for (int i = 0; i < array.length; i++) {

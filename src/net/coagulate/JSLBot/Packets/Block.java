@@ -68,7 +68,7 @@ public abstract class Block {
         @Nonnull final Map<Integer, Field> map = new HashMap<>();
         @Nonnull final Field[] fs = this.getClass().getDeclaredFields();
         for (@Nonnull final Field f : fs) {
-            if (!f.getName().equals("this$0")) {
+            if (!"this$0".equals(f.getName())) {
                 final Sequence a = f.getDeclaredAnnotation(Sequence.class);
                 // all fields in the block MUST have a sequence
                 if (a == null) {

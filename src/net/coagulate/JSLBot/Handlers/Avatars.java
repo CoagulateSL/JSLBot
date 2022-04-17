@@ -95,7 +95,7 @@ public class Avatars extends Handler {
     public void uUIDNameReplyUDPImmediate(@Nonnull final UDPEvent event) {
         @Nonnull final UUIDNameReply reply = (UUIDNameReply) event.body();
         for (@Nonnull final UUIDNameReply_bUUIDNameBlock element : reply.buuidnameblock) {
-            if (element.vlastname.toString().equalsIgnoreCase("Resident")) {
+            if ("Resident".equalsIgnoreCase(element.vlastname.toString())) {
                 resolvedUUIDs.put(element.vid, element.vfirstname.toString());
             } else {
                 resolvedUUIDs.put(element.vid, element.vfirstname + " " + element.vlastname);

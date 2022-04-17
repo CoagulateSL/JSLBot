@@ -37,10 +37,10 @@ public class Test {
 			CONFIGFILE=in.nextLine();
 		}
 		for (final String argument : args) {
-            if (argument.equalsIgnoreCase("--console")) {
-                CONSOLE = true;
-                System.out.println("Enabling console command mode");
-            }
+            if ("--console".equalsIgnoreCase(argument)) {
+				CONSOLE = true;
+				System.out.println("Enabling console command mode");
+			}
         }
 		if (CONFIGFILE==null) { throw new NullPointerException("You must supply a configuration file name"); }
 		if (CONFIGFILE.isBlank()) { throw new AssertionError("You must supply a file name so that we can create a configuration file!"); }
