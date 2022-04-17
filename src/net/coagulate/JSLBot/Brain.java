@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.*;
@@ -265,7 +264,7 @@ public class Brain {
 		catch (@Nonnull final InvocationTargetException ex) {
 			Throwable t=ex;
 			if (ex.getCause()!=null) { t=ex.getCause(); }
-			log.log(Level.SEVERE,"Exception loading handler "+handlername,t);
+			log.log(SEVERE, "Exception loading handler " + handlername, t);
 		}
 	}
 
