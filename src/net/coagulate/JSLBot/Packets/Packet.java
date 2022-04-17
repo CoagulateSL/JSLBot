@@ -201,7 +201,7 @@ public class Packet {
                 // acks are 4 byte acks followed by 1 byte quantity so...
                 // we have to read the last byte and work out tbe body length based on that, zero decode that, and keep everything else verbatim...
                 // this stuff actually works though.
-                boolean acks = (flags & 0x10) != 0;
+                final boolean acks = (flags & 0x10) != 0;
                 //System.out.println("Last byte is "+lastbyte+", body length is "+bodylength+" acks is "+acks);
                 if (acks) { bodylength-=1; bodylength -= (4 * lastbyte);
                 }
