@@ -77,19 +77,21 @@ public class CnC extends Handler {
 		@Nonnull final AlertMessage msg=(AlertMessage) event.body();
 		log.warning("Simulator "+event.region().circuit()+" sends Alert, data message: "+msg.balertdata.vmessage);
 		for (@Nonnull final AlertMessage_bAlertInfo info: msg.balertinfo) {
-			@Nonnull final String infotype=info.vmessage.toString();
-			boolean handled=false;
-			if (infotype.toLowerCase().contains("home")) {handled=true;} // handled by agent
+			@Nonnull final String infotype = info.vmessage.toString();
+			boolean handled = infotype.toLowerCase().contains("home");
+			// handled by agent
 			if ("RegionRestartMinutes".equals(infotype) || "RegionRestartSeconds".equals(infotype)) {
-				handled=true;
-				@Nonnull final Date when=parseRegionRestart(info.vextraparams.toString());
-				final int seconds=(int) ((when.getTime()-(new Date().getTime()))/1000);
-				@Nonnull Level level=INFO;
-				if (seconds<=180) { level=WARNING; }
-				if (seconds<=60) {
-					level=SEVERE;
-					if (evacby==null || evacby.before(new Date())) { // if not evacuating or it was in the past
-						evacby=new Date(when.getTime()+30000); // set to 30 seconds post evacuation so we dont do this more than once
+				handled = true;
+				@Nonnull final Date when = parseRegionRestart(info.vextraparams.toString());
+				final int seconds = (int) ((when.getTime() - (new Date().getTime())) / 1000);
+				@Nonnull Level level = INFO;
+				if (seconds <= 180) {
+					level = WARNING;
+				}
+				if (seconds <= 60) {
+					level = SEVERE;
+					if (evacby == null || evacby.before(new Date())) { // if not evacuating or it was in the past
+						evacby = new Date(when.getTime() + 30000); // set to 30 seconds post evacuation so we dont do this more than once
 						@Nonnull final Map<String,String> params=new HashMap<>();
 						params.put("when",""+((int) (when.getTime()/1000)));
 						@Nullable final CommandEvent evacuate=new CommandEvent(bot,event.region(),"evacuate",params,null);
@@ -652,8 +654,7 @@ public class CnC extends Handler {
 	                         @Nonnull String message,
 	                         @Nullable final String prefix,
 							 final boolean bypassAuth) {
-		boolean prefixok=false;
-		if (prefix==null || prefix.isEmpty()) { prefixok=true; }
+		boolean prefixok = prefix == null || prefix.isEmpty();
 		if (!prefixok) {
 			if (message.startsWith(prefix)) {
 				message=message.substring(prefix.length());

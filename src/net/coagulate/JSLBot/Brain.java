@@ -405,11 +405,9 @@ public class Brain {
 				return response;
 			}
 			final Set<Method> delayedhandler = handlermap.get(fen + "Delayed");
-			boolean nodelayedhandler = true;
-			if (delayedhandler!=null && (!delayedhandler.isEmpty())) { nodelayedhandler=false; }
+			boolean nodelayedhandler = delayedhandler == null || (delayedhandler.isEmpty());
 			final Set<Method> immediatehandler = handlermap.get(fen + "Immediate");
-			boolean noimmediatehandler = true;
-			if (immediatehandler!=null && (!immediatehandler.isEmpty())) { noimmediatehandler=false; }
+			boolean noimmediatehandler = immediatehandler == null || (immediatehandler.isEmpty());
 			// what else could it be
 			if (!warned.contains(fen) &&
 					( nodelayedhandler ) &&
