@@ -70,10 +70,7 @@ public final class Circuit extends Thread implements Closeable {
 	// name of the simulator
 	@Nonnull
 	private String regionname="";
-	// handle of the simulator
-	@Nullable
-	private LLUUID regionuuid;
-	// last time we rxed anything
+    // last time we rxed anything
 	@Nonnull
 	private Date lastpacket=new Date();
 	// primary CAPS url
@@ -682,8 +679,9 @@ public final class Circuit extends Thread implements Closeable {
 			Global.regionName(regionhandle,regionname);
 			final boolean register=false; // most connections register at creation since we know where we're connecting to
 			// the initial circuit maybe not so much
-			regionuuid=r.bregioninfo2.vregionid;
-			if (Debug.REGIONHANDLES) { log.log(Level.FINE,"RegionHandshake with UUID {0}",regionuuid.toUUIDString()); }
+            // handle of the simulator
+            LLUUID regionuuid = r.bregioninfo2.vregionid;
+			if (Debug.REGIONHANDLES) { log.log(Level.FINE,"RegionHandshake with UUID {0}", regionuuid.toUUIDString()); }
 			if (firsthandshake) {
 				log.log(Level.INFO,
 				        "Handshake {0} cpu {1}/{2} active as {3}#{4} @ colocation {5}",

@@ -30,7 +30,6 @@ public class Agent extends Handler {
 	private String firstname="";
 	@Nonnull
 	private String lastname="";
-	private int balance;
 	@Nullable
 	private LLUUID reporthometo;
 
@@ -103,7 +102,7 @@ public class Agent extends Handler {
 
 	public void moneyBalanceReplyUDPImmediate(@Nonnull final UDPEvent event) {
 		@Nonnull final MoneyBalanceReply money=(MoneyBalanceReply) event.body();
-		balance=money.bmoneydata.vmoneybalance.value;
+		int balance = money.bmoneydata.vmoneybalance.value;
 		final int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
 		final int sqmspent=money.bmoneydata.vsquaremeterscommitted.value;
 		@Nonnull final String description=money.bmoneydata.vdescription.toString();
