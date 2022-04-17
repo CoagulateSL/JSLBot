@@ -426,10 +426,10 @@ public class CnC extends Handler {
 			@Nonnull final List<String> commands=new ArrayList<>(unsortedcommands);
 			Collections.sort(commands);
 			for (String acommand: commands) {
-				if (!response.isEmpty()) {
-					response.append(", ");
-				} else {
+				if (response.isEmpty()) {
 					response = new StringBuilder("\n");
+				} else {
+					response.append(", ");
 				}
 				acommand=acommand.substring(0,acommand.length()-"command".length());
 				response.append(acommand);
@@ -447,15 +447,15 @@ public class CnC extends Handler {
 		for (@Nonnull final Parameter param: m.getParameters()) {
 			if (!(param.getType().equals(Regional.class) || param.getType().equals(CommandEvent.class))) {
 				final Param annotation = param.getAnnotation(Param.class);
-				if (param.getAnnotation(Param.class) != null) {
-					ret.append("\n").append(annotation.name());
-					ret.append(" - ").append(param.getAnnotation(Param.class).description());
-				} else {
+				if (param.getAnnotation(Param.class) == null) {
 					ret.append("\nThis command is not properly documented (Missing annotations in ")
 							.append(m.getDeclaringClass().getSimpleName())
 							.append(".")
 							.append(m.getName())
 							.append(")");
+				} else {
+					ret.append("\n").append(annotation.name());
+					ret.append(" - ").append(param.getAnnotation(Param.class).description());
 				}
 			}
 		}
