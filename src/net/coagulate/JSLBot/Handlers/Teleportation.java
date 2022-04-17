@@ -194,9 +194,9 @@ public class Teleportation extends Handler {
 		if (completed) {
 			if (!bot.getHomeSeat().isBlank()) {
 				if (!bot.getHomeSeat().isBlank()) {
-					@Nonnull Map<String, String> args = new HashMap<>();
+					@Nonnull final Map<String, String> args = new HashMap<>();
 					args.put("uuid", bot.getHomeSeat());
-					@Nonnull CommandEvent sit = new CommandEvent(bot, null, "siton", args, new LLUUID(config.get("CnC.authorisation.owneruuid")));
+                    @Nonnull final CommandEvent sit = new CommandEvent(bot, null, "siton", args, new LLUUID(config.get("CnC.authorisation.owneruuid")));
 					bot.brain().queue(sit);
 					return "1 - Home sequence with sit complete";
 				}

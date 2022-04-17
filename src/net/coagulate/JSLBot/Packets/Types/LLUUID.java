@@ -22,7 +22,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
         }
     }
 
-    public LLUUID(@Nonnull ByteBuffer buffer) {
+    public LLUUID(@Nonnull final ByteBuffer buffer) {
         read(buffer);
     }
 
@@ -38,7 +38,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
 
     @Nonnull
     private static String randomHexChar() {
-        int rand=ThreadLocalRandom.current().nextInt(16);
+        final int rand = ThreadLocalRandom.current().nextInt(16);
         if (rand<10) { return ""+rand; }
         // lazy
         if (rand==10) { return "A"; }
@@ -55,7 +55,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
 
     @Nonnull
     public ByteBuffer content() {
-        @Nonnull ByteBuffer content=ByteBuffer.allocate(size());
+        @Nonnull final ByteBuffer content = ByteBuffer.allocate(size());
         content.put(uuid);
         return content;
     }
@@ -66,13 +66,13 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
-        uuid=new byte[16];
-        in.get(uuid,0,16);
+    public void read(@Nonnull final ByteBuffer in) {
+        uuid = new byte[16];
+        in.get(uuid, 0, 16);
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
+    public void write(@Nonnull final ByteBuffer out) {
         out.put(uuid);
     }
 
@@ -80,11 +80,19 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     public String dump() {
         return toString();
     }
+
     @Override
-    public boolean equals(Object t) {
-        if (!(t instanceof LLUUID)) { System.out.println("REALLY ODD COMPARISON TO A UUID"); return false; }
-        @Nonnull LLUUID l=(LLUUID)t;
-        for (int i=0;i<16;i++) { if (uuid[i]!=l.uuid[i]) { return false; }}
+    public boolean equals(final Object t) {
+        if (!(t instanceof LLUUID)) {
+            System.out.println("REALLY ODD COMPARISON TO A UUID");
+            return false;
+        }
+        @Nonnull final LLUUID l = (LLUUID) t;
+        for (int i = 0; i < 16; i++) {
+            if (uuid[i] != l.uuid[i]) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -104,15 +112,21 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
 
     @Nonnull
     public String toUUIDString() {
-        String s=toString();
+        final String s = toString();
         return s.substring(0, 8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20);
     }
 
     @Override
-    public int compareTo(@Nonnull LLUUID o) {
-        if (o.toLong()==toLong()) { return 0; }
-        if (o.toLong()>toLong()) { return 1; }
-        if (o.toLong()<toLong()) { return -1; }
+    public int compareTo(@Nonnull final LLUUID o) {
+        if (o.toLong() == toLong()) {
+            return 0;
+        }
+        if (o.toLong() > toLong()) {
+            return 1;
+        }
+        if (o.toLong() < toLong()) {
+            return -1;
+        }
         throw new AssertionError("Code paths should be all complete at this point");
     }
 

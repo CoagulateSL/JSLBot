@@ -207,7 +207,7 @@ public final class Circuit extends Thread implements Closeable {
 					p=Packet.decode(rx);
 					if (p!=null) {
 						if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
-							@Nullable JSLBot botcopy = bot;
+							@Nullable final JSLBot botcopy = bot;
 							if (botcopy != null && p != null) {
 								botcopy.accountMessageIn(p.message().getId(), receive.getLength());
 							}
@@ -256,7 +256,7 @@ public final class Circuit extends Thread implements Closeable {
 			close();
 		}
 		if (Debug.CIRCUIT) { log.log(Level.FINE,"Deregistering circuit to {0}",regionname); }
-		@Nullable JSLBot mybot=bot;
+		@Nullable final JSLBot mybot = bot;
 		if (mybot!=null) { mybot.deregisterCircuit(regionhandle,this); }
 	}
 
@@ -285,8 +285,10 @@ public final class Circuit extends Thread implements Closeable {
 	                 final boolean reliable) throws IllegalStateException {
 		@Nonnull final Packet p=new Packet(m);
 		p.setReliable(reliable);
-		try { send(p); }
-		catch (IOException e) { this.close(); throw new IllegalStateException("Errors closed the circuit",e); }
+		try { send(p); } catch (final IOException e) {
+			this.close();
+			throw new IllegalStateException("Errors closed the circuit", e);
+		}
 	}
 
 	/* Send a message, unreliably */
@@ -363,7 +365,7 @@ public final class Circuit extends Thread implements Closeable {
             e.printStackTrace(); // show me!
         }*/
 		//System.out.println("TX: "+p.getName());
-		@Nullable JSLBot botcopy = bot;
+		@Nullable final JSLBot botcopy = bot;
 		if (Constants.PACKET_ACCOUNTING) {
 			bytesout.addAndGet(packet.getLength());
 			if (botcopy!=null) { botcopy.bytesout.addAndGet(packet.getLength()); }
@@ -399,9 +401,9 @@ public final class Circuit extends Thread implements Closeable {
 			if (disconnecting) { return; }
 			disconnecting=true;
 		}
-		@Nullable CAPS ourcaps=getCAPSNullable();
+		@Nullable final CAPS ourcaps = getCAPSNullable();
 		if (ourcaps!=null) {
-			@Nullable EventQueue oureventqueue=ourcaps.eventqueue();
+			@Nullable final EventQueue oureventqueue = ourcaps.eventqueue();
 			if (oureventqueue!=null) {
 				oureventqueue.shutdown();
 			}
@@ -431,7 +433,7 @@ public final class Circuit extends Thread implements Closeable {
 
 	@Nonnull
 	public JSLBot bot() {
-		@Nullable JSLBot mybot=bot;
+		@Nullable final JSLBot mybot = bot;
 		if (mybot==null) { throw new NullPointerException("Bot connection has gone away"); }
 		return bot;
 	}
@@ -571,7 +573,10 @@ public final class Circuit extends Thread implements Closeable {
 					try {
 						send(p);
 						inflight.put(p, new Date());
-					} catch (IOException e) { this.close(); throw new IllegalStateException("Failed to send a retransmit",e); }
+					} catch (final IOException e) {
+						this.close();
+						throw new IllegalStateException("Failed to send a retransmit", e);
+					}
 				}
 			}
 		}
@@ -680,7 +685,7 @@ public final class Circuit extends Thread implements Closeable {
 			final boolean register=false; // most connections register at creation since we know where we're connecting to
 			// the initial circuit maybe not so much
             // handle of the simulator
-            LLUUID regionuuid = r.bregioninfo2.vregionid;
+			final LLUUID regionuuid = r.bregioninfo2.vregionid;
 			if (Debug.REGIONHANDLES) { log.log(Level.FINE,"RegionHandshake with UUID {0}", regionuuid.toUUIDString()); }
 			if (firsthandshake) {
 				log.log(Level.INFO,
@@ -701,8 +706,9 @@ public final class Circuit extends Thread implements Closeable {
 			@Nonnull final Packet replypacket=new Packet(reply);
 			replypacket.setReliable(true);
 			replypacket.setZeroCode(true);
-			try { send(replypacket); }
-			catch (IOException e) { throw new IllegalStateException("Circuit failed during handshake, this is probably fatal",e); }
+			try { send(replypacket); } catch (final IOException e) {
+				throw new IllegalStateException("Circuit failed during handshake, this is probably fatal", e);
+			}
 			// open our eyes
 			bot.setMaxFOV();
 			bot.agentUpdate();

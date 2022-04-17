@@ -19,13 +19,13 @@ public class Fixed4 extends Unimplemented{
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
-        in.get(values,0,4);
+    public void read(@Nonnull final ByteBuffer in) {
+        in.get(values, 0, 4);
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
-        out.put(values,0,4);
+    public void write(@Nonnull final ByteBuffer out) {
+        out.put(values, 0, 4);
     }
 
     @Nonnull

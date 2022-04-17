@@ -101,9 +101,9 @@ public class Agent extends Handler {
 	}
 
 	public void moneyBalanceReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final MoneyBalanceReply money=(MoneyBalanceReply) event.body();
-		int balance = money.bmoneydata.vmoneybalance.value;
-		final int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
+		@Nonnull final MoneyBalanceReply money = (MoneyBalanceReply) event.body();
+        final int balance = money.bmoneydata.vmoneybalance.value;
+        final int sqmcredit = money.bmoneydata.vsquaremeterscredit.value;
 		final int sqmspent=money.bmoneydata.vsquaremeterscommitted.value;
 		@Nonnull final String description=money.bmoneydata.vdescription.toString();
 		log.log(Level.INFO,"Balance: {0}L$, Land: {1}m2/{2}m2 {3}",new Object[]{balance,sqmspent,sqmcredit,description});
@@ -217,7 +217,7 @@ public class Agent extends Handler {
 	@CmdHelp(description="Have the avatar sit on an object")
 	public String sitOnCommand(final CommandEvent command,
 									  @Nonnull @Param(name="uuid",description="UUID of the prim to sit on") final String uuid) {
-		@Nonnull AgentRequestSit sit=new AgentRequestSit(bot);
+        @Nonnull final AgentRequestSit sit = new AgentRequestSit(bot);
 		sit.btargetobject.vtargetid=new LLUUID(uuid);
 		sit.btargetobject.voffset=new LLVector3(0,0,0);
 		bot.send(sit,true);
@@ -227,7 +227,7 @@ public class Agent extends Handler {
 	@Nonnull
 	@CmdHelp(description="Have the avatar stand")
 	public String standCommand(final CommandEvent command) {
-		int controlflags=bot.controlflags;
+        final int controlflags = bot.controlflags;
 		bot.controlflags=bot.controlflags | 0x00010000;
 		bot.forceAgentUpdate();
 		bot.controlflags=controlflags;

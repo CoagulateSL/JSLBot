@@ -163,7 +163,7 @@ public class CommandEvent extends Event {
 			//System.out.println(param.toString());
 			if (firstparam) { firstparam=false; }
 			else {
-				JSLBot.Param annotation = param.getAnnotation(JSLBot.Param.class);
+				final JSLBot.Param annotation = param.getAnnotation(JSLBot.Param.class);
 				if (annotation!=null) {
 					@Nonnull final String paramname = annotation.name();
 					params.add(parameters().getOrDefault(paramname, null));

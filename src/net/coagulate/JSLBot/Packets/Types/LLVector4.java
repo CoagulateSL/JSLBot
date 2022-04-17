@@ -19,16 +19,16 @@ public class LLVector4 extends Unimplemented{
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
+    public void read(@Nonnull final ByteBuffer in) {
         in.order(ByteOrder.LITTLE_ENDIAN);
-        x=in.getFloat();
-        y=in.getFloat();
-        z=in.getFloat();
-        t=in.getFloat();
+        x = in.getFloat();
+        y = in.getFloat();
+        z = in.getFloat();
+        t = in.getFloat();
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
+    public void write(@Nonnull final ByteBuffer out) {
         out.order(ByteOrder.LITTLE_ENDIAN);
         out.putFloat(x);
         out.putFloat(y);

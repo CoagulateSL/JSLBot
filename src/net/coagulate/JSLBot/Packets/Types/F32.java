@@ -10,21 +10,26 @@ import java.nio.ByteOrder;
  */
 public class F32 extends Type{
     public float value=0;
-    public F32() {}
-    public F32(float v) { value=v; }
+    public F32() {
+    }
+
+    public F32(final float v) {
+        value = v;
+    }
+
     @Override
     public int size() {
         return 4;
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
+    public void read(@Nonnull final ByteBuffer in) {
         in.order(ByteOrder.LITTLE_ENDIAN);
-        value=in.getFloat();
+        value = in.getFloat();
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
+    public void write(@Nonnull final ByteBuffer out) {
         out.order(ByteOrder.LITTLE_ENDIAN);
         out.putFloat(value);
     }

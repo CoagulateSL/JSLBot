@@ -141,21 +141,23 @@ public class Groups extends Handler {
 	}
 
 	public void groupRoleDataReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final GroupRoleDataReply reply=(GroupRoleDataReply) event.body();
-		// only processing the role data at the moment!
-		long group=reply.bgroupdata.vgroupid.toLong();
-		@Nonnull Set<GroupRole> roles=new HashSet<>();
-		for (@Nonnull GroupRoleDataReply_bRoleData role:reply.broledata) {
-			roles.add(new GroupRole(role.vroleid,role.vname.toString(),role.vtitle.toString(),role.vdescription.toString(),role.vpowers.value,role.vmembers.value));
-		}
-		@Nullable Long signalObject=null;
-		for (Long potential:grouproles.keySet()) {
-			if (potential==group) { signalObject=potential; }
-		}
-		grouproles.put(group,roles);
-		if (signalObject!=null) {
-			// the inspection warning is correct, but we pulled ourReference from a shared map into a local variable
-			// (partly because we're about to replace it in the map we pulled it from)
+        @Nonnull final GroupRoleDataReply reply = (GroupRoleDataReply) event.body();
+        // only processing the role data at the moment!
+        final long group = reply.bgroupdata.vgroupid.toLong();
+        @Nonnull final Set<GroupRole> roles = new HashSet<>();
+        for (@Nonnull final GroupRoleDataReply_bRoleData role : reply.broledata) {
+            roles.add(new GroupRole(role.vroleid, role.vname.toString(), role.vtitle.toString(), role.vdescription.toString(), role.vpowers.value, role.vmembers.value));
+        }
+        @Nullable Long signalObject = null;
+        for (final Long potential : grouproles.keySet()) {
+            if (potential == group) {
+                signalObject = potential;
+            }
+        }
+        grouproles.put(group, roles);
+        if (signalObject != null) {
+            // the inspection warning is correct, but we pulled ourReference from a shared map into a local variable
+            // (partly because we're about to replace it in the map we pulled it from)
 			//noinspection SynchronizationOnLocalVariableOrMethodParameter
 			synchronized(signalObject) { signalObject.notifyAll(); } }
 	}
@@ -166,7 +168,7 @@ public class Groups extends Handler {
 									@Nullable @Param(name="uuid",description="Group UUID to query") final String uuid,
 									@Nullable @Param(name="name",description="Group name to query, if UUID not supplied") final String name) {
 		if (uuid==null && name==null) { return "1 - No group parameter supplied"; }
-		@Nullable LLUUID target;
+        @Nullable final LLUUID target;
 		if (uuid==null || uuid.isEmpty()) {
 			if (name==null) { return "1 - No group parameter supplied"; }
 			target=findGroupUUID(name);
@@ -175,26 +177,31 @@ public class Groups extends Handler {
 			target=new LLUUID(uuid);
 		}
 		if (target==null) { return "1 - Failed to obtain target group UUID for '"+name+"'"; }
-		@Nonnull final GroupRoleDataRequest req=new GroupRoleDataRequest(bot);
-		Long ourReference=target.toLong();
+        @Nonnull final GroupRoleDataRequest req = new GroupRoleDataRequest(bot);
+        final Long ourReference = target.toLong();
 		grouproles.put(ourReference,null);
-		@Nonnull LLUUID requestID=LLUUID.random();
-		req.bgroupdata.vgroupid=target;
-		req.bgroupdata.vrequestid=requestID;
-		bot.send(req,true);
-		// the warning is correct, but, we stashed the local scoped variable in the map
-		//noinspection SynchronizationOnLocalVariableOrMethodParameter
-		synchronized (ourReference) {
-			try { ourReference.wait(15000); }
-			catch (InterruptedException e) { return "1 - Wait was interrupted"; }
-		}
-		if (grouproles.get(ourReference)==null) { return "1 - No response received within timeout"; }
-		@Nonnull StringBuilder reply=new StringBuilder("Group Roles for group UUID ").append(target.toUUIDString());
-		for (@Nonnull GroupRole role:grouproles.get(ourReference)) {
-			reply.append("\n").append(role.name).append(" - ").append(role.roleID.toUUIDString());
-		}
-		return reply.toString();
-	}
+        @Nonnull final LLUUID requestID = LLUUID.random();
+        req.bgroupdata.vgroupid = target;
+        req.bgroupdata.vrequestid = requestID;
+        bot.send(req, true);
+        // the warning is correct, but, we stashed the local scoped variable in the map
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (ourReference) {
+            try {
+                ourReference.wait(15000);
+            } catch (final InterruptedException e) {
+                return "1 - Wait was interrupted";
+            }
+        }
+        if (grouproles.get(ourReference) == null) {
+            return "1 - No response received within timeout";
+        }
+        @Nonnull final StringBuilder reply = new StringBuilder("Group Roles for group UUID ").append(target.toUUIDString());
+        for (@Nonnull final GroupRole role : grouproles.get(ourReference)) {
+            reply.append("\n").append(role.name).append(" - ").append(role.roleID.toUUIDString());
+        }
+        return reply.toString();
+    }
 
 	public static class GroupRole {
 		public final LLUUID roleID;
@@ -203,14 +210,15 @@ public class Groups extends Handler {
 		public final String description;
 		public final long powers;
 		public final int members;
-		public GroupRole(LLUUID roleID,String name,String title,String description,long powers,int members) {
-			this.roleID=roleID;
-			this.name=name;
-			this.title=title;
-			this.description=description;
-			this.powers=powers;
-			this.members=members;
-		}
+
+        public GroupRole(final LLUUID roleID, final String name, final String title, final String description, final long powers, final int members) {
+            this.roleID = roleID;
+            this.name = name;
+            this.title = title;
+            this.description = description;
+            this.powers = powers;
+            this.members = members;
+        }
 	}
 
 	public void agentGroupDataUpdateXMLDelayed(@Nonnull final XMLEvent event) {

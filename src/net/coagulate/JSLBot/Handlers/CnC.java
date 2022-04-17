@@ -255,18 +255,18 @@ public class CnC extends Handler {
 				log.info("Leave session: "+messagetext);
 				break;
 			case 19:
-				@Nonnull String key=bot.getConfig().get("secretkey","");
+				@Nonnull final String key = bot.getConfig().get("secretkey", "");
 				if (key!=null && key.length()>=4) {
 					// maybe we let this be a command
 					// object IMs start with their name, in square brackets, apparently
-					@Nonnull Matcher matches= Pattern.compile("\\[(.*)\\] (.*)",Pattern.DOTALL).matcher(messagetext);
+					@Nonnull final Matcher matches = Pattern.compile("\\[(.*)\\] (.*)", Pattern.DOTALL).matcher(messagetext);
 					if (matches.matches()) {
-						String objectName = matches.group(1);
-						String objectMessage = matches.group(2);
+						final String objectName = matches.group(1);
+						final String objectMessage = matches.group(2);
 						if (objectMessage.startsWith("*" + key + " ")) {
-							@Nonnull String command = objectMessage.substring(key.length() + 2);
-							log.info("Executing Object ["+objectName+"] IM: " + command);
-							runCommands(objectName,null,command,null,true);
+							@Nonnull final String command = objectMessage.substring(key.length() + 2);
+							log.info("Executing Object [" + objectName + "] IM: " + command);
+							runCommands(objectName, null, command, null, true);
 							break;
 						}
 					}
@@ -441,7 +441,7 @@ public class CnC extends Handler {
 		}
 		for (@Nonnull final Parameter param: m.getParameters()) {
 			if (!(param.getType().equals(Regional.class) || param.getType().equals(CommandEvent.class))) {
-				Param annotation = param.getAnnotation(Param.class);
+				final Param annotation = param.getAnnotation(Param.class);
 				if (param.getAnnotation(Param.class)!=null) {
 					ret.append("\n").append(annotation.name());
 					ret.append(" - ").append(param.getAnnotation(Param.class).description());
@@ -572,12 +572,12 @@ public class CnC extends Handler {
 	boolean hasCoffed=false;
 	public void avatarAppearanceUDPDelayed(@Nonnull final UDPEvent event) {
 		if (hasCoffed) { return; }
-		@Nonnull AvatarAppearance app=(AvatarAppearance)(event.body());
+		@Nonnull final AvatarAppearance app = (AvatarAppearance) (event.body());
 		if (app.bappearancedata.size()==0) {
 			//System.out.println("Skipping no COF listed");
 			return;
 		}
-		int cofVersion=app.bappearancedata.get(0).vcofversion.value;
+		final int cofVersion = app.bappearancedata.get(0).vcofversion.value;
 		if (cofVersion==0) {
 			//System.out.println("Skip COF 0");
 			return;
@@ -586,20 +586,22 @@ public class CnC extends Handler {
 		@Nonnull final LLSDMap req=new LLSDMap();
 		req.put("cof_version",new LLSDInteger(cofVersion));
 		@Nonnull LLSD llsd=new LLSD(req);
-		try { @Nullable final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd); }
-		catch (IOException e) {
-			String error=e.getMessage();
-			@Nonnull Matcher matcher=Pattern.compile("Cof Version Mismatch: [0-9]+ != ([0-9]+)").matcher(error);
+		try {
+			@Nullable final LLSDMap response = bot.getCAPS().invokeCAPS("UpdateAvatarAppearance", "", llsd);
+		} catch (final IOException e) {
+			final String error = e.getMessage();
+			@Nonnull final Matcher matcher = Pattern.compile("Cof Version Mismatch: [0-9]+ != ([0-9]+)").matcher(error);
 			if (matcher.matches()) {
 				//System.out.println("Retrying for COF "+matcher.group(1));
-				req.put("cof_version",new LLSDInteger(Integer.parseInt(matcher.group(1))));
-				llsd=new LLSD(req);
-				try { @Nullable final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd); }
-				catch (IOException f) {
-					log.log(WARNING,"Failed to fetch Appearance COF again "+matcher.group(1)+" - "+ f,f);
+				req.put("cof_version", new LLSDInteger(Integer.parseInt(matcher.group(1))));
+				llsd = new LLSD(req);
+				try {
+					@Nullable final LLSDMap response = bot.getCAPS().invokeCAPS("UpdateAvatarAppearance", "", llsd);
+				} catch (final IOException f) {
+					log.log(WARNING, "Failed to fetch Appearance COF again " + matcher.group(1) + " - " + f, f);
 					return;
 				}
-				hasCoffed=true;
+				hasCoffed = true;
 				return;
 			} else { log.log(WARNING,"Cof retrier failed to match error message:"+error); }
 			log.log(WARNING,"Failed to fetch Appearance COF "+cofVersion+" - "+ e,e);

@@ -86,21 +86,31 @@ public class Inventory extends Handler implements Runnable {
 	public String inventoryFindCommand(final CommandEvent event,
 									   @Nonnull @JSLBot.Param(description = "Substring of item name to find",name="name") final String name) {
 		synchronized (inventorytree) {
-			if (!inventorycomplete) { return "2 - Inventory download is not yet complete"; }
-			String output="";
-			if (name==null) { return "1 - No search name supplied"; }
-			for (Map.Entry<LLUUID,InventoryAtom> entry:inventory.entrySet()) {
-				InventoryAtom atom=entry.getValue();
-				if (atom instanceof InventoryItem) {
-					InventoryItem item=(InventoryItem)atom;
-					if (item.name==null) { System.out.println("An item has a null name (?)"); }
-					if (item.name.toLowerCase().contains(name.toLowerCase())) {
-						if (!output.isBlank()) { output=output+"\n"; }
-						output=output+entry.getKey().toUUIDString()+" : "+item.name;
-					}
-				}
-			}
-			if (output.isBlank()) { output="1 - No items found containing that substring"; }
+            if (!inventorycomplete) {
+                return "2 - Inventory download is not yet complete";
+            }
+            String output = "";
+            if (name == null) {
+                return "1 - No search name supplied";
+            }
+            for (final Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
+                final InventoryAtom atom = entry.getValue();
+                if (atom instanceof InventoryItem) {
+                    final InventoryItem item = (InventoryItem) atom;
+                    if (item.name == null) {
+                        System.out.println("An item has a null name (?)");
+                    }
+                    if (item.name.toLowerCase().contains(name.toLowerCase())) {
+                        if (!output.isBlank()) {
+                            output = output + "\n";
+                        }
+                        output = output + entry.getKey().toUUIDString() + " : " + item.name;
+                    }
+                }
+            }
+            if (output.isBlank()) {
+                output = "1 - No items found containing that substring";
+            }
 			return output;
 		}
 	}
@@ -108,14 +118,18 @@ public class Inventory extends Handler implements Runnable {
 	public String inventorySendCommand(final CommandEvent event,
 									   @Nonnull @JSLBot.Param(description="UUID of item to send",name="item") final String item,
 									   @Nonnull @JSLBot.Param(description="UUID of avatar to send item to",name="target") final String target) {
-		if (!inventorycomplete) { return "2 - Inventory download is not yet complete"; }
-		LLUUID itemuuid=new LLUUID(item);
-		LLUUID targetuuid=new LLUUID(target);
-		InventoryItem invitem=inventoryFind(itemuuid);
-		if (invitem==null) { return "1 - Could not find item by that UUID"; }
-		sendInventory(invitem,targetuuid);
-		return "0 - Inventory transfer message sent";
-	}
+        if (!inventorycomplete) {
+            return "2 - Inventory download is not yet complete";
+        }
+        final LLUUID itemuuid = new LLUUID(item);
+        final LLUUID targetuuid = new LLUUID(target);
+        final InventoryItem invitem = inventoryFind(itemuuid);
+        if (invitem == null) {
+            return "1 - Could not find item by that UUID";
+        }
+        sendInventory(invitem, targetuuid);
+        return "0 - Inventory transfer message sent";
+    }
 
 	/** Send an inventory item to a target UUID.
 	 *
@@ -125,7 +139,7 @@ public class Inventory extends Handler implements Runnable {
 	 * @param target UUID of avatar to receive item
 	 */
 	public void sendInventory(@Nonnull final LLUUID itemuuid,@Nonnull final LLUUID target) {
-		InventoryItem item=inventoryFind(itemuuid);
+        final InventoryItem item = inventoryFind(itemuuid);
 		if (item==null) { throw new NullPointerException("Unable to resolve UUID "+itemuuid.toUUIDString()); }
 		sendInventory(item,target);
 	}
@@ -146,10 +160,10 @@ public class Inventory extends Handler implements Runnable {
 		im.bmessageblock.vposition=new LLVector3(0,0,0);
 		//im.bmessageblock.vregionid=circuit().getRegionUUID();
 		im.bmessageblock.vid=LLUUID.random();
-		byte[] binary=new byte[17];
+        final byte[] binary = new byte[17];
 		binary[0]=(byte)(item.type & 0xff);
 		System.arraycopy(item.id.content().array(),0,binary,1,16);
-		Variable2 sendme = new Variable2(binary);
+        final Variable2 sendme = new Variable2(binary);
 		im.bmessageblock.vbinarybucket=sendme;
 		bot.send(im,true);
 	}
@@ -158,30 +172,32 @@ public class Inventory extends Handler implements Runnable {
 	@CmdHelp(description="Dump item data by inventory UUID (see inventoryFind)")
 	public String inventoryDetailCommand(final CommandEvent event,
 									   @Nonnull @JSLBot.Param(description = "UUID of item to report on",name="uuid") final String uuid) {
-		if (!inventorycomplete) { return "2 - Inventory download is not yet complete"; }
-		if (uuid == null) {
-			return "1 - No UUID supplied";
-		}
-		LLUUID lluuid = new LLUUID(uuid);
-		InventoryItem item=inventoryFind(lluuid);
-		if (item==null) {
-			return "1 - Could not find object by uuid " + lluuid.toUUIDString();
-		}
-		return item.id.toUUIDString() + "\nName:" + item.name + "\nAssetID:" + item.assetid.toUUIDString() + "\nDescription: " + item.desc + "\nType: " + item.invtype + "/" + item.type;
-	}
+        if (!inventorycomplete) {
+            return "2 - Inventory download is not yet complete";
+        }
+        if (uuid == null) {
+            return "1 - No UUID supplied";
+        }
+        final LLUUID lluuid = new LLUUID(uuid);
+        final InventoryItem item = inventoryFind(lluuid);
+        if (item == null) {
+            return "1 - Could not find object by uuid " + lluuid.toUUIDString();
+        }
+        return item.id.toUUIDString() + "\nName:" + item.name + "\nAssetID:" + item.assetid.toUUIDString() + "\nDescription: " + item.desc + "\nType: " + item.invtype + "/" + item.type;
+    }
 
 	private InventoryItem inventoryFind(@Nonnull final LLUUID uuid) {
 		if (!inventorycomplete) { throw new IllegalStateException("Unable to search inventory, not yet completed initial download"); }
 		synchronized (inventorytree) {
-			for (Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
-				if (entry.getKey().equals(uuid)) {
-					InventoryAtom atom = entry.getValue();
-					if (atom instanceof InventoryItem) {
-						InventoryItem item = (InventoryItem) atom;
-						return item;
-					}
-				}
-			}
+            for (final Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
+                if (entry.getKey().equals(uuid)) {
+                    final InventoryAtom atom = entry.getValue();
+                    if (atom instanceof InventoryItem) {
+                        final InventoryItem item = (InventoryItem) atom;
+                        return item;
+                    }
+                }
+            }
 		}
 		return null;
 	}

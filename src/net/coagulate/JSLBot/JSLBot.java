@@ -350,9 +350,9 @@ public class JSLBot extends Thread {
 	public void send(@Nonnull final Packet p) {
 		if (primary==null) { throw new IllegalStateException("Primary circuit is not defined or connected"); }
 		try { primary.send(p); }
-		catch (IOException e) {
-			shutdown("Primary circuit was closed");
-		}
+		catch (final IOException e) {
+            shutdown("Primary circuit was closed");
+        }
 	}
 
 	/**
@@ -829,9 +829,9 @@ public class JSLBot extends Thread {
 		if (!quit) { brain.loggedIn(); }
 		if (!config.get("homeseat","").isBlank())
 		{
-			@Nonnull Map<String,String> args=new HashMap<>();
+            @Nonnull final Map<String, String> args = new HashMap<>();
 			args.put("uuid",config.get("homeseat"));
-			@Nonnull CommandEvent sit=new CommandEvent(this,null,"siton",args,new LLUUID(config.get("CnC.authorisation.owneruuid")));
+            @Nonnull final CommandEvent sit = new CommandEvent(this, null, "siton", args, new LLUUID(config.get("CnC.authorisation.owneruuid")));
 			brain.execute(sit);
 		}
 		while (!quit) {
