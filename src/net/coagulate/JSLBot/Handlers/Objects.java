@@ -278,26 +278,31 @@ public class Objects extends Handler {
 	public String objectReturnCommand(@Nonnull final CommandEvent command,
 	                                  @Nullable @Param(name="primuuid",description="UUID of prim to return") final String primuuid,
 	                                  @Nullable @Param(name="localid",description="LocalID of prim to return") final String localid) {
-		@Nonnull final Regional region=command.region();
+		@Nonnull final Regional region = command.region();
 		// One way or another we need the local ID
 		final int id;
-		if (localid!=null) { id=Integer.parseInt(localid); }
-		else {
-			if (primuuid==null) { return "9 - You must supply Prim UUID or Local simulator ID"; }
+		if (localid == null) {
+			if (primuuid == null) {
+				return "9 - You must supply Prim UUID or Local simulator ID";
+			}
 			// extract by primuuid
-			@Nullable final LLUUID uuid=new LLUUID(primuuid);
-			@Nullable final ObjectData od=region.getObject(uuid);
-			if (od==null) { return "1 - Could not find object by UUID "+primuuid; }
-			id=od.id.value;
+			@Nullable final LLUUID uuid = new LLUUID(primuuid);
+			@Nullable final ObjectData od = region.getObject(uuid);
+			if (od == null) {
+				return "1 - Could not find object by UUID " + primuuid;
+			}
+			id = od.id.value;
+		} else {
+			id = Integer.parseInt(localid);
 		}
-		@Nonnull final DeRezObject dro=new DeRezObject();
+		@Nonnull final DeRezObject dro = new DeRezObject();
 		// conn into
-		dro.bagentdata.vagentid=bot.getUUID();
-		dro.bagentdata.vsessionid=bot.getSession();
+		dro.bagentdata.vagentid = bot.getUUID();
+		dro.bagentdata.vsessionid = bot.getSession();
 		// object to return
-		@Nonnull final DeRezObject_bObjectData drood=new DeRezObject_bObjectData();
-		drood.vobjectlocalid=new U32(id);
-		dro.bobjectdata=new ArrayList<>();
+		@Nonnull final DeRezObject_bObjectData drood = new DeRezObject_bObjectData();
+		drood.vobjectlocalid = new U32(id);
+		dro.bobjectdata = new ArrayList<>();
 		dro.bobjectdata.add(drood);
 		// derez config - type 9 is return to owner, 10 to return to 'last owner'.  9 seems to work :P
 		dro.bagentblock.vdestination=new U8(9);

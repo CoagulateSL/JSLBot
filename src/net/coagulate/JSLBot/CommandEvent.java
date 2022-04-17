@@ -164,11 +164,11 @@ public class CommandEvent extends Event {
 			if (firstparam) { firstparam=false; }
 			else {
 				final JSLBot.Param annotation = param.getAnnotation(JSLBot.Param.class);
-				if (annotation!=null) {
+				if (annotation == null) {
+					throw new IllegalArgumentException("Parameter " + param.getName() + " of method " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " is missing a Param annotation");
+				} else {
 					@Nonnull final String paramname = annotation.name();
 					params.add(parameters().getOrDefault(paramname, null));
-				} else {
-					throw new IllegalArgumentException("Parameter "+param.getName()+" of method "+method.getDeclaringClass().getSimpleName()+"."+method.getName()+" is missing a Param annotation");
 				}
 			}
 		}

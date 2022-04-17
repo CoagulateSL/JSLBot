@@ -137,11 +137,11 @@ public final class CAPS extends Thread {
 			return (LLSDMap) new LLSD(read).getFirst();
 		} catch (final IOException e) {
 			final InputStream errorStream = connection.getErrorStream();
-			if (errorStream != null) {
+			if (errorStream == null) {
+				System.out.println("Error stream is null");
+			} else {
 				@Nonnull final Scanner errs = new Scanner(errorStream).useDelimiter("\\A");
 				throw new IOException(((LLSDMap) (new LLSD(errs.next()).getFirst())).get("error").toString(), e);
-			} else {
-				System.out.println("Error stream is null");
 			}
 			throw e;
 		}

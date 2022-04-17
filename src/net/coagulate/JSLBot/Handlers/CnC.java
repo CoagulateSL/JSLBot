@@ -445,7 +445,7 @@ public class CnC extends Handler {
 		for (@Nonnull final Parameter param: m.getParameters()) {
 			if (!(param.getType().equals(Regional.class) || param.getType().equals(CommandEvent.class))) {
 				final Param annotation = param.getAnnotation(Param.class);
-				if (param.getAnnotation(Param.class)!=null) {
+				if (param.getAnnotation(Param.class) != null) {
 					ret.append("\n").append(annotation.name());
 					ret.append(" - ").append(param.getAnnotation(Param.class).description());
 				} else {
@@ -453,7 +453,8 @@ public class CnC extends Handler {
 							.append(m.getDeclaringClass().getSimpleName())
 							.append(".")
 							.append(m.getName())
-							.append(")"); }
+							.append(")");
+				}
 			}
 		}
 		return ret.toString();

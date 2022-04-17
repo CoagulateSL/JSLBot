@@ -211,14 +211,14 @@ public class Packet {
                 while (bodylength > 0) {
                     bodylength--;
                     final byte b = source.get();
-                    if (b != 0) {
-                        uncoded.add(b);
-                    } else {
+                    if (b == 0) {
                         bodylength--;
                         final int qty = source.get() & 0xff;
                         for (int i = 0; i < qty; i++) {
                             uncoded.add((byte) 0);
                         }
+                    } else {
+                        uncoded.add(b);
                     }
                 }
                 while (source.hasRemaining()) { final byte b=source.get(); uncoded.add(b); }

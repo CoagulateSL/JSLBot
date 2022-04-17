@@ -130,13 +130,12 @@ public class Groups extends Handler {
 	}
 
 	public void joinGroupReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final JoinGroupReply jgr=(JoinGroupReply) event.body();
-		@Nonnull final String groupid=jgr.bgroupdata.vgroupid.toUUIDString();
-		if (jgr.bgroupdata.vsuccess.value!=0) {
-			log.info("Joined group "+groupid);
-		}
-		else {
-			log.warning("Failed to join group "+groupid);
+		@Nonnull final JoinGroupReply jgr = (JoinGroupReply) event.body();
+		@Nonnull final String groupid = jgr.bgroupdata.vgroupid.toUUIDString();
+		if (jgr.bgroupdata.vsuccess.value == 0) {
+			log.warning("Failed to join group " + groupid);
+		} else {
+			log.info("Joined group " + groupid);
 		}
 	}
 
