@@ -5,14 +5,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- *
  * @author Iain Price
  */
-public class LLVector4 extends Unimplemented{
-    public float x=0;
-    public float y=0;
-    public float z=0;
-    public float t=0;
+public class LLVector4 extends Unimplemented {
+    public float x;
+    public float y;
+    public float z;
+    public float t;
+
     @Override
     public int size() {
         return 12;

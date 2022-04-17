@@ -24,7 +24,7 @@ import java.util.Set;
  */
 public class Packet {
     byte flags;
-    int sequence=0;
+    int sequence;
     public int getSequence() {
         return sequence;
     }

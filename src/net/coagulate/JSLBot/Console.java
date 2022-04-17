@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Console {
 
-    static boolean exit = false;
+    static boolean exit;
 
     public static void run(final JSLBot bot) {
         final Scanner scanner = new Scanner(System.in);

@@ -94,7 +94,7 @@ public class EventQueue extends Thread {
 	@Nonnull
 	public String getRegionName() { return caps().circuit().getRegionName(); }
 
-	private boolean shutdown=false;
+	private boolean shutdown;
 	public void shutdown() { shutdown=true; }
 	// ----- Internal Instance -----
 	@SuppressWarnings("BusyWait")

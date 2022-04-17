@@ -381,7 +381,7 @@ public final class Circuit extends Thread implements Closeable {
 		}
 		packetrate++;
 	}
-	private int errors=0;
+	private int errors;
 
 	/**
 	 * Produce a reliable sequence counter for packets

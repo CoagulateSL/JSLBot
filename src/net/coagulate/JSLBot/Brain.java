@@ -163,7 +163,7 @@ public class Brain {
 		}
 		callMaintenance();
 	}
-	private boolean idle=false;
+	private boolean idle;
 	/** Checks the bot isn't running a command, and has no queue */
 	public boolean isIdle() {
 		if (!idle) { return false; } // running a command

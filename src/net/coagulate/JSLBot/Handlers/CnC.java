@@ -569,7 +569,7 @@ public class CnC extends Handler {
 	}
 	*/
 
-	boolean hasCoffed=false;
+	boolean hasCoffed;
 	public void avatarAppearanceUDPDelayed(@Nonnull final UDPEvent event) {
 		if (hasCoffed) { return; }
 		@Nonnull final AvatarAppearance app = (AvatarAppearance) (event.body());

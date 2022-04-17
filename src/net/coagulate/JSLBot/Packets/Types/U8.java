@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
  * @author Iain Price
  */
 public class U8 extends Type {
-    public byte value=0;    
+    public byte value;
 
     public U8() {
     }

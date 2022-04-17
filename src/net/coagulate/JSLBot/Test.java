@@ -13,7 +13,7 @@ import java.util.Scanner;
  */
 public class Test {
 
-	private static boolean CONSOLE=false;
+	private static boolean CONSOLE;
 	// ---------- STATICS ----------
 
 	/**

@@ -8,29 +8,30 @@ import java.nio.ByteOrder;
  *
  * @author Iain Price
  */
-public class LLVector3 extends Type{
+public class LLVector3 extends Type {
 
     @Nonnull
     public static LLVector3 random() {
         @Nonnull final LLVector3 v = new LLVector3();
-        v.x=(float) (Math.random()*10.0-5.0);
-        v.y=(float) (Math.random()*10.0-5.0);
-        v.z=(float) (Math.random()*10.0-5.0);
+        v.x = (float) (Math.random() * 10.0 - 5.0);
+        v.y = (float) (Math.random() * 10.0 - 5.0);
+        v.z = (float) (Math.random() * 10.0 - 5.0);
         return v;
     }
-    public float x=0;
-    public float y=0;
-    public float z=0;
+
+    public float x;
+    public float y;
+    public float z;
 
     public LLVector3(@Nonnull final ByteBuffer buffer) {
         read(buffer);
     }
 
     public LLVector3(@Nonnull String pos) {
-        pos=pos.replaceAll("<","");
-        pos=pos.replaceAll(">","");
+        pos = pos.replaceAll("<", "");
+        pos = pos.replaceAll(">", "");
         @Nonnull final String[] comps = pos.split(",");
-        x=Float.parseFloat(comps[0]);
+        x = Float.parseFloat(comps[0]);
         y=Float.parseFloat(comps[1]);
         z=Float.parseFloat(comps[2]);
     }

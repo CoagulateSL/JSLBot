@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
  * @author Iain Price
  */
 public class F32 extends Type{
-    public float value=0;
+    public float value;
     public F32() {
     }
 

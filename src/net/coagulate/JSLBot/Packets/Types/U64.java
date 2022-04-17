@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
  * @author Iain Price
  */
 public class U64 extends Type {
-    public long value=0;
+    public long value;
     @Override
     public int size() {
         return 8;
