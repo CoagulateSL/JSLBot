@@ -14,7 +14,9 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     byte[] uuid=new byte[16];
     public LLUUID() {}
     public LLUUID(@Nullable String uuid) {
-        if (uuid==null || uuid.length()==0) { uuid="00000000000000000000000000000000"; }
+        if (uuid == null || uuid.isEmpty()) {
+            uuid = "00000000000000000000000000000000";
+        }
         uuid=uuid.replaceAll("-","");
         if (uuid.length()!=32) { throw new IllegalArgumentException("UID should be 32 chars long: "+uuid); }
         for(int i=0;i<=15;i++) {

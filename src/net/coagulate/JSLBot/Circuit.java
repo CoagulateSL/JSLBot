@@ -224,16 +224,17 @@ public final class Circuit extends Thread implements Closeable {
 					if (Debug.ACK) { log.finer("Exiting receive without event"); }
 				} // as requested, and we dont care
 				// timeout is just to make sure we get HERE \/ once in a while
-				if ((ackqueue.size()>0 && lastAck()>2000) || ackqueue.size()>32) {
-					if (Debug.ACK) { log.finer("Manually sending ACKs"); }
-					sendAck();
-				}
-				else {
+				if ((!ackqueue.isEmpty() && lastAck() > 2000) || ackqueue.size() > 32) {
 					if (Debug.ACK) {
-						log.finer("NOT sending any ACKs.  Q size is "+ackqueue.size()+" and lastAck is "+lastAck()+"ms");
+						log.finer("Manually sending ACKs");
+					}
+					sendAck();
+				} else {
+					if (Debug.ACK) {
+						log.finer("NOT sending any ACKs.  Q size is " + ackqueue.size() + " and lastAck is " + lastAck() + "ms");
 					}
 				}
-				if (lastMaintenance()>2500) {
+				if (lastMaintenance() > 2500) {
 					maintenance();
 				}
 			}
@@ -309,8 +310,8 @@ public final class Circuit extends Thread implements Closeable {
 
 		int acksize=0;
 		// acks are 4 bytes each plus a byte 'counter'
-		if (sending.size()>0) {
-			acksize=(4*sending.size())+1;
+		if (!sending.isEmpty()) {
+			acksize = (4 * sending.size()) + 1;
 			p.setAck(true);
 		}
 		// claim message+ack size
@@ -328,17 +329,17 @@ public final class Circuit extends Thread implements Closeable {
 			log.log(Level.WARNING,"Message size is {0} post ZeroCoding which is quite large",sending.size());
 		}
 		// IF sending acks, append them now (AFTER zerocoding)
-		if (sending.size()>0) {
-			@Nonnull final ByteBuffer append=ByteBuffer.allocate(transmit.length+(4*sending.size())+1);
+		if (!sending.isEmpty()) {
+			@Nonnull final ByteBuffer append = ByteBuffer.allocate(transmit.length + (4 * sending.size()) + 1);
 			append.put(transmit);
 			// append acks
-			for (final Integer i: sending) {
-				@Nonnull final U32BE acknumber=new U32BE(i); // yup, the appended ones are big endian.   but a PacketAck uses little endian in the body.  LL ;)
+			for (final Integer i : sending) {
+				@Nonnull final U32BE acknumber = new U32BE(i); // yup, the appended ones are big endian.   but a PacketAck uses little endian in the body.  LL ;)
 				acknumber.write(append);
 				ackedlist.append(i).append(" ");
 			} // breaks if >256 acks :P
 			// finally number of acks, apparently.
-			@Nonnull final U8 count=new U8(sending.size());
+			@Nonnull final U8 count = new U8(sending.size());
 			count.write(append);
 			lastacks=new Date();
 			if (Debug.ACK) { log.log(Level.FINEST,"Appended ACKS:{0}",ackedlist.toString()); }

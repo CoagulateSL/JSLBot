@@ -31,7 +31,7 @@ public class Avatars extends Handler {
         Collections.addAll(param, uuid.split(","));
         @Nonnull final StringBuilder output = new StringBuilder();
         for (@Nonnull final Map.Entry<String, String> entry : resolveUUIDStrings(param).entrySet()) {
-            if (output.length() > 0) {
+            if (!output.isEmpty()) {
                 output.append(" ");
             }
             output.append(entry.getKey()).append("=").append(entry.getValue());

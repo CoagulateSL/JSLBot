@@ -60,7 +60,7 @@ public class Inventory extends Handler implements Runnable {
 			catch (@Nonnull final IOException e) {
 				log.log(SEVERE,"Inventory download gave IO exception",e);
 			}
-			if (inventorytree.size()==0) {
+			if (inventorytree.isEmpty()) {
 				log.fine("Inventory download complete - there is no inventory (?)");
 				break;
 			}

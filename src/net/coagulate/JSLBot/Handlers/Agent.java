@@ -203,11 +203,11 @@ public class Agent extends Handler {
 
 	public void alertMessageUDPDelayed(@Nonnull final UDPEvent event) {
 		@Nonnull final AlertMessage a=(AlertMessage) event.body();
-		if (a.balertinfo.size()>0) {
+		if (!a.balertinfo.isEmpty()) {
 			// this is a sweeping assumption, however, without knowing the full list of possibilities, i.e. the server code, this seems reasonable :|
 			if (a.balertinfo.get(0).vmessage.toString().toLowerCase().contains("home")) {
-				if (reporthometo!=null) {
-					bot.im(reporthometo,a.balertdata.vmessage.toString());
+				if (reporthometo != null) {
+					bot.im(reporthometo, a.balertdata.vmessage.toString());
 				}
 			}
 		}

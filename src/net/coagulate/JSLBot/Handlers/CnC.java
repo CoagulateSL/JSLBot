@@ -424,8 +424,11 @@ public class CnC extends Handler {
 			@Nonnull final List<String> commands=new ArrayList<>(unsortedcommands);
 			Collections.sort(commands);
 			for (String acommand: commands) {
-				if (response.length()>0) { response.append(", "); }
-				else { response=new StringBuilder("\n"); }
+				if (!response.isEmpty()) {
+					response.append(", ");
+				} else {
+					response = new StringBuilder("\n");
+				}
 				acommand=acommand.substring(0,acommand.length()-"command".length());
 				response.append(acommand);
 			}
@@ -573,7 +576,7 @@ public class CnC extends Handler {
 	public void avatarAppearanceUDPDelayed(@Nonnull final UDPEvent event) {
 		if (hasCoffed) { return; }
 		@Nonnull final AvatarAppearance app = (AvatarAppearance) (event.body());
-		if (app.bappearancedata.size()==0) {
+		if (app.bappearancedata.isEmpty()) {
 			//System.out.println("Skipping no COF listed");
 			return;
 		}
