@@ -93,7 +93,7 @@ public class CnC extends Handler {
 					if (evacby == null || evacby.before(new Date())) { // if not evacuating or it was in the past
 						evacby = new Date(when.getTime() + 30000); // set to 30 seconds post evacuation so we dont do this more than once
 						@Nonnull final Map<String,String> params=new HashMap<>();
-						params.put("when",""+((int) (when.getTime()/1000)));
+						params.put("when", String.valueOf((int) (when.getTime() / 1000)));
 						@Nullable final CommandEvent evacuate=new CommandEvent(bot,event.region(),"evacuate",params,null);
 						evacuate.submit();
 					}

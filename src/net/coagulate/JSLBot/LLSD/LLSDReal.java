@@ -30,7 +30,9 @@ public class LLSDReal extends Atomic {
 
 	@Nonnull
 	@Override
-	public String toString() { return ""+value; }
+	public String toString() {
+		return String.valueOf(value);
+	}
 
 	public float get() { return value; }
 }

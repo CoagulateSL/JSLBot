@@ -105,7 +105,7 @@ public abstract class Block {
                     }
                     size += b.size();
                 } catch (@Nonnull final IllegalArgumentException | IllegalAccessException ex) {
-                    throw new IllegalArgumentException("Exception in block " + this.getClass().getSimpleName() + "", ex);
+                    throw new IllegalArgumentException("Exception in block " + this.getClass().getSimpleName(), ex);
                 }
                 if (debug) {
                     System.out.println("< Exit Block recursion: " + f.getType().getName());

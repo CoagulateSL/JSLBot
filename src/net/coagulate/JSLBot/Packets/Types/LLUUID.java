@@ -41,7 +41,9 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     @Nonnull
     private static String randomHexChar() {
         final int rand = ThreadLocalRandom.current().nextInt(16);
-        if (rand<10) { return ""+rand; }
+        if (rand < 10) {
+            return String.valueOf(rand);
+        }
         // lazy
         if (rand==10) { return "A"; }
         if (rand==11) { return "B"; }

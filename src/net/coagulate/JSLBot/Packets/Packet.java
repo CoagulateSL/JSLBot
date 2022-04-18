@@ -321,7 +321,7 @@ public class Packet {
         if (this.getReliable()) { dump+="[Reliable] "; }
         if (this.getResent()) { dump+="[Resent] "; }
         if (this.getAck()) { dump+="[Acks] "; }
-        dump+="#"+sequence+""+messageDump();
+        dump += "#" + sequence + messageDump();
         return dump+acks;
     }
     

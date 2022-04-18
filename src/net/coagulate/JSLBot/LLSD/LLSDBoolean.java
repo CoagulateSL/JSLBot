@@ -48,7 +48,9 @@ public class LLSDBoolean extends Atomic {
 
 	@Nonnull
 	@Override
-	public String toString() { return ""+value; }
+	public String toString() {
+		return String.valueOf(value);
+	}
 
 	public boolean get() { return value; }
 }

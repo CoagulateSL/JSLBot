@@ -135,7 +135,9 @@ public class Regions extends Handler {
 				}
 			}
 		}
-		if (region.getResponse(reqid)!=null) { return region.getResponse(reqid)+""; }
+		if (region.getResponse(reqid) != null) {
+			return String.valueOf(region.getResponse(reqid));
+		}
 		return "";
 	}
 
