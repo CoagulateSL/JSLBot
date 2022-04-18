@@ -273,7 +273,7 @@ public abstract class Block {
             }
             ret.append(o).append("\n");
         } catch (@Nonnull final NullPointerException | IllegalAccessException | IllegalArgumentException e) {
-            ret.append(e.toString());
+            ret.append(e);
         }
         return ret.toString();
     }
