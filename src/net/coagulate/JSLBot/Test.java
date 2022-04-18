@@ -29,29 +29,30 @@ public class Test {
 		// 2) alternatively you can just make a configuration for each bot from scratch, each in its own store or file.
 		// a lot depends on your backing store, the file provider can serve different files to different bots via instansiation,
 		// or separate namespaces of one file to separate bots, via recursive instansiation (see Configuration's constructors)
-		final String CONFIGFILE;
-		if (args.length>0) { CONFIGFILE=args[0]; }
-		else {
-			@Nonnull final Scanner in=new Scanner(System.in);
+		final String configFile;
+		if (args.length > 0) {
+			configFile = args[0];
+		} else {
+			@Nonnull final Scanner in = new Scanner(System.in);
 			System.out.print("Name of config file: ");
-			CONFIGFILE=in.nextLine();
+			configFile = in.nextLine();
 		}
 		for (final String argument : args) {
-            if ("--console".equalsIgnoreCase(argument)) {
+			if ("--console".equalsIgnoreCase(argument)) {
 				console = true;
 				System.out.println("Enabling console command mode");
 			}
 		}
-		if (CONFIGFILE == null) {
+		if (configFile == null) {
 			throw new NullPointerException("You must supply a configuration file name");
 		}
-		if (CONFIGFILE.isBlank()) {
+		if (configFile.isBlank()) {
 			throw new AssertionError("You must supply a file name so that we can create a configuration file!");
 		}
-		if (!(new File(CONFIGFILE).exists())) {
-			initConfig(CONFIGFILE);
+		if (!(new File(configFile).exists())) {
+			initConfig(configFile);
 		}
-		@Nonnull final Configuration config = new FileBasedConfiguration(CONFIGFILE);
+		@Nonnull final Configuration config = new FileBasedConfiguration(configFile);
 		//System.out.println("===== Configuration file loaded =====\n"+config.dump());
 		@Nonnull final JSLBot bot = new JSLBot(config);
 		bot.alwaysReconnect = true; // likely this will be cleaned up, but for testing...

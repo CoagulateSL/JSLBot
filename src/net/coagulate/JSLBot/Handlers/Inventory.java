@@ -271,31 +271,31 @@ public class Inventory extends Handler implements Runnable {
 			@Nonnull final LLSDArray inneritems=(LLSDArray) innermap.get("items");
 			if (debugqueries) { System.out.println("Inner items:"+inneritems.get().size()); }
 			for (final Atomic itemmap: inneritems.get()) {
-				@Nonnull final LLSDMap item=(LLSDMap) itemmap;
-				final LLUUID item_id=((LLSDUUID) item.get("item_id")).toLLUUID();
-				final LLUUID parent_id=((LLSDUUID) item.get("parent_id")).toLLUUID();
-				final String name=item.get("name").toString();
-				final LLUUID asset_id=((LLSDUUID) item.get("asset_id")).toLLUUID();
-				final int type=((LLSDInteger) (item.get("type"))).get();
-				final int inv_type=((LLSDInteger) (item.get("inv_type"))).get();
-				final String desc=item.get("desc").toString();
-				processItem(item_id,parent_id,name,asset_id,type,inv_type,desc);
+				@Nonnull final LLSDMap item = (LLSDMap) itemmap;
+				final LLUUID itemId = ((LLSDUUID) item.get("item_id")).toLLUUID();
+				final LLUUID parentId = ((LLSDUUID) item.get("parent_id")).toLLUUID();
+				final String name = item.get("name").toString();
+				final LLUUID assetId = ((LLSDUUID) item.get("asset_id")).toLLUUID();
+				final int type = ((LLSDInteger) (item.get("type"))).get();
+				final int invType = ((LLSDInteger) (item.get("inv_type"))).get();
+				final String desc = item.get("desc").toString();
+				processItem(itemId, parentId, name, assetId, type, invType, desc);
 			}
 			@Nonnull final LLSDArray innercategories=(LLSDArray) innermap.get("categories");
 			if (debugqueries) { System.out.println("Inner categories:"+innercategories.get().size()); }
 			for (final Atomic categorymap: innercategories.get()) {
-				@Nonnull final LLSDMap category=(LLSDMap) categorymap;
+				@Nonnull final LLSDMap category = (LLSDMap) categorymap;
 				//System.out.println("---------------");
 				//for (String s:item.keys()) { System.out.println(s+"="+item.get(s).toString()); }
 				//System.out.println(category.toXML());
 				query.add(new LLUUID(category.get("category_id").toString()));
-				final int type_default=((LLSDInteger) (category.get("type_default"))).get();
-				final LLUUID agent_id=((LLSDUUID) (category.get("agent_id"))).toLLUUID();
-				final LLUUID category_id=((LLSDUUID) (category.get("category_id"))).toLLUUID();
-				final LLUUID parent_id=((LLSDUUID) (category.get("parent_id"))).toLLUUID();
-				final String name=category.get("name").toString();
-				final int version=((LLSDInteger) (category.get("version"))).get();
-				processCategory(type_default,agent_id,category_id,parent_id,name,version);
+				final int typeDefault = ((LLSDInteger) (category.get("type_default"))).get();
+				final LLUUID agentId = ((LLSDUUID) (category.get("agent_id"))).toLLUUID();
+				final LLUUID categoryId = ((LLSDUUID) (category.get("category_id"))).toLLUUID();
+				final LLUUID parentId = ((LLSDUUID) (category.get("parent_id"))).toLLUUID();
+				final String name = category.get("name").toString();
+				final int version = ((LLSDInteger) (category.get("version"))).get();
+				processCategory(typeDefault, agentId, categoryId, parentId, name, version);
 			}
 		}
 		if (query.isEmpty()) {
