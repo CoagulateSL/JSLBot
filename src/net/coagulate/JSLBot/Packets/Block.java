@@ -78,8 +78,7 @@ public abstract class Block {
             }
         }
         @Nonnull final List<Field> result = new ArrayList<>();
-        @Nonnull final List<Integer> sequence = new ArrayList<>();
-        sequence.addAll(map.keySet());
+        @Nonnull final List<Integer> sequence = new ArrayList<>(map.keySet());
         Collections.sort(sequence);
         for (final Integer i : sequence) {
             result.add(map.get(i));
