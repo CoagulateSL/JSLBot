@@ -58,7 +58,7 @@ public class JSLBot extends Thread {
 	private boolean connected;
 	@Nullable
 	private Date lastagentupdate;
-	private float drawdistance=(float) 0.001;
+	private float drawdistance = 0.001f;
 	/**
 	 * Send this generally useful message down the primary UDP circuit
 	 */
@@ -294,8 +294,8 @@ public class JSLBot extends Thread {
 			p.bagentdata.vcameracenter=new LLVector3(192,144,9999);
 			p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
 			p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
-			p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
-			p.bagentdata.vfar=new F32((float) 0.001);
+			p.bagentdata.vcameraupaxis = new LLVector3(0, 0, 1);
+			p.bagentdata.vfar = new F32(0.001f);
 		}
 		else {
 			p.bagentdata.vcameracenter=camera;
@@ -608,9 +608,11 @@ public class JSLBot extends Thread {
 		send(fov,true);
 	}
 
-	public void setMaxFOV() { setFOV((float) (Math.PI)); }
+	public void setMaxFOV() { setFOV((float) (Math.PI));
+	}
 
-	public void setMinFOV() { setFOV((float) 0.01); }
+	public void setMinFOV() {
+		setFOV(0.01f); }
 
 	public float drawDistance() { return drawdistance; }
 
