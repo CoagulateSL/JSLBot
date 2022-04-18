@@ -24,7 +24,7 @@ public class Avatars extends Handler {
     @JSLBot.CmdHelp(description = "Look up an Avatar's profile from UUID")
     public String resolveUUIDCommand(final CommandEvent command,
                                      @Nullable @JSLBot.Param(name = "uuid", description = "UUID of Avatar to look up, or comma separated list of UUIDs") final String uuid) {
-        if (uuid == null || "".equals(uuid)) {
+        if (uuid == null || uuid.isEmpty()) {
             return "No UUID parameter passed.";
         }
         @Nonnull final List<String> param = new ArrayList<>();

@@ -36,7 +36,9 @@ public class Regions extends Handler {
 	@CmdHelp(description="Look up a region handle from a region name")
 	public String regionLookupCommand(final CommandEvent command,
 	                                  @Nullable @Param(name="name",description="Name of region to lookup") final String name) {
-		if (name==null || "".equals(name)) { return "No NAME parameter passed."; }
+		if (name == null || name.isEmpty()) {
+			return "No NAME parameter passed.";
+		}
 		// check cache
 		@Nullable Long cached=Global.regionHandle(name);
 		if (cached!=null) { return Long.toUnsignedString(cached); }

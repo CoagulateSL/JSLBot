@@ -66,7 +66,9 @@ public class FileBasedConfiguration extends Configuration {
 	public String dump() {
 		@Nonnull String response="";
 		for (@Nonnull final Map.Entry<String,String> entry: kvstore.entrySet()) {
-			if (!"".equals(response)) { response+="\n"; }
+			if (!response.isEmpty()) {
+				response += "\n";
+			}
 			response+=entry.getKey()+"="+entry.getValue();
 		}
 		return response;

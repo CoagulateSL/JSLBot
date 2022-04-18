@@ -706,7 +706,9 @@ public class JSLBot extends Thread {
 		// load from config and call 'setup'
 		config=conf;
 		@Nullable String location=config.get("loginlocation");
-		if (location==null || "".equals(location)) { location="home"; }  // default to home
+		if (location == null || location.isEmpty()) {
+			location = "home";
+		}  // default to home
 		//String potentialmaster=config.get("owner");
 
 		@Nonnull final String handlerlist=config.get("handlers","");

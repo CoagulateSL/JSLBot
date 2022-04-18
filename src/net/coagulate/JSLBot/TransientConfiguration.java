@@ -40,7 +40,9 @@ public class TransientConfiguration extends Configuration {
 	public String dump() {
 		@Nonnull String response="";
 		for (@Nonnull final Map.Entry<String,String> entry: kv.entrySet()) {
-			if (!"".equals(response)) { response+="\n"; }
+			if (!response.isEmpty()) {
+				response += "\n";
+			}
 			response+=entry.getKey()+"="+entry.getValue();
 		}
 		return response;

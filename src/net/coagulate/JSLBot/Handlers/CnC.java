@@ -595,17 +595,18 @@ public class CnC extends Handler {
 		String keyword="";
 		String parameter="";
 		for (int i=index;i<parts.length;i++) {
-			if ("".equals(keyword)) {
-				keyword=parts[i];
-			}
-			else {
-				if (!"".equals(parameter)) { parameter+=" "; }
-				parameter+=parts[i];
+			if (keyword != null && keyword.isEmpty()) {
+				keyword = parts[i];
+			} else {
+				if (!parameter.isEmpty()) {
+					parameter += " ";
+				}
+				parameter += parts[i];
 				if ((!parameter.startsWith("\"")) || (parameter.startsWith("\"") && parameter.endsWith("\""))) {
 					if (parameter.startsWith("\"")) {
-						parameter=parameter.substring(1,parameter.length()-1);
+						parameter = parameter.substring(1, parameter.length() - 1);
 					}
-					paramsout1.put(keyword,parameter);
+					paramsout1.put(keyword, parameter);
 					keyword="";
 					parameter="";
 				}
@@ -643,8 +644,8 @@ public class CnC extends Handler {
 			log.log(WARNING,"CnC Subcommand exceptioned:"+e,e);
 			response="Exception:"+e;
 		}
-		if (!"".equals(response)) {
-			if (source==null) {
+		if (response == null || !response.isEmpty()) {
+			if (source == null) {
 				System.out.println(">> " + response);
 			} else {
 				if (bot.quitting()) {
