@@ -25,7 +25,7 @@ public class Console {
         }
     }
 
-    private static void execute(final JSLBot bot, final String line) throws Exception {
+    private static void execute(final JSLBot bot, final String line) {
         ((CnC) (bot.brain().getHandler("CnC"))).
                 runCommands("Local Console Input", null, line, null, true);
     }
