@@ -153,15 +153,11 @@ public class Packet {
         out.putInt(sequence); // sequence number
         out.put((byte)0); // extra  header byte count
         switch (getFrequency()) {
-            case Frequency.HIGH:
-                (new U8(getId())).write(out); break;
-            case Frequency.MEDIUM:
-                (new U16BE((short)(0xff00+getId()))).write(out); break;
-            case Frequency.LOW:
-                (new U32BE(0xffff0000+getId())).write(out); break;
-            case Frequency.FIXED:
-                (new U32BE(getId())).write(out); break;
-            default: throw new IllegalArgumentException("Frequency invalid "+getFrequency());
+            case Frequency.HIGH -> (new U8(getId())).write(out);
+            case Frequency.MEDIUM -> (new U16BE((short) (0xff00 + getId()))).write(out);
+            case Frequency.LOW -> (new U32BE(0xffff0000 + getId())).write(out);
+            case Frequency.FIXED -> (new U32BE(getId())).write(out);
+            default -> throw new IllegalArgumentException("Frequency invalid " + getFrequency());
         }
         messageNullable().writeBytes(out);
     }

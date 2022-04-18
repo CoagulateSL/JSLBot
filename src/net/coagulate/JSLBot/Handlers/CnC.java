@@ -110,85 +110,50 @@ public class CnC extends Handler {
 	}
 
 	public void chatFromSimulatorUDPDelayed(@Nonnull final UDPEvent event) {
-		@Nonnull final ChatFromSimulator msg=(ChatFromSimulator) event.body();
-		@Nonnull final String from=msg.bchatdata.vfromname.toString();
-		@Nonnull final LLUUID source=msg.bchatdata.vsourceid;
-		@Nonnull final LLUUID owner=msg.bchatdata.vownerid;
-		final int sourcetypenum=msg.bchatdata.vsourcetype.integer();
-		final int chattypenum=msg.bchatdata.vchattype.integer();
-		final int audiblenum=msg.bchatdata.vaudible.integer();
-		@Nonnull final LLVector3 pos=msg.bchatdata.vposition;
-		@Nonnull final String message=msg.bchatdata.vmessage.toString();
-		@Nonnull final String sourcetype;
-		switch (sourcetypenum) {
-			case 0:
-				sourcetype="SYSTEM";
-				break;
-			case 1:
-				sourcetype="Agent";
-				break;
-			case 2:
-				sourcetype="Object";
-				break;
-			default:
-				sourcetype="Unknown#"+sourcetypenum;
-				break;
-		}
-		@Nonnull final String audible;
-		switch (audiblenum) {
-			case -1:
-				audible="Inaudible";
-				break;
-			case 0:
-				audible="Quiet";
-				break;
-			case 1:
-				audible="Normal";
-				break;
-			default:
-				audible="Unknown#"+audiblenum;
-				break;
-		}
-		@Nonnull final String chattype;
-		switch (chattypenum) {
-			case 0:
-				chattype="Whisper";
-				break;
-			case 1:
-				chattype="Normal";
-				break;
-			case 2:
-				chattype="Shout";
-				break;
-			case 3:
-				chattype="Say??";
-				break;
-			case 4:
-				chattype="StartTyping";
-				break;
-			case 5:
-				chattype="StopTyping";
-				break;
-			case 6:
-				chattype="Debug";
-				break;
-			case 8:
-				chattype="OwnerSay";
-				break;
-			default:
-				chattype="Unknown#"+chattypenum;
-				break;
-		}
-		if (chattypenum!=4 && chattypenum!=5) {
-			@Nonnull String ownedby="";
+		@Nonnull final ChatFromSimulator msg = (ChatFromSimulator) event.body();
+		@Nonnull final String from = msg.bchatdata.vfromname.toString();
+		@Nonnull final LLUUID source = msg.bchatdata.vsourceid;
+		@Nonnull final LLUUID owner = msg.bchatdata.vownerid;
+		final int sourcetypenum = msg.bchatdata.vsourcetype.integer();
+		final int chattypenum = msg.bchatdata.vchattype.integer();
+		final int audiblenum = msg.bchatdata.vaudible.integer();
+		@Nonnull final LLVector3 pos = msg.bchatdata.vposition;
+		@Nonnull final String message = msg.bchatdata.vmessage.toString();
+		@Nonnull final String sourcetype = switch (sourcetypenum) {
+			case 0 -> "SYSTEM";
+			case 1 -> "Agent";
+			case 2 -> "Object";
+			default -> "Unknown#" + sourcetypenum;
+		};
+		@Nonnull final String audible = switch (audiblenum) {
+			case -1 -> "Inaudible";
+			case 0 -> "Quiet";
+			case 1 -> "Normal";
+			default -> "Unknown#" + audiblenum;
+		};
+		@Nonnull final String chattype = switch (chattypenum) {
+			case 0 -> "Whisper";
+			case 1 -> "Normal";
+			case 2 -> "Shout";
+			case 3 -> "Say??";
+			case 4 -> "StartTyping";
+			case 5 -> "StopTyping";
+			case 6 -> "Debug";
+			case 8 -> "OwnerSay";
+			default -> "Unknown#" + chattypenum;
+		};
+		if (chattypenum != 4 && chattypenum != 5) {
+			@Nonnull String ownedby = "";
 			if (!source.equals(owner)) {
-				ownedby=" (owner:"+bot.getUserName(owner)+")";
+				ownedby = " (owner:" + bot.getUserName(owner) + ")";
 			}
-			@Nonnull String volume="";
-			if (audiblenum!=1) { volume="vol:"+audible+" ";}
-			log.fine("Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
+			@Nonnull String volume = "";
+			if (audiblenum != 1) {
+				volume = "vol:" + audible + " ";
+			}
+			log.fine("Chat (" + chattype + ")" + volume + " " + sourcetype + ":<" + from + ">" + ownedby + ":: " + message);
 		}
-		@Nonnull final String prefix=config.get("publiccommandprefix","*");
+		@Nonnull final String prefix = config.get("publiccommandprefix", "*");
 		runCommands(from,source,message,prefix,false);
 	}
 
