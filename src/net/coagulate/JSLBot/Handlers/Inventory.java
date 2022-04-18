@@ -162,10 +162,9 @@ public class Inventory extends Handler implements Runnable {
 		im.bmessageblock.vid=LLUUID.random();
         final byte[] binary = new byte[17];
 		binary[0]=(byte)(item.type & 0xff);
-		System.arraycopy(item.id.content().array(),0,binary,1,16);
-        final Variable2 sendme = new Variable2(binary);
-		im.bmessageblock.vbinarybucket=sendme;
-		bot.send(im,true);
+		System.arraycopy(item.id.content().array(), 0, binary, 1, 16);
+		im.bmessageblock.vbinarybucket = new Variable2(binary);
+		bot.send(im, true);
 	}
 
 	@Nonnull
@@ -193,8 +192,7 @@ public class Inventory extends Handler implements Runnable {
                 if (entry.getKey().equals(uuid)) {
                     final InventoryAtom atom = entry.getValue();
                     if (atom instanceof InventoryItem) {
-                        final InventoryItem item = (InventoryItem) atom;
-                        return item;
+						return (InventoryItem) atom;
                     }
                 }
             }
