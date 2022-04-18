@@ -161,7 +161,7 @@ public final class Circuit extends Thread implements Closeable {
 		// wait for the 'outstanding acks' to be updated (meaning our reliable UseCircuitCode is acked)
 		try { synchronized (inflight) { inflight.wait(5000); } }
 		catch (@Nonnull final InterruptedException ex) {
-			throw new IOException("Failed to get UseCircuitCode Ack");
+			throw new IOException("Failed to get UseCircuitCode Ack", ex);
 		}
 		if (Debug.CIRCUIT) { log.finer("Outstanding ACKS: "+inflight.size()); }
 		if (!inflight.isEmpty()) {

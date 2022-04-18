@@ -56,7 +56,7 @@ public abstract class Block {
         } catch (final IllegalAccessException ex) {
             throw new IllegalArgumentException("Unable to size supposed LL Type " + this.getClass().getName() + " field " + f.getName() + " of type " + f.getType().getName(), ex);
         } catch (final NullPointerException e) {
-            throw new IllegalArgumentException("Block assembly failure " + f.getName() + " is null");
+            throw new IllegalArgumentException("Block assembly failure " + f.getName() + " is null", e);
         }
     }
     // gets the block's data fields, in order

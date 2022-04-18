@@ -100,7 +100,7 @@ public class Test {
 			oos.writeObject(m);
 		}
 		catch (@Nonnull final FileNotFoundException ex) {
-			throw new AssertionError("File not found creating file (incorrect directory??");
+			throw new AssertionError("File not found creating file (incorrect directory??", ex);
 		}
 		catch (@Nonnull final IOException ex) {
 			throw new AssertionError("Unable to write configuration file",ex);

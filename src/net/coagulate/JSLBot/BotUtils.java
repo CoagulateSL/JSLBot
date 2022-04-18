@@ -85,7 +85,7 @@ public abstract class BotUtils {
 			md5=MessageDigest.getInstance("MD5");
 		}
 		catch (@Nonnull final NoSuchAlgorithmException ex) {
-			throw new AssertionError("MD5 hashing is not supported on this platform?");
+			throw new AssertionError("MD5 hashing is not supported on this platform?", ex);
 		}
 		final byte[] digest;
 		digest=md5.digest(password.getBytes(StandardCharsets.UTF_8));
