@@ -306,15 +306,15 @@ public class Packet {
     
     @Nonnull
     public String dump() {
-        @Nonnull String acks="";
+        @Nonnull StringBuilder acks= new StringBuilder();
         if (!appendedacks.isEmpty()) {
-            acks=" [ACK:";
+            acks = new StringBuilder(" [ACK:");
             @Nonnull String comma = "";
             for (final Integer i : appendedacks) {
-                acks=acks+comma+i;
+                acks.append(comma).append(i);
                 comma=",";
             }
-            acks+="]";
+            acks.append("]");
         }
         @Nonnull String dump=getName()+":";
         if (this.getZeroCode()) { dump+="[Zero] "; }

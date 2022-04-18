@@ -245,36 +245,36 @@ public abstract class Block {
     }
 
     public String dump() {
-        String ret = "";
-        ret += " [==" + this.getClass().getSimpleName() + "==]\n";
+        StringBuilder ret = new StringBuilder();
+        ret.append(" [==").append(this.getClass().getSimpleName()).append("==]\n");
         for (@Nonnull final Field f : getFields()) {
-            ret += dumpField(f);
+            ret.append(dumpField(f));
         }
-        return ret;
+        return ret.toString();
     }
 
     private String dumpField(@Nonnull final Field f) {
-        String ret = "";
-        ret += "   field: " + f.getName() + "[" + f.getType().getSimpleName() + "]=";
+        StringBuilder ret = new StringBuilder();
+        ret.append("   field: ").append(f.getName()).append("[").append(f.getType().getSimpleName()).append("]=");
         try {
             final Object o = f.get(this);
             if (Block.class.isAssignableFrom(o.getClass())) {
                 @Nonnull final Block b = (Block) o;
-                ret = ret + b.dump();
-                return ret;
+                ret.append(b.dump());
+                return ret.toString();
             }
             if (List.class.isAssignableFrom(o.getClass())) {
                 @Nonnull @SuppressWarnings("unchecked") final List<Block> l = (List<Block>) o;
                 int counter = 0;
                 for (@Nonnull final Block b : l) {
-                    ret = ret + "{ #" + counter + " }  " + b.dump();
+                    ret.append("{ #").append(counter).append(" }  ").append(b.dump());
                     counter++;
                 }
             }
-            ret += o + "\n";
+            ret.append(o).append("\n");
         } catch (@Nonnull final NullPointerException | IllegalAccessException | IllegalArgumentException e) {
-            ret += e.toString();
+            ret.append(e.toString());
         }
-        return ret;
+        return ret.toString();
     }
 }

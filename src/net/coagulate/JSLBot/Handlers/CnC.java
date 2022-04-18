@@ -594,22 +594,22 @@ public class CnC extends Handler {
 		final String command=parts[0];
 		index++;
 		String keyword="";
-		String parameter="";
+		StringBuilder parameter= new StringBuilder();
 		for (int i=index;i<parts.length;i++) {
 			if (keyword != null && keyword.isEmpty()) {
 				keyword = parts[i];
 			} else {
-				if (!parameter.isEmpty()) {
-					parameter += " ";
+				if (parameter.length() > 0) {
+					parameter.append(" ");
 				}
-				parameter += parts[i];
-				if ((!parameter.startsWith("\"")) || (parameter.startsWith("\"") && parameter.endsWith("\""))) {
-					if (parameter.startsWith("\"")) {
-						parameter = parameter.substring(1, parameter.length() - 1);
+				parameter.append(parts[i]);
+				if ((!parameter.toString().startsWith("\"")) || (parameter.toString().startsWith("\"") && parameter.toString().endsWith("\""))) {
+					if (parameter.toString().startsWith("\"")) {
+						parameter = new StringBuilder(parameter.substring(1, parameter.length() - 1));
 					}
-					paramsout1.put(keyword, parameter);
+					paramsout1.put(keyword, parameter.toString());
 					keyword="";
-					parameter="";
+					parameter = new StringBuilder();
 				}
 			}
 		}

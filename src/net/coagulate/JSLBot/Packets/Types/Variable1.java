@@ -56,13 +56,13 @@ public class Variable1 extends Type {
     }
     @Nonnull
     public String toString() {
-        @Nonnull String str="";
+        @Nonnull StringBuilder str= new StringBuilder();
         for (final byte b : value) {
             if (b > 0) {
-                str = str + (char) b;
+                str.append((char) b);
             }
         }
-        return str;
+        return str.toString();
     }
     
 }

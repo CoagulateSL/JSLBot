@@ -89,7 +89,7 @@ public class Inventory extends Handler implements Runnable {
             if (!inventorycomplete) {
                 return "2 - Inventory download is not yet complete";
             }
-            String output = "";
+            StringBuilder output = new StringBuilder();
             if (name == null) {
                 return "1 - No search name supplied";
             }
@@ -100,17 +100,17 @@ public class Inventory extends Handler implements Runnable {
 						System.out.println("An item has a null name (?)");
 					}
 					if (item.name.toLowerCase().contains(name.toLowerCase())) {
-						if (!output.isBlank()) {
-							output = output + "\n";
+						if (!output.toString().isBlank()) {
+							output.append("\n");
 						}
-						output = output + entry.getKey().toUUIDString() + " : " + item.name;
+						output.append(entry.getKey().toUUIDString()).append(" : ").append(item.name);
 					}
 				}
             }
-            if (output.isBlank()) {
-                output = "1 - No items found containing that substring";
+            if (output.toString().isBlank()) {
+                output = new StringBuilder("1 - No items found containing that substring");
             }
-			return output;
+			return output.toString();
 		}
 	}
 	@Nonnull @CmdHelp(description = "Send an inventory item to a recipient")
