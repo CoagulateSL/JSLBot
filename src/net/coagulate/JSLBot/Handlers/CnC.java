@@ -67,9 +67,9 @@ public class CnC extends Handler {
 		final String region=msg.get("NAME").toString();
 		long shutdown=new Date().getTime();
 		if (msg.containsKey("MINUTES")) {
-			shutdown=shutdown+((Integer.parseInt(msg.get("MINUTES").toString()))*1000*60);
+			shutdown=shutdown+((long) (Integer.parseInt(msg.get("MINUTES").toString())) *1000*60);
 		}
-		if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))*1000); }
+		if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))* 1000L); }
 		return new Date(shutdown);
 	}
 

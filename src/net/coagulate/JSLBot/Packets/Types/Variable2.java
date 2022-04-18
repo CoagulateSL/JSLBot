@@ -43,7 +43,7 @@ public class Variable2 extends Type {
     public void read(@Nonnull final ByteBuffer in) {
         @Nonnull final U16 length = new U16();
         length.read(in);
-        final int len = ((int) (length.value)) & 0xffff;
+        final int len = (length.value) & 0xffff;
         value = new byte[len];
         for (int i = 0; i < len; i++) {
             value[i] = in.get();

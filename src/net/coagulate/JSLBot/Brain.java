@@ -217,7 +217,7 @@ public class Brain {
 			throw new AssertionError("How is oldest null at this point?  if null we should have hit 'launched less than 5 times'");
 		}
 		final long ago=new Date().getTime()-oldest.getTime();
-		final int secondsago=(int) (ago/1000f);
+		final int secondsago=(int) (ago/ 1000.0f);
 		log.info("Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
 		if (ago<(Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS)) {
 			log.severe("Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");

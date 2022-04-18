@@ -43,6 +43,6 @@ public class U8 extends Type {
     }
 
     public int integer() {
-        return ((int)value)&0xff;
+        return value &0xff;
     }
 }

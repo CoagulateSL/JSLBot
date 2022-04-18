@@ -108,7 +108,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
         long value = 0;
         for (int i = 0; i < uuid.length; i++)
         {
-           value += ((long) uuid[i] & 0xffL) << (8 * i);
+           value += (uuid[i] & 0xffL) << (8 * i);
         }
         return value;
     }

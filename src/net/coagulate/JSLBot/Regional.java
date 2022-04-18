@@ -158,7 +158,7 @@ public class Regional {
 		@Nonnull final StringBuilder resp=new StringBuilder();
 		for (@Nonnull final Map.Entry<Byte,Integer> entry: sizes.entrySet()) {
 			resp.append("\n");
-			resp.append("#byeid#").append(((int) (byte) entry.getKey())&0xff);
+			resp.append("#byeid#").append((byte) entry.getKey() &0xff);
 			resp.append(" ").append(entry.getValue()).append("m2");
 			totalsize+=entry.getValue();
 		}
