@@ -8,10 +8,10 @@ import java.nio.ByteBuffer;
  * @author Iain Price
  */
 public abstract class Type {
-    public Type() {
+    protected Type() {
     }
 
-    public Type(@Nonnull final ByteBuffer in) {
+    protected Type(@Nonnull final ByteBuffer in) {
         this.read(in);
     }
 
