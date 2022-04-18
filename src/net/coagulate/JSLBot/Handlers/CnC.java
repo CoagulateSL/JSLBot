@@ -599,7 +599,7 @@ public class CnC extends Handler {
 			if (keyword != null && keyword.isEmpty()) {
 				keyword = parts[i];
 			} else {
-				if (parameter.length() > 0) {
+				if (!parameter.isEmpty()) {
 					parameter.append(" ");
 				}
 				parameter.append(parts[i]);

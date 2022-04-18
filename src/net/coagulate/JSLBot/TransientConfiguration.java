@@ -42,7 +42,7 @@ public class TransientConfiguration extends Configuration {
 	public String dump() {
 		@Nonnull final StringBuilder response= new StringBuilder();
 		for (@Nonnull final Map.Entry<String,String> entry: kv.entrySet()) {
-			if (response.length() > 0) {
+			if (!response.isEmpty()) {
 				response.append("\n");
 			}
 			response.append(entry.getKey()).append("=").append(entry.getValue());
