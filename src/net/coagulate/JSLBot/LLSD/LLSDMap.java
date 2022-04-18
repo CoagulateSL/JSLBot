@@ -34,17 +34,17 @@ public class LLSDMap extends Container {
 
 
 	// ---------- INSTANCE ----------
-	@Nonnull
-	@Override
-	public String toXML(final String prefix) {
-		@Nonnull final StringBuilder resp=new StringBuilder(prefix+"<map>\n");
-		for (@Nonnull final Map.Entry<String,Atomic> entry: data.entrySet()) {
-			resp.append(prefix).append("<key>").append(entry.getKey()).append("</key>\n");
-			resp.append(entry.getValue().toXML(prefix+"  "));
-		}
-		resp.append(prefix).append("</map>\n");
-		return resp.toString();
-	}
+    @Nonnull
+    @Override
+    public String toXML(final String lineprefix) {
+        @Nonnull final StringBuilder resp = new StringBuilder(lineprefix + "<map>\n");
+        for (@Nonnull final Map.Entry<String, Atomic> entry : data.entrySet()) {
+            resp.append(lineprefix).append("<key>").append(entry.getKey()).append("</key>\n");
+            resp.append(entry.getValue().toXML(lineprefix + "  "));
+        }
+        resp.append(lineprefix).append("</map>\n");
+        return resp.toString();
+    }
 
 	@Nonnull
 	public Set<String> keys() { return data.keySet(); }

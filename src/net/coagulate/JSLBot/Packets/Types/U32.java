@@ -14,12 +14,12 @@ public class U32 extends Type {
     public U32() {
     }
 
-    public U32(final int v) {
-        value = v;
+    public U32(final int value) {
+        this.value = value;
     }
 
-    public U32(final int v, final ByteOrder byteorder) {
-        value = v;
+    public U32(final int value, final ByteOrder byteorder) {
+        this.value = value;
         this.byteorder = byteorder;
     }
 

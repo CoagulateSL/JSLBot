@@ -22,7 +22,9 @@ import static net.coagulate.JSLBot.Handlers.Objects.CompressedFlags.*;
 public class Objects extends Handler {
 
 	public Objects(@Nonnull final JSLBot bot,
-	               final Configuration c) { super(bot,c); }
+                   final Configuration config) {
+        super(bot, config);
+    }
 
 	// ---------- INSTANCE ----------
 	public void objectUpdateUDPImmediate(@Nonnull final UDPEvent event) {

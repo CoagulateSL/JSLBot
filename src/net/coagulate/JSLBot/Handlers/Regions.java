@@ -30,7 +30,9 @@ public class Regions extends Handler {
 	private final Object parcelpropertiessignal=new Object();
 
 	public Regions(@Nonnull final JSLBot bot,
-	               final Configuration conf) { super(bot,conf); }
+                   final Configuration config) {
+        super(bot, config);
+    }
 
 	// ---------- INSTANCE ----------
 	@CmdHelp(description="Look up a region handle from a region name")

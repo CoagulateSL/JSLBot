@@ -19,10 +19,10 @@ public class Health extends Handler {
 	float health;
 
 	public Health(@Nonnull final JSLBot bot,
-	              @Nonnull final Configuration c) {
-		super(bot,c);
-		verbose=Boolean.parseBoolean(c.get("verbose","false"));
-	}
+                  @Nonnull final Configuration config) {
+        super(bot, config);
+        verbose = Boolean.parseBoolean(config.get("verbose", "false"));
+    }
 
 	// ---------- INSTANCE ----------
 	public void healthMessageUDPImmediate(@Nonnull final UDPEvent event) {

@@ -86,8 +86,8 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     }
 
     @Override
-    public boolean equals(final Object t) {
-        if (!(t instanceof @Nonnull final LLUUID l)) {
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof @Nonnull final LLUUID l)) {
             System.out.println("REALLY ODD COMPARISON TO A UUID");
             return false;
         }

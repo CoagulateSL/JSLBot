@@ -86,27 +86,27 @@ public class LLCATruster implements X509TrustManager, HostnameVerifier {
 	}
 
 	// ---------- INSTANCE ----------
-	@Override
-	public boolean verify(final String string,
-	                      @Nonnull final SSLSession ssls) {
-		//throw new AssertionError("Verify for "+string+" called with session "+ssls);
-		return true;
-	}
+    @Override
+    public boolean verify(final String hostname,
+                          @Nonnull final SSLSession session) {
+        //throw new AssertionError("Verify for "+string+" called with session "+ssls);
+        return true;
+    }
 
-	@Override
-	public void checkClientTrusted(final X509Certificate[] xcs,
-	                               final String string) {
-		throw new AssertionError("CheckClientTrusted called in LLCATruster");
-	}
+    @Override
+    public void checkClientTrusted(final X509Certificate[] chain,
+                                   final String authType) {
+        throw new AssertionError("CheckClientTrusted called in LLCATruster");
+    }
 
-	@Override
-	public void checkServerTrusted(final X509Certificate[] xcs,
-	                               final String string) {
-		// FIXME
-		//System.out.println("Cert len:"+xcs.length);
-		//System.out.println("Random string:"+string);
-		//throw new AssertionError("CheckServerTrusted called in LLCATruster");
-	}
+    @Override
+    public void checkServerTrusted(final X509Certificate[] chain,
+                                   final String authType) {
+        // FIXME
+        //System.out.println("Cert len:"+xcs.length);
+        //System.out.println("Random string:"+string);
+        //throw new AssertionError("CheckServerTrusted called in LLCATruster");
+    }
 
 	@Override
 	public X509Certificate[] getAcceptedIssuers() {

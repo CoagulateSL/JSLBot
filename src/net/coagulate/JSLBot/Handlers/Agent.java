@@ -34,7 +34,9 @@ public class Agent extends Handler {
 	private LLUUID reporthometo;
 
 	public Agent(@Nonnull final JSLBot bot,
-	             final Configuration c) {super(bot,c);}
+				 final Configuration config) {
+		super(bot, config);
+	}
 
 	// ---------- INSTANCE ----------
 	@Override

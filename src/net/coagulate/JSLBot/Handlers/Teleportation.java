@@ -28,10 +28,10 @@ public class Teleportation extends Handler {
 	boolean teleporting;
 
 	public Teleportation(@Nonnull final JSLBot bot,
-	                     final Configuration c) {
-		super(bot,c);
-		config=c;
-	}
+                         final Configuration config) {
+        super(bot, config);
+        this.config = config;
+    }
 
 	// ---------- INSTANCE ----------
 	// nothing more than a status message

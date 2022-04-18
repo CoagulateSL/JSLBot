@@ -36,13 +36,15 @@ public class LLSDArray extends Container implements Iterable<Atomic> {
 	public List<Atomic> get() { return data; }
 
 	@Nonnull
-	@Override
-	public String toXML(final String prefix) {
-		@Nonnull final StringBuilder resp=new StringBuilder(prefix+"<array>\n");
-		for (@Nonnull final Atomic a: data) { resp.append(a.toXML(prefix+"  ")); }
-		resp.append(prefix).append("</array>\n");
-		return resp.toString();
-	}
+    @Override
+    public String toXML(final String lineprefix) {
+        @Nonnull final StringBuilder resp = new StringBuilder(lineprefix + "<array>\n");
+        for (@Nonnull final Atomic a : data) {
+            resp.append(a.toXML(lineprefix + "  "));
+        }
+        resp.append(lineprefix).append("</array>\n");
+        return resp.toString();
+    }
 
 	@Override
 	@Nonnull

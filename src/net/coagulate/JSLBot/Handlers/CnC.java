@@ -36,23 +36,24 @@ public class CnC extends Handler {
 	private Date homesickness;
 
 	public CnC(@Nonnull final JSLBot bot,
-	           @Nonnull final Configuration c) {
-		super(bot,c);
-		@Nonnull String authoriser=c.get("authoriser","OwnerOnly");
-		if (!authoriser.contains(".")) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
-		@Nullable Authorisation auth=null;
+			   @Nonnull final Configuration config) {
+		super(bot, config);
+		@Nonnull String authoriser = config.get("authoriser", "OwnerOnly");
+		if (!authoriser.contains(".")) {
+			authoriser = "net.coagulate.JSLBot.Handlers.Authorisation." + authoriser;
+		}
+		@Nullable Authorisation auth = null;
 		try {
-			auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
+			auth = (Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class, Configuration.class).newInstance(bot, config.subspace("authorisation"));
+		} catch (@Nonnull final Exception e) {
+			log.log(SEVERE, "Unable to load authoriser " + authoriser, e);
 		}
-		catch (@Nonnull final Exception e) {
-			log.log(SEVERE,"Unable to load authoriser "+authoriser,e);
-		}
-		if (auth==null) {
+		if (auth == null) {
 			log.warning("No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
-			auth=new DenyAll(bot,c.subspace("authorisation"));
+			auth = new DenyAll(bot, config.subspace("authorisation"));
 		}
 		bot.brain().setAuth(auth);
-		@Nonnull final String homesick=c.get("homesickfor","");
+		@Nonnull final String homesick = config.get("homesickfor", "");
 		if (!homesick.isEmpty()) { bot.homeSickFor(homesick); }
 	}
 
