@@ -31,7 +31,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     @Nonnull
     public static LLUUID random() {
         // apparently UUIDs might be used as arbitary request markers.
-        @Nonnull StringBuilder random= new StringBuilder();
+        @Nonnull final StringBuilder random= new StringBuilder();
         for (int i=0;i<32;i++) {
             random.append(randomHexChar());
         }

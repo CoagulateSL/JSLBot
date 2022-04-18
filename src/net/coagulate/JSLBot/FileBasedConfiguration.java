@@ -64,7 +64,7 @@ public class FileBasedConfiguration extends Configuration {
 	@Nonnull
 	@Override
 	public String dump() {
-		@Nonnull StringBuilder response= new StringBuilder();
+		@Nonnull final StringBuilder response= new StringBuilder();
 		for (@Nonnull final Map.Entry<String,String> entry: kvstore.entrySet()) {
 			if (response.length() > 0) {
 				response.append("\n");

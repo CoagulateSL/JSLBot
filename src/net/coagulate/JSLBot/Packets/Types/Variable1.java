@@ -56,7 +56,7 @@ public class Variable1 extends Type {
     }
     @Nonnull
     public String toString() {
-        @Nonnull StringBuilder str= new StringBuilder();
+        @Nonnull final StringBuilder str= new StringBuilder();
         for (final byte b : value) {
             if (b > 0) {
                 str.append((char) b);

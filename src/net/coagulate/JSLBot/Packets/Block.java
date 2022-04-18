@@ -245,7 +245,7 @@ public abstract class Block {
     }
 
     public String dump() {
-        StringBuilder ret = new StringBuilder();
+        final StringBuilder ret = new StringBuilder();
         ret.append(" [==").append(this.getClass().getSimpleName()).append("==]\n");
         for (@Nonnull final Field f : getFields()) {
             ret.append(dumpField(f));
@@ -254,7 +254,7 @@ public abstract class Block {
     }
 
     private String dumpField(@Nonnull final Field f) {
-        StringBuilder ret = new StringBuilder();
+        final StringBuilder ret = new StringBuilder();
         ret.append("   field: ").append(f.getName()).append("[").append(f.getType().getSimpleName()).append("]=");
         try {
             final Object o = f.get(this);
