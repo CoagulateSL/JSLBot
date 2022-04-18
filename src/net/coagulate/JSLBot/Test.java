@@ -64,16 +64,16 @@ public class Test {
 	/**
 	 * Builds a base configuration file
 	 */
-	static void initConfig(@Nonnull final String CONFIGFILE) {
-		@Nonnull final Map<String,String> m=new HashMap<>();
+	static void initConfig(@Nonnull final String configFile) {
+		@Nonnull final Map<String, String> m = new HashMap<>();
 
-		System.out.println("---- ALERT ----\nConfiguration file '"+CONFIGFILE+"' does not exist.\nIf you complete this process it will be created\n\n");
-		@Nonnull final Scanner in=new Scanner(System.in);
+		System.out.println("---- ALERT ----\nConfiguration file '" + configFile + "' does not exist.\nIf you complete this process it will be created\n\n");
+		@Nonnull final Scanner in = new Scanner(System.in);
 
 		System.out.print("Bot's first name: ");
-		final String firstname=in.nextLine();
+		final String firstname = in.nextLine();
 		System.out.print("Bot's last name: ");
-		final String lastname=in.nextLine();
+		final String lastname = in.nextLine();
 		System.out.print("Bot's password: ");
 		final String password=in.nextLine();
 		System.out.println("Handlers: CnC,Sink,Health,Regions,Teleportation,Agent,Objects,Groups,Inventory");
@@ -96,14 +96,12 @@ public class Test {
 		m.put("CnC.authorisation.ownerusername",ownername);
 		m.put("password",BotUtils.md5hash(password));
 		m.put("loginuri",loginuri);
-		try (@Nonnull final FileOutputStream fos=new FileOutputStream(CONFIGFILE); @Nonnull final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
+		try (@Nonnull final FileOutputStream fos = new FileOutputStream(configFile); @Nonnull final ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(m);
-		}
-		catch (@Nonnull final FileNotFoundException ex) {
+		} catch (@Nonnull final FileNotFoundException ex) {
 			throw new AssertionError("File not found creating file (incorrect directory??", ex);
-		}
-		catch (@Nonnull final IOException ex) {
-			throw new AssertionError("Unable to write configuration file",ex);
+		} catch (@Nonnull final IOException ex) {
+			throw new AssertionError("Unable to write configuration file", ex);
 		}
 
 		System.out.println("Configuration file created, initiating bot startup\n\n");
