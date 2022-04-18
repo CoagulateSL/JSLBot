@@ -647,7 +647,7 @@ public final class Circuit extends Thread implements Closeable {
 				log.log(Level.FINE,"Received resent LOST packet:{0}",p.getSequence());
 			}
 		}
-		if (alreadyseen&(!p.getResent())) {
+		if (alreadyseen && (!p.getResent())) {
 			log.warning("Re-seen packet that is not a retransmit, simulator/network bug?");
 			return;
 		}
