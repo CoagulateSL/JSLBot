@@ -135,7 +135,7 @@ public abstract class Event {
 			if (Debug.TRACKCOMMANDS && type==COMMAND) {
 				log.log(Level.FINER,"Command {0} in region {1}entering status {2}",new Object[]{getName(),region().toString(),status});
 			}
-			statusmonitor.notify();
+			statusmonitor.notifyAll();
 		}
 	}
 
