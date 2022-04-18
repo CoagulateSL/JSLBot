@@ -378,10 +378,11 @@ public class Brain {
 			try {
 				@Nonnull final Object callon=findHandler(handler);
 				if (event instanceof UDPEvent) { response=(String) handler.invoke(callon,event); }
-				if (event instanceof XMLEvent) { response=(String) handler.invoke(callon,event); }
-				if (event instanceof CommandEvent) {
-					@Nonnull final CommandEvent cmd=(CommandEvent) event;
-					response=cmd.run(callon,handler);
+				if (event instanceof XMLEvent) {
+					response = (String) handler.invoke(callon, event);
+				}
+				if (event instanceof @Nonnull final CommandEvent cmd) {
+					response = cmd.run(callon, handler);
 					cmd.response(response);
 				}
 			}

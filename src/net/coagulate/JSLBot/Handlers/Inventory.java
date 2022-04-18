@@ -95,18 +95,17 @@ public class Inventory extends Handler implements Runnable {
             }
             for (final Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
                 final InventoryAtom atom = entry.getValue();
-                if (atom instanceof InventoryItem) {
-                    final InventoryItem item = (InventoryItem) atom;
-                    if (item.name == null) {
-                        System.out.println("An item has a null name (?)");
-                    }
-                    if (item.name.toLowerCase().contains(name.toLowerCase())) {
-                        if (!output.isBlank()) {
-                            output = output + "\n";
-                        }
-                        output = output + entry.getKey().toUUIDString() + " : " + item.name;
-                    }
-                }
+                if (atom instanceof final InventoryItem item) {
+					if (item.name == null) {
+						System.out.println("An item has a null name (?)");
+					}
+					if (item.name.toLowerCase().contains(name.toLowerCase())) {
+						if (!output.isBlank()) {
+							output = output + "\n";
+						}
+						output = output + entry.getKey().toUUIDString() + " : " + item.name;
+					}
+				}
             }
             if (output.isBlank()) {
                 output = "1 - No items found containing that substring";
@@ -316,14 +315,12 @@ public class Inventory extends Handler implements Runnable {
 		if (children==null || children.isEmpty()) { return ""; }
 		for (final LLUUID item: children) {
 			ret.append(prefix);
-			final InventoryAtom child=inventory.get(item);
-			if (child instanceof InventoryCategory) {
-				@Nonnull final InventoryCategory i=(InventoryCategory) child;
+			final InventoryAtom child = inventory.get(item);
+			if (child instanceof @Nonnull final InventoryCategory i) {
 				ret.append(i.name).append("\n");
-				ret.append(inventoryDump(i.id,prefix+"  "));
+				ret.append(inventoryDump(i.id, prefix + "  "));
 			}
-			if (child instanceof InventoryItem) {
-				@Nonnull final InventoryItem i=(InventoryItem) child;
+			if (child instanceof @Nonnull final InventoryItem i) {
 				ret.append("-").append(i.name).append(" [").append(i.desc).append("]\n");
 			}
 		}

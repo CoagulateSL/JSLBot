@@ -654,38 +654,35 @@ public final class Circuit extends Thread implements Closeable {
 		boolean internal=false; // circuit control packets.  only for stuff that should never be propagated.  acks and pings basically.
 		@Nullable final Message m=p.messageNullable();
 		//System.out.println(m.getClass().getSimpleName());
-		if (m instanceof PacketAck) {
+		if (m instanceof @Nullable final PacketAck cast) {
 			// packetacks are just bunches of acks.  but might be zerocoded and little endian =)
-			@Nullable final PacketAck cast=(PacketAck) m;
-			for (@Nonnull final PacketAck_bPackets ack: cast.bpackets) {
+			for (@Nonnull final PacketAck_bPackets ack : cast.bpackets) {
 				//public void receivedAck(ack.)
 				receivedAck(ack.vid.value);
 			}
-			internal=true;
+			internal = true;
 		}
 		if (m instanceof StartPingCheck) {
 			// yes yes, we're here
-			@Nonnull final CompletePingCheck ping=new CompletePingCheck();
-			ping.bpingid.vpingid=((StartPingCheck) m).bpingid.vpingid;
+			@Nonnull final CompletePingCheck ping = new CompletePingCheck();
+			ping.bpingid.vpingid = ((StartPingCheck) m).bpingid.vpingid;
 			send(ping);
-			internal=true;
+			internal = true;
 		}
-		if (m instanceof KickUser) {
-			@Nonnull final KickUser kick=(KickUser) m;
-			internal=true;
-			bot.shutdown("Kicked from Second Life: "+kick.buserinfo.vreason);
+		if (m instanceof @Nonnull final KickUser kick) {
+			internal = true;
+			bot.shutdown("Kicked from Second Life: " + kick.buserinfo.vreason);
 		}
-		if (m instanceof RegionHandshake) {
+		if (m instanceof @Nonnull final RegionHandshake r) {
 			// this comes back soon after we establish the connection, and needs to be replied to explicitly (not just acked)
 			//internal=true; // we no longer mark this as internal so that it can be used by the Region module
-			@Nonnull final RegionHandshake r=(RegionHandshake) m;
-			regionname=r.bregioninfo.vsimname.toString();
-			setName("Circuit for "+bot.getUsername()+" to "+regionname);
-			log=bot.getLogger("Circuit."+regionname);
-			Global.regionName(regionhandle,regionname);
-			final boolean register=false; // most connections register at creation since we know where we're connecting to
+			regionname = r.bregioninfo.vsimname.toString();
+			setName("Circuit for " + bot.getUsername() + " to " + regionname);
+			log = bot.getLogger("Circuit." + regionname);
+			Global.regionName(regionhandle, regionname);
+			final boolean register = false; // most connections register at creation since we know where we're connecting to
 			// the initial circuit maybe not so much
-            // handle of the simulator
+			// handle of the simulator
 			final LLUUID regionuuid = r.bregioninfo2.vregionid;
 			if (Debug.REGIONHANDLES) { log.log(Level.FINE,"RegionHandshake with UUID {0}", regionuuid.toUUIDString()); }
 			if (firsthandshake) {
