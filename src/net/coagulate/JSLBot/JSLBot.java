@@ -34,9 +34,9 @@ public class JSLBot extends Thread {
 	private final Object connectsignal=new Object();
 	private final Map<Long,Circuit> circuits=new HashMap<>();
 	private final Object circuitsequencelock=new Object();
-	public boolean registershutdownhook=true;
-	public boolean ALWAYS_RECONNECT;
-	Configuration config=new TransientConfiguration();
+	public boolean registershutdownhook = true;
+	public boolean alwaysReconnect;
+	Configuration config = new TransientConfiguration();
 	JSLInterface jslinterface;
 	// bot level data
 	private String firstname;
@@ -139,8 +139,8 @@ public class JSLBot extends Thread {
 	 * Instruct the bot to always reconnect when disconnected
 	 */
 	public void setAlwaysReconnect() {
-		ALWAYS_RECONNECT=true;
-		reconnect=true;
+		alwaysReconnect = true;
+		reconnect = true;
 	}
 
 	/**
@@ -216,16 +216,20 @@ public class JSLBot extends Thread {
 		// ^^ nominated for most usual comment for dating my intermittent work on this project, now mid 2018.
 		if (brain.isEmpty()) { log.warning("Bot has no brain and will be a virtual zombie."); }
 		reconnect=true;
-		while (ALWAYS_RECONNECT || reconnect) {
-			quit=false;
-			quitreason="";
-			connected=false;
-			primary=null;
-			reconnect=ALWAYS_RECONNECT;
+		while (alwaysReconnect || reconnect) {
+			quit = false;
+			quitreason = "";
+			connected = false;
+			primary = null;
+			reconnect = alwaysReconnect;
 			circuits.clear();
 			brain.prepare();
-			try { mainLoop(); } catch (@Nonnull final Exception e) { log.log(SEVERE,"Main bot loop crashed - "+e,e); }
-			connected=false;
+			try {
+				mainLoop();
+			} catch (@Nonnull final Exception e) {
+				log.log(SEVERE, "Main bot loop crashed - " + e, e);
+			}
+			connected = false;
 			shutdown("Exited");
 			brain.loginLoopSafety();
 		}

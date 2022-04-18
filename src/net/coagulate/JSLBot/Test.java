@@ -13,7 +13,7 @@ import java.util.Scanner;
  */
 public class Test {
 
-	private static boolean CONSOLE;
+	private static boolean console;
 	// ---------- STATICS ----------
 
 	/**
@@ -38,18 +38,24 @@ public class Test {
 		}
 		for (final String argument : args) {
             if ("--console".equalsIgnoreCase(argument)) {
-				CONSOLE = true;
+				console = true;
 				System.out.println("Enabling console command mode");
 			}
-        }
-		if (CONFIGFILE==null) { throw new NullPointerException("You must supply a configuration file name"); }
-		if (CONFIGFILE.isBlank()) { throw new AssertionError("You must supply a file name so that we can create a configuration file!"); }
-		if (!(new File(CONFIGFILE).exists())) {initConfig(CONFIGFILE);}
-		@Nonnull final Configuration config=new FileBasedConfiguration(CONFIGFILE);
+		}
+		if (CONFIGFILE == null) {
+			throw new NullPointerException("You must supply a configuration file name");
+		}
+		if (CONFIGFILE.isBlank()) {
+			throw new AssertionError("You must supply a file name so that we can create a configuration file!");
+		}
+		if (!(new File(CONFIGFILE).exists())) {
+			initConfig(CONFIGFILE);
+		}
+		@Nonnull final Configuration config = new FileBasedConfiguration(CONFIGFILE);
 		//System.out.println("===== Configuration file loaded =====\n"+config.dump());
-		@Nonnull final JSLBot bot=new JSLBot(config);
-		bot.ALWAYS_RECONNECT=true; // likely this will be cleaned up, but for testing...
-		if (!CONSOLE) {
+		@Nonnull final JSLBot bot = new JSLBot(config);
+		bot.alwaysReconnect = true; // likely this will be cleaned up, but for testing...
+		if (!console) {
 			//noinspection CallToThreadRun
 			bot.run(); // lose control to bot.  call start() to background the bot and continue execution here.
 			return;
