@@ -50,7 +50,8 @@ public class Regions extends Handler {
 			try {
 				synchronized (mapblockreplysignal) { mapblockreplysignal.wait(1000); }
 			}
-			catch (@Nonnull final InterruptedException e) {}
+			catch (@Nonnull final InterruptedException ignored) {
+			}
 		}
 		cached=Global.regionHandle(name);
 		if (cached!=null) { return Long.toUnsignedString(cached); }
@@ -128,7 +129,10 @@ public class Regions extends Handler {
 		final long expire=new Date().getTime()+5000; // sleep on the signal
 		while (region.getResponse(reqid)==null && expire>(new Date().getTime())) {
 			synchronized (parcelpropertiessignal) {
-				try { parcelpropertiessignal.wait(1000); } catch (@Nonnull final InterruptedException e) {}
+				try {
+					parcelpropertiessignal.wait(1000);
+				} catch (@Nonnull final InterruptedException ignored) {
+				}
 			}
 		}
 		if (region.getResponse(reqid)!=null) { return region.getResponse(reqid)+""; }

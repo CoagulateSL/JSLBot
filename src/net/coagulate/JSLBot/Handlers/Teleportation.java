@@ -139,7 +139,10 @@ public class Teleportation extends Handler {
 			teleporting=true;
 			bot.send(req,true);
 			synchronized (signal) {
-				try { signal.wait(10000); } catch (@Nonnull final InterruptedException e) {}
+				try {
+					signal.wait(10000);
+				} catch (@Nonnull final InterruptedException ignored) {
+				}
 			}
 			if (teleporting) {
 				log.severe("Timer expired while teleporting, lost in transit?");
@@ -249,8 +252,8 @@ public class Teleportation extends Handler {
 				signal.wait(10000);
 				expired=true;
 			}
+		} catch (@Nonnull final InterruptedException ignored) {
 		}
-		catch (@Nonnull final InterruptedException e) {}
 		if (expired) { log.severe("Timer expired while teleporting, lost in transit?"); }
 		final boolean completed=!teleporting;
 		teleporting=false;
