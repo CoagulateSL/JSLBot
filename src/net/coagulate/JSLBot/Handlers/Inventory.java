@@ -131,24 +131,26 @@ public class Inventory extends Handler implements Runnable {
         return "0 - Inventory transfer message sent";
     }
 
-	/** Send an inventory item to a target UUID.
-	 *
-	 * This is implemented as an instant message over the primary circuit.
-	 *
-	 * @param itemuuid UUID of item to send
-	 * @param target UUID of avatar to receive item
-	 */
+	/**
+     * Send an inventory item to a target UUID.
+     * <p>
+     * This is implemented as an instant message over the primary circuit.
+     *
+     * @param itemuuid UUID of item to send
+     * @param target   UUID of avatar to receive item
+     */
 	public void sendInventory(@Nonnull final LLUUID itemuuid,@Nonnull final LLUUID target) {
         final InventoryItem item = inventoryFind(itemuuid);
 		if (item==null) { throw new NullPointerException("Unable to resolve UUID "+itemuuid.toUUIDString()); }
-		sendInventory(item,target);
-	}
-	/** Send an inventory item to a target UUID.
-	 *
-	 * This is implemented as an instant message over the primary circuit.
-	 *
-	 * @param item InventoryItem of item to send
-	 * @param target UUID of avatar to receive item
+		sendInventory(item, target);
+    }
+
+    /** Send an inventory item to a target UUID.
+     * <p>
+     * This is implemented as an instant message over the primary circuit.
+     *
+     * @param item InventoryItem of item to send
+     * @param target UUID of avatar to receive item
 	 */
 	public void sendInventory(@Nonnull final InventoryItem item,@Nonnull final LLUUID target) {
 		@Nonnull final ImprovedInstantMessage im=new ImprovedInstantMessage(bot);
