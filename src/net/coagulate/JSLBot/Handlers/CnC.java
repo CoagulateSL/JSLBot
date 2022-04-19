@@ -227,7 +227,7 @@ public class CnC extends Handler {
 				if (key!=null && key.length()>=4) {
 					// maybe we let this be a command
 					// object IMs start with their name, in square brackets, apparently
-					@Nonnull final Matcher matches = Pattern.compile("\\[(.*)\\] (.*)", Pattern.DOTALL).matcher(messagetext);
+					@Nonnull final Matcher matches = Pattern.compile("\\[(.*)] (.*)", Pattern.DOTALL).matcher(messagetext);
 					if (matches.matches()) {
 						final String objectName = matches.group(1);
 						final String objectMessage = matches.group(2);
@@ -564,7 +564,7 @@ public class CnC extends Handler {
 			@Nullable final LLSDMap response = bot.getCAPS().invokeCAPS("UpdateAvatarAppearance", "", llsd);
 		} catch (final IOException e) {
 			final String error = e.getMessage();
-			@Nonnull final Matcher matcher = Pattern.compile("Cof Version Mismatch: [0-9]+ != ([0-9]+)").matcher(error);
+			@Nonnull final Matcher matcher = Pattern.compile("Cof Version Mismatch: \\d+ != (\\d+)").matcher(error);
 			if (matcher.matches()) {
 				//System.out.println("Retrying for COF "+matcher.group(1));
 				req.put("cof_version", new LLSDInteger(Integer.parseInt(matcher.group(1))));
