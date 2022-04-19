@@ -14,7 +14,9 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     byte[] uuid=new byte[16];
     public LLUUID() {}
     public LLUUID(@Nullable String uuid) {
-        if (uuid==null || uuid.length()==0) { uuid="00000000000000000000000000000000"; }
+        if (uuid == null || uuid.isEmpty()) {
+            uuid = "00000000000000000000000000000000";
+        }
         uuid=uuid.replaceAll("-","");
         if (uuid.length()!=32) { throw new IllegalArgumentException("UID should be 32 chars long: "+uuid); }
         for(int i=0;i<=15;i++) {
@@ -22,24 +24,26 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
         }
     }
 
-    public LLUUID(@Nonnull ByteBuffer buffer) {
+    public LLUUID(@Nonnull final ByteBuffer buffer) {
         read(buffer);
     }
 
     @Nonnull
     public static LLUUID random() {
         // apparently UUIDs might be used as arbitary request markers.
-        @Nonnull String random="";
+        @Nonnull final StringBuilder random= new StringBuilder();
         for (int i=0;i<32;i++) {
-            random=random+randomHexChar();
+            random.append(randomHexChar());
         }
-        return new LLUUID(random);
+        return new LLUUID(random.toString());
     }
 
     @Nonnull
     private static String randomHexChar() {
-        int rand=ThreadLocalRandom.current().nextInt(16);
-        if (rand<10) { return ""+rand; }
+        final int rand = ThreadLocalRandom.current().nextInt(16);
+        if (rand < 10) {
+            return String.valueOf(rand);
+        }
         // lazy
         if (rand==10) { return "A"; }
         if (rand==11) { return "B"; }
@@ -55,7 +59,7 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
 
     @Nonnull
     public ByteBuffer content() {
-        @Nonnull ByteBuffer content=ByteBuffer.allocate(size());
+        @Nonnull final ByteBuffer content = ByteBuffer.allocate(size());
         content.put(uuid);
         return content;
     }
@@ -66,13 +70,13 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
-        uuid=new byte[16];
-        in.get(uuid,0,16);
+    public void read(@Nonnull final ByteBuffer in) {
+        uuid = new byte[16];
+        in.get(uuid, 0, 16);
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
+    public void write(@Nonnull final ByteBuffer out) {
         out.put(uuid);
     }
 
@@ -80,11 +84,18 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
     public String dump() {
         return toString();
     }
+
     @Override
-    public boolean equals(Object t) {
-        if (!(t instanceof LLUUID)) { System.out.println("REALLY ODD COMPARISON TO A UUID"); return false; }
-        @Nonnull LLUUID l=(LLUUID)t;
-        for (int i=0;i<16;i++) { if (uuid[i]!=l.uuid[i]) { return false; }}
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof @Nonnull final LLUUID l)) {
+            System.out.println("REALLY ODD COMPARISON TO A UUID");
+            return false;
+        }
+        for (int i = 0; i < 16; i++) {
+            if (uuid[i] != l.uuid[i]) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -97,22 +108,28 @@ public final class LLUUID extends Type implements Comparable<LLUUID> {
         long value = 0;
         for (int i = 0; i < uuid.length; i++)
         {
-           value += ((long) uuid[i] & 0xffL) << (8 * i);
+           value += (uuid[i] & 0xffL) << (8 * i);
         }
         return value;
     }
 
     @Nonnull
     public String toUUIDString() {
-        String s=toString();
+        final String s = toString();
         return s.substring(0, 8)+"-"+s.substring(8,12)+"-"+s.substring(12,16)+"-"+s.substring(16,20)+"-"+s.substring(20);
     }
 
     @Override
-    public int compareTo(@Nonnull LLUUID o) {
-        if (o.toLong()==toLong()) { return 0; }
-        if (o.toLong()>toLong()) { return 1; }
-        if (o.toLong()<toLong()) { return -1; }
+    public int compareTo(@Nonnull final LLUUID o) {
+        if (o.toLong() == toLong()) {
+            return 0;
+        }
+        if (o.toLong() > toLong()) {
+            return 1;
+        }
+        if (o.toLong() < toLong()) {
+            return -1;
+        }
         throw new AssertionError("Code paths should be all complete at this point");
     }
 

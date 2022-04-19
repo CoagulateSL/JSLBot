@@ -34,9 +34,9 @@ public class JSLBot extends Thread {
 	private final Object connectsignal=new Object();
 	private final Map<Long,Circuit> circuits=new HashMap<>();
 	private final Object circuitsequencelock=new Object();
-	public boolean registershutdownhook=true;
-	public boolean ALWAYS_RECONNECT;
-	Configuration config=new TransientConfiguration();
+	public boolean registershutdownhook = true;
+	public boolean alwaysReconnect;
+	Configuration config = new TransientConfiguration();
 	JSLInterface jslinterface;
 	// bot level data
 	private String firstname;
@@ -58,7 +58,7 @@ public class JSLBot extends Thread {
 	private boolean connected;
 	@Nullable
 	private Date lastagentupdate;
-	private float drawdistance=(float) 0.001;
+	private float drawdistance = 0.001f;
 	/**
 	 * Send this generally useful message down the primary UDP circuit
 	 */
@@ -139,8 +139,8 @@ public class JSLBot extends Thread {
 	 * Instruct the bot to always reconnect when disconnected
 	 */
 	public void setAlwaysReconnect() {
-		ALWAYS_RECONNECT=true;
-		reconnect=true;
+		alwaysReconnect = true;
+		reconnect = true;
 	}
 
 	/**
@@ -216,16 +216,20 @@ public class JSLBot extends Thread {
 		// ^^ nominated for most usual comment for dating my intermittent work on this project, now mid 2018.
 		if (brain.isEmpty()) { log.warning("Bot has no brain and will be a virtual zombie."); }
 		reconnect=true;
-		while (ALWAYS_RECONNECT || reconnect) {
-			quit=false;
-			quitreason="";
-			connected=false;
-			primary=null;
-			reconnect=ALWAYS_RECONNECT;
+		while (alwaysReconnect || reconnect) {
+			quit = false;
+			quitreason = "";
+			connected = false;
+			primary = null;
+			reconnect = alwaysReconnect;
 			circuits.clear();
 			brain.prepare();
-			try { mainLoop(); } catch (@Nonnull final Exception e) { log.log(SEVERE,"Main bot loop crashed - "+e,e); }
-			connected=false;
+			try {
+				mainLoop();
+			} catch (@Nonnull final Exception e) {
+				log.log(SEVERE, "Main bot loop crashed - " + e, e);
+			}
+			connected = false;
 			shutdown("Exited");
 			brain.loginLoopSafety();
 		}
@@ -294,8 +298,8 @@ public class JSLBot extends Thread {
 			p.bagentdata.vcameracenter=new LLVector3(192,144,9999);
 			p.bagentdata.vcameraataxis=new LLVector3(0,1,0);
 			p.bagentdata.vcameraleftaxis=new LLVector3(-1,0,0);
-			p.bagentdata.vcameraupaxis=new LLVector3(0,0,1);
-			p.bagentdata.vfar=new F32((float) 0.001);
+			p.bagentdata.vcameraupaxis = new LLVector3(0, 0, 1);
+			p.bagentdata.vfar = new F32(0.001f);
 		}
 		else {
 			p.bagentdata.vcameracenter=camera;
@@ -350,9 +354,9 @@ public class JSLBot extends Thread {
 	public void send(@Nonnull final Packet p) {
 		if (primary==null) { throw new IllegalStateException("Primary circuit is not defined or connected"); }
 		try { primary.send(p); }
-		catch (IOException e) {
-			shutdown("Primary circuit was closed");
-		}
+		catch (final IOException e) {
+            shutdown("Primary circuit was closed");
+        }
 	}
 
 	/**
@@ -608,9 +612,11 @@ public class JSLBot extends Thread {
 		send(fov,true);
 	}
 
-	public void setMaxFOV() { setFOV((float) (Math.PI)); }
+	public void setMaxFOV() { setFOV((float) (Math.PI));
+	}
 
-	public void setMinFOV() { setFOV((float) 0.01); }
+	public void setMinFOV() {
+		setFOV(0.01f); }
 
 	public float drawDistance() { return drawdistance; }
 
@@ -706,7 +712,9 @@ public class JSLBot extends Thread {
 		// load from config and call 'setup'
 		config=conf;
 		@Nullable String location=config.get("loginlocation");
-		if (location==null || "".equals(location)) { location="home"; }  // default to home
+		if (location == null || location.isEmpty()) {
+			location = "home";
+		}  // default to home
 		//String potentialmaster=config.get("owner");
 
 		@Nonnull final String handlerlist=config.get("handlers","");
@@ -829,9 +837,9 @@ public class JSLBot extends Thread {
 		if (!quit) { brain.loggedIn(); }
 		if (!config.get("homeseat","").isBlank())
 		{
-			@Nonnull Map<String,String> args=new HashMap<>();
+            @Nonnull final Map<String, String> args = new HashMap<>();
 			args.put("uuid",config.get("homeseat"));
-			@Nonnull CommandEvent sit=new CommandEvent(this,null,"siton",args,new LLUUID(config.get("CnC.authorisation.owneruuid")));
+            @Nonnull final CommandEvent sit = new CommandEvent(this, null, "siton", args, new LLUUID(config.get("CnC.authorisation.owneruuid")));
 			brain.execute(sit);
 		}
 		while (!quit) {

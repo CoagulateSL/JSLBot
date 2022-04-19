@@ -50,7 +50,7 @@ public class LLSDBinary extends Atomic {
 		final byte[] by=toByte();
 		long longvalue=0;
 		for (int i=0;i<by.length;i++) {
-			longvalue+=((long) by[by.length-1-i]&0xffL)<<(8*i);
+			longvalue+=(by[by.length-1-i] &0xffL)<<(8*i);
 		}
 		return longvalue;
 	}

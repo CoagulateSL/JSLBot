@@ -14,11 +14,11 @@ public abstract class Handler {
 	protected final JSLBot bot;
 	protected Configuration config;
 
-	public Handler(@Nonnull final JSLBot bot,
-	               final Configuration config) {
-		this.bot=bot;
-		this.config=config;
-		log=bot.getLogger("Handler."+getClass().getSimpleName());
+	protected Handler(@Nonnull final JSLBot bot,
+					  final Configuration config) {
+		this.bot = bot;
+		this.config = config;
+		log = bot.getLogger("Handler." + getClass().getSimpleName());
 	}
 
 	// ---------- INSTANCE ----------

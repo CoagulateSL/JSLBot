@@ -32,7 +32,9 @@ public class LLSDInteger extends Atomic {
 
 	@Nonnull
 	@Override
-	public String toString() { return ""+value; }
+	public String toString() {
+		return String.valueOf(value);
+	}
 
 	public int get() { return value; }
 }

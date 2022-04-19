@@ -5,30 +5,30 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- *
  * @author Iain Price
  */
-public class LLVector4 extends Unimplemented{
-    public float x=0;
-    public float y=0;
-    public float z=0;
-    public float t=0;
+public class LLVector4 extends Unimplemented {
+    public float x;
+    public float y;
+    public float z;
+    public float t;
+
     @Override
     public int size() {
         return 12;
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
+    public void read(@Nonnull final ByteBuffer in) {
         in.order(ByteOrder.LITTLE_ENDIAN);
-        x=in.getFloat();
-        y=in.getFloat();
-        z=in.getFloat();
-        t=in.getFloat();
+        x = in.getFloat();
+        y = in.getFloat();
+        z = in.getFloat();
+        t = in.getFloat();
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
+    public void write(@Nonnull final ByteBuffer out) {
         out.order(ByteOrder.LITTLE_ENDIAN);
         out.putFloat(x);
         out.putFloat(y);

@@ -20,17 +20,17 @@ public class ConfigurationSubspace extends Configuration {
 	}
 
 	// ---------- INSTANCE ----------
-	@Nullable
-	@Override
-	public String get(final String param) {
-		return c.get(p+"."+param);
-	}
+    @Nullable
+    @Override
+    public String get(final String key) {
+        return c.get(p + "." + key);
+    }
 
-	@Override
-	public void put(final String param,
-	                final String value) {
-		c.put(p+"."+param,value);
-	}
+    @Override
+    public void put(final String key,
+                    final String value) {
+        c.put(p + "." + key, value);
+    }
 
 	@Override
 	public Set<String> get() {

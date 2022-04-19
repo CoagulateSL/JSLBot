@@ -16,12 +16,14 @@ import java.util.logging.Logger;
 public abstract class Authorisation {
 	protected Logger log;
 
-	public Authorisation(@Nonnull final JSLBot bot,
-	                     final Configuration c) {
+	protected Authorisation(@Nonnull final JSLBot bot,
+							final Configuration c) {
 		initLogger(bot);
 	}
 
-	protected Authorisation(@Nonnull final JSLBot bot) { initLogger(bot); }
+	protected Authorisation(@Nonnull final JSLBot bot) {
+		initLogger(bot);
+	}
 
 	// ---------- INSTANCE ----------
 

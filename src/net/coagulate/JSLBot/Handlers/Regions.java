@@ -30,13 +30,17 @@ public class Regions extends Handler {
 	private final Object parcelpropertiessignal=new Object();
 
 	public Regions(@Nonnull final JSLBot bot,
-	               final Configuration conf) { super(bot,conf); }
+                   final Configuration config) {
+        super(bot, config);
+    }
 
 	// ---------- INSTANCE ----------
 	@CmdHelp(description="Look up a region handle from a region name")
 	public String regionLookupCommand(final CommandEvent command,
 	                                  @Nullable @Param(name="name",description="Name of region to lookup") final String name) {
-		if (name==null || "".equals(name)) { return "No NAME parameter passed."; }
+		if (name == null || name.isEmpty()) {
+			return "No NAME parameter passed.";
+		}
 		// check cache
 		@Nullable Long cached=Global.regionHandle(name);
 		if (cached!=null) { return Long.toUnsignedString(cached); }
@@ -50,7 +54,8 @@ public class Regions extends Handler {
 			try {
 				synchronized (mapblockreplysignal) { mapblockreplysignal.wait(1000); }
 			}
-			catch (@Nonnull final InterruptedException e) {}
+			catch (@Nonnull final InterruptedException ignored) {
+			}
 		}
 		cached=Global.regionHandle(name);
 		if (cached!=null) { return Long.toUnsignedString(cached); }
@@ -128,10 +133,15 @@ public class Regions extends Handler {
 		final long expire=new Date().getTime()+5000; // sleep on the signal
 		while (region.getResponse(reqid)==null && expire>(new Date().getTime())) {
 			synchronized (parcelpropertiessignal) {
-				try { parcelpropertiessignal.wait(1000); } catch (@Nonnull final InterruptedException e) {}
+				try {
+					parcelpropertiessignal.wait(1000);
+				} catch (@Nonnull final InterruptedException ignored) {
+				}
 			}
 		}
-		if (region.getResponse(reqid)!=null) { return region.getResponse(reqid)+""; }
+		if (region.getResponse(reqid) != null) {
+			return String.valueOf(region.getResponse(reqid));
+		}
 		return "";
 	}
 

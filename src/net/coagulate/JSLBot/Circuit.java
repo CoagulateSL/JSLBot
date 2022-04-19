@@ -70,10 +70,7 @@ public final class Circuit extends Thread implements Closeable {
 	// name of the simulator
 	@Nonnull
 	private String regionname="";
-	// handle of the simulator
-	@Nullable
-	private LLUUID regionuuid;
-	// last time we rxed anything
+    // last time we rxed anything
 	@Nonnull
 	private Date lastpacket=new Date();
 	// primary CAPS url
@@ -164,7 +161,7 @@ public final class Circuit extends Thread implements Closeable {
 		// wait for the 'outstanding acks' to be updated (meaning our reliable UseCircuitCode is acked)
 		try { synchronized (inflight) { inflight.wait(5000); } }
 		catch (@Nonnull final InterruptedException ex) {
-			throw new IOException("Failed to get UseCircuitCode Ack");
+			throw new IOException("Failed to get UseCircuitCode Ack", ex);
 		}
 		if (Debug.CIRCUIT) { log.finer("Outstanding ACKS: "+inflight.size()); }
 		if (!inflight.isEmpty()) {
@@ -210,7 +207,7 @@ public final class Circuit extends Thread implements Closeable {
 					p=Packet.decode(rx);
 					if (p!=null) {
 						if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
-							@Nullable JSLBot botcopy = bot;
+							@Nullable final JSLBot botcopy = bot;
 							if (botcopy != null && p != null) {
 								botcopy.accountMessageIn(p.message().getId(), receive.getLength());
 							}
@@ -227,16 +224,17 @@ public final class Circuit extends Thread implements Closeable {
 					if (Debug.ACK) { log.finer("Exiting receive without event"); }
 				} // as requested, and we dont care
 				// timeout is just to make sure we get HERE \/ once in a while
-				if ((ackqueue.size()>0 && lastAck()>2000) || ackqueue.size()>32) {
-					if (Debug.ACK) { log.finer("Manually sending ACKs"); }
-					sendAck();
-				}
-				else {
+				if ((!ackqueue.isEmpty() && lastAck() > 2000) || ackqueue.size() > 32) {
 					if (Debug.ACK) {
-						log.finer("NOT sending any ACKs.  Q size is "+ackqueue.size()+" and lastAck is "+lastAck()+"ms");
+						log.finer("Manually sending ACKs");
+					}
+					sendAck();
+				} else {
+					if (Debug.ACK) {
+						log.finer("NOT sending any ACKs.  Q size is " + ackqueue.size() + " and lastAck is " + lastAck() + "ms");
 					}
 				}
-				if (lastMaintenance()>2500) {
+				if (lastMaintenance() > 2500) {
 					maintenance();
 				}
 			}
@@ -259,7 +257,7 @@ public final class Circuit extends Thread implements Closeable {
 			close();
 		}
 		if (Debug.CIRCUIT) { log.log(Level.FINE,"Deregistering circuit to {0}",regionname); }
-		@Nullable JSLBot mybot=bot;
+		@Nullable final JSLBot mybot = bot;
 		if (mybot!=null) { mybot.deregisterCircuit(regionhandle,this); }
 	}
 
@@ -288,8 +286,10 @@ public final class Circuit extends Thread implements Closeable {
 	                 final boolean reliable) throws IllegalStateException {
 		@Nonnull final Packet p=new Packet(m);
 		p.setReliable(reliable);
-		try { send(p); }
-		catch (IOException e) { this.close(); throw new IllegalStateException("Errors closed the circuit",e); }
+		try { send(p); } catch (final IOException e) {
+			this.close();
+			throw new IllegalStateException("Errors closed the circuit", e);
+		}
 	}
 
 	/* Send a message, unreliably */
@@ -310,8 +310,8 @@ public final class Circuit extends Thread implements Closeable {
 
 		int acksize=0;
 		// acks are 4 bytes each plus a byte 'counter'
-		if (sending.size()>0) {
-			acksize=(4*sending.size())+1;
+		if (!sending.isEmpty()) {
+			acksize = (4 * sending.size()) + 1;
 			p.setAck(true);
 		}
 		// claim message+ack size
@@ -329,17 +329,17 @@ public final class Circuit extends Thread implements Closeable {
 			log.log(Level.WARNING,"Message size is {0} post ZeroCoding which is quite large",sending.size());
 		}
 		// IF sending acks, append them now (AFTER zerocoding)
-		if (sending.size()>0) {
-			@Nonnull final ByteBuffer append=ByteBuffer.allocate(transmit.length+(4*sending.size())+1);
+		if (!sending.isEmpty()) {
+			@Nonnull final ByteBuffer append = ByteBuffer.allocate(transmit.length + (4 * sending.size()) + 1);
 			append.put(transmit);
 			// append acks
-			for (final Integer i: sending) {
-				@Nonnull final U32BE acknumber=new U32BE(i); // yup, the appended ones are big endian.   but a PacketAck uses little endian in the body.  LL ;)
+			for (final Integer i : sending) {
+				@Nonnull final U32BE acknumber = new U32BE(i); // yup, the appended ones are big endian.   but a PacketAck uses little endian in the body.  LL ;)
 				acknumber.write(append);
 				ackedlist.append(i).append(" ");
 			} // breaks if >256 acks :P
 			// finally number of acks, apparently.
-			@Nonnull final U8 count=new U8(sending.size());
+			@Nonnull final U8 count = new U8(sending.size());
 			count.write(append);
 			lastacks=new Date();
 			if (Debug.ACK) { log.log(Level.FINEST,"Appended ACKS:{0}",ackedlist.toString()); }
@@ -366,7 +366,7 @@ public final class Circuit extends Thread implements Closeable {
             e.printStackTrace(); // show me!
         }*/
 		//System.out.println("TX: "+p.getName());
-		@Nullable JSLBot botcopy = bot;
+		@Nullable final JSLBot botcopy = bot;
 		if (Constants.PACKET_ACCOUNTING) {
 			bytesout.addAndGet(packet.getLength());
 			if (botcopy!=null) { botcopy.bytesout.addAndGet(packet.getLength()); }
@@ -382,7 +382,7 @@ public final class Circuit extends Thread implements Closeable {
 		}
 		packetrate++;
 	}
-	private int errors=0;
+	private int errors;
 
 	/**
 	 * Produce a reliable sequence counter for packets
@@ -402,9 +402,9 @@ public final class Circuit extends Thread implements Closeable {
 			if (disconnecting) { return; }
 			disconnecting=true;
 		}
-		@Nullable CAPS ourcaps=getCAPSNullable();
+		@Nullable final CAPS ourcaps = getCAPSNullable();
 		if (ourcaps!=null) {
-			@Nullable EventQueue oureventqueue=ourcaps.eventqueue();
+			@Nullable final EventQueue oureventqueue = ourcaps.eventqueue();
 			if (oureventqueue!=null) {
 				oureventqueue.shutdown();
 			}
@@ -434,7 +434,7 @@ public final class Circuit extends Thread implements Closeable {
 
 	@Nonnull
 	public JSLBot bot() {
-		@Nullable JSLBot mybot=bot;
+		@Nullable final JSLBot mybot = bot;
 		if (mybot==null) { throw new NullPointerException("Bot connection has gone away"); }
 		return bot;
 	}
@@ -574,7 +574,10 @@ public final class Circuit extends Thread implements Closeable {
 					try {
 						send(p);
 						inflight.put(p, new Date());
-					} catch (IOException e) { this.close(); throw new IllegalStateException("Failed to send a retransmit",e); }
+					} catch (final IOException e) {
+						this.close();
+						throw new IllegalStateException("Failed to send a retransmit", e);
+					}
 				}
 			}
 		}
@@ -644,46 +647,44 @@ public final class Circuit extends Thread implements Closeable {
 				log.log(Level.FINE,"Received resent LOST packet:{0}",p.getSequence());
 			}
 		}
-		if (alreadyseen&(!p.getResent())) {
+		if (alreadyseen && (!p.getResent())) {
 			log.warning("Re-seen packet that is not a retransmit, simulator/network bug?");
 			return;
 		}
 		boolean internal=false; // circuit control packets.  only for stuff that should never be propagated.  acks and pings basically.
 		@Nullable final Message m=p.messageNullable();
 		//System.out.println(m.getClass().getSimpleName());
-		if (m instanceof PacketAck) {
+		if (m instanceof @Nullable final PacketAck cast) {
 			// packetacks are just bunches of acks.  but might be zerocoded and little endian =)
-			@Nullable final PacketAck cast=(PacketAck) m;
-			for (@Nonnull final PacketAck_bPackets ack: cast.bpackets) {
+			for (@Nonnull final PacketAck_bPackets ack : cast.bpackets) {
 				//public void receivedAck(ack.)
 				receivedAck(ack.vid.value);
 			}
-			internal=true;
+			internal = true;
 		}
 		if (m instanceof StartPingCheck) {
 			// yes yes, we're here
-			@Nonnull final CompletePingCheck ping=new CompletePingCheck();
-			ping.bpingid.vpingid=((StartPingCheck) m).bpingid.vpingid;
+			@Nonnull final CompletePingCheck ping = new CompletePingCheck();
+			ping.bpingid.vpingid = ((StartPingCheck) m).bpingid.vpingid;
 			send(ping);
-			internal=true;
+			internal = true;
 		}
-		if (m instanceof KickUser) {
-			@Nonnull final KickUser kick=(KickUser) m;
-			internal=true;
-			bot.shutdown("Kicked from Second Life: "+kick.buserinfo.vreason);
+		if (m instanceof @Nonnull final KickUser kick) {
+			internal = true;
+			bot.shutdown("Kicked from Second Life: " + kick.buserinfo.vreason);
 		}
-		if (m instanceof RegionHandshake) {
+		if (m instanceof @Nonnull final RegionHandshake r) {
 			// this comes back soon after we establish the connection, and needs to be replied to explicitly (not just acked)
 			//internal=true; // we no longer mark this as internal so that it can be used by the Region module
-			@Nonnull final RegionHandshake r=(RegionHandshake) m;
-			regionname=r.bregioninfo.vsimname.toString();
-			setName("Circuit for "+bot.getUsername()+" to "+regionname);
-			log=bot.getLogger("Circuit."+regionname);
-			Global.regionName(regionhandle,regionname);
-			final boolean register=false; // most connections register at creation since we know where we're connecting to
+			regionname = r.bregioninfo.vsimname.toString();
+			setName("Circuit for " + bot.getUsername() + " to " + regionname);
+			log = bot.getLogger("Circuit." + regionname);
+			Global.regionName(regionhandle, regionname);
+			final boolean register = false; // most connections register at creation since we know where we're connecting to
 			// the initial circuit maybe not so much
-			regionuuid=r.bregioninfo2.vregionid;
-			if (Debug.REGIONHANDLES) { log.log(Level.FINE,"RegionHandshake with UUID {0}",regionuuid.toUUIDString()); }
+			// handle of the simulator
+			final LLUUID regionuuid = r.bregioninfo2.vregionid;
+			if (Debug.REGIONHANDLES) { log.log(Level.FINE,"RegionHandshake with UUID {0}", regionuuid.toUUIDString()); }
 			if (firsthandshake) {
 				log.log(Level.INFO,
 				        "Handshake {0} cpu {1}/{2} active as {3}#{4} @ colocation {5}",
@@ -703,8 +704,9 @@ public final class Circuit extends Thread implements Closeable {
 			@Nonnull final Packet replypacket=new Packet(reply);
 			replypacket.setReliable(true);
 			replypacket.setZeroCode(true);
-			try { send(replypacket); }
-			catch (IOException e) { throw new IllegalStateException("Circuit failed during handshake, this is probably fatal",e); }
+			try { send(replypacket); } catch (final IOException e) {
+				throw new IllegalStateException("Circuit failed during handshake, this is probably fatal", e);
+			}
 			// open our eyes
 			bot.setMaxFOV();
 			bot.agentUpdate();

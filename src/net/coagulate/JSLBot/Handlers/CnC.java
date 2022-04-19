@@ -36,23 +36,24 @@ public class CnC extends Handler {
 	private Date homesickness;
 
 	public CnC(@Nonnull final JSLBot bot,
-	           @Nonnull final Configuration c) {
-		super(bot,c);
-		@Nonnull String authoriser=c.get("authoriser","OwnerOnly");
-		if (!authoriser.contains(".")) { authoriser="net.coagulate.JSLBot.Handlers.Authorisation."+authoriser; }
-		@Nullable Authorisation auth=null;
+			   @Nonnull final Configuration config) {
+		super(bot, config);
+		@Nonnull String authoriser = config.get("authoriser", "OwnerOnly");
+		if (!authoriser.contains(".")) {
+			authoriser = "net.coagulate.JSLBot.Handlers.Authorisation." + authoriser;
+		}
+		@Nullable Authorisation auth = null;
 		try {
-			auth=(Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class,Configuration.class).newInstance(bot,c.subspace("authorisation"));
+			auth = (Authorisation) Class.forName(authoriser).getConstructor(JSLBot.class, Configuration.class).newInstance(bot, config.subspace("authorisation"));
+		} catch (@Nonnull final Exception e) {
+			log.log(SEVERE, "Unable to load authoriser " + authoriser, e);
 		}
-		catch (@Nonnull final Exception e) {
-			log.log(SEVERE,"Unable to load authoriser "+authoriser,e);
-		}
-		if (auth==null) {
+		if (auth == null) {
 			log.warning("No authorisation successfully loaded, using DenyAll, all commands will be rejected, even from you.");
-			auth=new DenyAll(bot,c.subspace("authorisation"));
+			auth = new DenyAll(bot, config.subspace("authorisation"));
 		}
 		bot.brain().setAuth(auth);
-		@Nonnull final String homesick=c.get("homesickfor","");
+		@Nonnull final String homesick = config.get("homesickfor", "");
 		if (!homesick.isEmpty()) { bot.homeSickFor(homesick); }
 	}
 
@@ -66,9 +67,9 @@ public class CnC extends Handler {
 		final String region=msg.get("NAME").toString();
 		long shutdown=new Date().getTime();
 		if (msg.containsKey("MINUTES")) {
-			shutdown=shutdown+((Integer.parseInt(msg.get("MINUTES").toString()))*1000*60);
+			shutdown=shutdown+((long) (Integer.parseInt(msg.get("MINUTES").toString())) *1000*60);
 		}
-		if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))*1000); }
+		if (msg.containsKey("SECONDS")) { shutdown=shutdown+((Integer.parseInt(msg.get("SECONDS").toString()))* 1000L); }
 		return new Date(shutdown);
 	}
 
@@ -77,21 +78,23 @@ public class CnC extends Handler {
 		@Nonnull final AlertMessage msg=(AlertMessage) event.body();
 		log.warning("Simulator "+event.region().circuit()+" sends Alert, data message: "+msg.balertdata.vmessage);
 		for (@Nonnull final AlertMessage_bAlertInfo info: msg.balertinfo) {
-			@Nonnull final String infotype=info.vmessage.toString();
-			boolean handled=false;
-			if (infotype.toLowerCase().contains("home")) {handled=true;} // handled by agent
+			@Nonnull final String infotype = info.vmessage.toString();
+			boolean handled = infotype.toLowerCase().contains("home");
+			// handled by agent
 			if ("RegionRestartMinutes".equals(infotype) || "RegionRestartSeconds".equals(infotype)) {
-				handled=true;
-				@Nonnull final Date when=parseRegionRestart(info.vextraparams.toString());
-				final int seconds=(int) ((when.getTime()-(new Date().getTime()))/1000);
-				@Nonnull Level level=INFO;
-				if (seconds<=180) { level=WARNING; }
-				if (seconds<=60) {
-					level=SEVERE;
-					if (evacby==null || evacby.before(new Date())) { // if not evacuating or it was in the past
-						evacby=new Date(when.getTime()+30000); // set to 30 seconds post evacuation so we dont do this more than once
+				handled = true;
+				@Nonnull final Date when = parseRegionRestart(info.vextraparams.toString());
+				final int seconds = (int) ((when.getTime() - (new Date().getTime())) / 1000);
+				@Nonnull Level level = INFO;
+				if (seconds <= 180) {
+					level = WARNING;
+				}
+				if (seconds <= 60) {
+					level = SEVERE;
+					if (evacby == null || evacby.before(new Date())) { // if not evacuating or it was in the past
+						evacby = new Date(when.getTime() + 30000); // set to 30 seconds post evacuation so we dont do this more than once
 						@Nonnull final Map<String,String> params=new HashMap<>();
-						params.put("when",""+((int) (when.getTime()/1000)));
+						params.put("when", String.valueOf((int) (when.getTime() / 1000)));
 						@Nullable final CommandEvent evacuate=new CommandEvent(bot,event.region(),"evacuate",params,null);
 						evacuate.submit();
 					}
@@ -108,85 +111,50 @@ public class CnC extends Handler {
 	}
 
 	public void chatFromSimulatorUDPDelayed(@Nonnull final UDPEvent event) {
-		@Nonnull final ChatFromSimulator msg=(ChatFromSimulator) event.body();
-		@Nonnull final String from=msg.bchatdata.vfromname.toString();
-		@Nonnull final LLUUID source=msg.bchatdata.vsourceid;
-		@Nonnull final LLUUID owner=msg.bchatdata.vownerid;
-		final int sourcetypenum=msg.bchatdata.vsourcetype.integer();
-		final int chattypenum=msg.bchatdata.vchattype.integer();
-		final int audiblenum=msg.bchatdata.vaudible.integer();
-		@Nonnull final LLVector3 pos=msg.bchatdata.vposition;
-		@Nonnull final String message=msg.bchatdata.vmessage.toString();
-		@Nonnull final String sourcetype;
-		switch (sourcetypenum) {
-			case 0:
-				sourcetype="SYSTEM";
-				break;
-			case 1:
-				sourcetype="Agent";
-				break;
-			case 2:
-				sourcetype="Object";
-				break;
-			default:
-				sourcetype="Unknown#"+sourcetypenum;
-				break;
-		}
-		@Nonnull final String audible;
-		switch (audiblenum) {
-			case -1:
-				audible="Inaudible";
-				break;
-			case 0:
-				audible="Quiet";
-				break;
-			case 1:
-				audible="Normal";
-				break;
-			default:
-				audible="Unknown#"+audiblenum;
-				break;
-		}
-		@Nonnull final String chattype;
-		switch (chattypenum) {
-			case 0:
-				chattype="Whisper";
-				break;
-			case 1:
-				chattype="Normal";
-				break;
-			case 2:
-				chattype="Shout";
-				break;
-			case 3:
-				chattype="Say??";
-				break;
-			case 4:
-				chattype="StartTyping";
-				break;
-			case 5:
-				chattype="StopTyping";
-				break;
-			case 6:
-				chattype="Debug";
-				break;
-			case 8:
-				chattype="OwnerSay";
-				break;
-			default:
-				chattype="Unknown#"+chattypenum;
-				break;
-		}
-		if (chattypenum!=4 && chattypenum!=5) {
-			@Nonnull String ownedby="";
+		@Nonnull final ChatFromSimulator msg = (ChatFromSimulator) event.body();
+		@Nonnull final String from = msg.bchatdata.vfromname.toString();
+		@Nonnull final LLUUID source = msg.bchatdata.vsourceid;
+		@Nonnull final LLUUID owner = msg.bchatdata.vownerid;
+		final int sourcetypenum = msg.bchatdata.vsourcetype.integer();
+		final int chattypenum = msg.bchatdata.vchattype.integer();
+		final int audiblenum = msg.bchatdata.vaudible.integer();
+		@Nonnull final LLVector3 pos = msg.bchatdata.vposition;
+		@Nonnull final String message = msg.bchatdata.vmessage.toString();
+		@Nonnull final String sourcetype = switch (sourcetypenum) {
+			case 0 -> "SYSTEM";
+			case 1 -> "Agent";
+			case 2 -> "Object";
+			default -> "Unknown#" + sourcetypenum;
+		};
+		@Nonnull final String audible = switch (audiblenum) {
+			case -1 -> "Inaudible";
+			case 0 -> "Quiet";
+			case 1 -> "Normal";
+			default -> "Unknown#" + audiblenum;
+		};
+		@Nonnull final String chattype = switch (chattypenum) {
+			case 0 -> "Whisper";
+			case 1 -> "Normal";
+			case 2 -> "Shout";
+			case 3 -> "Say??";
+			case 4 -> "StartTyping";
+			case 5 -> "StopTyping";
+			case 6 -> "Debug";
+			case 8 -> "OwnerSay";
+			default -> "Unknown#" + chattypenum;
+		};
+		if (chattypenum != 4 && chattypenum != 5) {
+			@Nonnull String ownedby = "";
 			if (!source.equals(owner)) {
-				ownedby=" (owner:"+bot.getUserName(owner)+")";
+				ownedby = " (owner:" + bot.getUserName(owner) + ")";
 			}
-			@Nonnull String volume="";
-			if (audiblenum!=1) { volume="vol:"+audible+" ";}
-			log.fine("Chat ("+chattype+")"+volume+" "+sourcetype+":<"+from+">"+ownedby+":: "+message);
+			@Nonnull String volume = "";
+			if (audiblenum != 1) {
+				volume = "vol:" + audible + " ";
+			}
+			log.fine("Chat (" + chattype + ")" + volume + " " + sourcetype + ":<" + from + ">" + ownedby + ":: " + message);
 		}
-		@Nonnull final String prefix=config.get("publiccommandprefix","*");
+		@Nonnull final String prefix = config.get("publiccommandprefix", "*");
 		runCommands(from,source,message,prefix,false);
 	}
 
@@ -255,18 +223,18 @@ public class CnC extends Handler {
 				log.info("Leave session: "+messagetext);
 				break;
 			case 19:
-				@Nonnull String key=bot.getConfig().get("secretkey","");
+				@Nonnull final String key = bot.getConfig().get("secretkey", "");
 				if (key!=null && key.length()>=4) {
 					// maybe we let this be a command
 					// object IMs start with their name, in square brackets, apparently
-					@Nonnull Matcher matches= Pattern.compile("\\[(.*)\\] (.*)",Pattern.DOTALL).matcher(messagetext);
+					@Nonnull final Matcher matches = Pattern.compile("\\[(.*)] (.*)", Pattern.DOTALL).matcher(messagetext);
 					if (matches.matches()) {
-						String objectName = matches.group(1);
-						String objectMessage = matches.group(2);
+						final String objectName = matches.group(1);
+						final String objectMessage = matches.group(2);
 						if (objectMessage.startsWith("*" + key + " ")) {
-							@Nonnull String command = objectMessage.substring(key.length() + 2);
-							log.info("Executing Object ["+objectName+"] IM: " + command);
-							runCommands(objectName,null,command,null,true);
+							@Nonnull final String command = objectMessage.substring(key.length() + 2);
+							log.info("Executing Object [" + objectName + "] IM: " + command);
+							runCommands(objectName, null, command, null, true);
 							break;
 						}
 					}
@@ -424,8 +392,11 @@ public class CnC extends Handler {
 			@Nonnull final List<String> commands=new ArrayList<>(unsortedcommands);
 			Collections.sort(commands);
 			for (String acommand: commands) {
-				if (response.length()>0) { response.append(", "); }
-				else { response=new StringBuilder("\n"); }
+				if (response.isEmpty()) {
+					response = new StringBuilder("\n");
+				} else {
+					response.append(", ");
+				}
 				acommand=acommand.substring(0,acommand.length()-"command".length());
 				response.append(acommand);
 			}
@@ -441,16 +412,17 @@ public class CnC extends Handler {
 		}
 		for (@Nonnull final Parameter param: m.getParameters()) {
 			if (!(param.getType().equals(Regional.class) || param.getType().equals(CommandEvent.class))) {
-				Param annotation = param.getAnnotation(Param.class);
-				if (param.getAnnotation(Param.class)!=null) {
-					ret.append("\n").append(annotation.name());
-					ret.append(" - ").append(param.getAnnotation(Param.class).description());
-				} else {
+				final Param annotation = param.getAnnotation(Param.class);
+				if (param.getAnnotation(Param.class) == null) {
 					ret.append("\nThis command is not properly documented (Missing annotations in ")
 							.append(m.getDeclaringClass().getSimpleName())
 							.append(".")
 							.append(m.getName())
-							.append(")"); }
+							.append(")");
+				} else {
+					ret.append("\n").append(annotation.name());
+					ret.append(" - ").append(param.getAnnotation(Param.class).description());
+				}
 			}
 		}
 		return ret.toString();
@@ -551,7 +523,9 @@ public class CnC extends Handler {
 	public String setSecretKeyCommand(final CommandEvent command,
 							@Nonnull @Param(name="secretkey",description="Secret key to use (make it secure!)") final String secretKey) {
 		bot.getConfig().put("secretkey",secretKey);
-		if (secretKey.equalsIgnoreCase("password")) { return "No! Bad Human!"; }
+		if ("password".equalsIgnoreCase(secretKey)) {
+			return "No! Bad Human!";
+		}
 		return bot.getConfig().persistent()?"Secret key changed and saved":"Secret key changed ; note your configuration store "+bot.getConfig().getClass().getSimpleName()+" is not persistent and changes will be lost on restart.";
 	}
 
@@ -569,15 +543,15 @@ public class CnC extends Handler {
 	}
 	*/
 
-	boolean hasCoffed=false;
+	boolean hasCoffed;
 	public void avatarAppearanceUDPDelayed(@Nonnull final UDPEvent event) {
 		if (hasCoffed) { return; }
-		@Nonnull AvatarAppearance app=(AvatarAppearance)(event.body());
-		if (app.bappearancedata.size()==0) {
+		@Nonnull final AvatarAppearance app = (AvatarAppearance) (event.body());
+		if (app.bappearancedata.isEmpty()) {
 			//System.out.println("Skipping no COF listed");
 			return;
 		}
-		int cofVersion=app.bappearancedata.get(0).vcofversion.value;
+		final int cofVersion = app.bappearancedata.get(0).vcofversion.value;
 		if (cofVersion==0) {
 			//System.out.println("Skip COF 0");
 			return;
@@ -586,20 +560,22 @@ public class CnC extends Handler {
 		@Nonnull final LLSDMap req=new LLSDMap();
 		req.put("cof_version",new LLSDInteger(cofVersion));
 		@Nonnull LLSD llsd=new LLSD(req);
-		try { @Nullable final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd); }
-		catch (IOException e) {
-			String error=e.getMessage();
-			@Nonnull Matcher matcher=Pattern.compile("Cof Version Mismatch: [0-9]+ != ([0-9]+)").matcher(error);
+		try {
+			@Nullable final LLSDMap response = bot.getCAPS().invokeCAPS("UpdateAvatarAppearance", "", llsd);
+		} catch (final IOException e) {
+			final String error = e.getMessage();
+			@Nonnull final Matcher matcher = Pattern.compile("Cof Version Mismatch: \\d+ != (\\d+)").matcher(error);
 			if (matcher.matches()) {
 				//System.out.println("Retrying for COF "+matcher.group(1));
-				req.put("cof_version",new LLSDInteger(Integer.parseInt(matcher.group(1))));
-				llsd=new LLSD(req);
-				try { @Nullable final LLSDMap response=bot.getCAPS().invokeCAPS("UpdateAvatarAppearance","",llsd); }
-				catch (IOException f) {
-					log.log(WARNING,"Failed to fetch Appearance COF again "+matcher.group(1)+" - "+ f,f);
+				req.put("cof_version", new LLSDInteger(Integer.parseInt(matcher.group(1))));
+				llsd = new LLSD(req);
+				try {
+					@Nullable final LLSDMap response = bot.getCAPS().invokeCAPS("UpdateAvatarAppearance", "", llsd);
+				} catch (final IOException f) {
+					log.log(WARNING, "Failed to fetch Appearance COF again " + matcher.group(1) + " - " + f, f);
 					return;
 				}
-				hasCoffed=true;
+				hasCoffed = true;
 				return;
 			} else { log.log(WARNING,"Cof retrier failed to match error message:"+error); }
 			log.log(WARNING,"Failed to fetch Appearance COF "+cofVersion+" - "+ e,e);
@@ -618,21 +594,22 @@ public class CnC extends Handler {
 		final String command=parts[0];
 		index++;
 		String keyword="";
-		String parameter="";
+		StringBuilder parameter= new StringBuilder();
 		for (int i=index;i<parts.length;i++) {
-			if ("".equals(keyword)) {
-				keyword=parts[i];
-			}
-			else {
-				if (!"".equals(parameter)) { parameter+=" "; }
-				parameter+=parts[i];
-				if ((!parameter.startsWith("\"")) || (parameter.startsWith("\"") && parameter.endsWith("\""))) {
-					if (parameter.startsWith("\"")) {
-						parameter=parameter.substring(1,parameter.length()-1);
+			if (keyword != null && keyword.isEmpty()) {
+				keyword = parts[i];
+			} else {
+				if (!parameter.isEmpty()) {
+					parameter.append(" ");
+				}
+				parameter.append(parts[i]);
+				if ((!parameter.toString().startsWith("\"")) || (parameter.toString().startsWith("\"") && parameter.toString().endsWith("\""))) {
+					if (parameter.toString().startsWith("\"")) {
+						parameter = new StringBuilder(parameter.substring(1, parameter.length() - 1));
 					}
-					paramsout1.put(keyword,parameter);
+					paramsout1.put(keyword, parameter.toString());
 					keyword="";
-					parameter="";
+					parameter = new StringBuilder();
 				}
 			}
 		}
@@ -644,8 +621,7 @@ public class CnC extends Handler {
 	                         @Nonnull String message,
 	                         @Nullable final String prefix,
 							 final boolean bypassAuth) {
-		boolean prefixok=false;
-		if (prefix==null || prefix.isEmpty()) { prefixok=true; }
+		boolean prefixok = prefix == null || prefix.isEmpty();
 		if (!prefixok) {
 			if (message.startsWith(prefix)) {
 				message=message.substring(prefix.length());
@@ -669,8 +645,8 @@ public class CnC extends Handler {
 			log.log(WARNING,"CnC Subcommand exceptioned:"+e,e);
 			response="Exception:"+e;
 		}
-		if (!"".equals(response)) {
-			if (source==null) {
+		if (response == null || !response.isEmpty()) {
+			if (source == null) {
 				System.out.println(">> " + response);
 			} else {
 				if (bot.quitting()) {

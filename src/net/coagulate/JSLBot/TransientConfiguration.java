@@ -16,18 +16,20 @@ public class TransientConfiguration extends Configuration {
 	private final Map<String,String> kv=new HashMap<>();
 
 	// ---------- INSTANCE ----------
-	@Nullable
-	@Override
-	public String get(final String param) {
-		if (kv.containsKey(param)) { return kv.get(param); }
-		return null;
-	}
+    @Nullable
+    @Override
+    public String get(final String key) {
+        if (kv.containsKey(key)) {
+            return kv.get(key);
+        }
+        return null;
+    }
 
-	@Override
-	public void put(final String param,
-	                final String value) {
-		kv.put(param,value);
-	}
+    @Override
+    public void put(final String key,
+                    final String value) {
+        kv.put(key, value);
+    }
 
 	@Nonnull
 	@Override
@@ -38,12 +40,14 @@ public class TransientConfiguration extends Configuration {
 	@Nonnull
 	@Override
 	public String dump() {
-		@Nonnull String response="";
+		@Nonnull final StringBuilder response= new StringBuilder();
 		for (@Nonnull final Map.Entry<String,String> entry: kv.entrySet()) {
-			if (!"".equals(response)) { response+="\n"; }
-			response+=entry.getKey()+"="+entry.getValue();
+			if (!response.isEmpty()) {
+				response.append("\n");
+			}
+			response.append(entry.getKey()).append("=").append(entry.getValue());
 		}
-		return response;
+		return response.toString();
 	}
 
 	@Override

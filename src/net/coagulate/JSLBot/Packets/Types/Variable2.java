@@ -4,31 +4,34 @@ import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
 /**
- *
  * @author Iain Price
  */
 public class Variable2 extends Type {
 
     @Nonnull
-    public  byte[] value=new byte[0];
+    public byte[] value = new byte[0];
 
-    public Variable2(){}
-    public Variable2(@Nonnull String string) {
-        @Nonnull char[] array=string.toCharArray();
-        value=new byte[array.length+1];
-        for (int i=0;i<array.length;i++) { value[i]=(byte) array[i]; }
-        value[value.length-1]=0;
+    public Variable2() {
     }
 
-    public Variable2(LLUUID uuid) {
-        value=new byte[16];
-        System.arraycopy(uuid.uuid,0,value,0,16);
+    public Variable2(@Nonnull final String string) {
+        @Nonnull final char[] array = string.toCharArray();
+        value = new byte[array.length + 1];
+        for (int i = 0; i < array.length; i++) {
+            value[i] = (byte) array[i];
+        }
+        value[value.length - 1] = 0;
+    }
+
+    public Variable2(final LLUUID uuid) {
+        value = new byte[16];
+        System.arraycopy(uuid.uuid, 0, value, 0, 16);
         // simple fixed conversion, uuid is known to be
     }
 
-    public Variable2(byte[] binary) {
-        value=new byte[binary.length];
-        System.arraycopy(binary,0,value,0,binary.length);
+    public Variable2(final byte[] binary) {
+        value = new byte[binary.length];
+        System.arraycopy(binary, 0, value, 0, binary.length);
     }
 
     @Override
@@ -37,20 +40,20 @@ public class Variable2 extends Type {
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
-        @Nonnull U16 length=new U16();
+    public void read(@Nonnull final ByteBuffer in) {
+        @Nonnull final U16 length = new U16();
         length.read(in);
-        int len=((int)(length.value)) & 0xffff;
-        value=new byte[len];
-        for (int i=0;i<len;i++) {
-            value[i]=in.get();
+        final int len = (length.value) & 0xffff;
+        value = new byte[len];
+        for (int i = 0; i < len; i++) {
+            value[i] = in.get();
         }
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
-        @Nonnull U16 length=new U16();
-        length.value=(short) value.length;
+    public void write(@Nonnull final ByteBuffer out) {
+        @Nonnull final U16 length = new U16();
+        length.value = (short) value.length;
         length.write(out);
         out.put(value);
     }
@@ -62,11 +65,13 @@ public class Variable2 extends Type {
     }
     @Nonnull
     public String toString() {
-        @Nonnull String str="";
-        for (byte b:value) {
-            if (b>0) { str=str+(char)b; }
+        @Nonnull final StringBuilder str= new StringBuilder();
+        for (final byte b : value) {
+            if (b > 0) {
+                str.append((char) b);
+            }
         }
-        return str;
+        return str.toString();
     }
         
 }

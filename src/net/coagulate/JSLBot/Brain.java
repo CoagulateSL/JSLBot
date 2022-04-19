@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.*;
@@ -163,7 +162,7 @@ public class Brain {
 		}
 		callMaintenance();
 	}
-	private boolean idle=false;
+	private boolean idle;
 	/** Checks the bot isn't running a command, and has no queue */
 	public boolean isIdle() {
 		if (!idle) { return false; } // running a command
@@ -218,7 +217,7 @@ public class Brain {
 			throw new AssertionError("How is oldest null at this point?  if null we should have hit 'launched less than 5 times'");
 		}
 		final long ago=new Date().getTime()-oldest.getTime();
-		final int secondsago=(int) (ago/1000f);
+		final int secondsago=(int) (ago/ 1000.0f);
 		log.info("Reconnection Safety: Last 5 login attempts took place over "+secondsago+" seconds");
 		if (ago<(Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS)) {
 			log.severe("Reconnection Safety: This is less than the threshold of "+Constants.MAX_LAUNCH_ATTEMPTS_WINDOW_SECONDS+", tripping safety.");
@@ -265,7 +264,7 @@ public class Brain {
 		catch (@Nonnull final InvocationTargetException ex) {
 			Throwable t=ex;
 			if (ex.getCause()!=null) { t=ex.getCause(); }
-			log.log(Level.SEVERE,"Exception loading handler "+handlername,t);
+			log.log(SEVERE, "Exception loading handler " + handlername, t);
 		}
 	}
 
@@ -379,10 +378,11 @@ public class Brain {
 			try {
 				@Nonnull final Object callon=findHandler(handler);
 				if (event instanceof UDPEvent) { response=(String) handler.invoke(callon,event); }
-				if (event instanceof XMLEvent) { response=(String) handler.invoke(callon,event); }
-				if (event instanceof CommandEvent) {
-					@Nonnull final CommandEvent cmd=(CommandEvent) event;
-					response=cmd.run(callon,handler);
+				if (event instanceof XMLEvent) {
+					response = (String) handler.invoke(callon, event);
+				}
+				if (event instanceof @Nonnull final CommandEvent cmd) {
+					response = cmd.run(callon, handler);
 					cmd.response(response);
 				}
 			}
@@ -405,12 +405,10 @@ public class Brain {
 				queue(event);
 				return response;
 			}
-			Set<Method> delayedhandler = handlermap.get(fen + "Delayed");
-			boolean nodelayedhandler=true;
-			if (delayedhandler!=null && (!delayedhandler.isEmpty())) { nodelayedhandler=false; }
-			Set<Method> immediatehandler = handlermap.get(fen + "Immediate");
-			boolean noimmediatehandler=true;
-			if (immediatehandler!=null && (!immediatehandler.isEmpty())) { noimmediatehandler=false; }
+			final Set<Method> delayedhandler = handlermap.get(fen + "Delayed");
+			final boolean nodelayedhandler = delayedhandler == null || (delayedhandler.isEmpty());
+			final Set<Method> immediatehandler = handlermap.get(fen + "Immediate");
+			final boolean noimmediatehandler = immediatehandler == null || (immediatehandler.isEmpty());
 			// what else could it be
 			if (!warned.contains(fen) &&
 					( nodelayedhandler ) &&

@@ -43,14 +43,13 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Configuration services must have a 'get' command
-	 *
-	 * @param param Key to get
-	 *
-	 * @return Value, or null if not present.
-	 */
-	@Nullable
-	public abstract String get(String param);
+     * Configuration services must have a 'get' command
+     *
+     * @param key Key to get
+     * @return Value, or null if not present.
+     */
+    @Nullable
+    public abstract String get(String key);
 
 	/**
 	 * Configuration services must have a 'put' command

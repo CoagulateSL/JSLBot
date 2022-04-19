@@ -24,51 +24,63 @@ import java.util.Set;
  */
 public class Packet {
     byte flags;
-    int sequence=0;
-    public int getSequence() { return sequence; }
-    /** Set the zerocoding flag.
-     * 
-     * @param setto New value for zerocoding flag.
-     */
-    public void setZeroCode(boolean setto) {
-        if (setto)
-        { flags=(byte) (flags|((byte)0x80)); }
-        else
-        { flags=(byte) (flags & ((byte)(~0x80))); }
+    int sequence;
+    public int getSequence() {
+        return sequence;
     }
 
-    /** Set the reliable flag.
+    /**
+     * Set the zerocoding flag.
+     *
+     * @param setto New value for zerocoding flag.
+     */
+    public void setZeroCode(final boolean setto) {
+        if (setto) {
+            flags = (byte) (flags | ((byte) 0x80));
+        } else {
+            flags = (byte) (flags & ((byte) (~0x80)));
+        }
+    }
+
+    /**
+     * Set the reliable flag.
      *
      * @param setto Reliable value
      */
-    public void setReliable(boolean setto) {
-        if (setto)
-        { flags=(byte) (flags|((byte)0x40)); }
-        else
-        { flags=(byte) (flags & ((byte)(~0x40))); }
+    public void setReliable(final boolean setto) {
+        if (setto) {
+            flags = (byte) (flags | ((byte) 0x40));
+        } else {
+            flags = (byte) (flags & ((byte) (~0x40)));
+        }
     }
-    
-    /**Set the Resent flag.
+
+    /**
+     * Set the Resent flag.
      * For internal use by the Circuit driver
-     * @see Circuit
+     *
      * @param setto New value for resent flag
+     * @see Circuit
      */
-    public void setResent(boolean setto) {
-        if (setto)
-        { flags=(byte) (flags|((byte)0x20)); }
-        else
-        { flags=(byte) (flags & ((byte)(~0x20))); }
+    public void setResent(final boolean setto) {
+        if (setto) {
+            flags = (byte) (flags | ((byte) 0x20));
+        } else {
+            flags = (byte) (flags & ((byte) (~0x20)));
+        }
     }
-    
-    /** Set the Appended ACKs flag.
+
+    /**
+     * Set the Appended ACKs flag.
      * For internal use by the Circuit driver which will opportunistically append acks.
+     *
      * @param setto New value for the ACKs flag
      */
-    public void setAck(boolean setto) {
-        if (setto)
-        { flags=(byte) (flags|((byte)0x10)); }
-        else
-        { flags=(byte) (flags & ((byte)(~0x10))); }
+    public void setAck(final boolean setto) {
+        if (setto) {
+            flags = (byte) (flags | ((byte) 0x10));
+        } else {
+            flags = (byte) (flags & ((byte)(~0x10))); }
     }
 
     /** Get the zerocoded flag
@@ -93,13 +105,16 @@ public class Packet {
      * Used by the Circuit driver which will remove these and process them.
      * @return The appended acks flag
      */
-    public boolean getAck() { return (flags & 0x10)!=0; }
+    public boolean getAck() {
+        return (flags & 0x10) != 0;
+    }
 
-    /** Wrap a message into a packet.
+    /**
+     * Wrap a message into a packet.
      *
      * @param m The message to encapsulate
      */
-    public Packet(Message m) { message=m; }
+    public Packet(final Message m) { message=m; }
     private final Message message;
 
     /** Get the message wrapped up in this Packet.
@@ -109,23 +124,27 @@ public class Packet {
     @Nullable
     public Message messageNullable() { return message; }
     @Nonnull
-    public Message message() { if (message==null) { throw new NullPointerException("Packet message is null"); } return message; }
-    
-    /** Write this packet into a ByteBuffer.
+    public Message message() { if (message==null) { throw new NullPointerException("Packet message is null");
+    }
+        return message;
+    }
+
+    /**
+     * Write this packet into a ByteBuffer.
      *
-     * @param c Circuit this packet will go over, provides sequence numbers.
+     * @param c   Circuit this packet will go over, provides sequence numbers.
      * @param out ByteBuffer to write the packet into.
      */
-    public void write(@Nonnull Circuit c, @Nonnull ByteBuffer out) {
+    public void write(@Nonnull final Circuit c, @Nonnull final ByteBuffer out) {
         // note this method might be called on a packet more than once (for retransmission), some things only should happen the first time, like:
-        if (sequence==0) { 
+        if (sequence == 0) {
             // sequence number allocation
-            sequence=c.getSequence();
+            sequence = c.getSequence();
             // registering for reliable transmission
-            if (getReliable()) { c.requiresAck(this); }
-        }
-        else
-        {
+            if (getReliable()) {
+                c.requiresAck(this);
+            }
+        } else {
             // and if we're not the first attempt, well, by the book:
             setResent(true);
         }
@@ -134,15 +153,11 @@ public class Packet {
         out.putInt(sequence); // sequence number
         out.put((byte)0); // extra  header byte count
         switch (getFrequency()) {
-            case Frequency.HIGH:
-                (new U8(getId())).write(out); break;
-            case Frequency.MEDIUM:
-                (new U16BE((short)(0xff00+getId()))).write(out); break;
-            case Frequency.LOW:
-                (new U32BE(0xffff0000+getId())).write(out); break;
-            case Frequency.FIXED:
-                (new U32BE(getId())).write(out); break;
-            default: throw new IllegalArgumentException("Frequency invalid "+getFrequency());
+            case Frequency.HIGH -> (new U8(getId())).write(out);
+            case Frequency.MEDIUM -> (new U16BE((short) (0xff00 + getId()))).write(out);
+            case Frequency.LOW -> (new U32BE(0xffff0000 + getId())).write(out);
+            case Frequency.FIXED -> (new U32BE(getId())).write(out);
+            default -> throw new IllegalArgumentException("Frequency invalid " + getFrequency());
         }
         messageNullable().writeBytes(out);
     }
@@ -154,55 +169,61 @@ public class Packet {
      */
     @Nullable
     public static Packet decode(@Nonnull ByteBuffer source) {
-        if (!source.hasRemaining()) { return null; }
+        if (!source.hasRemaining()) {
+            return null;
+        }
         try {
-            byte flags=source.get();
+            final byte flags = source.get();
             source.order(ByteOrder.BIG_ENDIAN);
-            int sequence=source.getInt();
-            byte extralen=source.get();
-            @Nonnull byte[] extra =new byte[extralen];
-            if (extralen>0) { source.get(extra,0,extralen); }
-            
+            final int sequence = source.getInt();
+            final byte extralen = source.get();
+            @Nonnull final byte[] extra = new byte[extralen];
+            if (extralen > 0) {
+                source.get(extra, 0, extralen);
+            }
+
             // STOP - everything from here on in MIGHT be zerocoded
-            if ((flags & 0x80)!=0) {
+            if ((flags & 0x80) != 0) {
                 // okay well this is a bit garbage :P
-                @Nonnull List<Byte> uncoded=new ArrayList<>();
+                @Nonnull final List<Byte> uncoded = new ArrayList<>();
                 // zero run length encoding.  a zero byte is followed by a "qty" byte, how many zeros there were.  e.g. 00 01 means 1 zero :P
                 // all other bytes are preserved.
-                int pos=source.position();
-                byte lastbyte=source.get(source.capacity()-1);
+                final int pos = source.position();
+                final byte lastbyte = source.get(source.capacity() - 1);
                 source.position(pos);
-                int bodylength=source.capacity()-pos;
+                int bodylength = source.capacity() - pos;
                 // ACKS are NOT NOT NOT ZERO CODED.
                 // only way to deal with this, since we dont have a body length marker, is to rely on the ack flag
                 // acks are 4 byte acks followed by 1 byte quantity so...
                 // we have to read the last byte and work out tbe body length based on that, zero decode that, and keep everything else verbatim...
                 // this stuff actually works though.
-                boolean acks=false;
-                if ((flags & 0x10)!=0) { acks=true; }
+                final boolean acks = (flags & 0x10) != 0;
                 //System.out.println("Last byte is "+lastbyte+", body length is "+bodylength+" acks is "+acks);
-                if (acks) { bodylength-=1; bodylength-=(4*lastbyte); }
-                while (bodylength>0) {
+                if (acks) { bodylength-=1; bodylength -= (4 * lastbyte);
+                }
+                while (bodylength > 0) {
                     bodylength--;
-                    byte b=source.get();
-                    if (b!=0) {
-                        uncoded.add(b);
-                    } else {
+                    final byte b = source.get();
+                    if (b == 0) {
                         bodylength--;
-                        int qty=source.get()&0xff;
-                        for (int i=0;i<qty;i++) { uncoded.add((byte)0); }
+                        final int qty = source.get() & 0xff;
+                        for (int i = 0; i < qty; i++) {
+                            uncoded.add((byte) 0);
+                        }
+                    } else {
+                        uncoded.add(b);
                     }
                 }
-                while (source.hasRemaining()) { byte b=source.get(); uncoded.add(b); }
-                source=ByteBuffer.allocate(uncoded.size());
-                for (Byte b:uncoded) { source.put(b); }
+                while (source.hasRemaining()) { final byte b=source.get(); uncoded.add(b); }
+                source = ByteBuffer.allocate(uncoded.size());
+                for (final Byte b:uncoded) { source.put(b); }
                 source.position(0);
             }
-            
-            
+
+
             // 1 2 or 4 byte message ID.  joy
             int code;
-            int codesize;
+            final int codesize;
             int codebyte=Byte.toUnsignedInt(source.get());
             // basically:
             // 01-FE - 1 byte message codes
@@ -230,31 +251,33 @@ public class Packet {
                 codesize=1;
                 code= codebyte & 0xff;
             }
-            if (Debug.PACKET) { System.out.println("Message is "+codebyte+" "+Integer.toHexString(code)+" (len:"+codesize+")");}
-            @Nonnull String messagetype=Lookup.lookup(code);
+            if (Debug.PACKET) { System.out.println("Message is "+codebyte+" "+Integer.toHexString(code) + " (len:" + codesize + ")");
+            }
+            @Nonnull final String messagetype = Lookup.lookup(code);
             //System.out.println("Message type is "+messagetype);
-            if (messagetype.equals("TestMessage")) { // seems unlikely, debug it ...
+            if ("TestMessage".equals(messagetype)) { // seems unlikely, debug it ...
                 System.err.println("Decoded a message to TestMessage - decoder error???");
-                @Nonnull byte[] array=source.array();
-                for (int i=0;i<array.length;i++) {
-                    System.err.print(Integer.toHexString(Byte.toUnsignedInt(array[i]))+" ");
-                    if (i % 16 == 0) { System.out.println(); }
+                @Nonnull final byte[] array = source.array();
+                for (int i = 0; i < array.length; i++) {
+                    System.err.print(Integer.toHexString(Byte.toUnsignedInt(array[i])) + " ");
+                    if (i % 16 == 0) {
+                        System.out.println();
+                    }
                 }
                 // this occured once, because I hadn't written the zerocoding decoder ;)
             }
-            Packet response;
-            Message message;
+            final Packet response;
+            final Message message;
             // fun with reflection =)
-            Class<?> messageclass;
+            final Class<?> messageclass;
             try {
-                messageclass=Class.forName("net.coagulate.JSLBot.Packets.Messages."+messagetype);
-            }
-            catch (ClassNotFoundException e) {
-                @Nonnull NullPointerException npe = new NullPointerException("Unable to create a message wrapper for message type " + messagetype);
+                messageclass = Class.forName("net.coagulate.JSLBot.Packets.Messages." + messagetype);
+            } catch (final ClassNotFoundException e) {
+                @Nonnull final NullPointerException npe = new NullPointerException("Unable to create a message wrapper for message type " + messagetype);
                 npe.initCause(e);
                 throw npe;
             }
-            @Nonnull Constructor<?> messageconstructor=messageclass.getConstructor();
+            @Nonnull final Constructor<?> messageconstructor=messageclass.getConstructor();
             message=(Message) messageconstructor.newInstance(new Object[0]);
             response=new Packet(message);
             response.flags=flags;
@@ -267,15 +290,15 @@ public class Packet {
                 remain--;
                 //if (remain>0) { System.out.println("Appended ack bytes corrected "+remain); }
                 remain=remain/4;
-                for (int i=0;i<remain;i++) {
-                    @Nonnull U32BE ack=new U32BE(source);
+                for (int i = 0; i < remain; i++) {
+                    @Nonnull final U32BE ack=new U32BE(source);
                     //System.out.println("READ ACK "+ack);
                     response.appendedacks.add(ack.value);
                 }
             }
             return response;
-        }
-        catch (@Nonnull NoSuchMethodException|SecurityException|InstantiationException|IllegalAccessException|IllegalArgumentException|InvocationTargetException ex) {
+        } catch (@Nonnull final NoSuchMethodException | SecurityException | InstantiationException |
+                                IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new AssertionError("Construction error decoding Packet",ex);
         }
     }
@@ -283,22 +306,22 @@ public class Packet {
     
     @Nonnull
     public String dump() {
-        @Nonnull String acks="";
+        @Nonnull StringBuilder acks= new StringBuilder();
         if (!appendedacks.isEmpty()) {
-            acks=" [ACK:";
-            @Nonnull String comma="";
-            for (Integer i:appendedacks) {
-                acks=acks+comma+i;
+            acks = new StringBuilder(" [ACK:");
+            @Nonnull String comma = "";
+            for (final Integer i : appendedacks) {
+                acks.append(comma).append(i);
                 comma=",";
             }
-            acks+="]";
+            acks.append("]");
         }
         @Nonnull String dump=getName()+":";
         if (this.getZeroCode()) { dump+="[Zero] "; }
         if (this.getReliable()) { dump+="[Reliable] "; }
         if (this.getResent()) { dump+="[Resent] "; }
         if (this.getAck()) { dump+="[Acks] "; }
-        dump+="#"+sequence+""+messageDump();
+        dump += "#" + sequence + messageDump();
         return dump+acks;
     }
     

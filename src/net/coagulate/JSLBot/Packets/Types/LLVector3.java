@@ -8,29 +8,30 @@ import java.nio.ByteOrder;
  *
  * @author Iain Price
  */
-public class LLVector3 extends Type{
+public class LLVector3 extends Type {
 
     @Nonnull
     public static LLVector3 random() {
-        @Nonnull LLVector3 v=new LLVector3();
-        v.x=(float) (Math.random()*10.0-5.0);
-        v.y=(float) (Math.random()*10.0-5.0);
-        v.z=(float) (Math.random()*10.0-5.0);
+        @Nonnull final LLVector3 v = new LLVector3();
+        v.x = (float) (Math.random() * 10.0 - 5.0);
+        v.y = (float) (Math.random() * 10.0 - 5.0);
+        v.z = (float) (Math.random() * 10.0 - 5.0);
         return v;
     }
-    public float x=0;
-    public float y=0;
-    public float z=0;
 
-    public LLVector3(@Nonnull ByteBuffer buffer) {
+    public float x;
+    public float y;
+    public float z;
+
+    public LLVector3(@Nonnull final ByteBuffer buffer) {
         read(buffer);
     }
 
     public LLVector3(@Nonnull String pos) {
-        pos=pos.replaceAll("<","");
-        pos=pos.replaceAll(">","");
-        @Nonnull String[] comps = pos.split(",");
-        x=Float.parseFloat(comps[0]);
+        pos = pos.replaceAll("<", "");
+        pos = pos.replaceAll(">", "");
+        @Nonnull final String[] comps = pos.split(",");
+        x = Float.parseFloat(comps[0]);
         y=Float.parseFloat(comps[1]);
         z=Float.parseFloat(comps[2]);
     }
@@ -38,26 +39,32 @@ public class LLVector3 extends Type{
     public int size() {
         return 12;
     }
-    public LLVector3(){}
-    public LLVector3(float x,float y,float z) {
-        this.x=x; this.y=y; this.z=z;
+
+    public LLVector3() {
     }
-    public LLVector3(@Nonnull String x, @Nonnull String y, @Nonnull String z){
-        this.x=Float.parseFloat(x);
-        this.y=Float.parseFloat(y);
-        this.z=Float.parseFloat(z);
+
+    public LLVector3(final float x, final float y, final float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public LLVector3(@Nonnull final String x, @Nonnull final String y, @Nonnull final String z) {
+        this.x = Float.parseFloat(x);
+        this.y = Float.parseFloat(y);
+        this.z = Float.parseFloat(z);
     }
 
     @Override
-    public void read(@Nonnull ByteBuffer in) {
+    public void read(@Nonnull final ByteBuffer in) {
         in.order(ByteOrder.LITTLE_ENDIAN);
-        x=in.getFloat();
-        y=in.getFloat();
-        z=in.getFloat();
+        x = in.getFloat();
+        y = in.getFloat();
+        z = in.getFloat();
     }
 
     @Override
-    public void write(@Nonnull ByteBuffer out) {
+    public void write(@Nonnull final ByteBuffer out) {
         out.order(ByteOrder.LITTLE_ENDIAN);
         out.putFloat(x);
         out.putFloat(y);

@@ -76,7 +76,7 @@ public class EventQueue extends Thread {
 		catch (@Nonnull final Exception e) {
 			log.log(SEVERE,"Event queue crashed: "+e,e);
 		}
-		@Nullable JSLBot mybot=botNullable();
+		@Nullable final JSLBot mybot = botNullable();
 		if (mybot==null) {
 			log.log(SEVERE,"CRITICAL (consequential) FAILURE - primary caps is closed, bot has already disconnected from us");
 			return;
@@ -94,7 +94,7 @@ public class EventQueue extends Thread {
 	@Nonnull
 	public String getRegionName() { return caps().circuit().getRegionName(); }
 
-	private boolean shutdown=false;
+	private boolean shutdown;
 	public void shutdown() { shutdown=true; }
 	// ----- Internal Instance -----
 	@SuppressWarnings("BusyWait")

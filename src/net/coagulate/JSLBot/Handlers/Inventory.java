@@ -60,7 +60,7 @@ public class Inventory extends Handler implements Runnable {
 			catch (@Nonnull final IOException e) {
 				log.log(SEVERE,"Inventory download gave IO exception",e);
 			}
-			if (inventorytree.size()==0) {
+			if (inventorytree.isEmpty()) {
 				log.fine("Inventory download complete - there is no inventory (?)");
 				break;
 			}
@@ -86,55 +86,70 @@ public class Inventory extends Handler implements Runnable {
 	public String inventoryFindCommand(final CommandEvent event,
 									   @Nonnull @JSLBot.Param(description = "Substring of item name to find",name="name") final String name) {
 		synchronized (inventorytree) {
-			if (!inventorycomplete) { return "2 - Inventory download is not yet complete"; }
-			String output="";
-			if (name==null) { return "1 - No search name supplied"; }
-			for (Map.Entry<LLUUID,InventoryAtom> entry:inventory.entrySet()) {
-				InventoryAtom atom=entry.getValue();
-				if (atom instanceof InventoryItem) {
-					InventoryItem item=(InventoryItem)atom;
-					if (item.name==null) { System.out.println("An item has a null name (?)"); }
+            if (!inventorycomplete) {
+                return "2 - Inventory download is not yet complete";
+            }
+            StringBuilder output = new StringBuilder();
+            if (name == null) {
+                return "1 - No search name supplied";
+            }
+            for (final Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
+                final InventoryAtom atom = entry.getValue();
+                if (atom instanceof final InventoryItem item) {
+					if (item.name == null) {
+						System.out.println("An item has a null name (?)");
+					}
 					if (item.name.toLowerCase().contains(name.toLowerCase())) {
-						if (!output.isBlank()) { output=output+"\n"; }
-						output=output+entry.getKey().toUUIDString()+" : "+item.name;
+						if (!output.toString().isBlank()) {
+							output.append("\n");
+						}
+						output.append(entry.getKey().toUUIDString()).append(" : ").append(item.name);
 					}
 				}
-			}
-			if (output.isBlank()) { output="1 - No items found containing that substring"; }
-			return output;
+            }
+            if (output.toString().isBlank()) {
+                output = new StringBuilder("1 - No items found containing that substring");
+            }
+			return output.toString();
 		}
 	}
 	@Nonnull @CmdHelp(description = "Send an inventory item to a recipient")
 	public String inventorySendCommand(final CommandEvent event,
 									   @Nonnull @JSLBot.Param(description="UUID of item to send",name="item") final String item,
 									   @Nonnull @JSLBot.Param(description="UUID of avatar to send item to",name="target") final String target) {
-		if (!inventorycomplete) { return "2 - Inventory download is not yet complete"; }
-		LLUUID itemuuid=new LLUUID(item);
-		LLUUID targetuuid=new LLUUID(target);
-		InventoryItem invitem=inventoryFind(itemuuid);
-		if (invitem==null) { return "1 - Could not find item by that UUID"; }
-		sendInventory(invitem,targetuuid);
-		return "0 - Inventory transfer message sent";
-	}
+        if (!inventorycomplete) {
+            return "2 - Inventory download is not yet complete";
+        }
+        final LLUUID itemuuid = new LLUUID(item);
+        final LLUUID targetuuid = new LLUUID(target);
+        final InventoryItem invitem = inventoryFind(itemuuid);
+        if (invitem == null) {
+            return "1 - Could not find item by that UUID";
+        }
+        sendInventory(invitem, targetuuid);
+        return "0 - Inventory transfer message sent";
+    }
 
-	/** Send an inventory item to a target UUID.
-	 *
-	 * This is implemented as an instant message over the primary circuit.
-	 *
-	 * @param itemuuid UUID of item to send
-	 * @param target UUID of avatar to receive item
-	 */
+	/**
+     * Send an inventory item to a target UUID.
+     * <p>
+     * This is implemented as an instant message over the primary circuit.
+     *
+     * @param itemuuid UUID of item to send
+     * @param target   UUID of avatar to receive item
+     */
 	public void sendInventory(@Nonnull final LLUUID itemuuid,@Nonnull final LLUUID target) {
-		InventoryItem item=inventoryFind(itemuuid);
+        final InventoryItem item = inventoryFind(itemuuid);
 		if (item==null) { throw new NullPointerException("Unable to resolve UUID "+itemuuid.toUUIDString()); }
-		sendInventory(item,target);
-	}
-	/** Send an inventory item to a target UUID.
-	 *
-	 * This is implemented as an instant message over the primary circuit.
-	 *
-	 * @param item InventoryItem of item to send
-	 * @param target UUID of avatar to receive item
+		sendInventory(item, target);
+    }
+
+    /** Send an inventory item to a target UUID.
+     * <p>
+     * This is implemented as an instant message over the primary circuit.
+     *
+     * @param item InventoryItem of item to send
+     * @param target UUID of avatar to receive item
 	 */
 	public void sendInventory(@Nonnull final InventoryItem item,@Nonnull final LLUUID target) {
 		@Nonnull final ImprovedInstantMessage im=new ImprovedInstantMessage(bot);
@@ -146,42 +161,42 @@ public class Inventory extends Handler implements Runnable {
 		im.bmessageblock.vposition=new LLVector3(0,0,0);
 		//im.bmessageblock.vregionid=circuit().getRegionUUID();
 		im.bmessageblock.vid=LLUUID.random();
-		byte[] binary=new byte[17];
+        final byte[] binary = new byte[17];
 		binary[0]=(byte)(item.type & 0xff);
-		System.arraycopy(item.id.content().array(),0,binary,1,16);
-		Variable2 sendme = new Variable2(binary);
-		im.bmessageblock.vbinarybucket=sendme;
-		bot.send(im,true);
+		System.arraycopy(item.id.content().array(), 0, binary, 1, 16);
+		im.bmessageblock.vbinarybucket = new Variable2(binary);
+		bot.send(im, true);
 	}
 
 	@Nonnull
 	@CmdHelp(description="Dump item data by inventory UUID (see inventoryFind)")
 	public String inventoryDetailCommand(final CommandEvent event,
 									   @Nonnull @JSLBot.Param(description = "UUID of item to report on",name="uuid") final String uuid) {
-		if (!inventorycomplete) { return "2 - Inventory download is not yet complete"; }
-		if (uuid == null) {
-			return "1 - No UUID supplied";
-		}
-		LLUUID lluuid = new LLUUID(uuid);
-		InventoryItem item=inventoryFind(lluuid);
-		if (item==null) {
-			return "1 - Could not find object by uuid " + lluuid.toUUIDString();
-		}
-		return item.id.toUUIDString() + "\nName:" + item.name + "\nAssetID:" + item.assetid.toUUIDString() + "\nDescription: " + item.desc + "\nType: " + item.invtype + "/" + item.type;
-	}
+        if (!inventorycomplete) {
+            return "2 - Inventory download is not yet complete";
+        }
+        if (uuid == null) {
+            return "1 - No UUID supplied";
+        }
+        final LLUUID lluuid = new LLUUID(uuid);
+        final InventoryItem item = inventoryFind(lluuid);
+        if (item == null) {
+            return "1 - Could not find object by uuid " + lluuid.toUUIDString();
+        }
+        return item.id.toUUIDString() + "\nName:" + item.name + "\nAssetID:" + item.assetid.toUUIDString() + "\nDescription: " + item.desc + "\nType: " + item.invtype + "/" + item.type;
+    }
 
 	private InventoryItem inventoryFind(@Nonnull final LLUUID uuid) {
 		if (!inventorycomplete) { throw new IllegalStateException("Unable to search inventory, not yet completed initial download"); }
 		synchronized (inventorytree) {
-			for (Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
-				if (entry.getKey().equals(uuid)) {
-					InventoryAtom atom = entry.getValue();
-					if (atom instanceof InventoryItem) {
-						InventoryItem item = (InventoryItem) atom;
-						return item;
-					}
-				}
-			}
+            for (final Map.Entry<LLUUID, InventoryAtom> entry : inventory.entrySet()) {
+                if (entry.getKey().equals(uuid)) {
+                    final InventoryAtom atom = entry.getValue();
+                    if (atom instanceof InventoryItem) {
+						return (InventoryItem) atom;
+                    }
+                }
+            }
 		}
 		return null;
 	}
@@ -256,31 +271,31 @@ public class Inventory extends Handler implements Runnable {
 			@Nonnull final LLSDArray inneritems=(LLSDArray) innermap.get("items");
 			if (debugqueries) { System.out.println("Inner items:"+inneritems.get().size()); }
 			for (final Atomic itemmap: inneritems.get()) {
-				@Nonnull final LLSDMap item=(LLSDMap) itemmap;
-				final LLUUID item_id=((LLSDUUID) item.get("item_id")).toLLUUID();
-				final LLUUID parent_id=((LLSDUUID) item.get("parent_id")).toLLUUID();
-				final String name=item.get("name").toString();
-				final LLUUID asset_id=((LLSDUUID) item.get("asset_id")).toLLUUID();
-				final int type=((LLSDInteger) (item.get("type"))).get();
-				final int inv_type=((LLSDInteger) (item.get("inv_type"))).get();
-				final String desc=item.get("desc").toString();
-				processItem(item_id,parent_id,name,asset_id,type,inv_type,desc);
+				@Nonnull final LLSDMap item = (LLSDMap) itemmap;
+				final LLUUID itemId = ((LLSDUUID) item.get("item_id")).toLLUUID();
+				final LLUUID parentId = ((LLSDUUID) item.get("parent_id")).toLLUUID();
+				final String name = item.get("name").toString();
+				final LLUUID assetId = ((LLSDUUID) item.get("asset_id")).toLLUUID();
+				final int type = ((LLSDInteger) (item.get("type"))).get();
+				final int invType = ((LLSDInteger) (item.get("inv_type"))).get();
+				final String desc = item.get("desc").toString();
+				processItem(itemId, parentId, name, assetId, type, invType, desc);
 			}
 			@Nonnull final LLSDArray innercategories=(LLSDArray) innermap.get("categories");
 			if (debugqueries) { System.out.println("Inner categories:"+innercategories.get().size()); }
 			for (final Atomic categorymap: innercategories.get()) {
-				@Nonnull final LLSDMap category=(LLSDMap) categorymap;
+				@Nonnull final LLSDMap category = (LLSDMap) categorymap;
 				//System.out.println("---------------");
 				//for (String s:item.keys()) { System.out.println(s+"="+item.get(s).toString()); }
 				//System.out.println(category.toXML());
 				query.add(new LLUUID(category.get("category_id").toString()));
-				final int type_default=((LLSDInteger) (category.get("type_default"))).get();
-				final LLUUID agent_id=((LLSDUUID) (category.get("agent_id"))).toLLUUID();
-				final LLUUID category_id=((LLSDUUID) (category.get("category_id"))).toLLUUID();
-				final LLUUID parent_id=((LLSDUUID) (category.get("parent_id"))).toLLUUID();
-				final String name=category.get("name").toString();
-				final int version=((LLSDInteger) (category.get("version"))).get();
-				processCategory(type_default,agent_id,category_id,parent_id,name,version);
+				final int typeDefault = ((LLSDInteger) (category.get("type_default"))).get();
+				final LLUUID agentId = ((LLSDUUID) (category.get("agent_id"))).toLLUUID();
+				final LLUUID categoryId = ((LLSDUUID) (category.get("category_id"))).toLLUUID();
+				final LLUUID parentId = ((LLSDUUID) (category.get("parent_id"))).toLLUUID();
+				final String name = category.get("name").toString();
+				final int version = ((LLSDInteger) (category.get("version"))).get();
+				processCategory(typeDefault, agentId, categoryId, parentId, name, version);
 			}
 		}
 		if (query.isEmpty()) {
@@ -300,14 +315,12 @@ public class Inventory extends Handler implements Runnable {
 		if (children==null || children.isEmpty()) { return ""; }
 		for (final LLUUID item: children) {
 			ret.append(prefix);
-			final InventoryAtom child=inventory.get(item);
-			if (child instanceof InventoryCategory) {
-				@Nonnull final InventoryCategory i=(InventoryCategory) child;
+			final InventoryAtom child = inventory.get(item);
+			if (child instanceof @Nonnull final InventoryCategory i) {
 				ret.append(i.name).append("\n");
-				ret.append(inventoryDump(i.id,prefix+"  "));
+				ret.append(inventoryDump(i.id, prefix + "  "));
 			}
-			if (child instanceof InventoryItem) {
-				@Nonnull final InventoryItem i=(InventoryItem) child;
+			if (child instanceof @Nonnull final InventoryItem i) {
 				ret.append("-").append(i.name).append(" [").append(i.desc).append("]\n");
 			}
 		}

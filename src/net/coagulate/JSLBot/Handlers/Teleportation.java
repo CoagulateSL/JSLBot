@@ -28,10 +28,10 @@ public class Teleportation extends Handler {
 	boolean teleporting;
 
 	public Teleportation(@Nonnull final JSLBot bot,
-	                     final Configuration c) {
-		super(bot,c);
-		config=c;
-	}
+                         final Configuration config) {
+        super(bot, config);
+        this.config = config;
+    }
 
 	// ---------- INSTANCE ----------
 	// nothing more than a status message
@@ -139,7 +139,10 @@ public class Teleportation extends Handler {
 			teleporting=true;
 			bot.send(req,true);
 			synchronized (signal) {
-				try { signal.wait(10000); } catch (@Nonnull final InterruptedException e) {}
+				try {
+					signal.wait(10000);
+				} catch (@Nonnull final InterruptedException ignored) {
+				}
 			}
 			if (teleporting) {
 				log.severe("Timer expired while teleporting, lost in transit?");
@@ -194,9 +197,9 @@ public class Teleportation extends Handler {
 		if (completed) {
 			if (!bot.getHomeSeat().isBlank()) {
 				if (!bot.getHomeSeat().isBlank()) {
-					@Nonnull Map<String, String> args = new HashMap<>();
+					@Nonnull final Map<String, String> args = new HashMap<>();
 					args.put("uuid", bot.getHomeSeat());
-					@Nonnull CommandEvent sit = new CommandEvent(bot, null, "siton", args, new LLUUID(config.get("CnC.authorisation.owneruuid")));
+                    @Nonnull final CommandEvent sit = new CommandEvent(bot, null, "siton", args, new LLUUID(config.get("CnC.authorisation.owneruuid")));
 					bot.brain().queue(sit);
 					return "1 - Home sequence with sit complete";
 				}
@@ -249,8 +252,8 @@ public class Teleportation extends Handler {
 				signal.wait(10000);
 				expired=true;
 			}
+		} catch (@Nonnull final InterruptedException ignored) {
 		}
-		catch (@Nonnull final InterruptedException e) {}
 		if (expired) { log.severe("Timer expired while teleporting, lost in transit?"); }
 		final boolean completed=!teleporting;
 		teleporting=false;

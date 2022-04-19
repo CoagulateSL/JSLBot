@@ -65,14 +65,14 @@ public class JSLInterface {
 		cmd.put("roleuuid",roleuuid);
 		@Nullable RuntimeException delayed=null;
 		try {
-			groupRoster(groupuuid);
-			if (((Groups) (bot.getHandler("Groups"))).isMember(new LLUUID(avataruuid), new LLUUID(groupuuid))) {
-				bot.getLogger("groupInvite").log(Level.FINE, "Avatar " + avataruuid + " is already in group " + groupuuid + ", not re-inviting");
-				return;
-			}
-		} catch (RuntimeException failed) {
-			delayed=failed;
-		}
+            groupRoster(groupuuid);
+            if (((Groups) (bot.getHandler("Groups"))).isMember(new LLUUID(avataruuid), new LLUUID(groupuuid))) {
+                bot.getLogger("groupInvite").log(Level.FINE, "Avatar " + avataruuid + " is already in group " + groupuuid + ", not re-inviting");
+                return;
+            }
+        } catch (final RuntimeException failed) {
+            delayed = failed;
+        }
 		new CommandEvent(bot,bot.getRegional(),"groupInvite",cmd,null).submitAndWait();
 		if (delayed!=null) { throw delayed; }
 	}
