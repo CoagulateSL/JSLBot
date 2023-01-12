@@ -15,28 +15,28 @@ import java.util.logging.Logger;
  */
 public abstract class Authorisation {
 	protected Logger log;
-
-	protected Authorisation(@Nonnull final JSLBot bot,
-							final Configuration c) {
+	
+	protected Authorisation(@Nonnull final JSLBot bot,final Configuration c) {
 		initLogger(bot);
 	}
-
+	
 	protected Authorisation(@Nonnull final JSLBot bot) {
 		initLogger(bot);
 	}
-
+	
 	// ---------- INSTANCE ----------
-
+	
 	/**
 	 * Returns null if approved, otherwise some explanative text
 	 *
 	 * @param event The CommandEvent to approve/reject
-	 *
 	 * @return Null if approved, otherwise a rejection reason.
 	 */
 	@Nullable
 	public abstract String approve(@Nonnull CommandEvent event);
-
+	
 	// ----- Internal Instance -----
-	private void initLogger(@Nonnull final JSLBot bot) {log=bot.getLogger("Authorisation."+getClass().getSimpleName());}
+	private void initLogger(@Nonnull final JSLBot bot) {
+		log=bot.getLogger("Authorisation."+getClass().getSimpleName());
+	}
 }

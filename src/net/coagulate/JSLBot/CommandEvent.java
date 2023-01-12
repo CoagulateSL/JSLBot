@@ -23,21 +23,18 @@ import static java.util.logging.Level.WARNING;
  * @author Iain Price
  */
 public class CommandEvent extends Event {
-	private final Logger log;
+	private final     Logger             log;
 	// K=V style parameters, typeless
-	private final Map<String,String> parameters;
+	private final     Map<String,String> parameters;
 	// auto IM the response to
-	private final LLUUID respondto;
+	private final     LLUUID             respondto;
 	// the response its self, for other threads to read.
-	@Nullable
-	private String response="";
-	private boolean immediate;
+	@Nullable private String             response="";
+	private           boolean            immediate;
 	// for evaluating the 'authorisation' of this command
-	@Nullable
-	private String invokerusername;
-	@Nullable
-	private LLUUID invokeruuid;
-
+	@Nullable private String             invokerusername;
+	@Nullable private LLUUID             invokeruuid;
+	
 	public CommandEvent(@Nonnull final JSLBot bot,
 	                    @Nullable final Regional r,
 	                    @Nonnull final String name,
@@ -48,27 +45,48 @@ public class CommandEvent extends Event {
 		this.parameters=parameters;
 		this.respondto=respondto;
 	}
-
-	// ---------- INSTANCE ----------
-	public Map<String,String> parameters() {return parameters;}
-
-	public LLUUID respondTo() { return respondto; }
-
-	public void respondTo(@Nonnull final String response) { this.response=response; }
-
+	
+	public LLUUID respondTo() {
+		return respondto;
+	}
+	
+	public void respondTo(@Nonnull final String response) {
+		this.response=response;
+	}
+	
 	@Nullable
-	public String response() { return response; }
-
+	public String response() {
+		return response;
+	}
+	
 	@Nullable
-	public String invokerUsername() { return invokerusername; }
-
-	public void invokerUsername(final String invoker) { invokerusername=invoker; }
-
+	public String invokerUsername() {
+		return invokerusername;
+	}
+	
+	public void invokerUsername(final String invoker) {
+		invokerusername=invoker;
+	}
+	
 	@Nullable
-	public LLUUID invokerUUID() { return invokeruuid; }
-
-	public void invokerUUID(final LLUUID invokeruuid) { this.invokeruuid=invokeruuid; }
-
+	public LLUUID invokerUUID() {
+		return invokeruuid;
+	}
+	
+	public void invokerUUID(final LLUUID invokeruuid) {
+		this.invokeruuid=invokeruuid;
+	}
+	
+	/**
+	 * Submits the command for Delayed processing and waits 10 seconds for it to complete
+	 *
+	 * @return The final response from the command.
+	 */
+	@Nullable
+	public String submitAndWait() {
+		return submitAndWait(10000);
+	}
+	
 	@Nonnull
 	@Override
 	public String dump() {
@@ -78,7 +96,7 @@ public class CommandEvent extends Event {
 		}
 		return ret.toString();
 	}
-
+	
 	/**
 	 * Submits this command onto the queue for DELAYED processing by the AI thread.
 	 * This is the most normal way to do things unless you know better.
@@ -88,12 +106,11 @@ public class CommandEvent extends Event {
 		immediate(false);
 		bot().brain().queue(this);
 	}
-
+	
 	/**
 	 * Submits the command for DELAYED processing, then halts this thread until it completes or times out
 	 *
 	 * @param timeoutmillis Number of milliseconds before giving up waiting
-	 *
 	 * @return Command response
 	 */
 	@Nullable
@@ -102,15 +119,12 @@ public class CommandEvent extends Event {
 		waitFinish(timeoutmillis);
 		return response();
 	}
-
-	/**
-	 * Submits the command for Delayed processing and waits 10 seconds for it to complete
-	 *
-	 * @return The final response from the command.
-	 */
-	@Nullable
-	public String submitAndWait() { return submitAndWait(10000); }
-
+	
+	// ----- Internal Instance -----
+	void response(@Nullable final String response) {
+		this.response=response;
+	}
+	
 	/**
 	 * Submits the command for immediate execution, the thread calling this function will be hijacked to execute the command.
 	 * There are sometimes very good reasons for this, and sometimes its definitely the wrong thing to do.  If you're not sure, use submit().
@@ -122,38 +136,39 @@ public class CommandEvent extends Event {
 		immediate(true);
 		return bot().brain().execute(this);
 	}
-
-	// ----- Internal Instance -----
-	void response(@Nullable final String response) { this.response=response; }
-
-	boolean immediate() { return immediate; }
-
+	
+	boolean immediate() {
+		return immediate;
+	}
+	
 	@Nullable
-	String run(@Nonnull final Object callon,
-	           @Nonnull final Method handler) {
+	String run(@Nonnull final Object callon,@Nonnull final Method handler) {
 		if (Debug.TRACKCOMMANDS) {
 			log.fine("Entering run() for "+handler.getName()+" in class "+callon.getClass().getSimpleName());
 		}
 		try {
-			return (String) handler.invoke(callon,getParameters(handler).toArray());
-		}
-		catch (@Nonnull final IllegalAccessException|IllegalArgumentException ex) {
+			return (String)handler.invoke(callon,getParameters(handler).toArray());
+		} catch (@Nonnull final IllegalAccessException|IllegalArgumentException ex) {
 			throw new AssertionError("Error accessing "+handler.getName()+" in class "+callon.getClass().getName(),ex);
-		}
-		catch (@Nonnull final InvocationTargetException ex) {
+		} catch (@Nonnull final InvocationTargetException ex) {
 			Throwable t=ex;
-			if (t.getCause()!=null) { t=t.getCause(); }
-			log.log(INFO,"Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+BotUtils.unravel(t),t);
+			if (t.getCause()!=null) {
+				t=t.getCause();
+			}
+			log.log(INFO,
+			        "Handler "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" threw exception "+
+			        BotUtils.unravel(t),
+			        t);
 			return "Exception inside handler "+handler.getName()+BotUtils.unravel(t);
-		}
-		catch (@Nonnull final Throwable generic) {
-			log.log(WARNING,"Handler calling error for "+handler.getName()+" in class "+callon.getClass().getSimpleName()+" failed to invoke with "+BotUtils.unravel(generic),generic);
+		} catch (@Nonnull final Throwable generic) {
+			log.log(WARNING,
+			        "Handler calling error for "+handler.getName()+" in class "+callon.getClass().getSimpleName()+
+			        " failed to invoke with "+BotUtils.unravel(generic),
+			        generic);
 			return "Exception calling handler "+handler.getName()+BotUtils.unravel(generic);
 		}
 	}
-
-	private void immediate(final boolean immediate) { this.immediate=immediate; }
-
+	
 	@Nonnull
 	private List<Object> getParameters(@Nonnull final Method method) {
 		@Nonnull final List<Object> params=new ArrayList<>();
@@ -161,18 +176,30 @@ public class CommandEvent extends Event {
 		boolean firstparam=true;
 		for (@Nonnull final Parameter param: method.getParameters()) {
 			//System.out.println(param.toString());
-			if (firstparam) { firstparam=false; }
-			else {
-				final JSLBot.Param annotation = param.getAnnotation(JSLBot.Param.class);
-				if (annotation == null) {
-					throw new IllegalArgumentException("Parameter " + param.getName() + " of method " + method.getDeclaringClass().getSimpleName() + "." + method.getName() + " is missing a Param annotation");
+			if (firstparam) {
+				firstparam=false;
+			} else {
+				final JSLBot.Param annotation=param.getAnnotation(JSLBot.Param.class);
+				if (annotation==null) {
+					throw new IllegalArgumentException(
+							"Parameter "+param.getName()+" of method "+method.getDeclaringClass().getSimpleName()+"."+
+							method.getName()+" is missing a Param annotation");
 				} else {
-					@Nonnull final String paramname = annotation.name();
-					params.add(parameters().getOrDefault(paramname, null));
+					@Nonnull final String paramname=annotation.name();
+					params.add(parameters().getOrDefault(paramname,null));
 				}
 			}
 		}
 		return params;
 	}
-
+	
+	// ---------- INSTANCE ----------
+	public Map<String,String> parameters() {
+		return parameters;
+	}
+	
+	private void immediate(final boolean immediate) {
+		this.immediate=immediate;
+	}
+	
 }

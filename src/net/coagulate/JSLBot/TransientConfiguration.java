@@ -14,33 +14,32 @@ import java.util.Set;
 public class TransientConfiguration extends Configuration {
 	// our transient store
 	private final Map<String,String> kv=new HashMap<>();
-
+	
 	// ---------- INSTANCE ----------
-    @Nullable
-    @Override
-    public String get(final String key) {
-        if (kv.containsKey(key)) {
-            return kv.get(key);
-        }
-        return null;
-    }
-
-    @Override
-    public void put(final String key,
-                    final String value) {
-        kv.put(key, value);
-    }
-
+	@Nullable
+	@Override
+	public String get(final String key) {
+		if (kv.containsKey(key)) {
+			return kv.get(key);
+		}
+		return null;
+	}
+	
+	@Override
+	public void put(final String key,final String value) {
+		kv.put(key,value);
+	}
+	
 	@Nonnull
 	@Override
 	public Set<String> get() {
 		return kv.keySet();
 	}
-
+	
 	@Nonnull
 	@Override
 	public String dump() {
-		@Nonnull final StringBuilder response= new StringBuilder();
+		@Nonnull final StringBuilder response=new StringBuilder();
 		for (@Nonnull final Map.Entry<String,String> entry: kv.entrySet()) {
 			if (!response.isEmpty()) {
 				response.append("\n");
@@ -49,7 +48,9 @@ public class TransientConfiguration extends Configuration {
 		}
 		return response.toString();
 	}
-
+	
 	@Override
-	public boolean persistent() { return false; }
+	public boolean persistent() {
+		return false;
+	}
 }

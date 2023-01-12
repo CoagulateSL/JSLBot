@@ -10,25 +10,27 @@ import javax.annotation.Nonnull;
  * @author Iain Price
  */
 public class LLSDString extends Atomic {
-
+	
 	final String value;
-
+	
 	public LLSDString(final String s) {
 		value=s;
 	}
-
+	
 	LLSDString(@Nonnull final Node item) {
 		value=item.getTextContent();
 	}
-
+	
 	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {
 		return lineprefix+"<string>"+value+"</string>\n";
 	}
-
+	
 	@Override
-	public String toString() { return value; }
+	public String toString() {
+		return value;
+	}
 }
 

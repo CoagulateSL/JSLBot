@@ -13,46 +13,50 @@ import java.util.Base64;
  * @author Iain Price
  */
 public class LLSDBinary extends Atomic {
-
+	
 	final String value;
-
+	
 	public LLSDBinary(final String s) {
 		value=s;
 	}
-
+	
 	LLSDBinary(@Nonnull final Node item) {
 		value=item.getTextContent();
 	}
-
+	
 	public LLSDBinary(final int a) {
 		value=Base64.getEncoder().encodeToString(ByteBuffer.allocate(4).putInt(a).array());
 	}
-
+	
 	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {
 		return lineprefix+"<binary encoding=\"base64\">"+value+"</binary>\n";
 	}
-
+	
 	@Override
-	public String toString() { return value; }
-
-	public byte[] toByte() { return Base64.getDecoder().decode(value); }
-
-	@Nonnull
-	public String toIP() {
-		final byte[] ipbyte=toByte();
-		return (ipbyte[0]&0xff)+"."+(ipbyte[1]&0xff)+"."+(ipbyte[2]&0xff)+"."+(ipbyte[3]&0xff);
+	public String toString() {
+		return value;
 	}
-
+	
 	public long toLong() {
 		final byte[] by=toByte();
 		long longvalue=0;
 		for (int i=0;i<by.length;i++) {
-			longvalue+=(by[by.length-1-i] &0xffL)<<(8*i);
+			longvalue+=(by[by.length-1-i]&0xffL)<<(8*i);
 		}
 		return longvalue;
+	}
+	
+	public byte[] toByte() {
+		return Base64.getDecoder().decode(value);
+	}
+	
+	@Nonnull
+	public String toIP() {
+		final byte[] ipbyte=toByte();
+		return (ipbyte[0]&0xff)+"."+(ipbyte[1]&0xff)+"."+(ipbyte[2]&0xff)+"."+(ipbyte[3]&0xff);
 	}
 }
 

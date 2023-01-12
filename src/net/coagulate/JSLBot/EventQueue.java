@@ -20,49 +20,47 @@ import static java.util.logging.Level.SEVERE;
  * @author Iain Price
  */
 public class EventQueue extends Thread {
-	private final Logger log;
-	private final String eventqueue;
-	@Nonnull
-	private final CAPS caps;
-
+	private final          Logger log;
+	private final          String eventqueue;
+	@Nonnull private final CAPS   caps;
+	
 	/**
 	 * Create an event queue for the given CAPS, queue URL and region handle
 	 */
-	EventQueue(@Nonnull final CAPS caps,
-	           final String queue) {
+	EventQueue(@Nonnull final CAPS caps,final String queue) {
 		log=caps.getLogger("EventQueue");
 		this.caps=caps;
 		eventqueue=queue;
 		setDaemon(true);
 	}
-
+	
 	// ---------- INSTANCE ----------
-
-	/**
-	 * Get the owning CAPS
-	 *
-	 * @return The CAPS object that owns this event queue
-	 */
-	@Nonnull
-	public CAPS caps() { return caps; }
-
+	
 	/**
 	 * Get the owning circuit
 	 *
 	 * @return The circuit from the CAPS that owns this Event Queue
 	 */
 	@Nonnull
-	public Circuit circuit() { return caps().circuit(); }
-
+	public Circuit circuit() {
+		return caps().circuit();
+	}
+	
 	/**
 	 * Get the owning bot
 	 *
 	 * @return Bot from the CAPS from circuit that owns this Event Queue
 	 */
 	@Nonnull
-	public JSLBot bot() { return circuit().bot(); }
+	public JSLBot bot() {
+		return circuit().bot();
+	}
+	
 	@Nullable
-	public JSLBot botNullable() { return circuit().botNullable(); }
+	public JSLBot botNullable() {
+		return circuit().botNullable();
+	}
+	
 	/**
 	 * Call via start() to launch a background thread for polling the event queue
 	 */
@@ -72,30 +70,48 @@ public class EventQueue extends Thread {
 		try {
 			runMain();
 			log.fine("Event queue closed");
-		}
-		catch (@Nonnull final Exception e) {
+		} catch (@Nonnull final Exception e) {
 			log.log(SEVERE,"Event queue crashed: "+e,e);
 		}
-		@Nullable final JSLBot mybot = botNullable();
+		@Nullable final JSLBot mybot=botNullable();
 		if (mybot==null) {
-			log.log(SEVERE,"CRITICAL (consequential) FAILURE - primary caps is closed, bot has already disconnected from us");
+			log.log(SEVERE,
+			        "CRITICAL (consequential) FAILURE - primary caps is closed, bot has already disconnected from us");
 			return;
 		}
-		if (mybot.circuit().getCAPS().eventqueue()==this && mybot.connected()) {
+		if (mybot.circuit().getCAPS().eventqueue()==this&&mybot.connected()) {
 			log.log(SEVERE,"CRITICAL FAILURE - primary caps circuit is closed, this is reason to reconnect");
 			mybot.shutdown("Primary event queue CAPS failed.");
 		}
 	}
-
+	
 	@Nonnull
 	@Override
-	public String toString() { return caps()+" / EventQueue"; }
-
+	public String toString() {
+		return caps()+" / EventQueue";
+	}
+	
+	/**
+	 * Get the owning CAPS
+	 *
+	 * @return The CAPS object that owns this event queue
+	 */
 	@Nonnull
-	public String getRegionName() { return caps().circuit().getRegionName(); }
-
+	public CAPS caps() {
+		return caps;
+	}
+	
+	@Nonnull
+	public String getRegionName() {
+		return caps().circuit().getRegionName();
+	}
+	
 	private boolean shutdown;
-	public void shutdown() { shutdown=true; }
+	
+	public void shutdown() {
+		shutdown=true;
+	}
+	
 	// ----- Internal Instance -----
 	@SuppressWarnings("BusyWait")
 	private void runMain() throws Exception {
@@ -114,7 +130,7 @@ public class EventQueue extends Thread {
 				@Nonnull final LLSD postdoc=new LLSD(post);
 				@Nonnull final byte[] postdata=(postdoc.toXML().getBytes(StandardCharsets.UTF_8));
 				// send it
-				@Nonnull final HttpURLConnection connection=(HttpURLConnection) url.openConnection();
+				@Nonnull final HttpURLConnection connection=(HttpURLConnection)url.openConnection();
 				connection.setRequestMethod("POST");
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Type","application/llsd+xml");
@@ -126,78 +142,84 @@ public class EventQueue extends Thread {
 				// write document
 				try (@Nonnull final DataOutputStream wr=new DataOutputStream(connection.getOutputStream())) {
 					wr.write(postdata);
-				}
-				catch (@Nonnull final Exception e) {
+				} catch (@Nonnull final Exception e) {
 					log.warning("Error writing to event queue, sleeping");
-					try { Thread.sleep(5000); } catch (@Nonnull final InterruptedException ignored) {}
+					try {
+						Thread.sleep(5000);
+					} catch (@Nonnull final InterruptedException ignored) {
+					}
 				}
-				if (Debug.EVENTQUEUE) { log.finer("Entering event queue wait"); }
+				if (Debug.EVENTQUEUE) {
+					log.finer("Entering event queue wait");
+				}
 				final int status=connection.getResponseCode();
 				if (status==404) {
 					log.info("EventQueue closed remotely");
 					return;
 				}
-				if (status!=502 && status!=499 && status!=500) {
+				if (status!=502&&status!=499&&status!=500) {
 					@Nonnull final Scanner s=new Scanner(connection.getInputStream()).useDelimiter("\\A");
 					final String read=s.next();
 					//System.out.println("Event queue:"+read);
 					@Nullable LLSD document=null;
 					try {
 						document=new LLSD(read);
-					}
-					catch (@Nonnull final RuntimeException e) {
+					} catch (@Nonnull final RuntimeException e) {
 						log.log(SEVERE,"Parse error loading LLSD document:"+e);
 						System.out.println(read);
 					}
 					if (document!=null) {
 						try {
-							@Nonnull final LLSDMap map=(LLSDMap) document.getFirst();
+							@Nonnull final LLSDMap map=(LLSDMap)document.getFirst();
 							if (map==null) {
 								log.log(SEVERE,"Loaded null LLSDMap from document "+read+", throwing IOException");
 								throw new IOException("Null LLSDMap response extracted from '"+read+"'");
-							}
-							else {
-								@Nonnull final LLSDInteger llsdid=(LLSDInteger) map.get("id");
+							} else {
+								@Nonnull final LLSDInteger llsdid=(LLSDInteger)map.get("id");
 								id=llsdid.get();
 								//System.out.println("Eventqueue#"+id+":"+document.toXML());
-								@Nonnull final LLSDMap outermap=(LLSDMap) document.getFirst();
-								@Nonnull final LLSDArray eventslist=(LLSDArray) outermap.get("events");
+								@Nonnull final LLSDMap outermap=(LLSDMap)document.getFirst();
+								@Nonnull final LLSDArray eventslist=(LLSDArray)outermap.get("events");
 								process(eventslist);
 							}
-						}
-						catch (@Nonnull final Exception e) {
+						} catch (@Nonnull final Exception e) {
 							log.log(SEVERE,"Exception processing event queue message",e);
 							throw new IOException(e);
 						}
 					}
+				} else {
+					if (Debug.EVENTQUEUE) {
+						log.finer("Event queue poller expired ("+status+"), repolling.");
+					}
 				}
-				else { if (Debug.EVENTQUEUE) { log.finer("Event queue poller expired ("+status+"), repolling."); } }
 				errorcount=0;
-			}
-			catch (@Nonnull final IOException e) {
+			} catch (@Nonnull final IOException e) {
 				errorcount++;
 				if (errorcount>10) {
 					log.log(SEVERE,"10 errors in a row polling event queue, closing event queue",e);
 					throw new IOException("Too many event queue IOExceptions occured, terminating EventQueue",e);
 				}
-				log.fine("IOException during Event Queue poll, errorcount is "+errorcount+" / 10 : "+e.getLocalizedMessage());
+				log.fine("IOException during Event Queue poll, errorcount is "+errorcount+" / 10 : "+
+				         e.getLocalizedMessage());
 			}
 		}
 		log.fine("Event queue was shut down");
 	}
-
+	
 	private void process(@Nonnull final LLSDArray events) {
 		for (final Atomic a: events.get()) {
 			//System.out.println("**************** ATOM:\n"+a.toXML());
 			// this is so clunky
 			// should be a map, "message" key and a "body" key, with which we can commence the decode
-			@Nonnull final LLSDMap eventmap=(LLSDMap) a;
+			@Nonnull final LLSDMap eventmap=(LLSDMap)a;
 			final String messagetype=eventmap.get("message").toString();
 			final Atomic body=eventmap.get("body");
-			if (Debug.DUMPXML) { System.out.println("Message type is "+messagetype+"\n"+body.toXML()); }
+			if (Debug.DUMPXML) {
+				System.out.println("Message type is "+messagetype+"\n"+body.toXML());
+			}
 			@Nonnull final XMLEvent event=new XMLEvent(bot(),circuit().regional(),body,messagetype);
 			event.submit();
 		}
 	}
-
+	
 }

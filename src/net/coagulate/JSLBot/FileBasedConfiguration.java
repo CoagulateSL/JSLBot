@@ -13,23 +13,21 @@ import java.util.Set;
  * @author Iain Price
  */
 public class FileBasedConfiguration extends Configuration {
-
-	@Nonnull
-	final String filename;
-	@Nonnull
-	Map<String,String> kvstore;
-
+	
+	@Nonnull final String filename;
+	@Nonnull Map<String,String> kvstore;
+	
 	@SuppressWarnings("unchecked") // pretty stuck with this :)
 	public FileBasedConfiguration(@Nonnull final String filename) {
 		this.filename=filename;
-		try (@Nonnull final FileInputStream fis=new FileInputStream(filename); @Nonnull final ObjectInputStream ois=new ObjectInputStream(fis)) {
-			kvstore=(Map<String,String>) ois.readObject();
-		}
-		catch (@Nonnull final IOException|ClassNotFoundException e) {
+		try (@Nonnull final FileInputStream fis=new FileInputStream(filename);
+		     @Nonnull final ObjectInputStream ois=new ObjectInputStream(fis)) {
+			kvstore=(Map<String,String>)ois.readObject();
+		} catch (@Nonnull final IOException|ClassNotFoundException e) {
 			throw new AssertionError("Could not load configuration file",e);
 		}
 	}
-
+	
 	// ---------- INSTANCE ----------
 	@Nullable
 	@Override
@@ -40,31 +38,29 @@ public class FileBasedConfiguration extends Configuration {
 		} // keep track of what was asked for...
 		return kvstore.get(key);
 	}
-
+	
 	@Override
 	@SuppressWarnings("CallToPrintStackTrace")
-	public void put(final String key,
-	                final String value) {
+	public void put(final String key,final String value) {
 		kvstore.put(key,value);
 		try {
 			writeStore();
-		}
-		catch (@Nonnull final IOException e) {
+		} catch (@Nonnull final IOException e) {
 			System.err.println("KVStore write failed, CONFIGURATION NOT SAVED : "+e);
 			e.printStackTrace();
 		}
 	}
-
+	
 	@Nonnull
 	@Override
 	public Set<String> get() {
 		return kvstore.keySet();
 	}
-
+	
 	@Nonnull
 	@Override
 	public String dump() {
-		@Nonnull final StringBuilder response= new StringBuilder();
+		@Nonnull final StringBuilder response=new StringBuilder();
 		for (@Nonnull final Map.Entry<String,String> entry: kvstore.entrySet()) {
 			if (!response.isEmpty()) {
 				response.append("\n");
@@ -73,13 +69,16 @@ public class FileBasedConfiguration extends Configuration {
 		}
 		return response.toString();
 	}
-
+	
 	@Override
-	public boolean persistent() { return true; }
-
+	public boolean persistent() {
+		return true;
+	}
+	
 	// ----- Internal Instance -----
 	private void writeStore() throws IOException {
-		try (@Nonnull final FileOutputStream fos=new FileOutputStream(filename); @Nonnull final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
+		try (@Nonnull final FileOutputStream fos=new FileOutputStream(filename);
+		     @Nonnull final ObjectOutputStream oos=new ObjectOutputStream(fos)) {
 			oos.writeObject(kvstore);
 		}
 	}

@@ -20,22 +20,22 @@ public class AllowAll extends Authorisation {
 	 * @param bot The creating bot
 	 * @param c   Configuration (unused)
 	 */
-	public AllowAll(@Nonnull final JSLBot bot,
-	                final Configuration c) {
+	public AllowAll(@Nonnull final JSLBot bot,final Configuration c) {
 		super(bot,c);
 		log.warning("Creating AllowAll authoriser, if used, anyone may completely control this bot");
 	}
-
+	
 	// ---------- INSTANCE ----------
-
+	
 	/**
 	 * Approve all events
 	 *
 	 * @param event Event to approve
-	 *
 	 * @return The null string, which approves everything
 	 */
 	@Nullable
 	@Override
-	public String approve(@Nonnull final CommandEvent event) { return null; }
+	public String approve(@Nonnull final CommandEvent event) {
+		return null;
+	}
 }

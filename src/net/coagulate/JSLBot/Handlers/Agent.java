@@ -20,24 +20,18 @@ import java.util.logging.Level;
  * @author Iain Price
  */
 public class Agent extends Handler {
-	private final Set<LLUUID> online=new HashSet<>();
-	private final Set<LLUUID> offline=new HashSet<>();
-	@Nonnull
-	private String grouptitle="";
-	@Nonnull
-	private String groupname="";
-	@Nonnull
-	private String firstname="";
-	@Nonnull
-	private String lastname="";
-	@Nullable
-	private LLUUID reporthometo;
-
-	public Agent(@Nonnull final JSLBot bot,
-				 final Configuration config) {
-		super(bot, config);
+	private final     Set<LLUUID> online    =new HashSet<>();
+	private final     Set<LLUUID> offline   =new HashSet<>();
+	@Nonnull private  String      grouptitle="";
+	@Nonnull private  String      groupname ="";
+	@Nonnull private  String      firstname ="";
+	@Nonnull private  String      lastname  ="";
+	@Nullable private LLUUID      reporthometo;
+	
+	public Agent(@Nonnull final JSLBot bot,final Configuration config) {
+		super(bot,config);
 	}
-
+	
 	// ---------- INSTANCE ----------
 	@Override
 	public void loggedIn() {
@@ -48,46 +42,54 @@ public class Agent extends Handler {
 		req.bmoneydata.vtransactionid=new LLUUID();
 		bot.send(req,true);
 	}
-
+	
 	public void agentDataUpdateUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final AgentDataUpdate adu=(AgentDataUpdate) event.body();
+		@Nonnull final AgentDataUpdate adu=(AgentDataUpdate)event.body();
 		firstname=adu.bagentdata.vfirstname.toString();
 		lastname=adu.bagentdata.vlastname.toString();
 		groupname=adu.bagentdata.vgroupname.toString();
 		grouptitle=adu.bagentdata.vgrouptitle.toString();
-
+		
 	}
-
+	
 	public void onlineNotificationUDPImmediate(@Nonnull final UDPEvent event) {
-		final List<OnlineNotification_bAgentBlock> agents=((OnlineNotification) event.body()).bagentblock;
+		final List<OnlineNotification_bAgentBlock> agents=((OnlineNotification)event.body()).bagentblock;
 		for (@Nonnull final OnlineNotification_bAgentBlock block: agents) {
 			@Nonnull final LLUUID uuid=block.vagentid;
-			synchronized (online) {
+			synchronized(online) {
 				if (!online.contains(uuid)) {
-					log.log(Level.INFO,"Friend ONLINE: {0} ({1}) [{2}]",new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
+					log.log(Level.INFO,
+					        "Friend ONLINE: {0} ({1}) [{2}]",
+					        new Object[] {bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
 					online.add(uuid);
 				}
 			}
-			synchronized (offline) { offline.remove(uuid); }
+			synchronized(offline) {
+				offline.remove(uuid);
+			}
 		}
 	}
-
+	
 	public void offlineNotificationUDPImmediate(@Nonnull final UDPEvent event) {
-		final List<OfflineNotification_bAgentBlock> agents=((OfflineNotification) event.body()).bagentblock;
+		final List<OfflineNotification_bAgentBlock> agents=((OfflineNotification)event.body()).bagentblock;
 		for (@Nonnull final OfflineNotification_bAgentBlock block: agents) {
 			@Nonnull final LLUUID uuid=block.vagentid;
-			synchronized (offline) {
+			synchronized(offline) {
 				if (!offline.contains(uuid)) {
-					log.log(Level.INFO,"Friend offline: {0} ({1}) [{2}]",new Object[]{bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
+					log.log(Level.INFO,
+					        "Friend offline: {0} ({1}) [{2}]",
+					        new Object[] {bot.getDisplayName(uuid),bot.getUserName(uuid),uuid.toUUIDString()});
 					offline.add(uuid);
 				}
 			}
-			synchronized (online) { online.remove(uuid); }
+			synchronized(online) {
+				online.remove(uuid);
+			}
 		}
 	}
-
+	
 	public void agentMovementCompleteUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final AgentMovementComplete amc=(AgentMovementComplete) event.body();
+		@Nonnull final AgentMovementComplete amc=(AgentMovementComplete)event.body();
 		bot.setPos(amc.bdata.vposition);
 		bot.setLookAt(amc.bdata.vlookat);
 		@Nonnull final U64 regionhandle=amc.bdata.vregionhandle;
@@ -95,83 +97,90 @@ public class Agent extends Handler {
 			log.fine("AgentMovementComplete discovers region handle "+Long.toUnsignedString(regionhandle.value));
 		}
 	}
-
+	
 	public void teleportLocalUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final TeleportLocal tp=(TeleportLocal) event.body();
+		@Nonnull final TeleportLocal tp=(TeleportLocal)event.body();
 		bot.setPos(tp.binfo.vposition);
 		bot.setLookAt(tp.binfo.vlookat);
 	}
-
+	
 	public void moneyBalanceReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final MoneyBalanceReply money = (MoneyBalanceReply) event.body();
-        final int balance = money.bmoneydata.vmoneybalance.value;
-        final int sqmcredit = money.bmoneydata.vsquaremeterscredit.value;
+		@Nonnull final MoneyBalanceReply money=(MoneyBalanceReply)event.body();
+		final int balance=money.bmoneydata.vmoneybalance.value;
+		final int sqmcredit=money.bmoneydata.vsquaremeterscredit.value;
 		final int sqmspent=money.bmoneydata.vsquaremeterscommitted.value;
 		@Nonnull final String description=money.bmoneydata.vdescription.toString();
-		log.log(Level.INFO,"Balance: {0}L$, Land: {1}m2/{2}m2 {3}",new Object[]{balance,sqmspent,sqmcredit,description});
+		log.log(Level.INFO,
+		        "Balance: {0}L$, Land: {1}m2/{2}m2 {3}",
+		        new Object[] {balance,sqmspent,sqmcredit,description});
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Returns some detailed packet accounting to the console")
 	public String accountingCommand(@Nonnull final CommandEvent command) {
 		command.bot().dumpAccounting();
 		return "0 - See console for output";
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Returns some basic information about the logged in agent")
 	public String statusCommand(final CommandEvent command) {
-		return "Agent is "+firstname+" "+lastname+"\n"+"("+grouptitle+" of "+groupname+")\n"+"Pos: "+bot.getPos()+"\n"+"Looking: "+bot.getLookAt()+"\n"+"Region: "+bot.getRegionName()+"\n"+"Bytes IN: "+bot.bytesin
-				.get()+"    OUT: "+bot.bytesout.get()+"\n"+"BPS IN: "+(int) (((float) bot.bytesin.get())/ bot.getSecondsSinceStartup())+"    OUT: "+(int) (((float) bot.bytesout
-				.get())/ bot.getSecondsSinceStartup());
+		return "Agent is "+firstname+" "+lastname+"\n"+"("+grouptitle+" of "+groupname+")\n"+"Pos: "+bot.getPos()+"\n"+
+		       "Looking: "+bot.getLookAt()+"\n"+"Region: "+bot.getRegionName()+"\n"+"Bytes IN: "+bot.bytesin.get()+
+		       "    OUT: "+bot.bytesout.get()+"\n"+"BPS IN: "+
+		       (int)(((float)bot.bytesin.get())/bot.getSecondsSinceStartup())+"    OUT: "+
+		       (int)(((float)bot.bytesout.get())/bot.getSecondsSinceStartup());
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Sets the FOV (field of view) to TWO_PI")
 	public String fovMaxCommand(final CommandEvent command) {
 		bot.setMaxFOV();
 		return "Set";
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Sets the FOV (field of view) to Zero")
 	public String fovMinCommand(final CommandEvent command) {
 		bot.setMinFOV();
 		return "Set";
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Send agent update")
 	public String updateCommand(final CommandEvent command) {
 		bot.agentUpdate();
 		return "Sent";
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Set agent's draw distance")
 	public String drawdistanceCommand(final CommandEvent command,
-	                                  @Nullable @Param(name="set",description="Meters draw distance") final String set) {
-		if (set==null || set.isEmpty()) { return "0 - Draw distance is "+bot.drawDistance(); }
+	                                  @Nullable @Param(name="set", description="Meters draw distance")
+	                                  final String set) {
+		if (set==null||set.isEmpty()) {
+			return "0 - Draw distance is "+bot.drawDistance();
+		}
 		bot.drawDistance(Float.parseFloat(set));
 		return "0 - Draw Distance Set";
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Attempt to blind the bot by setting camera out of scene")
 	public String blindCommand(final CommandEvent command) {
 		bot.blind();
 		return "0 - Blinded";
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Stop attempting to blind the bot")
 	public String unblindCommand(final CommandEvent command) {
 		bot.unblind();
 		return "0 - Unblinded";
 	}
-
+	
 	public void coarseLocationUpdateUDPDelayed(@Nonnull final UDPEvent event) {
-		@Nonnull final CoarseLocationUpdate up=(CoarseLocationUpdate) event.body();
+		@Nonnull final CoarseLocationUpdate up=(CoarseLocationUpdate)event.body();
 		final List<CoarseLocationUpdate_bLocation> locations=up.blocation;
 		final List<CoarseLocationUpdate_bAgentData> agents=up.bagentdata;
 		if (locations.size()!=agents.size()) {
@@ -189,7 +198,7 @@ public class Agent extends Handler {
 		}
 		event.region().setCoarseAgentLocations(locmap);
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Set the agent's start location")
 	public String setHomeCommand(@Nonnull final CommandEvent event) {
@@ -202,41 +211,41 @@ public class Agent extends Handler {
 		bot.send(req,true);
 		return "0 - Set Home request sent";
 	}
-
+	
 	public void alertMessageUDPDelayed(@Nonnull final UDPEvent event) {
-		@Nonnull final AlertMessage a=(AlertMessage) event.body();
+		@Nonnull final AlertMessage a=(AlertMessage)event.body();
 		if (!a.balertinfo.isEmpty()) {
 			// this is a sweeping assumption, however, without knowing the full list of possibilities, i.e. the server code, this seems reasonable :|
 			if (a.balertinfo.get(0).vmessage.toString().toLowerCase().contains("home")) {
-				if (reporthometo != null) {
-					bot.im(reporthometo, a.balertdata.vmessage.toString());
+				if (reporthometo!=null) {
+					bot.im(reporthometo,a.balertdata.vmessage.toString());
 				}
 			}
 		}
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Have the avatar sit on an object")
 	public String sitOnCommand(final CommandEvent command,
-									  @Nonnull @Param(name="uuid",description="UUID of the prim to sit on") final String uuid) {
-        @Nonnull final AgentRequestSit sit = new AgentRequestSit(bot);
+	                           @Nonnull @Param(name="uuid", description="UUID of the prim to sit on")
+	                           final String uuid) {
+		@Nonnull final AgentRequestSit sit=new AgentRequestSit(bot);
 		sit.btargetobject.vtargetid=new LLUUID(uuid);
 		sit.btargetobject.voffset=new LLVector3(0,0,0);
 		bot.send(sit,true);
 		return "0 - Sit request sent";
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Have the avatar stand")
 	public String standCommand(final CommandEvent command) {
-        final int controlflags = bot.controlflags;
-		bot.controlflags=bot.controlflags | 0x00010000;
+		final int controlflags=bot.controlflags;
+		bot.controlflags=bot.controlflags|0x00010000;
 		bot.forceAgentUpdate();
 		bot.controlflags=controlflags;
 		return "0 - Stand Agent Update sent";
 	}
-
-
-
+	
+	
 }
 

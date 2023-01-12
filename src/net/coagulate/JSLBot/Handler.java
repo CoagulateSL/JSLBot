@@ -9,35 +9,37 @@ import java.util.logging.Logger;
  * @author Iain Prive
  */
 public abstract class Handler {
-	protected final Logger log;
-	@Nonnull
-	protected final JSLBot bot;
-	protected Configuration config;
-
-	protected Handler(@Nonnull final JSLBot bot,
-					  final Configuration config) {
-		this.bot = bot;
-		this.config = config;
-		log = bot.getLogger("Handler." + getClass().getSimpleName());
+	protected final          Logger        log;
+	@Nonnull protected final JSLBot        bot;
+	protected                Configuration config;
+	
+	protected Handler(@Nonnull final JSLBot bot,final Configuration config) {
+		this.bot=bot;
+		this.config=config;
+		log=bot.getLogger("Handler."+getClass().getSimpleName());
 	}
-
+	
 	// ---------- INSTANCE ----------
-
+	
 	/**
 	 * Name of the handler
 	 */
 	@Nonnull
 	@Override
-	public String toString() { return bot+"/"+getClass().getSimpleName(); }
-
+	public String toString() {
+		return bot+"/"+getClass().getSimpleName();
+	}
+	
 	/**
 	 * Hook for post login activities
 	 */
-	public void loggedIn() {}
-
+	public void loggedIn() {
+	}
+	
 	/**
 	 * Maintenance hook, called every few seconds if implemented
 	 */
-	public void maintenance() {}
-
+	public void maintenance() {
+	}
+	
 }
