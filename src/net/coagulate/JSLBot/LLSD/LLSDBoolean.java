@@ -10,13 +10,13 @@ import javax.annotation.Nonnull;
  * @author Iain Price
  */
 public class LLSDBoolean extends Atomic {
-
+	
 	boolean value;
-
+	
 	public LLSDBoolean(final boolean a) {
 		value=a;
 	}
-
+	
 	LLSDBoolean(@Nonnull final Node item) {
 		// hmm
 		final String v=item.getTextContent();
@@ -38,19 +38,21 @@ public class LLSDBoolean extends Atomic {
 		}
 		throw new AssertionError("Unexpected LLSDBoolean(Node) constructor argument '"+v+"'");
 	}
-
+	
 	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {
 		return lineprefix+"<boolean>"+value+"</boolean>\n";
 	}
-
+	
 	@Nonnull
 	@Override
 	public String toString() {
 		return String.valueOf(value);
 	}
-
-	public boolean get() { return value; }
+	
+	public boolean get() {
+		return value;
+	}
 }

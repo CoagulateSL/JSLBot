@@ -12,9 +12,11 @@ import javax.annotation.Nonnull;
  * @author Iain Price
  */
 public class DenyAll extends Authorisation {
-
-	public DenyAll(@Nonnull final JSLBot bot) { super(bot); }
-
+	
+	public DenyAll(@Nonnull final JSLBot bot) {
+		super(bot);
+	}
+	
 	/**
 	 * Create a DenyAll constructor.
 	 * Logged because this may be undesirable.
@@ -22,22 +24,22 @@ public class DenyAll extends Authorisation {
 	 * @param bot The creating bot.
 	 * @param c   The unused configuration
 	 */
-	public DenyAll(@Nonnull final JSLBot bot,
-	               final Configuration c) {
+	public DenyAll(@Nonnull final JSLBot bot,final Configuration c) {
 		super(bot,c);
 		log.config("Created a DenyAll authoriser, if engaged all remote commands will be denied.");
 	}
-
+	
 	// ---------- INSTANCE ----------
-
+	
 	/**
 	 * Denies everything.
 	 *
 	 * @param event The event to not approve
-	 *
 	 * @return A consistent rejection reason
 	 */
 	@Nonnull
 	@Override
-	public String approve(@Nonnull final CommandEvent event) { return "The DenyAll authoriser denies all requests"; }
+	public String approve(@Nonnull final CommandEvent event) {
+		return "The DenyAll authoriser denies all requests";
+	}
 }

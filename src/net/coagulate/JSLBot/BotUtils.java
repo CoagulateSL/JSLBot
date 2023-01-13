@@ -24,12 +24,11 @@ import java.util.*;
  */
 public abstract class BotUtils {
 	// ---------- STATICS ----------
-
+	
 	/**
 	 * Turns a byte array into a hex string
 	 *
 	 * @param in Byte array
-	 *
 	 * @return Hex string representation.
 	 */
 	@Nonnull
@@ -40,91 +39,39 @@ public abstract class BotUtils {
 		}
 		return builder.toString();
 	}
-
-	/**
-	 * Get the machine's mac address as a hex string, required by the SL login.
-	 *
-	 * @return Mac address in hex form.
-	 */
-	@Nonnull
-	public static String getMac() {
-		try {
-			// this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
-			@Nonnull final Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
-			@Nullable byte[] mac=null;
-			while (e.hasMoreElements() && mac==null) {
-				final NetworkInterface ni=e.nextElement();
-				mac=ni.getHardwareAddress();
-			}
-			if (mac==null) {
-				throw new IllegalArgumentException("No network interfaces found");
-			}
-			//System.out.println("Using mac "+hex(mac)+" from "+stored.toString());
-			return hex(mac);
-		}
-		catch (@Nonnull final SocketException ex) {
-			throw new AssertionError("Unable to retrieve any network interfaces MAC addres; unsupported platform or no networking present???",ex);
-		}
-	}
-
-	/**
-	 * Hash a password using MD5 and prefix with $1$, used by SL login request.
-	 * If already prefixed with $!$, returned verbatim
-	 *
-	 * @param password Password, cleartext or MD5 with $1$ prefix
-	 *
-	 * @return MD5 hex hash of the password, with $1$ prefix, as used in SL login protocol
-	 */
-	@Nonnull
-	public static String md5hash(@Nonnull final String password) {
-		if (password.startsWith("$1$")) {
-			return password; // already hashed, or you have a really unfortunate choice of password :P
-		}
-		final MessageDigest md5;
-		try {
-			md5=MessageDigest.getInstance("MD5");
-		}
-		catch (@Nonnull final NoSuchAlgorithmException ex) {
-			throw new AssertionError("MD5 hashing is not supported on this platform?", ex);
-		}
-		final byte[] digest;
-		digest=md5.digest(password.getBytes(StandardCharsets.UTF_8));
-		return "$1$"+hex(digest);
-		//return hex(digest);
-	}
-
+	
 	/**
 	 * ZeroEncode the input byte array.
 	 * Add acks /after/ zerocoding, they are not included.
 	 * See the SL protocol documentation.
 	 *
 	 * @param input raw byte array
-	 *
 	 * @return ZeroCoded byte array
 	 */
 	@Nonnull
 	public static byte[] zeroEncode(@Nonnull final byte[] input) {
 		@Nonnull final List<Byte> output=new ArrayList<>();
 		// first 5 bytes (header) are not encoded
-		for (int i=0;i<6;i++) { output.add(input[i]); }
+		for (int i=0;i<6;i++) {
+			output.add(input[i]);
+		}
 		int zerocount=0;
 		// rest is
 		for (int i=6;i<input.length;i++) {
 			if (input[i]==0) {
 				zerocount++;
-			}
-			else {
+			} else {
 				if (zerocount>0) {
-					output.add((byte) 0);
-					output.add((byte) zerocount);
+					output.add((byte)0);
+					output.add((byte)zerocount);
 					zerocount=0;
 				}
 				output.add(input[i]);
 			}
 		}
 		if (zerocount>0) {
-			output.add((byte) 0);
-			output.add((byte) zerocount);
+			output.add((byte)0);
+			output.add((byte)zerocount);
 		}
 		@Nonnull final byte[] outputbytes=new byte[output.size()];
 		int offset=0;
@@ -135,12 +82,11 @@ public abstract class BotUtils {
 		}
 		return outputbytes;
 	}
-
+	
 	/**
 	 * Read a zero byte terminated string from a byte buffer.
 	 *
 	 * @param buffer Byte buffer containing a zero terminated string.
-	 *
 	 * @return String read up to the zero byte.
 	 */
 	@Nonnull
@@ -149,26 +95,18 @@ public abstract class BotUtils {
 		byte b=-1;
 		while (b!=0) {
 			b=buffer.get();
-			if (b>0) { bytes.add(b); }
+			if (b>0) {
+				bytes.add(b);
+			}
 		}
 		@Nonnull final Byte[] bytesarray=bytes.toArray(new Byte[0]);
 		@Nonnull final byte[] ba=new byte[bytesarray.length];
-		for (int i=0;i<bytesarray.length;i++) { ba[i]=bytesarray[i]; }
+		for (int i=0;i<bytesarray.length;i++) {
+			ba[i]=bytesarray[i];
+		}
 		return new String(ba);
 	}
-
-	@Nonnull
-	public static String unravel(@Nullable Throwable t) {
-		@Nonnull final StringBuilder response=new StringBuilder();
-		while (t!=null) {
-			response.append(" - [").append(t.getLocalizedMessage()).append("]");
-			t=t.getCause();
-		}
-		return response.toString();
-	}
-
-	// ----- Internal Statics -----
-
+	
 	/**
 	 * Create and execute the XMLRPC logon command.
 	 *
@@ -177,7 +115,6 @@ public abstract class BotUtils {
 	 * @param lastname  Login last name (maybe 'resident')
 	 * @param password  Password, in clear text or MD5 hex string preceeded by $!$
 	 * @param location  Login location
-	 *
 	 * @return Map of KV pairs from login server
 	 *
 	 * @throws MalformedURLException Login URL is somehow invalid
@@ -189,7 +126,8 @@ public abstract class BotUtils {
 	                                      final String lastname,
 	                                      @Nonnull String password,
 	                                      final String location,
-										  @Nonnull final String loginuri) throws MalformedURLException, XmlRpcException {
+	                                      @Nonnull
+	                                      final String loginuri) throws MalformedURLException, XmlRpcException {
 		@Nonnull final XmlRpcClientConfigImpl config=new XmlRpcClientConfigImpl();
 		config.setServerURL(new URL(loginuri));
 		@Nonnull final XmlRpcClient client=new XmlRpcClient();
@@ -229,24 +167,29 @@ public abstract class BotUtils {
 		// TURNS OUT SECOND LIFE ONLY USES THE FIRST 16 CHARS
 		// but silently discards the rest in the user interface, so you can have >16 chars, but the rest dont do anything.
 		// However, if you MD5sum more than 16 chars you break the world.
-		if (password.length()>16 && (!password.startsWith("$1$"))) { password=password.substring(0,16); }
+		if (password.length()>16&&(!password.startsWith("$1$"))) {
+			password=password.substring(0,16);
+		}
 		params.put("passwd",BotUtils.md5hash(password));
 		if (Debug.AUTH) {
 			for (@Nonnull final Map.Entry<String,Object> entry: params.entrySet()) {
 				System.out.println(entry.getKey()+"="+entry.getValue());
 			}
 		}
-		final Object resultobject=(client.execute("login_to_simulator",new Object[]{params}));
-		@Nonnull @SuppressWarnings("unchecked") final HashMap<Object,Object> result=(HashMap<Object,Object>) resultobject;
+		final Object resultobject=(client.execute("login_to_simulator",new Object[] {params}));
+		@Nonnull @SuppressWarnings("unchecked") final HashMap<Object,Object> result=
+				(HashMap<Object,Object>)resultobject;
 		if (Debug.AUTH) {
 			// dump the result
 			for (@Nonnull final Map.Entry<Object,Object> entry: result.entrySet()) {
 				@Nonnull String printline=(entry.getKey()+" -> ");
 				final Object output=entry.getValue();
-				if (output instanceof String) { printline+=("[String] "+output); }
-				else {
-					if (output instanceof Integer) { printline+=("[Integer] "+output); }
-					else {
+				if (output instanceof String) {
+					printline+=("[String] "+output);
+				} else {
+					if (output instanceof Integer) {
+						printline+=("[Integer] "+output);
+					} else {
 						@Nonnull final String clas=entry.getValue().getClass().getTypeName();
 						printline+="["+clas+"] "+(output);
 					}
@@ -256,7 +199,70 @@ public abstract class BotUtils {
 		}
 		return result;
 	}
-
+	
+	/**
+	 * Get the machine's mac address as a hex string, required by the SL login.
+	 *
+	 * @return Mac address in hex form.
+	 */
+	@Nonnull
+	public static String getMac() {
+		try {
+			// this used to be more intelligent but now we just iterate through cards and grab /a/ mac address.
+			@Nonnull final Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
+			@Nullable byte[] mac=null;
+			while (e.hasMoreElements()&&mac==null) {
+				final NetworkInterface ni=e.nextElement();
+				mac=ni.getHardwareAddress();
+			}
+			if (mac==null) {
+				throw new IllegalArgumentException("No network interfaces found");
+			}
+			//System.out.println("Using mac "+hex(mac)+" from "+stored.toString());
+			return hex(mac);
+		} catch (@Nonnull final SocketException ex) {
+			throw new AssertionError(
+					"Unable to retrieve any network interfaces MAC addres; unsupported platform or no networking present???",
+					ex);
+		}
+	}
+	
+	/**
+	 * Hash a password using MD5 and prefix with $1$, used by SL login request.
+	 * If already prefixed with $!$, returned verbatim
+	 *
+	 * @param password Password, cleartext or MD5 with $1$ prefix
+	 * @return MD5 hex hash of the password, with $1$ prefix, as used in SL login protocol
+	 */
+	@Nonnull
+	public static String md5hash(@Nonnull final String password) {
+		if (password.startsWith("$1$")) {
+			return password; // already hashed, or you have a really unfortunate choice of password :P
+		}
+		final MessageDigest md5;
+		try {
+			md5=MessageDigest.getInstance("MD5");
+		} catch (@Nonnull final NoSuchAlgorithmException ex) {
+			throw new AssertionError("MD5 hashing is not supported on this platform?",ex);
+		}
+		final byte[] digest;
+		digest=md5.digest(password.getBytes(StandardCharsets.UTF_8));
+		return "$1$"+hex(digest);
+		//return hex(digest);
+	}
+	
+	// ----- Internal Statics -----
+	
+	@Nonnull
+	public static String unravel(@Nullable Throwable t) {
+		@Nonnull final StringBuilder response=new StringBuilder();
+		while (t!=null) {
+			response.append(" - [").append(t.getLocalizedMessage()).append("]");
+			t=t.getCause();
+		}
+		return response.toString();
+	}
+	
 	/**
 	 * A list of caps we request from a sim.
 	 *

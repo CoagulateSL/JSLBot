@@ -9,43 +9,45 @@ import java.util.Set;
  * @author Iain Price
  */
 public class ConfigurationSubspace extends Configuration {
-
+	
 	final Configuration c;
-	final String p;
-
-	public ConfigurationSubspace(final Configuration c,
-	                             final String prefix) {
+	final String        p;
+	
+	public ConfigurationSubspace(final Configuration c,final String prefix) {
 		this.c=c;
 		p=prefix;
 	}
-
+	
 	// ---------- INSTANCE ----------
-    @Nullable
-    @Override
-    public String get(final String key) {
-        return c.get(p + "." + key);
-    }
-
-    @Override
-    public void put(final String key,
-                    final String value) {
-        c.put(p + "." + key, value);
-    }
-
+	@Nullable
+	@Override
+	public String get(final String key) {
+		return c.get(p+"."+key);
+	}
+	
+	@Override
+	public void put(final String key,final String value) {
+		c.put(p+"."+key,value);
+	}
+	
 	@Override
 	public Set<String> get() {
 		return getMaster().get();
 	}
-
+	
 	@Override
 	public String dump() {
 		return c.dump();
 	}
-
+	
 	@Override
-	public Configuration getMaster() {return c;}
-
+	public Configuration getMaster() {
+		return c;
+	}
+	
 	@Override
-	public boolean persistent() { return getMaster().persistent(); }
-
+	public boolean persistent() {
+		return getMaster().persistent();
+	}
+	
 }

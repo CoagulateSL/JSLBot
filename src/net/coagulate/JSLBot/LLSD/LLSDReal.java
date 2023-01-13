@@ -10,29 +10,31 @@ import javax.annotation.Nonnull;
  * @author Iain Price
  */
 public class LLSDReal extends Atomic {
-
+	
 	final float value;
-
+	
 	public LLSDReal(final float a) {
 		value=a;
 	}
-
+	
 	public LLSDReal(@Nonnull final Node item) {
 		value=Float.parseFloat(item.getTextContent());
 	}
-
+	
 	// ---------- INSTANCE ----------
 	@Nonnull
 	@Override
 	public String toXML(final String lineprefix) {
 		return lineprefix+"<real>"+value+"</real>\n";
 	}
-
+	
 	@Nonnull
 	@Override
 	public String toString() {
 		return String.valueOf(value);
 	}
-
-	public float get() { return value; }
+	
+	public float get() {
+		return value;
+	}
 }

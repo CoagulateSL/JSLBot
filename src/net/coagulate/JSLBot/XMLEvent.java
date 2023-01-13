@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
  */
 public class XMLEvent extends Event {
 	private final Atomic content;
-
+	
 	public XMLEvent(@Nonnull final JSLBot bot,
 	                @Nonnull final Regional r,
 	                final Atomic content,
@@ -20,20 +20,22 @@ public class XMLEvent extends Event {
 		super(bot,r,name);
 		this.content=content;
 	}
-
-	// ---------- INSTANCE ----------
-	public Atomic body() { return content; }
-
+	
+	@Nonnull
+	public LLSDMap map() { // "dangerous", assumes the body is a map, which it usually is.
+		return (LLSDMap)body();
+	}
+	
 	@Nonnull
 	@Override
 	public String dump() {
 		return body().toXML();
 	}
-
-	@Nonnull
-	public LLSDMap map() { // "dangerous", assumes the body is a map, which it usually is.
-		return (LLSDMap) body();
+	
+	// ---------- INSTANCE ----------
+	public Atomic body() {
+		return content;
 	}
-
-
+	
+	
 }

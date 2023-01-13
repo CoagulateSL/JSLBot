@@ -14,21 +14,22 @@ import javax.annotation.Nonnull;
  * @author Iain Price
  */
 public class Health extends Handler {
-
+	
 	final boolean verbose;
 	float health;
-
-	public Health(@Nonnull final JSLBot bot,
-                  @Nonnull final Configuration config) {
-        super(bot, config);
-        verbose = Boolean.parseBoolean(config.get("verbose", "false"));
-    }
-
+	
+	public Health(@Nonnull final JSLBot bot,@Nonnull final Configuration config) {
+		super(bot,config);
+		verbose=Boolean.parseBoolean(config.get("verbose","false"));
+	}
+	
 	// ---------- INSTANCE ----------
 	public void healthMessageUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final HealthMessage h=(HealthMessage) event.body();
+		@Nonnull final HealthMessage h=(HealthMessage)event.body();
 		health=h.bhealthdata.vhealth.value;
-		if (verbose) { log.info("Agent health is "+health); }
+		if (verbose) {
+			log.info("Agent health is "+health);
+		}
 	}
-
+	
 }

@@ -25,15 +25,17 @@ import java.util.List;
  */
 public class LLSD extends Container {
 	final List<Container> contents=new ArrayList<>();
-
+	
 	/**
 	 * Build an LLSD object around an existing container.
 	 * Typically a map, sometimes an array.
 	 *
 	 * @param c The container to wrap the LLSD document around
 	 */
-	public LLSD(final Container c) { contents.add(c); }
-
+	public LLSD(final Container c) {
+		contents.add(c);
+	}
+	
 	/**
 	 * Convert a received document into Class form.
 	 *
@@ -63,26 +65,27 @@ public class LLSD extends Container {
 					contents.add(new LLSDMap(n.getChildNodes()));
 					handled=true;
 				}
-				if ("undef".equals(type)) { handled=true; }
+				if ("undef".equals(type)) {
+					handled=true;
+				}
 				if (!handled) {
-					throw new AssertionError("Found container of type "+type+" which we don't know about.  Parse error most likely.");
+					throw new AssertionError(
+							"Found container of type "+type+" which we don't know about.  Parse error most likely.");
 				}
 			}
-		}
-		catch (@Nonnull final SAXException|ParserConfigurationException|IOException ex) {
+		} catch (@Nonnull final SAXException|ParserConfigurationException|IOException ex) {
 			@Nonnull final IllegalArgumentException f=new IllegalArgumentException(ex);
 			f.initCause(ex);
 			throw f;
 		}
 	}
-
+	
 	// ---------- INSTANCE ----------
-
+	
 	/**
 	 * Format this document as XML/LLSD
 	 *
 	 * @param lineprefix Spaces to append to the start of the lines (used for indenting)
-	 *
 	 * @return XML Document as String
 	 */
 	@Nonnull
@@ -95,7 +98,7 @@ public class LLSD extends Container {
 		response.append(lineprefix).append("</llsd>\n");
 		return response.toString();
 	}
-
+	
 	/**
 	 * Convenience method to get the first entry in this container.
 	 * Mostly used internally for initial processing of the wrapped document.
@@ -104,7 +107,9 @@ public class LLSD extends Container {
 	 */
 	@Nullable
 	public Container getFirst() {
-		if (contents.isEmpty()) { return null; }
+		if (contents.isEmpty()) {
+			return null;
+		}
 		return contents.get(0);
 	}
 }

@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
  */
 public class UDPEvent extends Event {
 	private final Message content;
-
+	
 	public UDPEvent(@Nonnull final JSLBot bot,
 	                @Nonnull final Regional r,
 	                final Message content,
@@ -20,10 +20,12 @@ public class UDPEvent extends Event {
 		super(bot,r,name);
 		this.content=content;
 	}
-
+	
 	// ---------- INSTANCE ----------
-	public Message body() { return content; }
-
+	public Message body() {
+		return content;
+	}
+	
 	@Override
 	public String dump() {
 		return body().dump();

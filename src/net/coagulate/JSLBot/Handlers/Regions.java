@@ -21,53 +21,58 @@ import java.util.Date;
  * @author Iain Price
  */
 public class Regions extends Handler {
-
+	
 	// signal
 	private final Object mapblockreplysignal=new Object();
-
+	
 	/////////////////////////////// MAP BLOCK LOOKUP ( REGION HANDLE FROM REGION NAME )
 	// signal for incoming parcel properties
 	private final Object parcelpropertiessignal=new Object();
-
-	public Regions(@Nonnull final JSLBot bot,
-                   final Configuration config) {
-        super(bot, config);
-    }
-
+	
+	public Regions(@Nonnull final JSLBot bot,final Configuration config) {
+		super(bot,config);
+	}
+	
 	// ---------- INSTANCE ----------
 	@CmdHelp(description="Look up a region handle from a region name")
 	public String regionLookupCommand(final CommandEvent command,
-	                                  @Nullable @Param(name="name",description="Name of region to lookup") final String name) {
-		if (name == null || name.isEmpty()) {
+	                                  @Nullable @Param(name="name", description="Name of region to lookup")
+	                                  final String name) {
+		if (name==null||name.isEmpty()) {
 			return "No NAME parameter passed.";
 		}
 		// check cache
 		@Nullable Long cached=Global.regionHandle(name);
-		if (cached!=null) { return Long.toUnsignedString(cached); }
+		if (cached!=null) {
+			return Long.toUnsignedString(cached);
+		}
 		// issue request
 		@Nonnull final MapNameRequest request=new MapNameRequest(bot);
 		request.bnamedata.vname=new Variable1(name);
 		bot.send(request);
 		// sleep on the signal, checking for a result when woken
 		@Nonnull final Date now=new Date();
-		while (Global.regionHandle(name)==null && ((new Date().getTime()-(now.getTime()))<5000)) {
+		while (Global.regionHandle(name)==null&&((new Date().getTime()-(now.getTime()))<5000)) {
 			try {
-				synchronized (mapblockreplysignal) { mapblockreplysignal.wait(1000); }
-			}
-			catch (@Nonnull final InterruptedException ignored) {
+				synchronized(mapblockreplysignal) {
+					mapblockreplysignal.wait(1000);
+				}
+			} catch (@Nonnull final InterruptedException ignored) {
 			}
 		}
 		cached=Global.regionHandle(name);
-		if (cached!=null) { return Long.toUnsignedString(cached); }
+		if (cached!=null) {
+			return Long.toUnsignedString(cached);
+		}
 		return "Lookup failed";
 	}
-
-
+	
+	
 	////////////////////////////// Parcel Overlay
 	// is just sent to us, so we stash it
 	// I think it's used to locate parcels, which can be of any odd size essentially
 	// note the "byte" id used here is not related to the parcel's local ID...
-
+	
 	/**
 	 * Process a map block reply into a region handle, store globally, and signal any waiting threads.
 	 * Must be immediate mode so it can signal delayed mode handlers.
@@ -75,28 +80,30 @@ public class Regions extends Handler {
 	 * @param event Event
 	 */
 	public void mapBlockReplyUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final MapBlockReply p=(MapBlockReply) event.body();
+		@Nonnull final MapBlockReply p=(MapBlockReply)event.body();
 		for (@Nonnull final MapBlockReply_bData data: p.bdata) {
 			// for some reason we get multiple replies, one has no access and 0 X/Y for a not found, not sure what this is about :)
-			if (data.vaccess.value!=-1 && data.vx.value!=0 && data.vy.value!=0) {
+			if (data.vaccess.value!=-1&&data.vx.value!=0&&data.vy.value!=0) {
 				@Nonnull final U64 handle=new U64();
 				handle.value=data.vx.value;
 				handle.value=handle.value<<(32+8);
 				handle.value=handle.value|(data.vy.value<<8);
-				if (handle.value!=0) { Global.regionName(handle.value,data.vname.toString()); }
+				if (handle.value!=0) {
+					Global.regionName(handle.value,data.vname.toString());
+				}
 				if (Debug.REGIONHANDLES) {
 					log.fine("Map Block Reply computed handle "+Long.toUnsignedString(handle.value));
 				}
 				Global.regionName(handle.value,data.vname.toString());
 			}
 		}
-		synchronized (mapblockreplysignal) {
+		synchronized(mapblockreplysignal) {
 			mapblockreplysignal.notifyAll();
 		}
 	}
-
+	
 	public void parcelOverlayUDPImmediate(@Nonnull final UDPEvent event) {
-		@Nonnull final ParcelOverlay parceloverlay=(ParcelOverlay) event.body();
+		@Nonnull final ParcelOverlay parceloverlay=(ParcelOverlay)event.body();
 		final int quadrant=parceloverlay.bparceldata.vsequenceid.value;
 		int sequence=quadrant*1024;
 		for (int i=0;i<1024;i++) {
@@ -105,22 +112,24 @@ public class Regions extends Handler {
 			sequence++;
 		}
 	}
-
-
+	
+	
 	/////////////////////// Parcel Properties
 	// Getting info about a parcel
-
+	
 	@Nonnull
 	@CmdHelp(description="Attempt to compute parcels and their size based on the overlay map, which may or may not work")
 	public String parcelListCommand(final CommandEvent command) {
 		return "Region: "+bot.getRegional().getName()+bot.getRegional().dumpParcels();
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="Get a parcel's LocalID from region-local x and y co-ordinates")
 	public String parcelIdCommand(@Nonnull final CommandEvent command,
-	                              @Nonnull @Param(name="x",description="X co-ordinate within the parcel") final String x,
-	                              @Nonnull @Param(name="y",description="Y co-ordinate within the parcel") final String y) {
+	                              @Nonnull @Param(name="x", description="X co-ordinate within the parcel")
+	                              final String x,
+	                              @Nonnull @Param(name="y", description="Y co-ordinate within the parcel")
+	                              final String y) {
 		@Nonnull final Regional region=command.region();
 		final int reqid=region.getRequestId();
 		@Nonnull final ParcelPropertiesRequest prr=new ParcelPropertiesRequest(bot); // set up the request
@@ -131,66 +140,68 @@ public class Regions extends Handler {
 		prr.bparceldata.vwest=new F32(Float.parseFloat(x));
 		region.circuit().send(prr,true);
 		final long expire=new Date().getTime()+5000; // sleep on the signal
-		while (region.getResponse(reqid)==null && expire>(new Date().getTime())) {
-			synchronized (parcelpropertiessignal) {
+		while (region.getResponse(reqid)==null&&expire>(new Date().getTime())) {
+			synchronized(parcelpropertiessignal) {
 				try {
 					parcelpropertiessignal.wait(1000);
 				} catch (@Nonnull final InterruptedException ignored) {
 				}
 			}
 		}
-		if (region.getResponse(reqid) != null) {
+		if (region.getResponse(reqid)!=null) {
 			return String.valueOf(region.getResponse(reqid));
 		}
 		return "";
 	}
-
+	
 	public void parcelPropertiesXMLImmediate(@Nonnull final XMLEvent event) {
 		@Nonnull final LLSDMap body=event.map();
-		@Nonnull final LLSDArray array=(LLSDArray) body.get("ParcelData");
-		@Nonnull final LLSDMap data=(LLSDMap) array.get().get(0);
+		@Nonnull final LLSDArray array=(LLSDArray)body.get("ParcelData");
+		@Nonnull final LLSDMap data=(LLSDMap)array.get().get(0);
 		//System.out.println(data.toXML());
-		@Nonnull final LLSDInteger parcelid=(LLSDInteger) data.get("LocalID");
+		@Nonnull final LLSDInteger parcelid=(LLSDInteger)data.get("LocalID");
 		//System.out.println("Got parcel id "+parcelid.toString());
 		final ParcelData parcel=event.region().getParcel(parcelid.get());
-		final int sequenceid=((LLSDInteger) data.get("SequenceID")).get();
+		final int sequenceid=((LLSDInteger)data.get("SequenceID")).get();
 		event.region().requestResponse(sequenceid,parcelid.get());
-		parcel.ownerprims=((LLSDInteger) data.get("OwnerPrims")).get();
-		parcel.groupprims=((LLSDInteger) data.get("GroupPrims")).get();
-		parcel.otherprims=((LLSDInteger) data.get("OtherPrims")).get();
+		parcel.ownerprims=((LLSDInteger)data.get("OwnerPrims")).get();
+		parcel.groupprims=((LLSDInteger)data.get("GroupPrims")).get();
+		parcel.otherprims=((LLSDInteger)data.get("OtherPrims")).get();
 		parcel.musicurl=data.get("MusicURL").toString();
-		parcel.group=((LLSDUUID) data.get("GroupID")).toLLUUID();
+		parcel.group=((LLSDUUID)data.get("GroupID")).toLLUUID();
 		parcel.name=data.get("Name").toString();
 		parcel.description=data.get("Desc").toString();
-		parcel.claimdate=((LLSDInteger) data.get("ClaimDate")).get();
+		parcel.claimdate=((LLSDInteger)data.get("ClaimDate")).get();
 		parcel.mediaurl=data.get("MediaURL").toString();
-		parcel.seeavs=((LLSDBoolean) data.get("SeeAVs")).get();
-		parcel.area=((LLSDInteger) data.get("Area")).get();
-		parcel.owner=((LLSDUUID) data.get("OwnerID")).toLLUUID();
-		parcel.primsused=((LLSDInteger) data.get("TotalPrims")).get();
-		parcel.category=((LLSDInteger) data.get("Category")).get();
-		parcel.autoreturntime=((LLSDInteger) data.get("OtherCleanTime")).get();
-		parcel.simwidemaxprims=((LLSDInteger) data.get("SimWideMaxPrims")).get();
-		parcel.parcelflags=((LLSDBinary) data.get("ParcelFlags")).toByte();
-		parcel.landingtype=((LLSDInteger) data.get("LandingType")).get();
-		parcel.maxprims=((LLSDInteger) data.get("MaxPrims")).get();
-		parcel.simwidetotalprims=((LLSDInteger) data.get("SimWideTotalPrims")).get();
+		parcel.seeavs=((LLSDBoolean)data.get("SeeAVs")).get();
+		parcel.area=((LLSDInteger)data.get("Area")).get();
+		parcel.owner=((LLSDUUID)data.get("OwnerID")).toLLUUID();
+		parcel.primsused=((LLSDInteger)data.get("TotalPrims")).get();
+		parcel.category=((LLSDInteger)data.get("Category")).get();
+		parcel.autoreturntime=((LLSDInteger)data.get("OtherCleanTime")).get();
+		parcel.simwidemaxprims=((LLSDInteger)data.get("SimWideMaxPrims")).get();
+		parcel.parcelflags=((LLSDBinary)data.get("ParcelFlags")).toByte();
+		parcel.landingtype=((LLSDInteger)data.get("LandingType")).get();
+		parcel.maxprims=((LLSDInteger)data.get("MaxPrims")).get();
+		parcel.simwidetotalprims=((LLSDInteger)data.get("SimWideTotalPrims")).get();
 		parcel.populated=true;
 		//System.out.println(parcel);
-		synchronized (parcelpropertiessignal) { parcelpropertiessignal.notifyAll(); }
+		synchronized(parcelpropertiessignal) {
+			parcelpropertiessignal.notifyAll();
+		}
 	}
-
-
+	
+	
 	////////////////////// misc regional data
-
+	
 	public void simulatorViewerTimeMessageUDPImmediate(@Nonnull final UDPEvent event) {
 		@Nonnull final Regional region=event.region();
-		@Nonnull final SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage) event.body();
+		@Nonnull final SimulatorViewerTimeMessage time=(SimulatorViewerTimeMessage)event.body();
 		region.setDayUSec(time.btimeinfo.vusecsincestart.value);
 		region.setSunDirection(time.btimeinfo.vsundirection);
 		region.setSunPhase(time.btimeinfo.vsunphase.value);
 	}
-
+	
 	@Nonnull
 	@CmdHelp(description="List regions currently known to the botz")
 	public String regionListCommand(final CommandEvent command) {
