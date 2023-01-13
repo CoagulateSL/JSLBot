@@ -169,7 +169,13 @@ public class JSLBot extends Thread {
 		alwaysReconnect=true;
 		reconnect=true;
 	}
-	
+	/**
+	 * Instruct the bot to not reconnect when disconnected
+	 */
+	public void clearAlwaysReconnect() {
+		alwaysReconnect=false;
+		reconnect=false;
+	}
 	@Nullable
 	public String homeSickFor() {
 		return homesickfor;
@@ -321,7 +327,7 @@ public class JSLBot extends Thread {
 			}
 			connected=false;
 			shutdown("Exited");
-			brain.loginLoopSafety();
+			if (alwaysReconnect||reconnect) { brain.loginLoopSafety(); }
 		}
 	}
 	
