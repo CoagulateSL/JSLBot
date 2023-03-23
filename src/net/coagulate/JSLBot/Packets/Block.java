@@ -4,6 +4,7 @@ import net.coagulate.JSLBot.Packets.Types.Type;
 import net.coagulate.JSLBot.Packets.Types.U8;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -209,6 +210,8 @@ public abstract class Block {
 		}
 	}
 	
+	private static final Map<Class<?>,Constructor<?>> constructorMap=new HashMap<>();
+
 	private void readField(@Nonnull final ByteBuffer in,@Nonnull final Field f) {
 		final boolean debug=false;
 		if (debug) {
@@ -241,7 +244,8 @@ public abstract class Block {
 					if (debug) {
 						System.out.println(listtype.getName());
 					}
-					@Nonnull final Block b=(Block)listtype.getDeclaredConstructor().newInstance();
+					//@Nonnull final Block b=(Block)listtype.getDeclaredConstructor().newInstance();
+					@Nonnull final Block b=(Block)constructor(listtype).newInstance();
 					b.readBytes(in);
 					list.add(b);
 				}
@@ -261,7 +265,8 @@ public abstract class Block {
 		
 		// else, a LL type?
 		try {
-			@Nonnull final Type value=(Type)f.getType().getDeclaredConstructor().newInstance();
+			//@Nonnull final Type value=(Type)f.getType().getDeclaredConstructor().newInstance();
+			@Nonnull final Type value=(Type)constructor(f.getType()).newInstance();
 			try {
 				value.read(in);
 			} catch (final BufferUnderflowException ignored) {
@@ -277,6 +282,13 @@ public abstract class Block {
 					"Failed to set class "+this.getClass().getName()+" field "+f.getName()+" type "+
 					f.getType().getName(),e);
 		}
+	}
+	
+	private Constructor<?> constructor(final Class <?> clazz) throws NoSuchMethodException {
+		if (constructorMap.containsKey(clazz)) { return constructorMap.get(clazz); }
+		final Constructor<?> cons=clazz.getDeclaredConstructor();
+		constructorMap.put(clazz,cons);
+		return cons;
 	}
 	
 	public String dump() {
