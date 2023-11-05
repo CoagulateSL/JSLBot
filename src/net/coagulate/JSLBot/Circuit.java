@@ -324,11 +324,8 @@ public final class Circuit extends Thread implements Closeable {
 						bytesin.getAndAdd(receive.getLength());
 						bot.bytesin.getAndAdd(receive.getLength());
 					}
-					@Nullable Packet p=null;
-					try { p=Packet.decode(rx); }
-					catch (final NullPointerException e) {
-						log.log(SEVERE,"Exception decoding packet",e);
-					}
+					@Nonnull final Packet p;
+					p=Packet.decode(rx);
 					if (p!=null) {
 						if (Constants.PACKET_ACCOUNTING_BY_MESSAGE) {
 							@Nullable final JSLBot botcopy=bot;
