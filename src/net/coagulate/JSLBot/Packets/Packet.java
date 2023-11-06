@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 /**
  * The layout of a Packet, which contains a Message of Blocks.
@@ -46,8 +47,14 @@ public class Packet {
 	 */
 	@Nullable
 	public static Packet decode(@Nonnull ByteBuffer source) {
+		String commentary="";
+		
 		if (!source.hasRemaining()) {
 			return null;
+		}
+		String prezc="RX/DBG/PreZC:";
+		for (final Byte b: source.array()) {
+			prezc=prezc+Integer.toHexString(Byte.toUnsignedInt(b))+" ";
 		}
 		try {
 			final byte flags=source.get();
@@ -61,6 +68,7 @@ public class Packet {
 			
 			// STOP - everything from here on in MIGHT be zerocoded
 			if ((flags&0x80)!=0) {
+				commentary+="ZeroDecoded ";
 				// okay well this is a bit garbage :P
 				@Nonnull final List<Byte> uncoded=new ArrayList<>();
 				// zero run length encoding.  a zero byte is followed by a "qty" byte, how many zeros there were.  e.g. 00 01 means 1 zero :P
@@ -133,10 +141,16 @@ public class Packet {
 				codesize=1;
 				code=codebyte&0xff;
 			}
-			if (Debug.PACKET) {
-				System.out.println("Message is "+codebyte+" "+Integer.toHexString(code)+" (len:"+codesize+")");
-			}
+
 			@Nonnull final String messagetype=Lookup.lookup(code);
+			if (Debug.PACKET) {
+					String output="RX/DBG:";
+					for (final Byte b: source.array()) {
+						output=output+Integer.toHexString(Byte.toUnsignedInt(b))+" ";
+					}
+				
+				System.out.println(prezc+"\n"+output+"\nMessage is "+codebyte+" (0x"+Integer.toHexString(codebyte)+") "+Integer.toHexString(code)+" (len:"+codesize+").  Lookup is "+messagetype+". Commentary is "+commentary);
+			}
 			//System.out.println("Message type is "+messagetype);
 			if ("TestMessage".equals(messagetype)) { // seems unlikely, debug it ...
 				System.err.println("Decoded a message to TestMessage - decoder error???");
@@ -159,7 +173,7 @@ public class Packet {
 				@Nonnull final NullPointerException npe=
 						new NullPointerException("Unable to create a message wrapper for message type "+messagetype);
 				npe.initCause(e);
-				throw npe;
+				return null;
 			}
 			@Nonnull final Constructor<?> messageconstructor=messageclass.getConstructor();
 			message=(Message)messageconstructor.newInstance(new Object[0]);

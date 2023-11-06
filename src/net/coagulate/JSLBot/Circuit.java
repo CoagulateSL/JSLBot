@@ -235,10 +235,11 @@ public final class Circuit extends Thread implements Closeable {
 		if (Debug.PACKET) {
 			log.log(Level.FINEST,"Sending packet: {0}",p.dump());
 			System.out.println();
+			String output="TX:";
 			for (final Byte b: transmit) {
-				System.out.print(b+" ");
+				output=output+b+" ";
 			}
-			System.out.println();
+			System.out.println(output);
 		}
 		if (Debug.PACKET) {
 			// nice debugger, pretend we received our own packet, do we dismantle it properly?
@@ -308,13 +309,21 @@ public final class Circuit extends Thread implements Closeable {
 			log.fine("Starting background driver:"+getName());
 		}
 		try {
-			@Nonnull final DatagramPacket receive=
-					new DatagramPacket(new byte[Constants.UDP_MAX_BUFFER],Constants.UDP_MAX_BUFFER);
+			
 			// begin eternal damnation as a circuit driver.
 			while (!disconnected&&!disconnectlogged&&!bot().quitting()) {
+				@Nonnull final DatagramPacket receive=
+						new DatagramPacket(new byte[Constants.UDP_MAX_BUFFER],Constants.UDP_MAX_BUFFER);
 				try {
 					socket.setSoTimeout(250);
 					socket.receive(receive);
+					if (Debug.PACKET) {
+						String o="HOTRX:";
+						for (int i=0;i< receive.getLength();i++) {
+							o=o+Integer.toHexString(Byte.toUnsignedInt(receive.getData()[i]))+" ";
+						}
+						System.out.println(o);
+					}
 					// if we received nothing, go to "Socket Timeout Exception"
 					lastpacket=new Date();
 					@Nonnull final ByteBuffer rx=ByteBuffer.allocate(receive.getLength());
