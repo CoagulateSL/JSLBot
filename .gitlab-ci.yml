@@ -1,0 +1,15 @@
+stages:
+ - update
+
+update-job:
+  stage: update
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+  script:
+    - git clone https://gitlab-ci-token:$ACCESS@git.coagulate.net/CoagulateSL/LSLR.git
+    - cd LSLR
+    - git pull --recurse-submodules
+    - git submodule update --remote --recursive
+    - git config --global user.name 'GitLab bot'
+    - git config --global user.email 'gitlabbot@predestined.net'
+    - git commit -am "Updated LSLR" && git push || echo "No changes to commit"
