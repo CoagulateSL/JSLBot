@@ -30,5 +30,5 @@ jobs:
         run: |
           git config --global user.name 'Git bot'
           git config --global user.email 'bot@noreply.github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/CoagulateSL/LSLR
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/CoagulateSL/JSLBotBridge
           git commit -am "Updated JSLBot" && git push || echo "No changes to commit"  
