@@ -37,6 +37,20 @@ public class JSLInterface {
 		new CommandEvent(bot,bot.getRegional(),"im",cmd,null).submitAndWait();
 	}
 	
+	/** Send a group notice
+	 * @param uuid Group UUID
+	 * @param subject Group notice subject
+	 * @param message Group notice body
+	 */
+	public void groupNotice(final String uuid,final String subject,final String message) {
+		bot.waitConnection(15000);
+		@Nonnull final Map<String,String> cmd=new HashMap<>();
+		cmd.put("uuid",uuid);
+		cmd.put("subject",subject);
+		cmd.put("message",message);
+		new CommandEvent(bot,bot.getRegional(),"sendnotice",cmd,null).submitAndWait();
+	}
+	
 	/**
 	 * Invite a user to a group (Everybody role)
 	 *
