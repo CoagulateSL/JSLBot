@@ -336,6 +336,24 @@ public class Groups extends Handler {
 	}
 	
 	@Nonnull
+	@CmdHelp(description="Sends group notice")
+	public String sendNoticeCommand(final CommandEvent event,
+	                                @Nonnull @Param(name="uuid",description="Group UUID to send notice to") final String uuid,
+                                    @Nonnull @Param(name="Subject",description="Notice subject") final String subject,
+	                                @Nonnull @Param(name="Message",description="Notice message body") final String body)
+                                 
+	{
+		@Nonnull final ImprovedInstantMessage notice=new ImprovedInstantMessage(bot);
+		notice.bmessageblock.vfromagentname=new Variable1(bot.getUsername());
+		notice.bmessageblock.vmessage=new Variable2(subject+"|"+body);
+		notice.bmessageblock.vtoagentid=new LLUUID(uuid);
+		notice.bmessageblock.voffline = new U8(0); // online
+		notice.bmessageblock.vdialog=new U8(32); // group notice
+		bot.send(notice,true);
+		return "0 - Group Message Sent";
+	}
+	
+	@Nonnull
 	@CmdHelp(description="Selects a group as active")
 	public String activateGroupCommand(final CommandEvent event,
 	                                   @Nullable
