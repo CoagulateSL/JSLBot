@@ -339,8 +339,8 @@ public class Groups extends Handler {
 	@CmdHelp(description="Sends group notice")
 	public String sendNoticeCommand(final CommandEvent event,
 	                                @Nonnull @Param(name="uuid",description="Group UUID to send notice to") final String uuid,
-                                    @Nonnull @Param(name="Subject",description="Notice subject") final String subject,
-	                                @Nonnull @Param(name="Message",description="Notice message body") final String body)
+                                    @Nonnull @Param(name="subject",description="Notice subject") final String subject,
+	                                @Nonnull @Param(name="message",description="Notice message body") final String body)
                                  
 	{
 		@Nonnull final ImprovedInstantMessage notice=new ImprovedInstantMessage(bot);
